@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Encontre as especialidades médicas da Clínica Medicina Humana." />
+  <title>Especialidades — Clínica Medicina Humana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="header header--over" id="header">
+    <div class="header__topbar">
+      <span class="topbar-tab topbar-tab--center">Você está em <strong>Clínica Medicina Humana</strong> <i class="chev--sm"></i></span>
+      <div class="topbar-tab topbar-tab--right"><a href="ouvidoria.html">Ouvidoria</a><a href="noticias.html">Notícias</a></div>
+    </div>
+    <div class="container header__inner">
+      <a href="index.html" class="brand" aria-label="Clínica Medicina Humana">
+        <img src="assets/logo.png" alt="Clínica Medicina Humana" class="brand__logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+        <span class="brand__text"><strong>Medicina Humana</strong><em>Cuidando de você em cada detalhe</em></span>
+      </a>
+      <nav class="nav" id="nav">
+        <ul class="nav__list">
+          <li class="nav__item has-mega"><button class="nav__link">A Clínica <i class="chev"></i></button>
+            <div class="mega"><a href="quem-somos.html">Quem Somos</a><a href="#">Infraestrutura</a><a href="index.html#tour">Tour Virtual</a><a href="como-chegar.html">Como Chegar</a></div></li>
+          <li class="nav__item has-mega"><button class="nav__link">Serviços <i class="chev"></i></button>
+            <div class="mega"><a href="index.html#servicos">Consultas</a><a href="index.html#servicos">Check-up completo</a><a href="index.html#servicos">Medicina ocupacional</a><a href="index.html#servicos">Exames laboratoriais</a><a href="index.html#servicos">Exames de imagem</a><a href="index.html#servicos">Vacinas</a></div></li>
+          <li class="nav__item has-mega"><button class="nav__link">Tecnologia e Segurança <i class="chev"></i></button>
+            <div class="mega"><a href="#">Equipamentos de ponta</a><a href="#">Diagnóstico por imagem</a><a href="#">Laboratório próprio</a><a href="#">Segurança do paciente</a><a href="#">Certificações</a><a href="#">Protocolos clínicos</a></div></li>
+          <li class="nav__item has-mega"><button class="nav__link">Especialidades <i class="chev"></i></button>
+            <div class="mega"><a href="especialidades.html">Cardiologia</a><a href="especialidades.html">Pediatria</a><a href="especialidades.html">Ver mais</a></div></li>
+          <li class="nav__item"><a href="index.html#servicos" class="nav__link">Exames</a></li>
+          <li class="nav__item"><a href="#" class="nav__link">Resultados de Exames</a></li>
+        </ul>
+      </nav>
+      <div class="header__cta"><button class="hamburger" id="hamburger" aria-label="Abrir menu"><span></span><span></span><span></span></button></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero"><div class="page-hero__bg"></div><div class="container"><h1>Especialidades</h1><span class="page-hero__rule"></span><p style="color:rgba(255,255,255,.9);margin-top:1rem;max-width:560px">Utilize o campo abaixo para encontrar os cuidados certos para você.</p></div></section>
+
+    <section class="spec2">
+      <div class="container">
+        <div class="spec2__search">
+          <input type="text" id="specSearch" placeholder="Especialidade" aria-label="Buscar especialidade" />
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        </div>
+        <p class="spec2__hint">Ou, se preferir, escolha abaixo a letra inicial da especialidade que você procura.</p>
+
+        <div class="spec2__alpha" id="specAlpha"></div>
+        <div class="spec2__count" id="specCount"></div>
+        <div class="spec2__toolbar"><button class="spec2__expandall" id="specExpand">Expandir todos os itens ⌄</button></div>
+        <div id="specList"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__grid">
+      <div class="footer__brand">
+        <img src="assets/logo.png" alt="Clínica Medicina Humana" class="footer__logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+        <span class="brand__text" style="display:none"><strong>Medicina Humana</strong><em>Cuidando de você em cada detalhe</em></span>
+        <p class="footer__phone"><span class="fico">📞</span> (71) 3493-7205</p>
+        <div class="footer__addr"><h4>Endereço</h4><p>R. da Bandeira, 646-758 — Centro, Camaçari - BA, 42800-970</p></div>
+        <div class="footer__socialwrap"><h4>Acompanhe nossas redes sociais</h4>
+          <div class="footer__social">
+            <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-8h2.5l.4-3h-2.9V8.2c0-.86.24-1.45 1.48-1.45H16V4.07C15.66 4.03 14.7 3.94 13.6 3.94c-2.3 0-3.87 1.4-3.87 3.98V10H7.2v3h2.53v8h3.77z"/></svg></a>
+            <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6.94 5.5a1.94 1.94 0 1 1-3.88 0 1.94 1.94 0 0 1 3.88 0zM3.4 8.4h3.1V21H3.4V8.4zM9.1 8.4h2.97v1.72h.04c.41-.78 1.42-1.6 2.93-1.6 3.13 0 3.71 2.06 3.71 4.74V21h-3.09v-5.6c0-1.33-.02-3.05-1.86-3.05-1.86 0-2.14 1.45-2.14 2.95V21H9.1V8.4z"/></svg></a>
+            <a href="https://www.instagram.com/clinicamedicinahumana_" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg></a>
+          </div>
+        </div>
+      </div>
+      <div class="footer__col"><h4>A Clínica</h4><a href="quem-somos.html">Quem Somos</a><a href="como-chegar.html">Como Chegar</a><a href="#">Infraestrutura</a><h4>Serviços</h4><a href="index.html#servicos">Consultas</a><a href="index.html#servicos">Medicina Ocupacional</a><a href="index.html#servicos">Centro de Diagnósticos</a></div>
+      <div class="footer__col"><h4>Especialidades</h4><a href="especialidades.html">Cardiologia</a><a href="especialidades.html">Pediatria</a><a href="especialidades.html">Ver todas</a></div>
+      <div class="footer__col footer__col--last"><a href="index.html#servicos">Exames</a><a href="#">Resultados de Exames</a><a href="#">Aplicativo</a><a href="ouvidoria.html">Ouvidoria</a><a href="noticias.html">Notícias</a><a href="#">Trabalhe Conosco</a><a href="privacidade.html">Privacidade</a></div>
+    </div>
+    <div class="footer__bottom"><div class="container footer__bottom-inner"><span>© 2026 Clínica Medicina Humana — Todos os direitos reservados.</span></div></div>
+  </footer>
+
+  <a href="#" class="wpp" aria-label="WhatsApp">💬</a>
+  <script src="js/main.js"></script>
+  <script>
+  (function(){
+    var DATA = [
+      {n:'Alergologia', d:'Diagnóstico e tratamento de alergias e do sistema imunológico.'},
+      {n:'Anestesiologia', d:'Avaliação pré-anestésica e controle da dor.'},
+      {n:'Angiologia', d:'Cuidado dos vasos sanguíneos e circulação.'},
+      {n:'Cardiologia', d:'Saúde do coração e prevenção cardiovascular.', sub:['Ecocardiografia','Arritmias','Insuficiência cardíaca']},
+      {n:'Cirurgia Geral', d:'Procedimentos cirúrgicos e acompanhamento.', sub:['Pré-operatório','Pós-operatório']},
+      {n:'Clínica Médica', d:'Atendimento clínico, orientação e encaminhamento.'},
+      {n:'Dermatologia', d:'Saúde da pele, cabelos e unhas.'},
+      {n:'Endocrinologia', d:'Hormônios e metabolismo.', sub:['Diabetes','Tireoide']},
+      {n:'Fisioterapia', d:'Reabilitação e recuperação do movimento.'},
+      {n:'Gastroenterologia', d:'Sistema digestivo e endoscopia.'},
+      {n:'Geriatria', d:'Cuidado integral da pessoa idosa.'},
+      {n:'Ginecologia', d:'Saúde da mulher em todas as fases.', sub:['Obstetrícia','Pré-natal']},
+      {n:'Infectologia', d:'Prevenção e tratamento de infecções.'},
+      {n:'Medicina Ocupacional', d:'Saúde e segurança do trabalhador.', sub:['ASO','PCMSO','PGR / NRs']},
+      {n:'Nefrologia', d:'Saúde dos rins.'},
+      {n:'Neurologia', d:'Sistema nervoso e cérebro.'},
+      {n:'Nutrição', d:'Alimentação, bem-estar e reeducação alimentar.'},
+      {n:'Oftalmologia', d:'Saúde dos olhos e visão.'},
+      {n:'Ortopedia', d:'Ossos, músculos e articulações.', sub:['Coluna','Joelho','Ombro']},
+      {n:'Otorrinolaringologia', d:'Ouvido, nariz e garganta.'},
+      {n:'Pediatria', d:'Cuidado das crianças e adolescentes.'},
+      {n:'Pneumologia', d:'Saúde dos pulmões e respiração.'},
+      {n:'Psicologia', d:'Saúde mental e emocional.'},
+      {n:'Psiquiatria', d:'Diagnóstico e tratamento em saúde mental.'},
+      {n:'Reumatologia', d:'Doenças das articulações e autoimunes.'},
+      {n:'Urologia', d:'Sistema urinário e saúde do homem.'}
+    ];
+    var listEl=document.getElementById('specList'), alphaEl=document.getElementById('specAlpha'),
+        countEl=document.getElementById('specCount'), searchEl=document.getElementById('specSearch'),
+        expandBtn=document.getElementById('specExpand');
+    var letter='TODAS', allOpen=false;
+
+    var letters=['TODAS'];
+    DATA.forEach(function(s){ var L=s.n.charAt(0).toUpperCase(); if(letters.indexOf(L)<0) letters.push(L); });
+    letters.forEach(function(L){
+      var b=document.createElement('button'); b.textContent=L; if(L==='TODAS') b.classList.add('on');
+      b.addEventListener('click',function(){ letter=L; alphaEl.querySelectorAll('button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); render(); });
+      alphaEl.appendChild(b);
+    });
+
+    function render(){
+      var q=(searchEl.value||'').trim().toLowerCase();
+      var items=DATA.filter(function(s){
+        var okL = letter==='TODAS' || s.n.charAt(0).toUpperCase()===letter;
+        var okQ = !q || s.n.toLowerCase().indexOf(q)>=0;
+        return okL && okQ;
+      });
+      countEl.innerHTML='Foram encontradas <b>'+items.length+' especialidade'+(items.length===1?'':'s')+'</b>.';
+      listEl.innerHTML='';
+      if(!items.length){ listEl.innerHTML='<p class="spec2-empty">Nenhuma especialidade encontrada. Tente outro termo.</p>'; return; }
+      items.forEach(function(s){
+        var subN = s.sub ? s.sub.length : 0;
+        var item=document.createElement('div'); item.className='spec2-item'+(allOpen?' open':'');
+        var body = '<div class="spec2-item__body"><p>'+s.d+'</p>'+ (s.sub?('<ul><li>'+s.sub.join('</li><li>')+'</li></ul>'):'') +'</div>';
+        item.innerHTML =
+          '<div class="spec2-item__head"><b>'+s.n+'</b>'+
+          '<span class="spec2-item__right">'+(subN?('<span>+'+subN+' especialidade'+(subN===1?'':'s')+'</span>'):'')+
+          '<span class="spec2-item__toggle">'+(allOpen?'−':'+')+'</span></span></div>'+ body;
+        var head=item.querySelector('.spec2-item__head');
+        head.addEventListener('click',function(){
+          item.classList.toggle('open');
+          item.querySelector('.spec2-item__toggle').textContent=item.classList.contains('open')?'−':'+';
+        });
+        listEl.appendChild(item);
+      });
+    }
+    searchEl.addEventListener('input',render);
+    expandBtn.addEventListener('click',function(){
+      allOpen=!allOpen; expandBtn.textContent = allOpen?'Recolher todos os itens ⌃':'Expandir todos os itens ⌄'; render();
+    });
+    render();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+Salve a logo da clínica NESTA pasta com o nome exato:
+
+    logo.png
+
+Caminho completo:
+    C:\Users\josec\projetos\clinica-medicina-humana\assets\logo.png
+
+O site já está apontando para esse arquivo. Assim que você salvar a logo aqui,
+recarregue a página (Ctrl+F5) e ela aparece no cabeçalho automaticamente.
+
+Enquanto o arquivo não existir, o cabeçalho mostra o nome "Medicina Humana"
+em texto como reserva.
