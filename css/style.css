@@ -104,7 +104,7 @@ img{max-width:100%;display:block}
 .header__inner{display:flex;align-items:center;justify-content:space-between;height:78px;transition:height .35s var(--ease)}
 .header.scrolled .header__inner{height:64px}
 
-.brand{display:flex;align-items:center;gap:.7rem}
+.brand{display:flex;align-items:center;gap:.7rem;transform:translateY(-8px)}
 .brand__logo{height:72px;width:auto;transition:height .35s var(--ease)}
 .header.scrolled .brand__logo{height:56px}
 .brand__mark{color:var(--brand);display:grid;place-items:center}
@@ -304,7 +304,7 @@ img{max-width:100%;display:block}
 .footer__bottom a:hover{color:#fff}
 
 /* ---------- WhatsApp float ---------- */
-.wpp{position:fixed;bottom:24px;right:24px;z-index:90;width:58px;height:58px;background:#25d366;color:#fff;border-radius:50%;display:grid;place-items:center;font-size:1.6rem;box-shadow:0 10px 30px rgba(37,211,102,.45);transition:transform .3s}
+.wpp{position:fixed;bottom:24px;right:24px;z-index:90;width:58px;height:58px;background:#25d366;color:#fff;border-radius:50%;display:grid;place-items:center;font-size:1.6rem;box-shadow:0 10px 30px rgba(18,144,224,.42);transition:transform .3s}
 .wpp:hover{transform:scale(1.08)}
 
 /* ---------- Scroll reveal ---------- */
@@ -598,11 +598,11 @@ h2,.page-hero h1{font-family:var(--font-display);font-weight:400}
 
 /* ============ Widget de acessibilidade ============ */
 .a11y-fx{position:fixed;inset:0;z-index:94;pointer-events:none}
-.a11y-fab{position:fixed;left:14px;top:50%;transform:translateY(-50%);z-index:96;width:54px;height:54px;border-radius:50%;background:var(--navy);color:#fff;border:none;cursor:pointer;display:grid;place-items:center;box-shadow:0 6px 20px rgba(10,46,92,.45);transition:transform .25s}
+.a11y-fab{position:fixed;left:14px;top:50%;transform:translateY(-50%);z-index:200;width:54px;height:54px;border-radius:50%;background:var(--navy);color:#fff;border:none;cursor:pointer;display:grid;place-items:center;box-shadow:0 6px 20px rgba(10,46,92,.45);transition:transform .25s}
 .a11y-fab:hover{transform:translateY(-50%) scale(1.07)}
-.a11y-overlay{position:fixed;inset:0;background:rgba(10,46,92,.4);z-index:97;opacity:0;visibility:hidden;transition:opacity .3s}
+.a11y-overlay{position:fixed;inset:0;background:rgba(10,46,92,.4);z-index:201;opacity:0;visibility:hidden;transition:opacity .3s}
 .a11y-overlay.open{opacity:1;visibility:visible}
-.a11y-panel2{position:fixed;top:0;left:0;height:100%;width:min(380px,92vw);background:#fff;z-index:98;transform:translateX(-102%);transition:transform .35s var(--ease);overflow-y:auto;box-shadow:0 0 50px rgba(0,0,0,.25);display:flex;flex-direction:column}
+.a11y-panel2{position:fixed;top:0;left:0;height:100%;width:min(380px,92vw);background:#fff;z-index:202;transform:translateX(-102%);transition:transform .35s var(--ease);overflow-y:auto;box-shadow:0 0 50px rgba(0,0,0,.25);display:flex;flex-direction:column}
 .a11y-panel2.open{transform:none}
 .a11y-top{display:flex;justify-content:space-between;align-items:center;padding:1.1rem 1.2rem;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:1}
 .a11y-top strong{font-family:var(--font-display);color:var(--navy)}
@@ -682,3 +682,60 @@ body.a11y-readguide .a11y-readbar{display:block}
   .page-side a{border-left:none;padding:.5rem .9rem;background:var(--brand-mist);border-radius:8px;margin-left:0}
   .gallery{grid-template-columns:1fr}
 }
+
+
+/* ---- Pilula Agende por WhatsApp ---- */
+.wpp-pill{position:fixed;bottom:22px;right:22px;z-index:205;display:inline-flex;align-items:center;gap:.7rem;padding:.35rem .45rem .35rem 1.15rem;background:linear-gradient(90deg,#0b5aa5,#1290e0);border-radius:999px;box-shadow:0 10px 30px rgba(18,144,224,.42);color:#fff;text-decoration:none;transition:transform .3s,box-shadow .3s}
+.wpp-pill:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(18,144,224,.55)}
+.wpp-pill__ic{width:34px;height:34px;flex:none;display:grid;place-items:center;background:rgba(255,255,255,.22);border-radius:50%;color:#fff}
+.wpp-pill__ic svg{width:22px;height:22px}
+.wpp-pill__txt{font-family:var(--font-display);font-weight:600;font-size:.95rem;white-space:nowrap}
+.wpp-pill__av{width:52px;height:52px;border-radius:50%;object-fit:cover;border:3px solid #fff;display:block}
+@media(max-width:560px){.wpp-pill{padding:.35rem}.wpp-pill__txt{display:none}}
+
+.wpp-pill{padding:.45rem 1.3rem .45rem 1.5rem}
+.wpp-pill__avwrap{position:relative;flex:none;line-height:0}
+.wpp-pill__badge{position:absolute;right:-3px;bottom:-3px;width:26px;height:26px;background:#25d366;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;color:#fff}
+.wpp-pill__badge svg{width:15px;height:15px}
+
+/* ---- Cards: layout texto sobre a imagem ---- */
+.cards__grid .card{position:relative;height:400px;border:none;padding:0;border-radius:16px;overflow:hidden;background:var(--navy)}
+.cards__grid .card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg)}
+.cards__grid .card__img{position:absolute;inset:0;height:100%;border-radius:0;transition:transform .6s var(--ease)}
+.cards__grid .card:hover .card__img{transform:scale(1.07)}
+.cards__grid .card::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(10,46,92,.05) 18%,rgba(10,46,92,.5) 52%,rgba(10,46,92,.92) 100%)}
+.cards__grid .card__body{position:absolute;left:0;right:0;bottom:0;z-index:2;background:none;margin:0;padding:1.6rem}
+.cards__grid .card__body h3{color:#fff;font-size:1.3rem}
+.cards__grid .card__body p{color:rgba(255,255,255,.92)}
+.cards__grid .card__body .link-arrow,.cards__grid .card__body .link-arrow:hover{color:#fff}
+
+/* card inteiro clicável */
+.card__stretch{position:absolute;inset:0;z-index:3}
+
+/* ---- Botao circular WhatsApp (foto + selo) ---- */
+.wpp-fab{position:fixed;bottom:22px;right:22px;z-index:205;display:block;width:74px;height:74px;border-radius:50%;box-shadow:0 8px 26px rgba(10,46,92,.4);transition:transform .3s}
+.wpp-fab:hover{transform:scale(1.07)}
+.wpp-fab__av{width:74px;height:74px;border-radius:50%;object-fit:cover;border:3px solid var(--navy);display:block;background:var(--navy)}
+.wpp-fab__badge{position:absolute;right:-2px;bottom:-2px;width:30px;height:30px;background:#25d366;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;color:#fff}
+.wpp-fab__badge svg{width:18px;height:18px}
+
+/* ---- WhatsApp: circulo que expande no hover ---- */
+.wpp-fab{position:fixed;bottom:22px;right:22px;z-index:205;display:flex;align-items:center;width:auto;height:auto;border-radius:0;box-shadow:none;background:none;transition:none}
+.wpp-fab:hover{transform:none}
+.wpp-fab__panel{display:flex;align-items:center;gap:.55rem;height:58px;max-width:0;opacity:0;overflow:hidden;white-space:nowrap;color:#fff;background:linear-gradient(90deg,#0b5aa5,#1290e0);border-radius:999px;padding:0;margin-right:-34px;box-shadow:0 8px 24px rgba(10,46,92,.4);transition:max-width .45s cubic-bezier(.22,.61,.36,1),opacity .3s,padding .45s cubic-bezier(.22,.61,.36,1)}
+.wpp-fab:hover .wpp-fab__panel{max-width:300px;opacity:1;padding:0 2.7rem 0 .8rem}
+.wpp-fab__ic{width:36px;height:36px;flex:none;background:rgba(255,255,255,.22);border-radius:50%;display:grid;place-items:center;color:#fff}
+.wpp-fab__ic svg{width:20px;height:20px}
+.wpp-fab__txt{font-family:var(--font-display);font-weight:600;font-size:.95rem;color:#fff}
+.wpp-fab__avwrap{position:relative;flex:none;z-index:2;line-height:0}
+.wpp-fab__av{width:64px;height:64px;border-radius:50%;border:3px solid #fff;object-fit:cover;display:block;background:var(--navy);box-shadow:0 6px 18px rgba(10,46,92,.45)}
+.wpp-fab__badge{position:absolute;right:-2px;bottom:-2px;width:28px;height:28px;background:#25d366;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;color:#fff;transition:opacity .25s}
+.wpp-fab__badge svg{width:16px;height:16px}
+.wpp-fab:hover .wpp-fab__badge{opacity:0}
+/* WhatsApp: circulo maior */
+.wpp-fab__av{width:88px;height:88px}
+.wpp-fab__panel{height:74px}
+.wpp-fab__badge{width:34px;height:34px}
+.wpp-fab__badge svg{width:19px;height:19px}
+.wpp-fab:hover .wpp-fab__panel{max-width:320px;padding:0 3rem 0 .9rem}
+.wpp-fab__av{object-position:center 20%}
