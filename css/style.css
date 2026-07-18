@@ -839,7 +839,10 @@ body.a11y-readguide .a11y-readbar{display:block}
 
 /* Hero: usa fotos da unidade (assets/unidade-1/2/3.jpg) com fallback nas genericas */
 .slide__bg--1{background:url('../assets/unidade-1.jpg') center/cover no-repeat,#0a2e5c url('https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?auto=format&fit=crop&w=1900&q=80') center/cover no-repeat}
-.slide__bg--2{background:url('../assets/unidade-2.jpg') center/cover no-repeat,#0a2e5c url('https://images.unsplash.com/photo-1584982751601-97dcc096659c?auto=format&fit=crop&w=1900&q=80') center/cover no-repeat}
+.slide__bg--2{background:#0a2e5c url('../assets/unidade-2.png') center 45%/cover no-repeat!important;background-image:url('../assets/unidade-2.png')!important;background-position:center 45%!important;transform:none!important}
+.slide.is-active .slide__bg--2,.slide__bg--2{transform:none!important}
+.hero__track .slide:nth-child(2) .slide__scrim{background:none!important}
+.hero__track .slide:nth-child(2) .slide__decor{display:none}
 .slide__bg--3{background:#0a2e5c url('../assets/unidade-3.png') center 28%/cover no-repeat!important;background-image:url('../assets/unidade-3.png')!important;background-position:center 28%!important;transform:none!important}
 /* slide 3: sem zoom (direto no elemento, sem depender de :has), sem overlays */
 .slide.is-active .slide__bg--3,.slide__bg--3{transform:none!important}
@@ -869,3 +872,10 @@ body.a11y-readguide .a11y-readbar{display:block}
 .news__grid::before{top:-2.6rem}
 .news__grid::after{bottom:-2.6rem}
 .news .btn-ghost,.news .link-arrow.link-arrow--center,.news__more{margin-top:3rem}
+
+/* Especialidades: hero em duas colunas com retrato da medica a direita */
+.page-hero--espec{position:relative;min-height:430px;padding:0;display:flex;align-items:center}
+.page-hero--espec .page-hero__bg{background:linear-gradient(90deg,var(--navy) 0%,var(--blue-700) 58%,#1567b3 100%)}
+.page-hero--espec .container{position:relative;z-index:2;padding-top:2.5rem;padding-bottom:3.4rem}
+.page-hero__photo{position:absolute;right:5%;bottom:0;height:114%;width:auto;z-index:1;object-fit:contain;object-position:bottom;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 34%);mask-image:linear-gradient(90deg,transparent 0,#000 34%);pointer-events:none}
+@media(max-width:900px){.page-hero__photo{right:-4%;height:104%;opacity:.30}}
