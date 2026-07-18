@@ -190,13 +190,10 @@
             <form id="resForm">
               <div class="fld"><label>CPF do paciente</label><input type="text" id="rCpf" placeholder="000.000.000-00" maxlength="14" required /></div>
               <div class="row2">
-                <div class="fld"><label>Título do exame</label><input type="text" id="rTitulo" placeholder="Ex.: Hemograma completo" required /></div>
-                <div class="fld"><label>Data do exame</label><input type="date" id="rData" /></div>
-              </div>
-              <div class="row2">
-                <div class="fld"><label>Observação (opcional)</label><input type="text" id="rDesc" /></div>
+                <div class="fld"><label>Data dos exames</label><input type="date" id="rData" /></div>
                 <div class="fld"><label>CRM do médico (opcional)</label><input type="text" id="rMedCrm" placeholder="Vincula ao médico" /></div>
               </div>
+              <div class="fld"><label>Descrição (opcional)</label><input type="text" id="rDesc" placeholder="Ex.: Exames laboratoriais, imagem..." /></div>
               <div class="fld"><label>Arquivo (PDF/imagem)</label><input type="file" id="rFile" accept="application/pdf,image/jpeg,image/png" required /></div>
               <button class="btn" id="resBtn">Lançar resultado</button>
               <div class="msg" id="resMsg"></div>
@@ -364,7 +361,9 @@
       if(up.error){b.disabled=false;b.textContent='Lançar resultado';msg($('resMsg'),'Falha no upload: '+up.error.message,'err');return;}
       var medId=null;var crm=$('rMedCrm').value.trim();
       if(crm){var med=await sb.from('medicos').select('id').eq('crm',crm).maybeSingle();if(med.data)medId=med.data.id;}
-      var ins=await sb.from('resultados').insert({paciente_id:pac.data.id,medico_id:medId,titulo:$('rTitulo').value.trim(),descricao:$('rDesc').value.trim()||null,data_exame:$('rData').value||null,arquivo_path:path});
+      var dataEx=$('rData').value;
+      var titulo=dataEx?('Exames de '+new Date(dataEx+'T00:00:00').toLocaleDateString('pt-BR')):'Resultado de exames';
+      var ins=await sb.from('resultados').insert({paciente_id:pac.data.id,medico_id:medId,titulo:titulo,descricao:$('rDesc').value.trim()||null,data_exame:dataEx||null,arquivo_path:path});
       b.disabled=false;b.textContent='Lançar resultado';
       if(ins.error){msg($('resMsg'),'Erro: '+ins.error.message,'err');return;}
       msg($('resMsg'),'Resultado lançado! Aguardando liberação do responsável.','ok');
@@ -392,7 +391,7 @@
       var up=await sb.from('resultados').update({status:'liberado'}).eq('id',x.id);
       if(up.error){btn.disabled=false;btn.textContent='Liberar';alert('Erro: '+up.error.message);return;}
       var tel=x.pacientes&&x.pacientes.telefone;
-      var txt='Olá '+(x.pacientes?x.pacientes.nome.split(' ')[0]:'')+'! Seu resultado "'+x.titulo+'" já está disponível:\n'+PORTAL+'\n\nEntre com o seu CPF e senha.';
+      var txt='Olá '+(x.pacientes?x.pacientes.nome:'')+'! Seu resultado "'+x.titulo+'" já está disponível:\n'+PORTAL+'\n\nEntre com o seu CPF e senha. Clínica Medicina Humana.';
       tr.lastChild.innerHTML='<span class="badge badge--ok">Liberado</span> '+(tel?'<a class="wa" style="margin:0 0 0 .4rem;padding:.35rem .8rem" target="_blank" href="'+waLink(tel,txt)+'">Avisar</a>':'');
       refreshPend();
     }
