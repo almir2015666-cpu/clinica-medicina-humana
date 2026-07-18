@@ -906,3 +906,17 @@ body.a11y-readguide .a11y-readbar{display:block}
 .mo-stickybar__tel:hover{text-decoration:underline}
 body.mo-bar-on .wpp-fab{bottom:92px}
 @media(max-width:760px){.mo-stickybar__txt{display:none}.mo-stickybar__inner{justify-content:center;padding:.55rem 0}.mo-stickybar__wa{flex:1;justify-content:center}.mo-stickybar__tel{display:none}}
+
+/* Mobile: evita rolagem horizontal e layout deslocado */
+html,body{overflow-x:hidden;max-width:100%}
+@media(max-width:560px){
+  .page-hero{padding:120px 0 70px}
+  .page-hero h1{font-size:1.5rem}
+  .founder-band__card::after{display:none}
+}
+
+/* Botão fixo "Agende sua consulta" no cabeçalho */
+.btn-agendar{display:inline-flex;align-items:center;gap:.45rem;background:#fff;color:var(--navy);font-weight:700;font-size:.88rem;padding:.6rem 1.2rem;border-radius:40px;white-space:nowrap;box-shadow:0 4px 14px rgba(10,46,92,.18);transition:transform .2s,box-shadow .2s;margin-right:.5rem}
+.btn-agendar:hover{transform:translateY(-1px);box-shadow:0 7px 20px rgba(10,46,92,.28)}
+.btn-agendar svg{flex-shrink:0}
+@media(max-width:560px){.btn-agendar{font-size:.75rem;padding:.45rem .8rem}.btn-agendar svg{display:none}}
