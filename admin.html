@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Painel da Equipe — Clínica Medicina Humana</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--navy:#0a2e5c;--blue-700:#0b5aa5;--blue-500:#1290e0;--blue-400:#3bb3ef;--blue-300:#6fcdf5;--ink:#1e2a3a;--muted:#6b7c93;--line:#e3ebf3;--bg:#f2f6fb;--ok:#1e7a43;--okbg:#e9f6ee;--warn:#b8860b;--warnbg:#fdf4e3}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+    a{text-decoration:none;color:inherit}
+    /* ---------- LOGIN ---------- */
+    .login{min-height:100vh;display:grid;place-items:center;padding:1.5rem;background:linear-gradient(135deg,var(--navy),var(--blue-700))}
+    .login__card{background:#fff;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.25);padding:2.4rem;width:100%;max-width:380px}
+    .login__card h1{font-family:'Montserrat';color:var(--navy);font-size:1.4rem;margin:.2rem 0 .1rem;text-align:center}
+    .login__card p{color:var(--muted);text-align:center;margin:0 0 1.6rem;font-size:.9rem}
+    .fld{margin-bottom:1rem}
+    .fld label{display:block;font-weight:600;font-size:.85rem;color:var(--navy);margin-bottom:.35rem}
+    .fld input,.fld select{width:100%;padding:.75rem .9rem;border:1px solid var(--line);border-radius:10px;font-size:.96rem;font-family:inherit;background:#fff}
+    .fld input:focus,.fld select:focus{outline:none;border-color:var(--blue-400);box-shadow:0 0 0 3px rgba(59,179,239,.18)}
+    .btn{border:none;border-radius:10px;background:linear-gradient(120deg,var(--blue-700),var(--blue-500));color:#fff;font-weight:700;font-size:.95rem;cursor:pointer;padding:.8rem 1.2rem;font-family:inherit}
+    .btn:hover{filter:brightness(1.07)} .btn:disabled{opacity:.6;cursor:not-allowed}
+    .btn--full{width:100%} .btn--ok{background:linear-gradient(120deg,#1e7a43,#2fa85f)} .btn--ghost{background:#fff;color:var(--blue-700);border:1px solid var(--blue-300)}
+    .msg{margin-top:.9rem;padding:.7rem .9rem;border-radius:9px;font-size:.87rem;display:none}
+    .msg.err{display:block;background:#fdecec;color:#b3261e;border:1px solid #f6c9c6}
+    .msg.ok{display:block;background:var(--okbg);color:var(--ok);border:1px solid #bfe6cd}
+    /* ---------- SHELL ---------- */
+    .app{display:none;min-height:100vh;grid-template-columns:250px 1fr}
+    .backdrop{display:none}
+    .side{background:linear-gradient(180deg,var(--navy),#08264d);color:#fff;display:flex;flex-direction:column;padding:1.3rem 0;position:sticky;top:0;height:100vh}
+    .side__brand{padding:0 1.4rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:.9rem}
+    .side__brand b{font-family:'Montserrat';font-size:1.05rem;display:block}
+    .side__brand span{font-size:.72rem;color:var(--blue-300)}
+    .nav{flex:1;display:flex;flex-direction:column;gap:.15rem;padding:0 .8rem}
+    .nav a{display:flex;align-items:center;gap:.7rem;padding:.7rem .8rem;border-radius:10px;color:rgba(255,255,255,.78);font-weight:600;font-size:.92rem;cursor:pointer}
+    .nav a:hover{background:rgba(255,255,255,.08);color:#fff}
+    .nav a.on{background:linear-gradient(120deg,var(--blue-500),var(--blue-400));color:#fff}
+    .nav a svg{width:19px;height:19px;flex-shrink:0}
+    .nav a .pill{margin-left:auto;background:#ff5252;color:#fff;font-size:.68rem;font-weight:700;border-radius:20px;padding:.05rem .45rem;min-width:20px;text-align:center;display:none}
+    .side__user{padding:1rem 1.4rem 0;border-top:1px solid rgba(255,255,255,.1);margin-top:.6rem;font-size:.85rem}
+    .side__user b{display:block} .side__user span{color:var(--blue-300);font-size:.72rem;text-transform:uppercase;letter-spacing:.03em}
+    .side__logout{margin-top:.7rem;background:rgba(255,255,255,.1);border:none;color:#fff;padding:.5rem;border-radius:8px;width:100%;cursor:pointer;font-weight:600;font-size:.85rem}
+    .side__logout:hover{background:rgba(255,255,255,.2)}
+    /* ---------- MAIN ---------- */
+    .main{min-width:0}
+    .top{background:#fff;border-bottom:1px solid var(--line);padding:1.1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
+    .top h2{font-family:'Montserrat';color:var(--navy);font-size:1.25rem;margin:0}
+    .top .burger{display:none;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--navy)}
+    .content{padding:1.8rem 2rem 3rem;max-width:1100px}
+    .view{display:none} .view.on{display:block}
+    /* KPIs */
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-bottom:1.8rem}
+    .kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:1.2rem;display:flex;align-items:center;gap:.9rem}
+    .kpi__ic{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;flex-shrink:0}
+    .kpi__ic svg{width:22px;height:22px;color:#fff}
+    .kpi b{font-size:1.6rem;font-family:'Montserrat';color:var(--navy);display:block;line-height:1}
+    .kpi span{color:var(--muted);font-size:.82rem}
+    /* Card */
+    .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:1.4rem 1.5rem;margin-bottom:1.4rem}
+    .card__head{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+    .card__head h3{font-family:'Montserrat';color:var(--navy);font-size:1.05rem;margin:0}
+    .search{padding:.6rem .9rem;border:1px solid var(--line);border-radius:9px;font-size:.9rem;font-family:inherit;min-width:220px}
+    /* Table */
+    table{width:100%;border-collapse:collapse;font-size:.9rem}
+    th{text-align:left;color:var(--muted);font-weight:600;font-size:.76rem;text-transform:uppercase;letter-spacing:.03em;padding:.6rem .7rem;border-bottom:2px solid var(--line)}
+    td{padding:.75rem .7rem;border-bottom:1px solid var(--line)}
+    tr:hover td{background:#f8fbfe}
+    .tbl-wrap{overflow-x:auto}
+    .badge{display:inline-block;font-size:.72rem;font-weight:700;padding:.15rem .55rem;border-radius:20px}
+    .badge--ok{color:var(--ok);background:var(--okbg)} .badge--pend{color:var(--warn);background:var(--warnbg)}
+    .badge--role{color:var(--blue-700);background:#eaf4fc}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:1rem} @media(max-width:560px){.row2{grid-template-columns:1fr}}
+    .out{margin-top:1rem;padding:1rem;border:1px dashed var(--blue-300);border-radius:12px;background:#f3f9fe;display:none}
+    .out.show{display:block}
+    .cred{font-family:monospace;font-size:1.02rem;color:var(--blue-700);background:#fff;padding:.2rem .5rem;border-radius:6px;display:inline-block}
+    .wa{display:inline-flex;align-items:center;gap:.4rem;background:#25d366;color:#fff;font-weight:700;padding:.5rem 1rem;border-radius:40px;margin-top:.5rem;font-size:.88rem}
+    .empty{color:var(--muted);text-align:center;padding:1.6rem 0}
+    .hidden{display:none!important}
+    @media(max-width:860px){
+      .app{grid-template-columns:1fr}
+      .side{position:fixed;left:0;top:0;bottom:0;width:250px;z-index:40;transform:translateX(-100%);transition:transform .3s;height:100vh}
+      .side.open{transform:none}
+      .top .burger{display:block}
+      .kpis{grid-template-columns:1fr 1fr}
+      .content{padding:1.2rem}
+      .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:39;display:none} .backdrop.show{display:block}
+    }
+  </style>
+</head>
+<body>
+  <!-- LOGIN -->
+  <div class="login" id="login">
+    <form class="login__card" id="loginForm">
+      <h1>Clínica Medicina Humana</h1>
+      <p>Painel da equipe · Resultados de exames</p>
+      <div class="fld"><label>Login</label><input type="text" id="admLogin" autocapitalize="none" placeholder="seu login" required /></div>
+      <div class="fld"><label>Senha</label><input type="password" id="admSenha" required /></div>
+      <button class="btn btn--full" id="loginBtn">Entrar</button>
+      <div class="msg" id="loginMsg"></div>
+    </form>
+  </div>
+
+  <!-- APP -->
+  <div class="app" id="app">
+    <div class="backdrop" id="backdrop"></div>
+    <aside class="side" id="side">
+      <div class="side__brand"><b>Medicina Humana</b><span>Painel da Equipe</span></div>
+      <nav class="nav" id="nav">
+        <a data-view="dashboard" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Visão geral</a>
+        <a data-view="pacientes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a6 6 0 0 1 12 0v2M17 11a4 4 0 0 0 0-8"/></svg> Pacientes</a>
+        <a data-view="medicos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v6a6 6 0 0 0 12 0V3"/><circle cx="12" cy="15" r="3"/></svg> Médicos</a>
+        <a data-view="lancar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg> Lançar resultado</a>
+        <a data-view="pendentes" id="navPend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Pendentes <span class="pill" id="pendPill">0</span></a>
+        <a data-view="funcionarios" id="navFunc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M13 9h5M13 13h5M6 16h6"/></svg> Funcionários</a>
+      </nav>
+      <div class="side__user">
+        <b id="uNome"></b><span id="uPapel"></span>
+        <button class="side__logout" id="logoutBtn">Sair</button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="top"><button class="burger" id="burger">☰</button><h2 id="viewTitle">Visão geral</h2><span></span></div>
+      <div class="content">
+
+        <!-- DASHBOARD -->
+        <section class="view on" data-view="dashboard">
+          <div class="kpis">
+            <div class="kpi"><div class="kpi__ic" style="background:var(--blue-500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a6 6 0 0 1 12 0v2"/></svg></div><div><b id="kPac">–</b><span>Pacientes</span></div></div>
+            <div class="kpi"><div class="kpi__ic" style="background:var(--warn)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div><b id="kPend">–</b><span>Pendentes</span></div></div>
+            <div class="kpi"><div class="kpi__ic" style="background:var(--ok)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div><div><b id="kLib">–</b><span>Liberados</span></div></div>
+            <div class="kpi"><div class="kpi__ic" style="background:var(--navy)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v6a6 6 0 0 0 12 0V3"/></svg></div><div><b id="kMed">–</b><span>Médicos</span></div></div>
+          </div>
+          <div class="card">
+            <div class="card__head"><h3>Últimos pendentes de liberação</h3><button class="btn btn--ghost" data-goto="pendentes">Ver todos</button></div>
+            <div id="dashPend"><p class="empty">Carregando...</p></div>
+          </div>
+        </section>
+
+        <!-- PACIENTES -->
+        <section class="view" data-view="pacientes">
+          <div class="card">
+            <div class="card__head"><h3>Novo paciente</h3></div>
+            <form id="pacForm">
+              <div class="fld"><label>Nome completo</label><input type="text" id="pNome" required /></div>
+              <div class="row2">
+                <div class="fld"><label>CPF</label><input type="text" id="pCpf" placeholder="000.000.000-00" maxlength="14" required /></div>
+                <div class="fld"><label>WhatsApp (com DDD)</label><input type="text" id="pTel" placeholder="(71) 90000-0000" /></div>
+              </div>
+              <button class="btn" id="pacBtn">Cadastrar e gerar senha</button>
+              <div class="msg" id="pacMsg"></div>
+            </form>
+            <div class="out" id="pacOut"></div>
+          </div>
+          <div class="card">
+            <div class="card__head"><h3>Pacientes cadastrados</h3><input class="search" id="pacSearch" placeholder="Buscar por nome ou CPF..." /></div>
+            <div class="tbl-wrap"><table><thead><tr><th>Nome</th><th>CPF</th><th>WhatsApp</th><th>Cadastro</th></tr></thead><tbody id="pacTable"></tbody></table></div>
+          </div>
+        </section>
+
+        <!-- MÉDICOS -->
+        <section class="view" data-view="medicos">
+          <div class="card">
+            <div class="card__head"><h3>Novo médico</h3></div>
+            <form id="medForm">
+              <div class="fld"><label>Nome do médico</label><input type="text" id="mNome" required /></div>
+              <div class="row2">
+                <div class="fld"><label>CRM</label><input type="text" id="mCrm" placeholder="Ex.: CRM/BA 43699" required /></div>
+                <div class="fld"><label>Especialidade</label><input type="text" id="mEsp" placeholder="Ex.: Cardiologia" /></div>
+              </div>
+              <div class="fld"><label>WhatsApp (com DDD)</label><input type="text" id="mTel" placeholder="(71) 90000-0000" /></div>
+              <button class="btn" id="medBtn">Cadastrar e gerar senha</button>
+              <div class="msg" id="medMsg"></div>
+            </form>
+            <div class="out" id="medOut"></div>
+          </div>
+          <div class="card">
+            <div class="card__head"><h3>Médicos cadastrados</h3><input class="search" id="medSearch" placeholder="Buscar..." /></div>
+            <div class="tbl-wrap"><table><thead><tr><th>Nome</th><th>CRM</th><th>Especialidade</th></tr></thead><tbody id="medTable"></tbody></table></div>
+          </div>
+        </section>
+
+        <!-- LANÇAR -->
+        <section class="view" data-view="lancar">
+          <div class="card">
+            <div class="card__head"><h3>Lançar resultado</h3></div>
+            <p style="color:var(--muted);font-size:.88rem;margin:-.4rem 0 1.1rem">O resultado fica <b>pendente</b> até ser liberado pelo responsável. Só depois o paciente vê.</p>
+            <form id="resForm">
+              <div class="fld"><label>CPF do paciente</label><input type="text" id="rCpf" placeholder="000.000.000-00" maxlength="14" required /></div>
+              <div class="row2">
+                <div class="fld"><label>Título do exame</label><input type="text" id="rTitulo" placeholder="Ex.: Hemograma completo" required /></div>
+                <div class="fld"><label>Data do exame</label><input type="date" id="rData" /></div>
+              </div>
+              <div class="row2">
+                <div class="fld"><label>Observação (opcional)</label><input type="text" id="rDesc" /></div>
+                <div class="fld"><label>CRM do médico (opcional)</label><input type="text" id="rMedCrm" placeholder="Vincula ao médico" /></div>
+              </div>
+              <div class="fld"><label>Arquivo (PDF/imagem)</label><input type="file" id="rFile" accept="application/pdf,image/jpeg,image/png" required /></div>
+              <button class="btn" id="resBtn">Lançar resultado</button>
+              <div class="msg" id="resMsg"></div>
+            </form>
+          </div>
+        </section>
+
+        <!-- PENDENTES -->
+        <section class="view" data-view="pendentes">
+          <div class="card">
+            <div class="card__head"><h3>Resultados pendentes de liberação</h3></div>
+            <div class="tbl-wrap"><table><thead><tr><th>Paciente</th><th>Exame</th><th>Data</th><th>Ação</th></tr></thead><tbody id="pendTable"></tbody></table></div>
+          </div>
+        </section>
+
+        <!-- FUNCIONÁRIOS -->
+        <section class="view" data-view="funcionarios">
+          <div class="card">
+            <div class="card__head"><h3>Novo funcionário</h3></div>
+            <form id="funcForm">
+              <div class="fld"><label>Nome</label><input type="text" id="fNome" required /></div>
+              <div class="row2">
+                <div class="fld"><label>Login</label><input type="text" id="fLogin" autocapitalize="none" placeholder="ex.: maria" required /></div>
+                <div class="fld"><label>Função</label><select id="fPapel"><option value="recepcao">Recepção (lança)</option><option value="tecnico">Responsável Técnico (libera)</option><option value="gestor">Gestor (tudo)</option></select></div>
+              </div>
+              <button class="btn" id="funcBtn">Cadastrar e gerar senha</button>
+              <div class="msg" id="funcMsg"></div>
+            </form>
+            <div class="out" id="funcOut"></div>
+          </div>
+          <div class="card">
+            <div class="card__head"><h3>Equipe</h3></div>
+            <div class="tbl-wrap"><table><thead><tr><th>Nome</th><th>Função</th><th>Status</th></tr></thead><tbody id="funcTable"></tbody></table></div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="js/supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  (function(){
+    var sb=supabase.createClient(window.SUPA.url,window.SUPA.key);
+    var PORTAL='https://clinicamedicinahumana.com.br/resultados.html';
+    var PAPEL={gestor:'Gestor',recepcao:'Recepção',tecnico:'Responsável Técnico'};
+    var meuPapel='recepcao', cachePac=[], cacheMed=[];
+    var $=function(id){return document.getElementById(id);};
+    function digits(s){return (s||'').replace(/\D/g,'');}
+    function msg(el,t,c){el.textContent=t;el.className='msg '+c;}
+    function waLink(t,x){return 'https://wa.me/55'+digits(t)+'?text='+encodeURIComponent(x);}
+    function esc(s){return (s||'').replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+    function dt(d){return d?new Date(d).toLocaleDateString('pt-BR'):'';}
+    function dEx(d){return d?new Date(d+'T00:00:00').toLocaleDateString('pt-BR'):'—';}
+    async function token(){return (await sb.auth.getSession()).data.session.access_token;}
+    async function criar(p){var r=await fetch(window.SUPA.url+'/functions/v1/'+window.SUPA.functionName,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await token()),'apikey':window.SUPA.key},body:JSON.stringify(p)});return {ok:r.ok,data:await r.json()};}
+
+    // login/senha maiúsculo
+    ['admLogin','admSenha'].forEach(function(id){var el=$(id);el.style.textTransform='uppercase';el.addEventListener('input',function(){var p=el.selectionStart;el.value=el.value.toUpperCase();try{el.setSelectionRange(p,p);}catch(e){}});});
+    ['pCpf','rCpf'].forEach(function(id){var el=$(id);el.addEventListener('input',function(){el.value=digits(el.value).slice(0,11).replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');});});
+
+    // navegação
+    function go(view){
+      document.querySelectorAll('.nav a').forEach(function(a){a.classList.toggle('on',a.dataset.view===view);});
+      document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('on',v.dataset.view===view);});
+      var t={dashboard:'Visão geral',pacientes:'Pacientes',medicos:'Médicos',lancar:'Lançar resultado',pendentes:'Pendentes',funcionarios:'Funcionários'};
+      $('viewTitle').textContent=t[view]||'';
+      $('side').classList.remove('open');$('backdrop').classList.remove('show');
+      if(view==='dashboard')loadDash(); if(view==='pacientes')loadPac(); if(view==='medicos')loadMed();
+      if(view==='pendentes')loadPend(); if(view==='funcionarios')loadFunc();
+    }
+    document.querySelectorAll('.nav a').forEach(function(a){a.addEventListener('click',function(){go(a.dataset.view);});});
+    document.querySelectorAll('[data-goto]').forEach(function(b){b.addEventListener('click',function(){go(b.dataset.goto);});});
+    $('burger').addEventListener('click',function(){$('side').classList.toggle('open');$('backdrop').classList.toggle('show');});
+    $('backdrop').addEventListener('click',function(){$('side').classList.remove('open');$('backdrop').classList.remove('show');});
+
+    // LOGIN
+    $('loginForm').addEventListener('submit',async function(e){
+      e.preventDefault();var b=$('loginBtn');b.disabled=true;b.textContent='Entrando...';
+      var login=$('admLogin').value.trim().toLowerCase().replace(/[^a-z0-9]/g,'');
+      var r=await sb.auth.signInWithPassword({email:login+'@'+window.SUPA.adminEmailDomain,password:$('admSenha').value});
+      b.disabled=false;b.textContent='Entrar';
+      if(r.error){msg($('loginMsg'),'Login ou senha incorretos.','err');return;}
+      entrar();
+    });
+    $('logoutBtn').addEventListener('click',async function(){await sb.auth.signOut();location.reload();});
+
+    async function entrar(){
+      var u=await sb.auth.getUser();
+      var f=await sb.from('funcionarios').select('nome,papel,ativo').eq('id',u.data.user.id).maybeSingle();
+      if(!f.data||!f.data.ativo){msg($('loginMsg'),'Usuário não é um funcionário ativo.','err');await sb.auth.signOut();return;}
+      meuPapel=f.data.papel;
+      $('login').style.display='none';$('app').style.display='grid';
+      $('uNome').textContent=f.data.nome;$('uPapel').textContent=PAPEL[meuPapel]||meuPapel;
+      var podeLib=(meuPapel==='gestor'||meuPapel==='tecnico');
+      $('navPend').style.display=podeLib?'':'none';
+      $('navFunc').style.display=(meuPapel==='gestor')?'':'none';
+      go('dashboard');
+    }
+
+    // DASHBOARD
+    async function count(tbl,filtro){var q=sb.from(tbl).select('*',{count:'exact',head:true});if(filtro)q=q.eq('status',filtro);var r=await q;return r.count||0;}
+    async function loadDash(){
+      $('kPac').textContent=await count('pacientes');
+      $('kMed').textContent=await count('medicos');
+      $('kPend').textContent=await count('resultados','pendente');
+      $('kLib').textContent=await count('resultados','liberado');
+      var r=await sb.from('resultados').select('id,titulo,data_exame,pacientes(nome)').eq('status','pendente').order('criado_em',{ascending:false}).limit(5);
+      var el=$('dashPend');
+      if(!r.data||!r.data.length){el.innerHTML='<p class="empty">Nenhum resultado pendente.</p>';return;}
+      el.innerHTML='<div class="tbl-wrap"><table><thead><tr><th>Paciente</th><th>Exame</th><th>Data</th></tr></thead><tbody>'+
+        r.data.map(function(x){return '<tr><td>'+esc(x.pacientes?x.pacientes.nome:'—')+'</td><td>'+esc(x.titulo)+' <span class="badge badge--pend">Pendente</span></td><td>'+dEx(x.data_exame)+'</td></tr>';}).join('')+'</tbody></table></div>';
+    }
+
+    // PACIENTES
+    async function loadPac(){
+      var r=await sb.from('pacientes').select('nome,cpf,telefone,criado_em').order('criado_em',{ascending:false});
+      cachePac=r.data||[];renderPac('');
+    }
+    function renderPac(q){
+      q=(q||'').toLowerCase();var items=!q?cachePac:cachePac.filter(function(p){return (p.nome||'').toLowerCase().indexOf(q)>=0||(p.cpf||'').indexOf(q.replace(/\D/g,''))>=0;});
+      $('pacTable').innerHTML=items.length?items.map(function(p){return '<tr><td>'+esc(p.nome)+'</td><td>'+p.cpf+'</td><td>'+(p.telefone||'—')+'</td><td>'+dt(p.criado_em)+'</td></tr>';}).join(''):'<tr><td colspan="4" class="empty">Nenhum paciente.</td></tr>';
+    }
+    $('pacSearch').addEventListener('input',function(){renderPac(this.value);});
+    $('pacForm').addEventListener('submit',async function(e){
+      e.preventDefault();var b=$('pacBtn');b.disabled=true;b.textContent='Cadastrando...';$('pacOut').classList.remove('show');
+      var nome=$('pNome').value.trim(),cpf=digits($('pCpf').value),tel=$('pTel').value;
+      var r=await criar({tipo:'paciente',nome:nome,cpf:cpf,telefone:tel});
+      b.disabled=false;b.textContent='Cadastrar e gerar senha';
+      if(!r.ok){msg($('pacMsg'),r.data.error||'Erro.','err');return;}
+      msg($('pacMsg'),'Paciente cadastrado!','ok');
+      var txt='Olá '+nome+'! A Clínica Medicina Humana criou o seu acesso aos resultados de exames.\n\nAcesse: '+PORTAL+'\nCPF: '+cpf+'\nSenha: '+r.data.senha+'\n\nGuarde com segurança.';
+      $('pacOut').classList.add('show');
+      $('pacOut').innerHTML='CPF: <span class="cred">'+cpf+'</span> · Senha: <span class="cred">'+r.data.senha+'</span><br>'+(tel?'<a class="wa" target="_blank" href="'+waLink(tel,txt)+'">Enviar no WhatsApp</a>':'<small style="color:var(--muted)">Copie a senha e envie ao paciente.</small>');
+      $('pacForm').reset();loadPac();
+    });
+
+    // MÉDICOS
+    async function loadMed(){var r=await sb.from('medicos').select('nome,crm,especialidade,criado_em').order('criado_em',{ascending:false});cacheMed=r.data||[];renderMed('');}
+    function renderMed(q){q=(q||'').toLowerCase();var items=!q?cacheMed:cacheMed.filter(function(m){return (m.nome||'').toLowerCase().indexOf(q)>=0||(m.crm||'').toLowerCase().indexOf(q)>=0;});
+      $('medTable').innerHTML=items.length?items.map(function(m){return '<tr><td>'+esc(m.nome)+'</td><td>'+esc(m.crm)+'</td><td>'+esc(m.especialidade||'—')+'</td></tr>';}).join(''):'<tr><td colspan="3" class="empty">Nenhum médico.</td></tr>';}
+    $('medSearch').addEventListener('input',function(){renderMed(this.value);});
+    $('medForm').addEventListener('submit',async function(e){
+      e.preventDefault();var b=$('medBtn');b.disabled=true;b.textContent='Cadastrando...';$('medOut').classList.remove('show');
+      var nome=$('mNome').value.trim(),crm=$('mCrm').value.trim(),esp=$('mEsp').value.trim(),tel=$('mTel').value;
+      var r=await criar({tipo:'medico',nome:nome,crm:crm,especialidade:esp,telefone:tel});
+      b.disabled=false;b.textContent='Cadastrar e gerar senha';
+      if(!r.ok){msg($('medMsg'),r.data.error||'Erro.','err');return;}
+      msg($('medMsg'),'Médico cadastrado!','ok');
+      var txt='Olá Dr(a). '+nome+'! Criamos o seu acesso ao portal de resultados dos seus pacientes.\n\nAcesse: '+PORTAL+' (aba "Sou Médico")\nCRM: '+crm+'\nSenha: '+r.data.senha;
+      $('medOut').classList.add('show');
+      $('medOut').innerHTML='CRM: <span class="cred">'+esc(crm)+'</span> · Senha: <span class="cred">'+r.data.senha+'</span><br>'+(tel?'<a class="wa" target="_blank" href="'+waLink(tel,txt)+'">Enviar no WhatsApp</a>':'<small style="color:var(--muted)">Copie a senha e envie ao médico.</small>');
+      $('medForm').reset();loadMed();
+    });
+
+    // LANÇAR
+    $('resForm').addEventListener('submit',async function(e){
+      e.preventDefault();var b=$('resBtn');b.disabled=true;b.textContent='Lançando...';
+      var cpf=digits($('rCpf').value);
+      var pac=await sb.from('pacientes').select('id').eq('cpf',cpf).maybeSingle();
+      if(!pac.data){b.disabled=false;b.textContent='Lançar resultado';msg($('resMsg'),'Paciente não encontrado. Cadastre-o primeiro.','err');return;}
+      var file=$('rFile').files[0];var ext=(file.name.split('.').pop()||'pdf').toLowerCase();var path=pac.data.id+'/'+Date.now()+'.'+ext;
+      var up=await sb.storage.from('resultados').upload(path,file,{contentType:file.type});
+      if(up.error){b.disabled=false;b.textContent='Lançar resultado';msg($('resMsg'),'Falha no upload: '+up.error.message,'err');return;}
+      var medId=null;var crm=$('rMedCrm').value.trim();
+      if(crm){var med=await sb.from('medicos').select('id').eq('crm',crm).maybeSingle();if(med.data)medId=med.data.id;}
+      var ins=await sb.from('resultados').insert({paciente_id:pac.data.id,medico_id:medId,titulo:$('rTitulo').value.trim(),descricao:$('rDesc').value.trim()||null,data_exame:$('rData').value||null,arquivo_path:path});
+      b.disabled=false;b.textContent='Lançar resultado';
+      if(ins.error){msg($('resMsg'),'Erro: '+ins.error.message,'err');return;}
+      msg($('resMsg'),'Resultado lançado! Aguardando liberação do responsável.','ok');
+      $('resForm').reset();refreshPend();
+    });
+
+    // PENDENTES
+    async function loadPend(){
+      var r=await sb.from('resultados').select('id,titulo,data_exame,pacientes(nome,telefone,cpf)').eq('status','pendente').order('criado_em',{ascending:true});
+      var el=$('pendTable');var data=r.data||[];
+      $('pendPill').textContent=data.length;$('pendPill').style.display=data.length?'inline-block':'none';
+      if(!data.length){el.innerHTML='<tr><td colspan="4" class="empty">Nenhum resultado pendente.</td></tr>';return;}
+      el.innerHTML='';
+      data.forEach(function(x){
+        var tr=document.createElement('tr');
+        tr.innerHTML='<td>'+esc(x.pacientes?x.pacientes.nome:'—')+'</td><td>'+esc(x.titulo)+'</td><td>'+dEx(x.data_exame)+'</td><td></td>';
+        var btn=document.createElement('button');btn.className='btn btn--ok';btn.textContent='Liberar';btn.style.padding='.45rem .9rem';btn.style.fontSize='.85rem';
+        btn.addEventListener('click',function(){liberar(x,tr,btn);});
+        tr.lastChild.appendChild(btn);el.appendChild(tr);
+      });
+    }
+    async function refreshPend(){var c=await count('resultados','pendente');$('pendPill').textContent=c;$('pendPill').style.display=c?'inline-block':'none';}
+    async function liberar(x,tr,btn){
+      btn.disabled=true;btn.textContent='Liberando...';
+      var up=await sb.from('resultados').update({status:'liberado'}).eq('id',x.id);
+      if(up.error){btn.disabled=false;btn.textContent='Liberar';alert('Erro: '+up.error.message);return;}
+      var tel=x.pacientes&&x.pacientes.telefone;
+      var txt='Olá '+(x.pacientes?x.pacientes.nome.split(' ')[0]:'')+'! Seu resultado "'+x.titulo+'" já está disponível:\n'+PORTAL+'\n\nEntre com o seu CPF e senha.';
+      tr.lastChild.innerHTML='<span class="badge badge--ok">Liberado</span> '+(tel?'<a class="wa" style="margin:0 0 0 .4rem;padding:.35rem .8rem" target="_blank" href="'+waLink(tel,txt)+'">Avisar</a>':'');
+      refreshPend();
+    }
+
+    // FUNCIONÁRIOS
+    async function loadFunc(){
+      var r=await sb.from('funcionarios').select('nome,papel,ativo').order('criado_em',{ascending:true});
+      $('funcTable').innerHTML=(r.data&&r.data.length)?r.data.map(function(f){return '<tr><td>'+esc(f.nome)+'</td><td><span class="badge badge--role">'+(PAPEL[f.papel]||f.papel)+'</span></td><td>'+(f.ativo?'<span class="badge badge--ok">Ativo</span>':'Inativo')+'</td></tr>';}).join(''):'<tr><td colspan="3" class="empty">—</td></tr>';
+    }
+    $('funcForm').addEventListener('submit',async function(e){
+      e.preventDefault();var b=$('funcBtn');b.disabled=true;b.textContent='Cadastrando...';$('funcOut').classList.remove('show');
+      var nome=$('fNome').value.trim(),login=$('fLogin').value.trim().toLowerCase().replace(/[^a-z0-9]/g,''),papel=$('fPapel').value;
+      var r=await criar({tipo:'funcionario',nome:nome,login:login,papel:papel});
+      b.disabled=false;b.textContent='Cadastrar e gerar senha';
+      if(!r.ok){msg($('funcMsg'),r.data.error||'Erro.','err');return;}
+      msg($('funcMsg'),'Funcionário cadastrado!','ok');
+      $('funcOut').classList.add('show');
+      $('funcOut').innerHTML='Login: <span class="cred">'+login.toUpperCase()+'</span> · Senha: <span class="cred">'+r.data.senha+'</span><br><small style="color:var(--muted)">Entregue essas credenciais ao funcionário.</small>';
+      $('funcForm').reset();loadFunc();
+    });
+
+    // já logado?
+    sb.auth.getSession().then(function(r){if(r.data.session)entrar();});
+  })();
+  </script>
+</body>
+</html>
