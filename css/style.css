@@ -916,7 +916,7 @@ html,body{overflow-x:hidden;max-width:100%}
 }
 
 /* Botão fixo "Agende sua consulta" no cabeçalho */
-.btn-agendar{display:inline-flex;align-items:center;gap:.45rem;background:#fff;color:var(--navy);font-weight:700;font-size:.88rem;padding:.6rem 1.2rem;border-radius:40px;white-space:nowrap;box-shadow:0 4px 14px rgba(10,46,92,.18);transition:transform .2s,box-shadow .2s;margin-right:.5rem}
+.btn-agendar{display:inline-flex;align-items:center;gap:.45rem;background:#fff;color:var(--navy);font-weight:700;font-size:.88rem;padding:.6rem 1.2rem;border-radius:40px;white-space:nowrap;box-shadow:0 4px 14px rgba(10,46,92,.18);transition:transform .2s,box-shadow .2s;margin:0 .3rem 0 1.7rem}
 .btn-agendar:hover{transform:translateY(-1px);box-shadow:0 7px 20px rgba(10,46,92,.28)}
 .btn-agendar svg{flex-shrink:0}
 @media(max-width:560px){.btn-agendar{font-size:.75rem;padding:.45rem .8rem}.btn-agendar svg{display:none}}
