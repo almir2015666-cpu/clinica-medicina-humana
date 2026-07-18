@@ -470,7 +470,7 @@ img{max-width:100%;display:block}
 /* ---------- Imagens reais dos cards (Unsplash, uso livre) ---------- */
 .card__img--sched{background:linear-gradient(145deg,rgba(10,46,92,.5) 0%,rgba(10,46,92,.12) 45%,rgba(10,46,92,0) 72%),url('https://images.unsplash.com/photo-1666214280557-f1b5022eb634?auto=format&fit=crop&w=700&q=80') center/cover no-repeat}
 .card__img--result{background:linear-gradient(145deg,rgba(10,46,92,.5) 0%,rgba(10,46,92,.12) 45%,rgba(10,46,92,0) 72%),url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=700&q=80') center/cover no-repeat}
-.card__img--spec{background:linear-gradient(145deg,rgba(10,46,92,.5) 0%,rgba(10,46,92,.12) 45%,rgba(10,46,92,0) 72%),url('https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=700&q=80') center/cover no-repeat}
+.card__img--spec{background:linear-gradient(145deg,rgba(10,46,92,.5) 0%,rgba(10,46,92,.12) 45%,rgba(10,46,92,0) 72%),url('../assets/especialidades.png') center 16%/cover no-repeat}
 
 /* ---------- Fotos reais do hero (Unsplash, uso livre) ---------- */
 .slide__bg::after{display:none}
