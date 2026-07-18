@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Central de Notícias da Clínica Medicina Humana — saúde, prevenção e medicina ocupacional." />
-  <title>Central de Notícias — Clínica Medicina Humana</title>
+  <meta name="description" content="Exames laboratoriais, de imagem, cardiológicos e mais na Clínica Medicina Humana. Encontre o exame que você precisa e agende com facilidade." />
+  <title>Exames — Clínica Medicina Humana</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -13,7 +13,6 @@
 <body>
   <header class="header header--over" id="header">
     <div class="header__topbar">
-      
       <div class="topbar-tab topbar-tab--right"><a href="ouvidoria.html">Ouvidoria</a><a href="noticias.html">Notícias</a></div>
     </div>
     <div class="container header__inner">
@@ -36,34 +35,29 @@
   </header>
 
   <main>
-    <section class="page-hero"><div class="page-hero__bg"></div><div class="container"><h1>Central de Notícias</h1><span class="page-hero__rule"></span><p style="color:rgba(255,255,255,.9);margin-top:1rem;max-width:560px">Saúde, prevenção, bem-estar e medicina ocupacional. Fique por dentro.</p></div></section>
+    <section class="page-hero"><div class="page-hero__bg"></div><div class="container"><h1>Exames</h1><span class="page-hero__rule"></span><p style="color:rgba(255,255,255,.9);margin-top:1rem;max-width:560px">Do laboratório à imagem de alta precisão: encontre o exame que você precisa e agende com quem cuida de você em cada detalhe.</p></div></section>
 
-    <section class="news" style="background:#fff">
+    <section class="spec2">
       <div class="container">
-        <div class="news__grid">
-          <article class="post reveal"><a class="post__link" href="noticia-4.html">
-            <div class="post__img post__img--4"></div>
-            <div class="post__body"><time>15 Jul 2026</time><h3>Medicina ocupacional: o que é e por que a sua empresa precisa</h3><span class="link-arrow">Ler mais →</span></div></a></article>
+        <div class="spec2__search">
+          <input type="text" id="examSearch" placeholder="Buscar exame (ex.: hemograma, ultrassom, ECG)" aria-label="Buscar exame" />
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        </div>
+        <p class="spec2__hint">Digite o nome do exame ou explore por categoria abrindo os grupos abaixo.</p>
 
-          <article class="post reveal"><a class="post__link" href="noticia-1.html">
-            <div class="post__img post__img--1"></div>
-            <div class="post__body"><time>10 Jul 2026</time><h3>Semaglutida: o novo capítulo no tratamento da obesidade e do diabetes tipo 2</h3><span class="link-arrow">Ler mais →</span></div></a></article>
+        <div class="spec2__count" id="examCount"></div>
+        <div class="spec2__toolbar"><button class="spec2__expandall" id="examExpand">Expandir todas as categorias ⌄</button></div>
+        <div id="examList"></div>
 
-          <article class="post reveal"><a class="post__link" href="noticia-5.html">
-            <div class="post__img post__img--5"></div>
-            <div class="post__body"><time>8 Jul 2026</time><h3>NR-1, GRO e PGR: o que a sua empresa precisa saber</h3><span class="link-arrow">Ler mais →</span></div></a></article>
-
-          <article class="post reveal"><a class="post__link" href="noticia-6.html">
-            <div class="post__img post__img--6"></div>
-            <div class="post__body"><time>1 Jul 2026</time><h3>ASO e PCMSO: os exames ocupacionais que a sua empresa não pode ignorar</h3><span class="link-arrow">Ler mais →</span></div></a></article>
-
-          <article class="post reveal"><a class="post__link" href="noticia-2.html">
-            <div class="post__img post__img--2"></div>
-            <div class="post__body"><time>26 Jun 2026</time><h3>Câncer colorretal: por que o rastreamento agora começa aos 45 anos</h3><span class="link-arrow">Ler mais →</span></div></a></article>
-
-          <article class="post reveal"><a class="post__link" href="noticia-3.html">
-            <div class="post__img post__img--3"></div>
-            <div class="post__body"><time>12 Jun 2026</time><h3>Sono e imunidade: por que dormir bem protege a sua saúde</h3><span class="link-arrow">Ler mais →</span></div></a></article>
+        <div class="exam-cta">
+          <div class="exam-cta__txt">
+            <h3>Pronto para agendar o seu exame?</h3>
+            <p>Fale com o Zezinho no WhatsApp ou ligue para a nossa central. Ajudamos você a marcar e tirar dúvidas sobre o preparo.</p>
+          </div>
+          <div class="exam-cta__actions">
+            <a class="btn btn--primary" href="https://wa.me/557134937205?text=Ol%C3%A1%2C%20Zezinho.%20Gostaria%20de%20agendar%20um%20exame." target="_blank" rel="noopener">Agendar pelo WhatsApp</a>
+            <a class="btn btn--ghost" href="tel:+557134937205">(71) 3493-7205</a>
+          </div>
         </div>
       </div>
     </section>
@@ -85,7 +79,7 @@
         </div>
       </div>
       <div class="footer__col"><h4>A Clínica</h4><a href="quem-somos.html">Quem Somos</a><a href="homenagem.html">Nosso Fundador</a><a href="como-chegar.html">Como Chegar</a><h4>Serviços</h4><a href="index.html#servicos">Consultas</a><a href="index.html#servicos">Medicina Ocupacional</a><a href="index.html#servicos">Centro de Diagnósticos</a></div>
-      <div class="footer__col"><h4>Especialidades</h4><a href="#">Cardiologia</a><a href="#">Pediatria</a><a href="#">Ver todas</a></div>
+      <div class="footer__col"><h4>Especialidades</h4><a href="especialidades.html">Cardiologia</a><a href="especialidades.html">Pediatria</a><a href="especialidades.html">Ver todas</a></div>
       <div class="footer__col footer__col--last"><a href="exames.html">Exames</a><a href="#">Resultados de Exames</a><a href="#">Aplicativo</a><a href="ouvidoria.html">Ouvidoria</a><a href="noticias.html">Notícias</a><a href="trabalhe-conosco.html">Trabalhe Conosco</a><a href="privacidade.html">Privacidade</a></div>
     </div>
     <div class="footer__bottom"><div class="container footer__bottom-inner"><span>© 2026 Clínica Medicina Humana — Todos os direitos reservados.</span></div></div>
@@ -93,5 +87,60 @@
 
   <a href="https://wa.me/557134937205?text=Ol%C3%A1%2C%20Zezinho.%20Gostaria%20de%20fazer%20um%20agendamento." class="wpp-fab" target="_blank" rel="noopener" aria-label="Agende por WhatsApp"><span class="wpp-fab__panel"><span class="wpp-fab__ic"><svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.2 1.6 6L4 27l6.2-1.6c1.7.9 3.7 1.4 5.8 1.4 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 21.8c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.7 1 1-3.6-.2-.4c-1-1.6-1.5-3.4-1.5-5.2 0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 9.8-10 9.8zm5.5-7.3c-.3-.2-1.8-.9-2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.4.5-.6.1-.2.2-.3.3-.5.1-.2 0-.4 0-.6-.1-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.2-.5-.4z"/></svg></span><span class="wpp-fab__txt">Agende por WhatsApp</span></span><span class="wpp-fab__avwrap"><img class="wpp-fab__av" src="assets/atendente.png" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=140&q=80'" alt="Zezinho" /><span class="wpp-fab__badge"><svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.2 1.6 6L4 27l6.2-1.6c1.7.9 3.7 1.4 5.8 1.4 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 21.8c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.7 1 1-3.6-.2-.4c-1-1.6-1.5-3.4-1.5-5.2 0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 9.8-10 9.8zm5.5-7.3c-.3-.2-1.8-.9-2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.4.5-.6.1-.2.2-.3.3-.5.1-.2 0-.4 0-.6-.1-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.2-.5-.4z"/></svg></span></span></a>
   <script src="js/main.js"></script>
+  <script>
+  (function(){
+    var DATA = [
+      {n:'Exames Laboratoriais', d:'Coletas de sangue, urina e outros materiais para diagnóstico e acompanhamento da sua saúde.', sub:['Hemograma completo','Glicemia e curva glicêmica','Colesterol e triglicerídeos','Perfil hormonal (TSH, T4)','Função renal (ureia e creatinina)','Função hepática (TGO, TGP)','Exame de urina (EAS)','Urocultura','Beta HCG (gravidez)','Preventivo ginecológico (Papanicolau)']},
+      {n:'Exames de Imagem', d:'Tecnologia de alta precisão para enxergar por dentro com segurança e conforto.', sub:['Raio-X digital','Ultrassonografia','Mamografia','Densitometria óssea','Ressonância magnética','Doppler / Duplex Scan']},
+      {n:'Cardiológicos', d:'Avaliação completa da saúde do coração e da circulação.', sub:['Eletrocardiograma (ECG)','Ecocardiograma','Teste ergométrico','Holter 24h','MAPA 24h']},
+      {n:'Endoscópicos', d:'Exames que investigam o sistema digestivo e as vias respiratórias.', sub:['Endoscopia digestiva alta','Colonoscopia','Retossigmoidoscopia','Nasofibroscopia']},
+      {n:'Oftalmológicos', d:'Exames especializados para a saúde e o cuidado dos seus olhos.', sub:['Mapeamento de retina','Campimetria','Tonometria','Paquimetria','Retinografia','Topografia de córnea']},
+      {n:'Otorrino e Audiológicos', d:'Avaliação da audição, do equilíbrio e das vias aéreas superiores.', sub:['Audiometria','Impedanciometria','Teste da orelhinha','Testes vestibulares']},
+      {n:'Neurológicos', d:'Investigação do sistema nervoso e da atividade cerebral.', sub:['Eletroencefalograma (EEG)','BERA (PEATE)']},
+      {n:'Pneumológicos', d:'Avaliação da função respiratória e da capacidade pulmonar.', sub:['Espirometria']},
+      {n:'Check-up e Ocupacionais', d:'Pacotes preventivos e exames voltados à saúde do trabalhador.', sub:['Check-up completo','Exames admissionais e periódicos','ASO (Atestado de Saúde Ocupacional)','Teste do pezinho']}
+    ];
+    var listEl=document.getElementById('examList'), countEl=document.getElementById('examCount'),
+        searchEl=document.getElementById('examSearch'), expandBtn=document.getElementById('examExpand');
+    var allOpen=false;
+
+    function render(){
+      var q=(searchEl.value||'').trim().toLowerCase();
+      var groups=DATA.map(function(c){
+        if(!q) return {c:c, exams:c.sub};
+        var nameMatch=c.n.toLowerCase().indexOf(q)>=0;
+        if(nameMatch) return {c:c, exams:c.sub};
+        var exams=c.sub.filter(function(e){return e.toLowerCase().indexOf(q)>=0;});
+        return exams.length ? {c:c, exams:exams} : null;
+      }).filter(Boolean);
+
+      var totalEx=groups.reduce(function(a,g){return a+g.exams.length;},0);
+      countEl.innerHTML='Foram encontrados <b>'+totalEx+' exame'+(totalEx===1?'':'s')+'</b> em <b>'+groups.length+' categoria'+(groups.length===1?'':'s')+'</b>.';
+      listEl.innerHTML='';
+      if(!groups.length){ listEl.innerHTML='<p class="spec2-empty">Nenhum exame encontrado. Tente outro termo ou fale com a gente pelo WhatsApp.</p>'; return; }
+
+      var openNow = allOpen || !!q;
+      groups.forEach(function(g){
+        var item=document.createElement('div'); item.className='spec2-item'+(openNow?' open':'');
+        var body='<div class="spec2-item__body"><p>'+g.c.d+'</p><ul><li>'+g.exams.join('</li><li>')+'</li></ul></div>';
+        item.innerHTML=
+          '<div class="spec2-item__head"><b>'+g.c.n+'</b>'+
+          '<span class="spec2-item__right"><span>'+g.exams.length+' exame'+(g.exams.length===1?'':'s')+'</span>'+
+          '<span class="spec2-item__toggle">'+(openNow?'−':'+')+'</span></span></div>'+body;
+        var head=item.querySelector('.spec2-item__head');
+        head.addEventListener('click',function(){
+          item.classList.toggle('open');
+          item.querySelector('.spec2-item__toggle').textContent=item.classList.contains('open')?'−':'+';
+        });
+        listEl.appendChild(item);
+      });
+    }
+    searchEl.addEventListener('input',render);
+    expandBtn.addEventListener('click',function(){
+      allOpen=!allOpen; expandBtn.textContent=allOpen?'Recolher todas as categorias ⌃':'Expandir todas as categorias ⌄'; render();
+    });
+    render();
+  })();
+  </script>
 </body>
 </html>
