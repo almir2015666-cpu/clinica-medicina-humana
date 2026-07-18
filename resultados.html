@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Acesse com segurança os seus resultados de exames da Clínica Medicina Humana." />
+  <title>Resultados de Exames — Clínica Medicina Humana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .res-wrap{max-width:820px;margin:0 auto;padding:2.5rem 1rem 4rem}
+    .res-card{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-md);padding:2.4rem}
+    .res-card h2{color:var(--navy);font-family:var(--font-display);font-weight:600;margin:0 0 .3rem}
+    .res-card .sub{color:var(--muted);margin:0 0 1.5rem}
+    /* seletor de perfil */
+    .res-tabs{display:flex;gap:.4rem;background:var(--brand-mist);padding:.35rem;border-radius:12px;margin-bottom:1.6rem}
+    .res-tab{flex:1;border:none;background:none;padding:.7rem;border-radius:9px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--font-body);font-size:.95rem;transition:.2s}
+    .res-tab.on{background:#fff;color:var(--navy);box-shadow:0 2px 8px rgba(10,46,92,.12)}
+    .res-field{margin-bottom:1.1rem}
+    .res-field label{display:block;font-weight:600;color:var(--navy);margin-bottom:.4rem;font-size:.9rem}
+    .res-field input{width:100%;padding:.85rem 1rem;border:1px solid var(--line);border-radius:12px;font-size:1rem;font-family:var(--font-body);transition:border-color .2s,box-shadow .2s}
+    .res-field input:focus{outline:none;border-color:var(--blue-400);box-shadow:0 0 0 3px rgba(59,179,239,.18)}
+    .res-btn{width:100%;padding:.9rem 1rem;border:none;border-radius:12px;background:linear-gradient(120deg,var(--blue-700),var(--blue-500));color:#fff;font-weight:700;font-size:1rem;cursor:pointer;transition:filter .2s,transform .2s}
+    .res-btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+    .res-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .res-msg{margin-top:1rem;padding:.8rem 1rem;border-radius:10px;font-size:.92rem;display:none}
+    .res-msg.err{display:block;background:#fdecec;color:#b3261e;border:1px solid #f6c9c6}
+    .res-forgot{text-align:center;margin-top:1rem}
+    .res-forgot a{color:var(--blue-700);font-size:.88rem;text-decoration:none;font-weight:600}
+    .res-forgot a:hover{text-decoration:underline}
+    .res-lock{display:flex;align-items:center;gap:.5rem;color:var(--muted);font-size:.8rem;margin-top:1.4rem;justify-content:center;text-align:center}
+    .res-lock svg{width:15px;height:15px;flex-shrink:0}
+    .res-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.3rem;flex-wrap:wrap}
+    .res-top h2{margin:0}
+    .res-role{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--blue-700);background:var(--brand-mist);padding:.2rem .6rem;border-radius:20px;margin-bottom:1.4rem}
+    .res-logout{background:none;border:1px solid var(--line);color:var(--navy);padding:.5rem 1rem;border-radius:10px;cursor:pointer;font-weight:600;font-size:.88rem}
+    .res-logout:hover{background:var(--brand-mist)}
+    .res-search{width:100%;padding:.7rem 1rem;border:1px solid var(--line);border-radius:12px;margin-bottom:1.1rem;font-size:.95rem;font-family:var(--font-body)}
+    .res-item{border:1px solid var(--line);border-radius:14px;margin-bottom:.8rem;padding:1.1rem 1.2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+    .res-item__info{min-width:0}
+    .res-item__pac{font-size:.78rem;color:var(--blue-700);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+    .res-item__info b{color:var(--navy);display:block;font-size:1.05rem;margin:.1rem 0}
+    .res-item__meta{color:var(--muted);font-size:.85rem}
+    .res-badge{display:inline-block;font-size:.72rem;font-weight:700;color:#1e7a43;background:#e9f6ee;border:1px solid #bfe6cd;padding:.15rem .55rem;border-radius:20px;margin-left:.4rem;vertical-align:1px}
+    .res-dl{display:inline-flex;align-items:center;gap:.45rem;background:var(--brand-mist);color:var(--blue-700);border:1px solid var(--blue-300);padding:.6rem 1.1rem;border-radius:10px;font-weight:700;text-decoration:none;cursor:pointer;font-size:.9rem;white-space:nowrap}
+    .res-dl:hover{background:var(--blue-300);color:#fff}
+    .res-empty{color:var(--muted);text-align:center;padding:2rem 0}
+  </style>
+</head>
+<body>
+  <header class="header header--over" id="header">
+    <div class="header__topbar">
+      <div class="topbar-tab topbar-tab--right"><a href="ouvidoria.html">Ouvidoria</a><a href="noticias.html">Notícias</a></div>
+    </div>
+    <div class="container header__inner">
+      <a href="index.html" class="brand" aria-label="Clínica Medicina Humana">
+        <img src="assets/logo.png" alt="Clínica Medicina Humana" class="brand__logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+        <span class="brand__text"><strong>Medicina Humana</strong><em>Cuidando de você em cada detalhe</em></span>
+      </a>
+      <nav class="nav" id="nav">
+        <ul class="nav__list">
+          <li class="nav__item has-mega"><button class="nav__link">A Clínica <i class="chev"></i></button>
+            <div class="mega"><a href="quem-somos.html">Quem Somos</a><a href="homenagem.html">Nosso Fundador</a><a href="index.html#tour">Tour Virtual</a><a href="como-chegar.html">Como Chegar</a></div></li>
+          <li class="nav__item"><a href="medicina-ocupacional.html" class="nav__link">Medicina Ocupacional</a></li>
+          <li class="nav__item"><a href="especialidades.html" class="nav__link">Especialidades</a></li>
+          <li class="nav__item"><a href="exames.html" class="nav__link">Exames</a></li>
+          <li class="nav__item"><a href="resultados.html" class="nav__link">Resultados de Exames</a></li>
+        </ul>
+      </nav>
+      <div class="header__cta"><button class="hamburger" id="hamburger" aria-label="Abrir menu"><span></span><span></span><span></span></button></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero"><div class="page-hero__bg"></div><div class="container"><h1>Resultados de Exames</h1><span class="page-hero__rule"></span><p style="color:rgba(255,255,255,.9);margin-top:1rem;max-width:560px">Acesse os seus resultados com segurança, a qualquer hora e de qualquer lugar.</p></div></section>
+
+    <div class="res-wrap">
+      <!-- LOGIN -->
+      <div class="res-card" id="loginView">
+        <div class="res-tabs">
+          <button class="res-tab on" data-perfil="paciente" type="button">Sou Paciente</button>
+          <button class="res-tab" data-perfil="medico" type="button">Sou Médico</button>
+        </div>
+        <h2 id="loginTitle">Acesse seus resultados</h2>
+        <p class="sub" id="loginSub">Entre com o seu CPF e a senha que a clínica enviou para você.</p>
+        <form id="loginForm" autocomplete="off">
+          <div class="res-field">
+            <label id="idLabel" for="ident">CPF</label>
+            <input type="text" id="ident" inputmode="numeric" placeholder="000.000.000-00" required />
+          </div>
+          <div class="res-field">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" placeholder="Sua senha" required />
+          </div>
+          <button type="submit" class="res-btn" id="loginBtn">Entrar</button>
+          <div class="res-msg" id="loginMsg"></div>
+        </form>
+        <p class="res-forgot"><a href="https://wa.me/557134937205?text=Ol%C3%A1%2C%20Zezinho.%20Esqueci%20a%20minha%20senha%20de%20acesso%20aos%20resultados%20de%20exames." target="_blank" rel="noopener">Esqueci minha senha</a></p>
+        <div class="res-lock">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          Conexão criptografada. Seus dados de saúde são protegidos conforme a LGPD.
+        </div>
+      </div>
+
+      <!-- RESULTADOS -->
+      <div class="res-card" id="resultsView" style="display:none">
+        <div class="res-top">
+          <h2 id="welcome">Seus resultados</h2>
+          <button class="res-logout" id="logoutBtn">Sair</button>
+        </div>
+        <span class="res-role" id="roleTag"></span>
+        <input type="text" class="res-search" id="resSearch" placeholder="Buscar por exame..." style="display:none" />
+        <div id="resultsList"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__grid">
+      <div class="footer__brand">
+        <img src="assets/logo.png" alt="Clínica Medicina Humana" class="footer__logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+        <span class="brand__text" style="display:none"><strong>Medicina Humana</strong><em>Cuidando de você em cada detalhe</em></span>
+        <p class="footer__phone"><span class="fico">📞</span> (71) 3493-7205</p>
+        <div class="footer__addr"><h4>Endereço</h4><p>R. da Bandeira, 646-758 — Centro, Camaçari - BA, 42800-970</p></div>
+      </div>
+      <div class="footer__col"><h4>A Clínica</h4><a href="quem-somos.html">Quem Somos</a><a href="homenagem.html">Nosso Fundador</a><a href="como-chegar.html">Como Chegar</a><a href="trabalhe-conosco.html">Trabalhe Conosco</a></div>
+      <div class="footer__col"><h4>Serviços</h4><a href="medicina-ocupacional.html">Medicina Ocupacional</a><a href="especialidades.html">Especialidades</a><a href="exames.html">Exames</a><a href="resultados.html">Resultados de Exames</a></div>
+      <div class="footer__col footer__col--last"><h4>Atendimento</h4><a href="noticias.html">Notícias</a><a href="ouvidoria.html">Ouvidoria</a><a href="privacidade.html">Privacidade</a></div>
+    </div>
+    <div class="footer__bottom"><div class="container footer__bottom-inner"><span>© 2026 Clínica Medicina Humana — Todos os direitos reservados.</span></div></div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  (function(){
+    var sb = supabase.createClient(window.SUPA.url, window.SUPA.key);
+    var perfil='paciente', cache=[];
+    var $=function(id){return document.getElementById(id);};
+    var identEl=$('ident'), senhaEl=$('senha'), msg=$('loginMsg');
+    function digits(s){return (s||'').replace(/\D/g,'');}
+    function normCrm(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+    function showMsg(t){ msg.textContent=t; msg.className='res-msg '+(t?'err':''); }
+
+    // seletor de perfil
+    document.querySelectorAll('.res-tab').forEach(function(tab){
+      tab.addEventListener('click',function(){
+        document.querySelectorAll('.res-tab').forEach(function(t){t.classList.remove('on');});
+        tab.classList.add('on'); perfil=tab.dataset.perfil; showMsg('');
+        if(perfil==='medico'){
+          $('idLabel').textContent='CRM'; identEl.placeholder='Ex.: 43699 ou CRM/BA 43699'; identEl.value=''; identEl.setAttribute('inputmode','text');
+          $('loginTitle').textContent='Área do Médico'; $('loginSub').textContent='Entre com o seu CRM e senha para ver os resultados dos seus pacientes.';
+        }else{
+          $('idLabel').textContent='CPF'; identEl.placeholder='000.000.000-00'; identEl.value=''; identEl.setAttribute('inputmode','numeric');
+          $('loginTitle').textContent='Acesse seus resultados'; $('loginSub').textContent='Entre com o seu CPF e a senha que a clínica enviou para você.';
+        }
+      });
+    });
+    // máscara CPF (só no perfil paciente)
+    identEl.addEventListener('input',function(){
+      if(perfil!=='paciente') return;
+      var v=digits(identEl.value).slice(0,11).replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+      identEl.value=v;
+    });
+
+    $('loginForm').addEventListener('submit',async function(e){
+      e.preventDefault(); var b=$('loginBtn'); showMsg('');
+      var email;
+      if(perfil==='paciente'){
+        var cpf=digits(identEl.value);
+        if(cpf.length!==11){ showMsg('Digite um CPF válido (11 dígitos).'); return; }
+        email=cpf+'@'+window.SUPA.emailDomain;
+      }else{
+        var crm=normCrm(identEl.value);
+        if(!crm){ showMsg('Digite o seu CRM.'); return; }
+        email=crm+'@'+window.SUPA.medicoEmailDomain;
+      }
+      b.disabled=true; b.textContent='Entrando...';
+      var r=await sb.auth.signInWithPassword({email:email,password:senhaEl.value});
+      b.disabled=false; b.textContent='Entrar';
+      if(r.error){ showMsg('Dados incorretos. Confira o '+(perfil==='paciente'?'CPF':'CRM')+' e a senha enviados pela clínica.'); return; }
+      carregar(perfil);
+    });
+
+    $('logoutBtn').addEventListener('click',async function(){
+      await sb.auth.signOut(); $('resultsView').style.display='none'; $('loginView').style.display='block';
+      identEl.value=''; senhaEl.value=''; showMsg('');
+    });
+
+    $('resSearch').addEventListener('input',function(){ render(this.value); });
+
+    async function carregar(tipo){
+      $('loginView').style.display='none'; $('resultsView').style.display='block';
+      var list=$('resultsList'); list.innerHTML='<p class="res-empty">Carregando seus resultados...</p>';
+      $('roleTag').textContent = tipo==='medico'?'Acesso Médico':'Acesso Paciente';
+
+      if(tipo==='medico'){
+        var m=await sb.from('medicos').select('nome,crm').limit(1).maybeSingle();
+        $('welcome').textContent = m.data? ('Dr(a). '+m.data.nome.split(' ')[0]) : 'Resultados dos pacientes';
+      }else{
+        var p=await sb.from('pacientes').select('nome').limit(1).maybeSingle();
+        $('welcome').textContent = (p.data&&p.data.nome)? ('Olá, '+p.data.nome.split(' ')[0]+'!') : 'Seus resultados';
+      }
+
+      var r=await sb.from('resultados')
+        .select('id,titulo,descricao,data_exame,criado_em,arquivo_path,pacientes(nome,cpf)')
+        .order('data_exame',{ascending:false});
+      if(r.error){ list.innerHTML='<p class="res-empty">Não foi possível carregar. Tente novamente.</p>'; return; }
+      cache=r.data||[];
+      $('resSearch').style.display = cache.length>3? 'block':'none';
+      render('');
+    }
+
+    function render(q){
+      q=(q||'').trim().toLowerCase();
+      var list=$('resultsList');
+      var items=!q? cache : cache.filter(function(x){
+        return (x.titulo||'').toLowerCase().indexOf(q)>=0 || (x.pacientes&&(x.pacientes.nome||'').toLowerCase().indexOf(q)>=0);
+      });
+      if(!cache.length){ list.innerHTML='<p class="res-empty">Nenhum resultado disponível ainda. Assim que a clínica liberar, ele aparece aqui.</p>'; return; }
+      if(!items.length){ list.innerHTML='<p class="res-empty">Nenhum exame encontrado para a busca.</p>'; return; }
+      list.innerHTML='';
+      items.forEach(function(x){
+        var dEx=x.data_exame? new Date(x.data_exame+'T00:00:00').toLocaleDateString('pt-BR'):'—';
+        var dLib=x.criado_em? new Date(x.criado_em).toLocaleDateString('pt-BR'):'';
+        var pac = (perfil==='medico' && x.pacientes)? ('<span class="res-item__pac">'+x.pacientes.nome+'</span>'):'';
+        var item=document.createElement('div'); item.className='res-item';
+        item.innerHTML='<div class="res-item__info">'+pac+
+          '<b>'+x.titulo+'<span class="res-badge">Liberado</span></b>'+
+          '<span class="res-item__meta">Exame: '+dEx+(dLib?(' · Liberado em '+dLib):'')+(x.descricao?(' · '+x.descricao):'')+'</span></div>'+
+          '<a class="res-dl">Baixar PDF</a>';
+        item.querySelector('.res-dl').addEventListener('click',function(){ baixar(x.arquivo_path,this); });
+        list.appendChild(item);
+      });
+    }
+
+    async function baixar(path,el){
+      var old=el.textContent; el.textContent='Abrindo...';
+      var r=await sb.storage.from('resultados').createSignedUrl(path,120);
+      el.textContent=old;
+      if(r.data&&r.data.signedUrl){ window.open(r.data.signedUrl,'_blank','noopener'); }
+      else { alert('Não foi possível abrir o arquivo. Tente novamente.'); }
+    }
+
+    // sessão já ativa?
+    sb.auth.getSession().then(function(res){
+      if(res.data.session){
+        var em=res.data.session.user.email||'';
+        perfil = em.indexOf('@'+window.SUPA.medicoEmailDomain)>=0? 'medico':'paciente';
+        carregar(perfil);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>
