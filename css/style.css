@@ -890,7 +890,7 @@ body.a11y-readguide .a11y-readbar{display:block}
 @media(max-width:640px){.exam-cta{padding:1.8rem 1.4rem}.exam-cta__actions{width:100%}.exam-cta__actions .btn{flex:1;text-align:center}}
 
 /* Menu deslocado 4cm para a esquerda (apenas desktop) */
-@media(min-width:1025px){.nav{transform:translateX(-4cm)}}
+@media(min-width:1025px){.nav,.header__cta{transform:translateX(-4cm)}}
 
 /* Barra fixa da Medicina Ocupacional que acompanha o scroll */
 .mo-stickybar{position:fixed;left:0;right:0;bottom:0;z-index:150;background:linear-gradient(90deg,var(--navy),var(--blue-700));box-shadow:0 -8px 30px rgba(10,46,92,.34);border-top:3px solid var(--blue-400);transform:translateY(120%);transition:transform .45s var(--ease)}
