@@ -739,3 +739,56 @@ body.a11y-readguide .a11y-readbar{display:block}
 .wpp-fab__badge svg{width:19px;height:19px}
 .wpp-fab:hover .wpp-fab__panel{max-width:320px;padding:0 3rem 0 .9rem}
 .wpp-fab__av{object-position:center 20%}
+
+/* ---- Landing Medicina Ocupacional ---- */
+.mo-lead{font-size:1.18rem;color:var(--ink);line-height:1.75;max-width:780px;margin-bottom:1.2rem}
+.mo-lead strong{color:var(--brand-dark)}
+.mo-pain{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;margin:1.4rem 0 2rem}
+.mo-pain li{list-style:none;background:#fff5f5;border:1px solid #f3d6d6;border-radius:12px;padding:1rem 1.1rem;color:#8a3b3b;font-size:.94rem;display:flex;gap:.6rem;align-items:flex-start}
+.mo-pain li::before{content:"⚠";flex:none}
+.mo-benefits{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1.2rem;margin:1.5rem 0 2rem}
+.mo-benefit{border:1px solid var(--line);border-radius:14px;padding:1.4rem;background:#fff;transition:transform .3s,box-shadow .3s,border-color .3s}
+.mo-benefit:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--brand-light)}
+.mo-benefit .ic{width:48px;height:48px;border-radius:12px;background:var(--brand-pale);display:grid;place-items:center;font-size:1.5rem;margin-bottom:.8rem}
+.mo-benefit b{display:block;font-family:var(--font-display);color:var(--navy);margin-bottom:.35rem;font-size:1.05rem}
+.mo-benefit p{color:var(--muted);font-size:.92rem;line-height:1.55}
+.mo-cta{background:linear-gradient(120deg,var(--navy),var(--blue-700));border-radius:18px;padding:2.8rem 2rem;text-align:center;color:#fff;margin:2.6rem 0 1rem;box-shadow:var(--shadow-lg)}
+.mo-cta h2{color:#fff;font-size:clamp(1.5rem,3.2vw,2.2rem);margin-bottom:.7rem}
+.mo-cta p{color:rgba(255,255,255,.92);max-width:600px;margin:0 auto 1.7rem}
+.mo-cta__btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.mo-cta .btn-wa{background:#25d366;color:#fff;font-family:var(--font-display);font-weight:600;padding:1rem 2rem;border-radius:10px;display:inline-flex;align-items:center;gap:.5rem;transition:transform .3s}
+.mo-cta .btn-wa:hover{transform:translateY(-2px)}
+.mo-cta .btn-ghost2{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.5);color:#fff;font-family:var(--font-display);font-weight:600;padding:1rem 2rem;border-radius:10px;display:inline-flex;align-items:center;gap:.5rem;transition:background .3s}
+.mo-cta .btn-ghost2:hover{background:rgba(255,255,255,.26)}
+
+/* ---- Trabalhe Conosco: chips de áreas ---- */
+.tc-areas{display:flex;flex-wrap:wrap;gap:.5rem}
+.tc-areas span{background:var(--brand-pale);color:var(--brand-dark);border-radius:999px;padding:.5rem 1rem;font-size:.88rem;font-family:var(--font-display);font-weight:500}
+.mo-benefit .ic svg{width:26px;height:26px;color:var(--brand-dark)}
+.spec-card__ic svg{width:28px;height:28px;color:var(--brand-dark)}
+
+/* cruz da logo no hero */
+.slide__decor{width:min(200px,23vw)}
+.slide__decor-img{width:100%;height:auto;display:block;filter:drop-shadow(0 10px 26px rgba(10,46,92,.5))}
+
+/* traços ligando os cards às bordas (topo e base) */
+.cards__grid{position:relative}
+.cards__grid::before,.cards__grid::after{content:"";position:absolute;left:50%;transform:translateX(-50%);width:100vw;height:2px;background:#d7e6f4}
+.cards__grid::before{top:-2.8rem}
+.cards__grid::after{bottom:-2.8rem}
+/* elemento de ondas (inspirado na logo) */
+.slide__decor{width:min(300px,30vw)}
+
+/* blocos detalhados dos servicos ocupacionais */
+.mo-detail{border-left:4px solid var(--brand);background:#fff;border-radius:0 12px 12px 0;padding:1.3rem 1.5rem;margin-bottom:1.1rem;box-shadow:var(--shadow-sm);scroll-margin-top:130px}
+.mo-detail h3{font-family:var(--font-display);color:var(--navy);margin:0 0 .5rem;font-size:1.2rem}
+.mo-detail p{color:var(--muted);line-height:1.7;margin:0 0 .6rem}
+.mo-detail p:last-child{margin-bottom:0}
+
+/* CTA da landing: botao de telefone branco (melhor contraste) */
+.mo-cta .btn-ghost2{background:#fff;color:var(--brand-dark);border:none;box-shadow:0 6px 18px rgba(10,46,92,.25)}
+.mo-cta .btn-ghost2:hover{background:#eaf3fb;transform:translateY(-2px)}
+.mo-cta__btns{align-items:stretch}
+.mo-cta__btns .btn-wa,.mo-cta__btns .btn-ghost2{font-size:1rem}
+.mo-cta__mail{margin:1.3rem 0 0;color:rgba(255,255,255,.85);font-size:.92rem}
+.mo-cta__mail a{color:#fff;text-decoration:underline;font-weight:600}
