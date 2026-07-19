@@ -47,6 +47,20 @@
     .res-dl{display:inline-flex;align-items:center;gap:.45rem;background:var(--brand-mist);color:var(--blue-700);border:1px solid var(--blue-300);padding:.6rem 1.1rem;border-radius:10px;font-weight:700;text-decoration:none;cursor:pointer;font-size:.9rem;white-space:nowrap}
     .res-dl:hover{background:var(--blue-300);color:#fff}
     .res-empty{color:var(--muted);text-align:center;padding:2rem 0}
+    /* visualizador de exame (modal) */
+    .pdf-modal{position:fixed;inset:0;background:rgba(10,46,92,.62);z-index:300;display:none;align-items:center;justify-content:center;padding:1rem}
+    .pdf-modal.show{display:flex}
+    .pdf-modal__box{background:#fff;border-radius:14px;width:min(920px,96vw);height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.45)}
+    .pdf-modal__bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.8rem 1.1rem;border-bottom:1px solid var(--line);flex-wrap:wrap}
+    .pdf-modal__bar b{color:var(--navy);font-family:var(--font-display);font-size:1rem}
+    .pdf-modal__actions{display:flex;gap:.5rem;flex-wrap:wrap}
+    .pdf-btn{border:1px solid var(--line);background:#fff;color:var(--navy);padding:.5rem .95rem;border-radius:9px;font-weight:600;cursor:pointer;font-size:.86rem;font-family:var(--font-body)}
+    .pdf-btn:hover{background:var(--brand-mist)}
+    .pdf-btn--primary{background:linear-gradient(120deg,var(--blue-700),var(--blue-500));color:#fff;border:none}
+    .pdf-btn--primary:hover{filter:brightness(1.06);background:linear-gradient(120deg,var(--blue-700),var(--blue-500))}
+    .pdf-btn--x{color:var(--muted)}
+    .pdf-modal iframe{flex:1;width:100%;border:none;background:#525659}
+    @media(max-width:560px){.pdf-modal__box{height:96vh}.pdf-modal__bar b{width:100%}}
   </style>
 </head>
 <body>
@@ -131,6 +145,20 @@
     </div>
     <div class="footer__bottom"><div class="container footer__bottom-inner"><span>© 2026 Clínica Medicina Humana — Todos os direitos reservados.</span></div></div>
   </footer>
+
+  <div class="pdf-modal" id="pdfModal" role="dialog" aria-modal="true">
+    <div class="pdf-modal__box">
+      <div class="pdf-modal__bar">
+        <b id="pdfTitle">Exame</b>
+        <div class="pdf-modal__actions">
+          <button id="pdfPrint" class="pdf-btn" type="button">Imprimir</button>
+          <button id="pdfDown" class="pdf-btn pdf-btn--primary" type="button">Baixar PDF</button>
+          <button id="pdfClose" class="pdf-btn pdf-btn--x" type="button" aria-label="Fechar">Fechar ✕</button>
+        </div>
+      </div>
+      <iframe id="pdfFrame" title="Visualizador de exame"></iframe>
+    </div>
+  </div>
 
   <script src="js/main.js"></script>
   <script src="js/supabase-config.js"></script>
@@ -231,19 +259,36 @@
         item.innerHTML='<div class="res-item__info">'+pac+
           '<b>'+x.titulo+'<span class="res-badge">Liberado</span></b>'+
           '<span class="res-item__meta">Exame: '+dEx+(dLib?(' · Liberado em '+dLib):'')+(x.descricao?(' · '+x.descricao):'')+'</span></div>'+
-          '<a class="res-dl">Baixar PDF</a>';
-        item.querySelector('.res-dl').addEventListener('click',function(){ baixar(x.arquivo_path,this); });
+          '<a class="res-dl">Ver exame</a>';
+        item.querySelector('.res-dl').addEventListener('click',function(){ openViewer(x.arquivo_path,x.titulo,this); });
         list.appendChild(item);
       });
     }
 
-    async function baixar(path,el){
+    var vPath='';
+    async function openViewer(path,titulo,el){
       var old=el.textContent; el.textContent='Abrindo...';
-      var r=await sb.storage.from('resultados').createSignedUrl(path,120);
+      var r=await sb.storage.from('resultados').createSignedUrl(path,300);
       el.textContent=old;
-      if(r.data&&r.data.signedUrl){ window.open(r.data.signedUrl,'_blank','noopener'); }
-      else { alert('Não foi possível abrir o arquivo. Tente novamente.'); }
+      if(!(r.data&&r.data.signedUrl)){ alert('Não foi possível abrir o exame. Tente novamente.'); return; }
+      vPath=path;
+      $('pdfTitle').textContent=titulo||'Exame';
+      $('pdfFrame').src=r.data.signedUrl;
+      $('pdfModal').classList.add('show');
+      document.body.style.overflow='hidden';
     }
+    function closeViewer(){ $('pdfModal').classList.remove('show'); $('pdfFrame').src='about:blank'; document.body.style.overflow=''; }
+    $('pdfClose').addEventListener('click',closeViewer);
+    $('pdfModal').addEventListener('click',function(e){ if(e.target===this) closeViewer(); });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeViewer(); });
+    $('pdfPrint').addEventListener('click',async function(){
+      var r=await sb.storage.from('resultados').createSignedUrl(vPath,120);
+      if(r.data&&r.data.signedUrl){ var w=window.open(r.data.signedUrl,'_blank','noopener'); }
+    });
+    $('pdfDown').addEventListener('click',async function(){
+      var r=await sb.storage.from('resultados').createSignedUrl(vPath,120,{download:true});
+      if(r.data&&r.data.signedUrl){ window.open(r.data.signedUrl,'_blank','noopener'); }
+    });
 
     // sessão já ativa?
     sb.auth.getSession().then(function(res){
