@@ -61,6 +61,17 @@
     .pdf-btn--x{color:var(--muted)}
     .pdf-modal iframe{flex:1;width:100%;border:none;background:#525659}
     @media(max-width:560px){.pdf-modal__box{height:96vh}.pdf-modal__bar b{width:100%}}
+    .res-msg.ok{display:block;background:#e9f6ee;color:#1e7a43;border:1px solid #bfe6cd}
+    .res-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+    .res-filters{display:flex;gap:.7rem;margin-bottom:1.1rem;flex-wrap:wrap}
+    .res-filters .res-search{margin-bottom:0;flex:1;min-width:180px}
+    .res-periodo{max-width:210px;background:#fff;cursor:pointer}
+    .res-note{color:var(--muted);font-size:.78rem;text-align:center;margin-top:1.4rem;line-height:1.5}
+    .pw-box{background:#fff;border-radius:16px;padding:1.8rem;width:min(420px,94vw);box-shadow:0 24px 60px rgba(0,0,0,.4)}
+    .pw-box h3{color:var(--navy);font-family:var(--font-display);font-weight:600;margin:0 0 .2rem}
+    .pw-sub{color:var(--muted);font-size:.88rem;margin:0 0 1.2rem}
+    .pw-actions{display:flex;gap:.6rem;align-items:center;margin-top:.4rem}
+    .pw-actions .res-btn{flex:1;width:auto}
   </style>
 </head>
 <body>
@@ -122,11 +133,24 @@
       <div class="res-card" id="resultsView" style="display:none">
         <div class="res-top">
           <h2 id="welcome">Seus resultados</h2>
-          <button class="res-logout" id="logoutBtn">Sair</button>
+          <div class="res-actions">
+            <button class="res-logout" id="pwBtn">Trocar senha</button>
+            <button class="res-logout" id="logoutBtn">Sair</button>
+          </div>
         </div>
         <span class="res-role" id="roleTag"></span>
-        <input type="text" class="res-search" id="resSearch" placeholder="Buscar por exame..." style="display:none" />
+        <div class="res-filters" id="resFilters" style="display:none">
+          <input type="text" class="res-search" id="resSearch" placeholder="Buscar por exame ou paciente..." />
+          <select class="res-search res-periodo" id="resPeriodo">
+            <option value="0">Todo o período</option>
+            <option value="30">Últimos 30 dias</option>
+            <option value="90">Últimos 3 meses</option>
+            <option value="180">Últimos 6 meses</option>
+            <option value="365">Último ano</option>
+          </select>
+        </div>
         <div id="resultsList"></div>
+        <p class="res-note">Conexão criptografada. Por segurança, você sai automaticamente após alguns minutos sem uso. Seus dados de saúde são tratados conforme a LGPD.</p>
       </div>
     </div>
   </main>
@@ -157,6 +181,20 @@
         </div>
       </div>
       <iframe id="pdfFrame" title="Visualizador de exame"></iframe>
+    </div>
+  </div>
+
+  <div class="pdf-modal" id="pwModal" role="dialog" aria-modal="true">
+    <div class="pw-box">
+      <h3>Trocar senha</h3>
+      <p class="pw-sub">Crie uma senha só sua. Recomendamos trocar no primeiro acesso.</p>
+      <div class="res-field"><label for="pwNew">Nova senha</label><input type="password" id="pwNew" placeholder="Mínimo 6 caracteres" /></div>
+      <div class="res-field"><label for="pwNew2">Confirmar nova senha</label><input type="password" id="pwNew2" placeholder="Repita a senha" /></div>
+      <div class="pw-actions">
+        <button class="res-btn" id="pwSave" type="button">Salvar nova senha</button>
+        <button class="res-logout" id="pwCancel" type="button">Cancelar</button>
+      </div>
+      <div class="res-msg" id="pwMsg"></div>
     </div>
   </div>
 
@@ -219,6 +257,28 @@
     });
 
     $('resSearch').addEventListener('input',function(){ render(this.value); });
+    $('resPeriodo').addEventListener('change',function(){ render($('resSearch').value); });
+
+    // auto-logout por inatividade (segurança)
+    var idleTimer;
+    function startIdle(){ clearTimeout(idleTimer); idleTimer=setTimeout(async function(){ await sb.auth.signOut(); location.reload(); }, 600000); }
+    ['click','keydown','mousemove','touchstart'].forEach(function(ev){ document.addEventListener(ev,function(){ if($('resultsView').style.display!=='none') startIdle(); },{passive:true}); });
+
+    // trocar senha
+    $('pwBtn').addEventListener('click',function(){ $('pwNew').value=''; $('pwNew2').value=''; $('pwMsg').className='res-msg'; $('pwModal').classList.add('show'); });
+    $('pwCancel').addEventListener('click',function(){ $('pwModal').classList.remove('show'); });
+    $('pwModal').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
+    $('pwSave').addEventListener('click',async function(){
+      var a=$('pwNew').value, c=$('pwNew2').value, m=$('pwMsg');
+      if(a.length<6){ m.textContent='A senha deve ter ao menos 6 caracteres.'; m.className='res-msg err'; return; }
+      if(a!==c){ m.textContent='As senhas não conferem.'; m.className='res-msg err'; return; }
+      var btn=$('pwSave'); btn.disabled=true; btn.textContent='Salvando...';
+      var r=await sb.auth.updateUser({password:a});
+      btn.disabled=false; btn.textContent='Salvar nova senha';
+      if(r.error){ m.textContent='Não foi possível alterar agora. Tente novamente.'; m.className='res-msg err'; return; }
+      m.textContent='Senha alterada com sucesso!'; m.className='res-msg ok';
+      setTimeout(function(){ $('pwModal').classList.remove('show'); },1300);
+    });
 
     async function carregar(tipo){
       $('loginView').style.display='none'; $('resultsView').style.display='block';
@@ -238,27 +298,34 @@
         .order('data_exame',{ascending:false});
       if(r.error){ list.innerHTML='<p class="res-empty">Não foi possível carregar. Tente novamente.</p>'; return; }
       cache=r.data||[];
-      $('resSearch').style.display = cache.length>3? 'block':'none';
+      $('resFilters').style.display = cache.length? 'flex':'none';
       render('');
+      startIdle();
     }
 
     function render(q){
       q=(q||'').trim().toLowerCase();
+      var pel=$('resPeriodo'); var dias=pel?(parseInt(pel.value,10)||0):0;
+      var limite=dias?(Date.now()-dias*86400000):0;
       var list=$('resultsList');
-      var items=!q? cache : cache.filter(function(x){
-        return (x.titulo||'').toLowerCase().indexOf(q)>=0 || (x.pacientes&&(x.pacientes.nome||'').toLowerCase().indexOf(q)>=0);
+      var items=cache.filter(function(x){
+        var okQ=!q || (x.titulo||'').toLowerCase().indexOf(q)>=0 || (x.pacientes&&(x.pacientes.nome||'').toLowerCase().indexOf(q)>=0);
+        var ref=x.data_exame? new Date(x.data_exame+'T00:00:00').getTime() : (x.criado_em? new Date(x.criado_em).getTime():0);
+        var okP=!limite || ref>=limite;
+        return okQ && okP;
       });
       if(!cache.length){ list.innerHTML='<p class="res-empty">Nenhum resultado disponível ainda. Assim que a clínica liberar, ele aparece aqui.</p>'; return; }
-      if(!items.length){ list.innerHTML='<p class="res-empty">Nenhum exame encontrado para a busca.</p>'; return; }
+      if(!items.length){ list.innerHTML='<p class="res-empty">Nenhum exame encontrado para o filtro.</p>'; return; }
       list.innerHTML='';
       items.forEach(function(x){
         var dEx=x.data_exame? new Date(x.data_exame+'T00:00:00').toLocaleDateString('pt-BR'):'—';
         var dLib=x.criado_em? new Date(x.criado_em).toLocaleDateString('pt-BR'):'';
+        var proto=(x.id||'').replace(/-/g,'').slice(0,8).toUpperCase();
         var pac = (perfil==='medico' && x.pacientes)? ('<span class="res-item__pac">'+x.pacientes.nome+'</span>'):'';
         var item=document.createElement('div'); item.className='res-item';
         item.innerHTML='<div class="res-item__info">'+pac+
           '<b>'+x.titulo+'<span class="res-badge">Liberado</span></b>'+
-          '<span class="res-item__meta">Exame: '+dEx+(dLib?(' · Liberado em '+dLib):'')+(x.descricao?(' · '+x.descricao):'')+'</span></div>'+
+          '<span class="res-item__meta">Exame: '+dEx+(dLib?(' · Liberado em '+dLib):'')+(proto?(' · Protocolo '+proto):'')+(x.descricao?(' · '+x.descricao):'')+'</span></div>'+
           '<a class="res-dl">Ver exame</a>';
         item.querySelector('.res-dl').addEventListener('click',function(){ openViewer(x.arquivo_path,x.titulo,this); });
         list.appendChild(item);
