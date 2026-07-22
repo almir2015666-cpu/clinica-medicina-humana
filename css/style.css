@@ -919,11 +919,16 @@ html,body{overflow-x:hidden;max-width:100%}
 .btn-agendar svg{flex-shrink:0}
 @media(max-width:560px){.btn-agendar{font-size:.75rem;padding:.45rem .8rem}.btn-agendar svg{display:none}}
 
-/* Cabecalho: caber todos os itens do menu em uma linha (desktop) */
+/* Cabecalho: largura total (logo mais a esquerda) para caber todo o menu (desktop) */
 @media(min-width:1025px){
-  .header__inner{max-width:1600px}
-  .nav__list{gap:.05rem}
-  .nav__link{white-space:nowrap;padding:.55rem .72rem;font-size:.9rem}
-  .header__cta{gap:.6rem}
-  .btn-agendar{margin-left:.7rem}
+  .header__inner{max-width:none;padding-left:20px;padding-right:26px}
+  .nav__list{gap:0}
+  .nav__link{white-space:nowrap;padding:.5rem .55rem;font-size:.85rem}
+  .header__cta{gap:.5rem}
+  .btn-agendar{font-size:.82rem;padding:.55rem 1rem;margin-left:.4rem}
 }
+.nav__link{white-space:nowrap}
+
+/* Home: 4 cards (inclui Pegue seu ASO) */
+@media(min-width:1025px){.cards__grid{grid-template-columns:repeat(4,1fr);max-width:1280px}}
+.card__img--aso{background:linear-gradient(155deg,#0b5aa5 0%,#0a2e5c 100%)}
