@@ -918,3 +918,12 @@ html,body{overflow-x:hidden;max-width:100%}
 .btn-agendar:hover{transform:translateY(-1px);box-shadow:0 7px 20px rgba(10,46,92,.28)}
 .btn-agendar svg{flex-shrink:0}
 @media(max-width:560px){.btn-agendar{font-size:.75rem;padding:.45rem .8rem}.btn-agendar svg{display:none}}
+
+/* Cabecalho: caber todos os itens do menu em uma linha (desktop) */
+@media(min-width:1025px){
+  .header__inner{max-width:1600px}
+  .nav__list{gap:.05rem}
+  .nav__link{white-space:nowrap;padding:.55rem .72rem;font-size:.9rem}
+  .header__cta{gap:.6rem}
+  .btn-agendar{margin-left:.7rem}
+}
