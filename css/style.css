@@ -919,12 +919,12 @@ html,body{overflow-x:hidden;max-width:100%}
 .btn-agendar svg{flex-shrink:0}
 @media(max-width:560px){.btn-agendar{font-size:.75rem;padding:.45rem .8rem}.btn-agendar svg{display:none}}
 
-/* Cabecalho: logo puxada 5cm para a direita e menu trazido para a esquerda (desktop) */
+/* Cabecalho: logo + menu + botao juntos e centralizados (desktop) */
 @media(min-width:1025px){
-  .header__inner{max-width:none;padding-left:20px;padding-right:26px;justify-content:flex-start}
-  .brand{margin-left:5cm}
-  .nav{margin-left:2rem}
-  .header__cta{gap:.5rem;margin-left:auto}
+  .header__inner{max-width:none;padding-left:20px;padding-right:26px;justify-content:center}
+  .brand{margin-left:0}
+  .nav{margin-left:1.6rem}
+  .header__cta{gap:.5rem;margin-left:1.6rem}
   .nav__list{gap:0}
   .nav__link{white-space:nowrap;padding:.5rem .55rem;font-size:.85rem}
   .btn-agendar{font-size:.82rem;padding:.55rem 1rem;margin-left:.4rem}
