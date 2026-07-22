@@ -933,4 +933,4 @@ html,body{overflow-x:hidden;max-width:100%}
 
 /* Home: 4 cards (inclui Pegue seu ASO) */
 @media(min-width:1025px){.cards__grid{grid-template-columns:repeat(4,1fr);max-width:1280px}}
-.card__img--aso{background:linear-gradient(155deg,#0b5aa5 0%,#0a2e5c 100%)}
+.card__img--aso{background:#0a2e5c url('../assets/aso-card.png') center/cover no-repeat}
