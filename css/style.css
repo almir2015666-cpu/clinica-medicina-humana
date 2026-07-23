@@ -977,3 +977,8 @@ html,body{overflow-x:hidden;max-width:100%}
 .quem-fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.8rem}
 .quem-fotos .page-photo{height:300px}
 @media(max-width:640px){.quem-fotos{gap:.5rem}.quem-fotos .page-photo{height:120px}}
+
+/* Cards de riscos (Medicina Ocupacional) mais em evidencia */
+.mo-pain{gap:1.2rem}
+.mo-pain li{background:#fff;border:1px solid #f0cccc;border-left:5px solid #d64545;color:#9a2b2b;font-weight:600;font-size:1rem;padding:1.15rem 1.25rem;box-shadow:0 8px 20px rgba(180,40,40,.14);align-items:center}
+.mo-pain li::before{color:#d64545;font-size:1.2rem}
