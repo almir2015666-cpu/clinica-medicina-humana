@@ -522,7 +522,7 @@ h2,.page-hero h1{font-family:var(--font-display);font-weight:400}
 .page-body__grid{display:grid;grid-template-columns:1fr 250px;gap:3.5rem;align-items:start}
 .page-intro{display:grid;grid-template-columns:330px 1fr;gap:2rem;margin-bottom:1.6rem;align-items:start}
 .page-photo{width:100%;height:280px;border-radius:12px;background-size:cover;background-position:center;box-shadow:var(--shadow-md)}
-.page-body__main p{color:var(--ink);margin-bottom:1.3rem;line-height:1.78}
+.page-body__main p{color:var(--ink);margin-bottom:.85rem;line-height:1.72}
 .btn-block{display:block;text-align:center;width:100%;margin:2.2rem 0 1.6rem;background:linear-gradient(120deg,var(--navy),var(--blue-700));color:#fff;font-family:'Poppins',sans-serif;font-weight:600;letter-spacing:.02em;padding:1.1rem;border-radius:8px;transition:filter .3s,transform .3s}
 .btn-block:hover{filter:brightness(1.12);transform:translateY(-2px)}
 .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem}
