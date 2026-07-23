@@ -851,6 +851,9 @@ body.a11y-readguide .a11y-readbar{display:block}
 /* slide 4: "Pegue seu ASO" — imagem ja traz o navy a esquerda para o texto */
 .slide__bg--4{background:#0a2e5c url('../assets/aso-hero.png') center/cover no-repeat!important;background-image:url('../assets/aso-hero.png')!important;background-position:center!important;transform:none!important}
 .slide.is-active .slide__bg--4,.slide__bg--4{transform:none!important}
+/* slide 5: "eSocial (SST)" — fundo azul da marca com ondas decorativas */
+.slide__bg--5{background:linear-gradient(120deg,#0a2e5c 0%,#0c5fbf 55%,#12457f 100%)!important;transform:none!important}
+.slide.is-active .slide__bg--5,.slide__bg--5{transform:none!important}
 .hero__track .slide:nth-child(4) .slide__scrim{background:none!important}
 .hero__track .slide:nth-child(4) .slide__decor{display:none}
 
@@ -946,11 +949,9 @@ html,body{overflow-x:hidden;max-width:100%}
 .hero__track .slide:nth-child(1) .slide__scrim{background:none!important}
 .hero__track .slide:nth-child(1) .slide__decor{display:none}
 
-/* Home: 6 cards (inclui Area Medica e eSocial) */
-@media(min-width:1025px){.cards .container{max-width:1680px}.cards__grid{grid-template-columns:repeat(6,1fr);max-width:1680px}}
+/* Home: 5 cards (inclui Area Medica) */
+@media(min-width:1025px){.cards .container{max-width:1560px}.cards__grid{grid-template-columns:repeat(5,1fr);max-width:1560px}}
 .card__img--med{background:#0a2e5c url('../assets/med-card.png?v=2') center/cover no-repeat}
-.card__img--esocial{background:linear-gradient(135deg,#0a2e5c 0%,#12457f 100%);display:grid;place-items:center}
-.card__img--esocial .card__img-ico{width:92px;height:92px;fill:none;stroke:#fff;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;opacity:.92}
 
 /* Menu lateral (mobile): itens escuros no fundo branco, senao ficam invisiveis */
 @media(max-width:1024px){
