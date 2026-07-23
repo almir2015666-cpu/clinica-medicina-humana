@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Carregando a Área Médica…</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png?v=2" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --navy:#0a2e5c; --navy2:#12457f; }
+    * { box-sizing: border-box; }
+    html,body { height:100%; margin:0; }
+    body {
+      font-family:'Poppins',system-ui,Arial,sans-serif;
+      background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);
+      color:#fff; display:flex; align-items:center; justify-content:center;
+      text-align:center; padding:24px;
+    }
+    .box { max-width:440px; width:100%; }
+    .logo { max-width:180px; margin:0 auto 28px; display:block; }
+    .spinner {
+      width:54px; height:54px; margin:0 auto 24px;
+      border:5px solid rgba(255,255,255,.25); border-top-color:#fff;
+      border-radius:50%; animation:spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    h1 { font-size:1.25rem; font-weight:600; margin:0 0 8px; }
+    p  { font-size:.95rem; opacity:.85; margin:0; line-height:1.5; }
+    .fallback {
+      margin-top:30px; padding-top:24px;
+      border-top:1px solid rgba(255,255,255,.2);
+      display:none;
+    }
+    .fallback.show { display:block; }
+    .fallback p { margin-bottom:14px; }
+    .btn {
+      display:inline-block; margin:6px; padding:12px 22px;
+      background:#fff; color:var(--navy); text-decoration:none;
+      border-radius:8px; font-weight:600; font-size:.9rem;
+      transition:transform .15s ease;
+    }
+    .btn:hover { transform:translateY(-2px); }
+    .btn--ghost { background:transparent; color:#fff; border:1px solid rgba(255,255,255,.5); }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <img src="assets/logo.png" alt="Clínica Medicina Humana" class="logo"
+         onerror="this.style.display='none';" />
+    <div class="spinner"></div>
+    <h1>Procurando o melhor acesso…</h1>
+    <p>Aguarde, estamos abrindo a Área Médica.</p>
+
+    <div class="fallback" id="fallback">
+      <p>Se a página não abrir sozinha, escolha uma opção:</p>
+      <a class="btn" id="linkExterno" href="#">Acessar Área Médica</a>
+      <a class="btn btn--ghost" id="linkInterno" href="#">Estou na clínica</a>
+      <a class="btn btn--ghost" id="linkBackup" href="#">Servidor alternativo</a>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    // ===================== CONFIGURAÇÃO =====================
+    // IP(s) público(s) da clínica. Quem acessa a partir daqui é "interno"
+    // e vai para o servidor local. Se o IP da internet da clínica mudar,
+    // basta atualizar esta lista.
+    var INTERNAL_IPS = ["187.44.242.222"];
+
+    // Para onde mandar cada perfil:
+    var INTERNAL_URL = "http://192.168.0.3:81/";        // dentro da clínica
+    var EXTERNAL_URL = "http://187.44.242.222:81/";     // fora (servidor principal)
+    var BACKUP_URL   = "http://206.42.46.178:81/";      // fora (servidor alternativo)
+
+    var IP_TIMEOUT_MS = 4000; // se a checagem de IP demorar, assume externo
+    // =======================================================
+
+    var decided = false;
+
+    function go(url) {
+      if (decided) return;
+      decided = true;
+      window.location.replace(url);
+    }
+
+    // Preenche os links de fallback (caso o redirecionamento não ocorra)
+    document.getElementById("linkExterno").setAttribute("href", EXTERNAL_URL);
+    document.getElementById("linkInterno").setAttribute("href", INTERNAL_URL);
+    document.getElementById("linkBackup").setAttribute("href", BACKUP_URL);
+    // Mostra as opções manuais depois de alguns segundos, por segurança
+    setTimeout(function () {
+      var fb = document.getElementById("fallback");
+      if (fb) fb.classList.add("show");
+    }, 5000);
+
+    // Rede de segurança: se a detecção de IP falhar/demorar, vai para o externo
+    var safety = setTimeout(function () { go(EXTERNAL_URL); }, IP_TIMEOUT_MS);
+
+    function decide(ip) {
+      clearTimeout(safety);
+      if (ip && INTERNAL_IPS.indexOf(String(ip).trim()) !== -1) {
+        go(INTERNAL_URL);   // está dentro da clínica
+      } else {
+        go(EXTERNAL_URL);   // fora / servidor principal
+      }
+    }
+
+    // Descobre o IP público de quem está acessando
+    fetch("https://api.ipify.org?format=json", { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { decide(d && d.ip); })
+      .catch(function () { clearTimeout(safety); go(EXTERNAL_URL); });
+  })();
+  </script>
+</body>
+</html>
