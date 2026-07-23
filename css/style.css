@@ -790,8 +790,8 @@ body.a11y-readguide .a11y-readbar{display:block}
 .mo-cta .btn-ghost2:hover{background:#eaf3fb;transform:translateY(-2px)}
 .mo-cta__btns{align-items:stretch}
 .mo-cta__btns .btn-wa,.mo-cta__btns .btn-ghost2{font-size:1rem}
-.mo-cta__mail{margin:1.3rem 0 0;color:rgba(255,255,255,.85);font-size:.92rem}
-.mo-cta__mail a{color:#fff;text-decoration:underline;font-weight:600}
+.mo-cta__mail{margin:2.6rem auto 0;color:#fff;font-size:1.08rem;font-weight:500;display:inline-block;padding:.9rem 1.6rem;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);border-radius:40px}
+.mo-cta__mail a{color:#fff;text-decoration:underline;font-weight:700}
 
 /* ---- Homenagem ao fundador ---- */
 .memo{padding:3.5rem 0 5rem}
@@ -851,8 +851,8 @@ body.a11y-readguide .a11y-readbar{display:block}
 /* slide 4: "Pegue seu ASO" — imagem ja traz o navy a esquerda para o texto */
 .slide__bg--4{background:#0a2e5c url('../assets/aso-hero.png') center/cover no-repeat!important;background-image:url('../assets/aso-hero.png')!important;background-position:center!important;transform:none!important}
 .slide.is-active .slide__bg--4,.slide__bg--4{transform:none!important}
-/* slide 5: "eSocial (SST)" — fundo azul da marca com ondas decorativas */
-.slide__bg--5{background:linear-gradient(120deg,#0a2e5c 0%,#0c5fbf 55%,#12457f 100%)!important;transform:none!important}
+/* slide 5: "eSocial (SST)" — imagem de ambiente empresarial/conformidade */
+.slide__bg--5{background:#0a2e5c url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1900&q=80') center/cover no-repeat!important;transform:none!important}
 .slide.is-active .slide__bg--5,.slide__bg--5{transform:none!important}
 .hero__track .slide:nth-child(4) .slide__scrim{background:none!important}
 .hero__track .slide:nth-child(4) .slide__decor{display:none}
