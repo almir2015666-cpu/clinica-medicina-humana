@@ -944,3 +944,10 @@ html,body{overflow-x:hidden;max-width:100%}
 /* Home: 5 cards (inclui Area Medica) */
 @media(min-width:1025px){.cards__grid{grid-template-columns:repeat(auto-fit,minmax(226px,1fr));max-width:1340px}}
 .card__img--med{background:linear-gradient(150deg,#1290e0 0%,#0a2e5c 100%)}
+
+/* Menu lateral (mobile): itens escuros no fundo branco, senao ficam invisiveis */
+@media(max-width:1024px){
+  .header--over .nav__link{color:var(--navy)}
+  .header--over .nav__link:hover{color:var(--navy);background:var(--brand-mist)}
+  .nav .mega a{color:var(--navy)}
+}
