@@ -964,7 +964,7 @@ html,body{overflow-x:hidden;max-width:100%}
 @media(max-width:1024px){.nav__item--cta{display:block}.nav__item--cta .nav__link{color:var(--blue-700);font-weight:700}}
 
 /* Quem Somos: layout limpo, coluna unica, foto flutuando (elimina vazios) */
-.page-body__grid{grid-template-columns:1fr;gap:1.6rem;max-width:940px;margin:0 auto}
+.page-body__grid{grid-template-columns:1fr;gap:1.6rem;max-width:1040px;margin:0 auto}
 .page-intro{display:block;margin-bottom:0}
 .page-intro .page-photo{float:left;width:300px;height:230px;margin:.3rem 1.8rem .8rem 0}
 .page-body__main .btn-block{clear:both}
@@ -975,5 +975,5 @@ html,body{overflow-x:hidden;max-width:100%}
 
 /* Quem Somos: 3 fotos no topo, texto abaixo */
 .quem-fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.8rem}
-.quem-fotos .page-photo{height:230px}
+.quem-fotos .page-photo{height:300px}
 @media(max-width:640px){.quem-fotos{gap:.5rem}.quem-fotos .page-photo{height:120px}}
