@@ -18,29 +18,38 @@
   /* ---- Mobile menu ---- */
   const hamburger = document.getElementById('hamburger');
   const nav = document.getElementById('nav');
+  const closeMenu = () => {
+    hamburger.classList.remove('active');
+    nav.classList.remove('open');
+    document.body.style.overflow = '';
+  };
   hamburger.addEventListener('click', () => {
     hamburger.classList.toggle('active');
     nav.classList.toggle('open');
     document.body.style.overflow = nav.classList.contains('open') ? 'hidden' : '';
   });
 
+  // Botao X para fechar a gaveta (mobile)
+  const navClose = document.createElement('button');
+  navClose.className = 'nav__close';
+  navClose.setAttribute('aria-label', 'Fechar menu');
+  navClose.innerHTML = '&times;';
+  navClose.addEventListener('click', closeMenu);
+  nav.appendChild(navClose);
+
   // Accordion for mega menus on mobile
   document.querySelectorAll('.has-mega > .nav__link').forEach((btn) => {
     btn.addEventListener('click', (e) => {
-      if (window.innerWidth <= 820) {
+      if (window.innerWidth <= 1024) {
         e.preventDefault();
         btn.parentElement.classList.toggle('open-sub');
       }
     });
   });
 
-  // Close menu when a link is clicked (mobile)
-  nav.querySelectorAll('a[href^="#"]').forEach((a) => {
-    a.addEventListener('click', () => {
-      hamburger.classList.remove('active');
-      nav.classList.remove('open');
-      document.body.style.overflow = '';
-    });
+  // Fecha o menu ao clicar em qualquer link (mobile)
+  nav.querySelectorAll('a').forEach((a) => {
+    a.addEventListener('click', closeMenu);
   });
 
   /* ---- Scroll reveal (IntersectionObserver) ---- */
