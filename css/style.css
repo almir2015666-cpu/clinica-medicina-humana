@@ -951,3 +951,6 @@ html,body{overflow-x:hidden;max-width:100%}
   .header--over .nav__link:hover{color:var(--navy);background:var(--brand-mist)}
   .nav .mega a{color:var(--navy)}
 }
+
+/* Mobile: esconde os botoes do cabecalho (nao cabem; navegacao vai pro menu-sanduiche) */
+@media(max-width:1024px){.header__cta .btn-agendar{display:none}}
