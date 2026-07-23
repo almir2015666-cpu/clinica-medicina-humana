@@ -958,3 +958,7 @@ html,body{overflow-x:hidden;max-width:100%}
 /* Botao X para fechar o menu lateral (mobile) */
 .nav__close{display:none;position:absolute;top:.9rem;right:1rem;width:44px;height:44px;border:none;background:none;font-size:2.4rem;line-height:1;color:var(--navy);cursor:pointer;padding:0}
 @media(max-width:1024px){.nav.open .nav__close{display:block}}
+
+/* Itens de CTA visiveis SO no menu lateral do celular (no desktop sao os botoes do cabecalho) */
+.nav__item--cta{display:none}
+@media(max-width:1024px){.nav__item--cta{display:block}.nav__item--cta .nav__link{color:var(--blue-700);font-weight:700}}
