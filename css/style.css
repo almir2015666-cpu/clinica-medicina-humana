@@ -943,7 +943,7 @@ html,body{overflow-x:hidden;max-width:100%}
 
 /* Home: 5 cards (inclui Area Medica) */
 @media(min-width:1025px){.cards .container{max-width:1560px}.cards__grid{grid-template-columns:repeat(5,1fr);max-width:1560px}}
-.card__img--med{background:#0a2e5c url('../assets/med-card.png') center/cover no-repeat}
+.card__img--med{background:#0a2e5c url('../assets/med-card.png?v=2') center/cover no-repeat}
 
 /* Menu lateral (mobile): itens escuros no fundo branco, senao ficam invisiveis */
 @media(max-width:1024px){
