@@ -848,6 +848,11 @@ body.a11y-readguide .a11y-readbar{display:block}
 .slide.is-active .slide__bg--3,.slide__bg--3{transform:none!important}
 .hero__track .slide:nth-child(3) .slide__scrim{background:none!important}
 .hero__track .slide:nth-child(3) .slide__decor{display:none}
+/* slide 4: "Pegue seu ASO" — imagem ja traz o navy a esquerda para o texto */
+.slide__bg--4{background:#0a2e5c url('../assets/aso-hero.png') center/cover no-repeat!important;background-image:url('../assets/aso-hero.png')!important;background-position:center!important;transform:none!important}
+.slide.is-active .slide__bg--4,.slide__bg--4{transform:none!important}
+.hero__track .slide:nth-child(4) .slide__scrim{background:none!important}
+.hero__track .slide:nth-child(4) .slide__decor{display:none}
 
 /* Bloco do fundador: card contido e bem encaixado */
 .founder-band{padding:4rem 0}
