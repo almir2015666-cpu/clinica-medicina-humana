@@ -962,3 +962,13 @@ html,body{overflow-x:hidden;max-width:100%}
 /* Itens de CTA visiveis SO no menu lateral do celular (no desktop sao os botoes do cabecalho) */
 .nav__item--cta{display:none}
 @media(max-width:1024px){.nav__item--cta{display:block}.nav__item--cta .nav__link{color:var(--blue-700);font-weight:700}}
+
+/* Quem Somos: layout limpo, coluna unica, foto flutuando (elimina vazios) */
+.page-body__grid{grid-template-columns:1fr;gap:1.6rem;max-width:940px;margin:0 auto}
+.page-intro{display:block;margin-bottom:0}
+.page-intro .page-photo{float:left;width:300px;height:230px;margin:.3rem 1.8rem .8rem 0}
+.page-body__main .btn-block{clear:both}
+.page-side{border-left:none;border-top:1px solid var(--line);padding-top:1.1rem;margin-top:1.6rem;position:static;display:flex;flex-wrap:wrap;gap:.5rem;clear:both}
+.page-side a{border-left:none;padding:.5rem 1rem;background:var(--brand-mist);border-radius:8px;margin-left:0;color:var(--navy);font-weight:500}
+.page-side a.is-active{border-left:none;background:var(--blue-500);color:#fff}
+@media(max-width:640px){.page-intro .page-photo{float:none;width:100%;height:200px;margin:0 0 1rem}}
