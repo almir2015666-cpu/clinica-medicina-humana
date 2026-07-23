@@ -56,7 +56,6 @@
       <p>Se a página não abrir sozinha, escolha uma opção:</p>
       <a class="btn" id="linkExterno" href="#">Acessar Área Médica</a>
       <a class="btn btn--ghost" id="linkInterno" href="#">Estou na clínica</a>
-      <a class="btn btn--ghost" id="linkBackup" href="#">Servidor alternativo</a>
     </div>
   </div>
 
@@ -70,8 +69,7 @@
 
     // Para onde mandar cada perfil:
     var INTERNAL_URL = "http://192.168.0.3:81/";        // dentro da clínica
-    var EXTERNAL_URL = "http://187.44.242.222:81/";     // fora (servidor principal)
-    var BACKUP_URL   = "http://206.42.46.178:81/";      // fora (servidor alternativo)
+    var EXTERNAL_URL = "http://medico.clinicamedicinahumana.com.br:81/"; // fora (subdominio com failover DNS: 187.44.242.222 + 206.42.46.178)
 
     var IP_TIMEOUT_MS = 4000; // se a checagem de IP demorar, assume externo
     // =======================================================
@@ -87,7 +85,6 @@
     // Preenche os links de fallback (caso o redirecionamento não ocorra)
     document.getElementById("linkExterno").setAttribute("href", EXTERNAL_URL);
     document.getElementById("linkInterno").setAttribute("href", INTERNAL_URL);
-    document.getElementById("linkBackup").setAttribute("href", BACKUP_URL);
     // Mostra as opções manuais depois de alguns segundos, por segurança
     setTimeout(function () {
       var fb = document.getElementById("fallback");
