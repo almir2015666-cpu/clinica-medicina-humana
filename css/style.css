@@ -934,3 +934,13 @@ html,body{overflow-x:hidden;max-width:100%}
 /* Home: 4 cards (inclui Pegue seu ASO) */
 @media(min-width:1025px){.cards__grid{grid-template-columns:repeat(4,1fr);max-width:1280px}}
 .card__img--aso{background:#0a2e5c url('../assets/aso-card.png') center/cover no-repeat}
+
+/* Slide "Bem-vindos": imagem da fachada (Unidade 01) */
+.slide__bg--1{background:#0a2e5c url('../assets/unidade-1.png') center 45%/cover no-repeat!important;background-image:url('../assets/unidade-1.png')!important;background-position:center 45%!important;transform:none!important}
+.slide.is-active .slide__bg--1,.slide__bg--1{transform:none!important}
+.hero__track .slide:nth-child(1) .slide__scrim{background:none!important}
+.hero__track .slide:nth-child(1) .slide__decor{display:none}
+
+/* Home: 5 cards (inclui Area Medica) */
+@media(min-width:1025px){.cards__grid{grid-template-columns:repeat(auto-fit,minmax(226px,1fr));max-width:1340px}}
+.card__img--med{background:linear-gradient(150deg,#1290e0 0%,#0a2e5c 100%)}
