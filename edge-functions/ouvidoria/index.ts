@@ -110,6 +110,54 @@ function limpa(v: unknown, max = 400): string {
   return String(v ?? "").trim().slice(0, max);
 }
 
+// ---------------------------------------------------------------------
+//  Contorno para dois bugs do denomailer 1.6.0 (config/mail/encoding.ts).
+//  Os dois fazem o e-mail chegar "cheio de letras e números soltos".
+//
+//  1. CORPO — quotedPrintableEncode() quebra a linha a cada 74 caracteres,
+//     e nessa quebra ele pode comer os caracteres de uma sequência "=XX".
+//     Como todo atributo HTML tem um "=" (e cada "=" vira "=3d"), o corpo é
+//     o pior caso possível: quanto mais longo, mais chance de corromper.
+//     Saída: mandar o corpo já em base64 pelo mimeContent — a biblioteca
+//     escreve o conteúdo exatamente como recebeu, sem passar pelo encoder.
+//
+//  2. CABEÇALHOS — o mesmo encoder é usado no assunto, no nome do remetente
+//     e no nome do Reply-To. Passando de 74 caracteres codificados, ele enfia
+//     uma quebra de linha DENTRO do "=?utf-8?Q?...?=" e o cabeçalho vira lixo.
+//     Saída: se não couber, tirar os acentos — em ASCII puro a biblioteca
+//     devolve o texto intacto, sem codificar nada.
+// ---------------------------------------------------------------------
+const codificador = new TextEncoder();
+
+// Corpo em base64, quebrado de 76 em 76 caracteres como o SMTP espera.
+function base64Corpo(texto: string): string {
+  const bytes = codificador.encode(texto);
+  let bin = "";
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/.{1,76}/g, "$&\r\n").trimEnd();
+}
+
+// Quantos caracteres o texto ocuparia depois do quoted-printable deles.
+function tamanhoQP(texto: string): number {
+  let total = 0;
+  for (const ch of texto) {
+    const bytes = codificador.encode(ch);
+    const code = bytes[0];
+    const literal = bytes.length === 1 &&
+      ((code >= 32 && code <= 126 && code !== 61) || code === 9);
+    total += literal ? 1 : bytes.length * 3;
+  }
+  return total;
+}
+
+// Cabeçalho sem risco de ser partido no meio da codificação.
+function cabecalhoSeguro(texto: string): string {
+  if (tamanhoQP(texto) <= 74) return texto;
+  return texto
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\x20-\x7E]/g, "-");
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "Método não permitido" }, 405);
@@ -158,9 +206,9 @@ Deno.serve(async (req) => {
     return json({ error: "E-mail inválido." }, 400);
   }
 
-  // ATENÇÃO: montado SEM quebras de linha e SEM indentação de propósito.
-  // O SMTP codifica o corpo em quoted-printable; espaço antes de quebra de
-  // linha vira um "=20" literal e aparece como lixo no e-mail.
+  // Montado sem quebras de linha e sem indentação. Não é mais obrigatório
+  // desde que o corpo passou a ir em base64, mas manter assim evita
+  // surpresas se um dia alguém trocar a codificação de volta.
   const fonte = "font-family:'Segoe UI',Arial,Helvetica,sans-serif";
   const celula = "padding:11px 16px;border-bottom:1px solid #e6eef7;font-size:14px";
 
@@ -209,12 +257,20 @@ Deno.serve(async (req) => {
     await client.send({
       // O remetente é SEMPRE a conta da clínica. Usar o e-mail do visitante aqui
       // quebraria SPF/DKIM do Google e jogaria a mensagem direto no spam.
-      from: `${cfg.titulo} — Clínica Medicina Humana <${SMTP_USER}>`,
+      from: `${cabecalhoSeguro(`${cfg.titulo} — Clínica Medicina Humana`)} <${SMTP_USER}>`,
       to: destino,
       // Assim o "Responder" da caixa vai direto para quem escreveu.
-      replyTo: `${nome} <${email}>`,
-      subject: assunto ? `[${cfg.titulo}] ${assunto} — ${nome}` : `[${cfg.titulo}] ${nome}`,
-      html,
+      replyTo: `${cabecalhoSeguro(nome)} <${email}>`,
+      subject: cabecalhoSeguro(
+        assunto ? `[${cfg.titulo}] ${assunto} — ${nome}` : `[${cfg.titulo}] ${nome}`,
+      ),
+      // Corpo já codificado por nós — ver o bloco de contorno lá em cima.
+      // Passar "html" aqui de volta reintroduz o bug do quoted-printable.
+      mimeContent: [{
+        mimeType: 'text/html; charset="utf-8"',
+        content: base64Corpo(html),
+        transferEncoding: "base64",
+      }],
     });
     await client.close();
   } catch (e) {
