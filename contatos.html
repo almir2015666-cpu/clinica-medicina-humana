@@ -64,28 +64,24 @@
           <p><strong>E-mail:</strong> <a href="mailto:comercial@medicinahumana.com.br">comercial@medicinahumana.com.br</a></p>
         </div>
 
-        <!--
-          ENVIO DE E-MAIL (a configurar): quando o cliente informar o e-mail de destino,
-          troque a linha do <form> abaixo por:
-            <form class="ouv__form" action="https://formsubmit.co/EMAIL_DE_DESTINO" method="POST">
-          e remova o onsubmit="return false;". Os campos ja tem os name= prontos.
-          (FormSubmit.co funciona em site estatico/GitHub Pages, sem servidor.)
-        -->
-        <form class="ouv__form" onsubmit="return false;">
+        <form class="ouv__form" id="contatoForm">
           <div class="field-row">
-            <div class="field"><input type="text" name="nome" placeholder="Nome*" required /></div>
-            <div class="field"><input type="email" name="email" placeholder="E-mail*" required /></div>
+            <div class="field"><input type="text" id="ct_nome" name="nome" placeholder="Nome*" required /></div>
+            <div class="field"><input type="email" id="ct_email" name="email" placeholder="E-mail*" required /></div>
           </div>
           <div class="field-row">
-            <div class="field"><input type="tel" name="telefone" placeholder="Telefone*" required /></div>
-            <div class="field"><input type="text" name="cnpj" placeholder="CNPJ* (apenas números)" inputmode="numeric" pattern="[0-9]*" required /></div>
+            <div class="field"><input type="tel" id="ct_telefone" name="telefone" placeholder="Telefone*" required /></div>
+            <div class="field"><input type="text" id="ct_cnpj" name="cnpj" placeholder="CNPJ* (apenas números)" inputmode="numeric" pattern="[0-9]*" required /></div>
           </div>
-          <div class="field"><input type="text" name="assunto" placeholder="Assunto*" required /></div>
-          <div class="field"><textarea name="mensagem" rows="6" placeholder="Escreva aqui a sua mensagem*" required></textarea></div>
-          <label class="ouv__terms"><input type="checkbox" required /> <span>Concordo com os termos e condições. <a href="privacidade.html">Ver política de privacidade.</a></span></label>
+          <div class="field"><input type="text" id="ct_assunto" name="assunto" placeholder="Assunto*" required /></div>
+          <div class="field"><textarea id="ct_mensagem" name="mensagem" rows="6" placeholder="Escreva aqui a sua mensagem*" required></textarea></div>
+          <!-- Campo-armadilha anti-spam: fica escondido, humanos nunca preenchem -->
+          <input type="text" id="ct_hp" name="hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true" />
+          <label class="ouv__terms"><input type="checkbox" id="ct_consent" required /> <span>Concordo com os termos e condições. <a href="privacidade.html">Ver política de privacidade.</a></span></label>
+          <div class="form-status" id="ct_status" role="status" aria-live="polite"></div>
           <div class="ouv__form-foot">
             <span class="ouv__req">*campos obrigatórios</span>
-            <button class="btn btn--primary" type="submit">Enviar</button>
+            <button class="btn btn--primary" type="submit" id="ct_submit">Enviar</button>
           </div>
         </form>
       </div>
@@ -146,6 +142,94 @@
     .ouv__terms{display:flex;align-items:flex-start;gap:.6rem;margin:.2rem 0 .4rem;font-size:.92rem;color:var(--muted);line-height:1.5}
     .ouv__terms input{margin-top:.2rem;flex:none}
     .ouv__terms a{color:var(--brand);font-weight:600;text-decoration:underline}
+    .form-status{display:none;margin:.8rem 0 0;padding:.85rem 1rem;border-radius:12px;font-size:.92rem;line-height:1.5}
+    .form-status--ok{display:block;background:#e8f6ed;border:1.5px solid #9ad3b0;color:#1d6b3f}
+    .form-status--err{display:block;background:#fdeaea;border:1.5px solid #eaa3a3;color:#8c2b2b}
+    .form-status--info{display:block;background:var(--brand-mist);border:1.5px solid var(--brand-light);color:var(--navy)}
+    .ouv__form button[disabled]{opacity:.6;cursor:not-allowed;transform:none;filter:none}
   </style>
+  <script src="js/supabase-config.js?v=2"></script>
+  <script>
+  (function () {
+    // O destinatário NÃO fica aqui: quem decide é a Edge Function, pelo
+    // secret MAIL_TO_CONTATOS. O site só diz DE QUAL formulário veio.
+    var ENDPOINT = window.SUPA.url + '/functions/v1/' + window.SUPA.ouvidoriaFunction;
+
+    var form = document.getElementById('contatoForm');
+    if (!form) return;
+    var botao = document.getElementById('ct_submit');
+    var status = document.getElementById('ct_status');
+
+    function mostrar(tipo, texto) {
+      status.className = 'form-status form-status--' + tipo;
+      status.textContent = texto;
+      status.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function val(id) { return (document.getElementById(id).value || '').trim(); }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      // Bot preencheu o campo-armadilha: finge que deu certo e descarta.
+      if (val('ct_hp')) return;
+
+      var dados = {
+        form: 'contatos',
+        assunto: val('ct_assunto'),
+        nome: val('ct_nome'),
+        cnpj: val('ct_cnpj').replace(/\D/g, ''),
+        email: val('ct_email'),
+        telefone: val('ct_telefone'),
+        mensagem: val('ct_mensagem')
+      };
+
+      if (!dados.assunto || !dados.nome || !dados.cnpj || !dados.email || !dados.telefone || !dados.mensagem) {
+        mostrar('err', 'Por favor, preencha todos os campos obrigatórios.');
+        return;
+      }
+      if (dados.cnpj.length !== 14) {
+        mostrar('err', 'O CNPJ deve ter 14 números.');
+        return;
+      }
+      if (!document.getElementById('ct_consent').checked) {
+        mostrar('err', 'É preciso concordar com os termos para enviar a mensagem.');
+        return;
+      }
+
+      botao.disabled = true;
+      var rotulo = botao.textContent;
+      botao.textContent = 'Enviando...';
+      mostrar('info', 'Enviando sua mensagem...');
+
+      fetch(ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': window.SUPA.key,
+          'Authorization': 'Bearer ' + window.SUPA.key
+        },
+        body: JSON.stringify(dados)
+      })
+        .then(function (r) {
+          return r.json().catch(function () { return {}; }).then(function (j) {
+            return { ok: r.ok, json: j };
+          });
+        })
+        .then(function (res) {
+          if (!res.ok || !res.json.ok) throw new Error(res.json.error || 'Falha no envio.');
+          mostrar('ok', 'Mensagem enviada com sucesso! Nossa equipe comercial entrará em contato em breve.');
+          form.reset();
+        })
+        .catch(function () {
+          mostrar('err', 'Não conseguimos enviar agora. Tente novamente ou fale com o comercial pelo WhatsApp (71) 99301-0103.');
+        })
+        .then(function () {
+          botao.disabled = false;
+          botao.textContent = rotulo;
+        });
+    });
+  })();
+  </script>
 </body>
 </html>
