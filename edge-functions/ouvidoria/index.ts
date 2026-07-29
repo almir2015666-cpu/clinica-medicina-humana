@@ -242,7 +242,7 @@ Deno.serve(async (req) => {
   if (cfg.exigeMensagem && !mensagem) {
     return json({ error: "Preencha todos os campos obrigatórios." }, 400);
   }
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+  if (!EMAIL_OK.test(email)) {
     return json({ error: "E-mail inválido." }, 400);
   }
 
