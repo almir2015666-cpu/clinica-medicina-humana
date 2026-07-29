@@ -41,20 +41,38 @@ Edge Functions → **Secrets** → adicione:
 
 ### Destinos separados por formulário
 
-A função atende dois formulários. Enquanto existir só o `MAIL_TO`, os dois
+A função atende três formulários. Enquanto existir só o `MAIL_TO`, todos
 caem na mesma caixa. Para separar, crie:
 
 | Nome | Quem recebe |
 |---|---|
 | `MAIL_TO_OUVIDORIA` | mensagens de `ouvidoria.html` |
 | `MAIL_TO_CONTATOS` | mensagens de `contatos.html` (comercial) |
+| `MAIL_TO_AGENDAMENTO` | pedidos de `agende-exame.html` |
 
 Cada um sobrepõe o `MAIL_TO` no seu formulário. **Trocar destinatário =
 mudar o secret.** Nada no site muda, nenhuma ativação, nada quebra.
 
-> O site manda só o **nome do formulário** (`ouvidoria` / `contatos`), nunca o
-> endereço de destino. Se o endereço viesse do navegador, qualquer um poderia
-> mandar spam em nome da clínica para quem quisesse.
+O agendamento tem uma escada a mais: sem `MAIL_TO_AGENDAMENTO` ele usa o
+`MAIL_TO_CONTATOS`. Ou seja, os pedidos de exame já nascem chegando na caixa
+do comercial — só crie o secret próprio no dia em que quiser separar.
+
+> O site manda só o **nome do formulário** (`ouvidoria` / `contatos` /
+> `agendamento`), nunca o endereço de destino. Se o endereço viesse do
+> navegador, qualquer um poderia mandar spam em nome da clínica para quem
+> quisesse.
+
+### Quando mexer no `index.ts` (importante)
+
+Editar o arquivo aqui no repositório **não muda nada sozinho** — o que roda é
+a cópia que está publicada no Supabase. Depois de qualquer alteração:
+
+1. Painel do Supabase → **Edge Functions** → abra a função (slug `rapid-function`)
+2. Cole o conteúdo novo de `index.ts` por cima → **Deploy**
+
+Enquanto o deploy não for feito, o formulário novo responde
+*"Formulário desconhecido"* — a versão antiga da função não conhece o
+`agendamento`.
 
 ## 4. Apontar o site para a função
 
