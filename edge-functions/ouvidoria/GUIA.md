@@ -76,6 +76,11 @@ Vale o primeiro secret preenchido da escada (do mais específico para o
 `MAIL_CC`) — não é soma. Endereços malformados são descartados em silêncio,
 e o destinatário principal nunca entra na cópia duas vezes.
 
+**Como está hoje:** só existe o `MAIL_CC_AGENDAMENTO`, com o atendimento e a
+recepção. Ouvidoria e Contatos não têm cópia — vão só para o destinatário
+principal. Para dar cópia a eles depois, crie o secret do formulário
+correspondente (ou o `MAIL_CC`, que pega os três de uma vez).
+
 > Quem está em Cc **enxerga os outros endereços da cópia**. Como aqui são todos
 > e-mails da própria clínica, isso não é problema — mas se um dia precisar de
 > cópia oculta, é uma linha de código.
