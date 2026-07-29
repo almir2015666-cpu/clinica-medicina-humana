@@ -10,5 +10,9 @@ window.SUPA = {
   // Médico entra por CRM (normalizado) -> e-mail interno
   medicoEmailDomain: 'medico.clinicamedicinahumana.com.br',
   // Nome da Edge Function publicada (o slug ficou "swift-api" no deploy)
-  functionName: 'swift-api'
+  functionName: 'swift-api',
+  // Envio do formulário da Ouvidoria por e-mail.
+  // Atenção: o painel mostra o nome "ouvidoria", mas o slug do deploy
+  // ficou "rapid-function" — é o slug que vale na URL.
+  ouvidoriaFunction: 'rapid-function'
 };
