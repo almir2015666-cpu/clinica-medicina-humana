@@ -57,6 +57,29 @@ O agendamento tem uma escada a mais: sem `MAIL_TO_AGENDAMENTO` ele usa o
 `MAIL_TO_CONTATOS`. Ou seja, os pedidos de exame já nascem chegando na caixa
 do comercial — só crie o secret próprio no dia em que quiser separar.
 
+### Quem recebe em cópia (Cc)
+
+| Nome | Quem recebe em cópia |
+|---|---|
+| `MAIL_CC` | **todos** os formulários |
+| `MAIL_CC_OUVIDORIA` | só a Ouvidoria |
+| `MAIL_CC_CONTATOS` | só os Contatos (e o agendamento, se não tiver o de baixo) |
+| `MAIL_CC_AGENDAMENTO` | só os agendamentos de exame |
+
+Vários endereços no mesmo secret, separados por vírgula:
+
+```
+atendimentocmh@medicinahumana.com.br, recepcao@medicinahumana.com.br
+```
+
+Vale o primeiro secret preenchido da escada (do mais específico para o
+`MAIL_CC`) — não é soma. Endereços malformados são descartados em silêncio,
+e o destinatário principal nunca entra na cópia duas vezes.
+
+> Quem está em Cc **enxerga os outros endereços da cópia**. Como aqui são todos
+> e-mails da própria clínica, isso não é problema — mas se um dia precisar de
+> cópia oculta, é uma linha de código.
+
 > O site manda só o **nome do formulário** (`ouvidoria` / `contatos` /
 > `agendamento`), nunca o endereço de destino. Se o endereço viesse do
 > navegador, qualquer um poderia mandar spam em nome da clínica para quem

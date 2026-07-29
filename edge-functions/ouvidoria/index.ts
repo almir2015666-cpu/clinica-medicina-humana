@@ -18,6 +18,10 @@
 //    MAIL_TO_CONTATOS     -> (opcional) destino do comercial
 //    MAIL_TO_AGENDAMENTO  -> (opcional) destino dos agendamentos de exame;
 //                            sem ele, os agendamentos vão para o comercial
+//    MAIL_CC              -> (opcional) cópia em TODOS os formulários;
+//                            vários e-mails separados por vírgula
+//    MAIL_CC_OUVIDORIA / MAIL_CC_CONTATOS / MAIL_CC_AGENDAMENTO
+//                         -> (opcional) cópia só naquele formulário
 //    SITE_ORIGIN          -> ex.: https://clinicamedicinahumana.com.br
 // =====================================================================
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
@@ -38,9 +42,12 @@ const cors = {
 // secretsDestino é uma LISTA em ordem de preferência: vale o primeiro secret
 // que estiver cadastrado. Assim o agendamento já nasce caindo na caixa do
 // comercial, e no dia em que quiserem separar é só criar o secret próprio.
+// secretsCopia funciona igual, para quem recebe em cópia (Cc). Vale o
+// primeiro secret preenchido; MAIL_CC é o coringa que serve para todos.
 const FORMULARIOS: Record<string, {
   titulo: string;
   secretsDestino: string[];
+  secretsCopia: string[];
   campos: Array<[chave: string, rotulo: string, obrigatorio: boolean]>;
   // Alguns formulários são um pedido estruturado: o texto livre é opcional.
   exigeMensagem: boolean;
@@ -49,6 +56,7 @@ const FORMULARIOS: Record<string, {
   ouvidoria: {
     titulo: "Ouvidoria",
     secretsDestino: ["MAIL_TO_OUVIDORIA"],
+    secretsCopia: ["MAIL_CC_OUVIDORIA"],
     campos: [
       ["assunto", "Assunto", true],
       ["nome", "Nome completo", true],
@@ -63,6 +71,7 @@ const FORMULARIOS: Record<string, {
   contatos: {
     titulo: "Contato comercial",
     secretsDestino: ["MAIL_TO_CONTATOS"],
+    secretsCopia: ["MAIL_CC_CONTATOS"],
     campos: [
       ["assunto", "Assunto", true],
       ["nome", "Nome", true],
@@ -76,12 +85,14 @@ const FORMULARIOS: Record<string, {
   agendamento: {
     titulo: "Agendamento de exame ocupacional",
     secretsDestino: ["MAIL_TO_AGENDAMENTO", "MAIL_TO_CONTATOS"],
+    secretsCopia: ["MAIL_CC_AGENDAMENTO", "MAIL_CC_CONTATOS"],
     campos: [
       ["empresa", "Empresa", true],
       ["contrato", "Contrato", true],
       ["responsavel", "Responsável", false],
       ["email", "E-mail", true],
       ["telefone", "Telefone", false],
+      ["regiao", "Região de atendimento", true],
       ["tipoExame", "Tipo de exame", true],
       ["data", "Data de comparecimento", true],
       ["quantidade", "Quantidade de pessoas", true],
@@ -108,6 +119,29 @@ function esc(s: string): string {
 // Corta campos absurdamente longos (defesa simples contra abuso).
 function limpa(v: unknown, max = 400): string {
   return String(v ?? "").trim().slice(0, max);
+}
+
+const EMAIL_OK = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+// Lê uma lista de e-mails de secrets (separados por vírgula, ponto e vírgula
+// ou espaço) e devolve só os válidos. Vale o primeiro secret preenchido.
+//
+// A validação aqui não é frescura: o validateConfig do denomailer 1.6.0 tem um
+// bug feio — ao achar um e-mail inválido no Cc ele faz `config.to = valCc.ok`,
+// ou seja, SOBRESCREVE o destinatário principal com a lista de cópia. Um
+// endereço com erro de digitação no secret faria o comercial parar de receber.
+// Entregando só endereços válidos, esse trecho da biblioteca nunca roda.
+function listaEmails(...nomesSecrets: string[]): string[] {
+  for (const nome of nomesSecrets) {
+    const bruto = Deno.env.get(nome);
+    if (!bruto) continue;
+    const emails = bruto
+      .split(/[,;\s]+/)
+      .map((e) => e.trim())
+      .filter((e) => EMAIL_OK.test(e));
+    if (emails.length > 0) return emails.slice(0, 20);
+  }
+  return [];
 }
 
 // ---------------------------------------------------------------------
@@ -181,6 +215,12 @@ Deno.serve(async (req) => {
   // cai no destino padrão.
   const destino = cfg.secretsDestino.map((s) => Deno.env.get(s)).find((v) => v) ??
     Deno.env.get("MAIL_TO") ?? SMTP_USER;
+
+  // Quem recebe em cópia. MAIL_CC é o coringa que vale para todos os
+  // formulários. Tira o destinatário principal da lista para ninguém receber
+  // a mesma mensagem duas vezes.
+  const copia = listaEmails(...cfg.secretsCopia, "MAIL_CC")
+    .filter((e) => e.toLowerCase() !== destino.toLowerCase());
 
   const linhas: Array<[string, string]> = [];
   for (const [chave, rotulo, obrigatorio] of cfg.campos) {
@@ -259,6 +299,7 @@ Deno.serve(async (req) => {
       // quebraria SPF/DKIM do Google e jogaria a mensagem direto no spam.
       from: `${cabecalhoSeguro(`${cfg.titulo} — Clínica Medicina Humana`)} <${SMTP_USER}>`,
       to: destino,
+      cc: copia,
       // Assim o "Responder" da caixa vai direto para quem escreveu.
       replyTo: `${cabecalhoSeguro(nome)} <${email}>`,
       subject: cabecalhoSeguro(
