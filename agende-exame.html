@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Agende os exames ocupacionais da sua empresa na Clínica Medicina Humana. Informe o contrato, o tipo de exame, a data e a quantidade de pessoas." />
+  <meta name="description" content="Agende os exames ocupacionais da sua empresa na Clínica Medicina Humana. Atendimento em Salvador, Camaçari e Candeias." />
   <title>Agende seu exame — Clínica Medicina Humana</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -47,7 +47,7 @@
       <div class="container">
         <h1>Agende seu exame</h1>
         <span class="page-hero__rule"></span>
-        <p style="color:rgba(255,255,255,.9);margin-top:1rem;max-width:600px">Empresas conveniadas: solicite o agendamento dos exames ocupacionais da sua equipe. Informe o contrato, o tipo de exame, a data e quantas pessoas vão comparecer.</p>
+        <p style="color:rgba(255,255,255,.9);margin-top:1rem;max-width:600px">Empresas conveniadas: solicite o agendamento dos exames ocupacionais da sua equipe. Informe o contrato, a região de atendimento, o tipo de exame, a data e quantas pessoas vão comparecer.</p>
       </div>
     </section>
 
@@ -76,16 +76,26 @@
             <div class="field"><input type="tel" id="ag_telefone" name="telefone" placeholder="Telefone" /></div>
           </div>
           <div class="field"><input type="email" id="ag_email" name="email" placeholder="E-mail*" required /></div>
-          <div class="field">
-            <select id="ag_tipo" name="tipoExame" required>
-              <option value="" disabled selected>Tipo do exame*</option>
-              <option>Admissional</option>
-              <option>Periódico</option>
-              <option>Demissional</option>
-              <option>Mudança de função / risco ocupacional</option>
-              <option>Retorno ao trabalho</option>
-              <option>Outro (descrever nas observações)</option>
-            </select>
+          <div class="field-row">
+            <div class="field">
+              <select id="ag_tipo" name="tipoExame" required>
+                <option value="" disabled selected>Tipo do exame*</option>
+                <option>Admissional</option>
+                <option>Periódico</option>
+                <option>Demissional</option>
+                <option>Mudança de função / risco ocupacional</option>
+                <option>Retorno ao trabalho</option>
+                <option>Outro (descrever nas observações)</option>
+              </select>
+            </div>
+            <div class="field">
+              <select id="ag_regiao" name="regiao" required>
+                <option value="" disabled selected>Região de atendimento*</option>
+                <option>Salvador</option>
+                <option>Camaçari</option>
+                <option>Candeias</option>
+              </select>
+            </div>
           </div>
           <div class="field-row">
             <div class="field">
@@ -222,13 +232,14 @@
         responsavel: val('ag_responsavel'),
         email: val('ag_email'),
         telefone: val('ag_telefone'),
+        regiao: val('ag_regiao'),
         tipoExame: val('ag_tipo'),
         data: dataBR(dataISO),
         quantidade: qtd,
         mensagem: val('ag_obs')
       };
 
-      if (!dados.empresa || !dados.contrato || !dados.email || !dados.tipoExame || !dataISO || !qtd) {
+      if (!dados.empresa || !dados.contrato || !dados.email || !dados.regiao || !dados.tipoExame || !dataISO || !qtd) {
         mostrar('err', 'Por favor, preencha todos os campos obrigatórios.');
         return;
       }
