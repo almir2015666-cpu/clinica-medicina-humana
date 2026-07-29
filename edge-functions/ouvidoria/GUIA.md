@@ -36,11 +36,25 @@ Edge Functions → **Secrets** → adicione:
 |---|---|
 | `SMTP_USER` | o Gmail que envia — ex.: `clinicamedicinahumana2@gmail.com` |
 | `SMTP_PASS` | os 16 caracteres do passo 1 (sem espaços) |
-| `MAIL_TO` | quem recebe — hoje `almir2015.666@gmail.com`, depois o da clínica |
+| `MAIL_TO` | destino padrão — hoje `almir2015.666@gmail.com` |
 | `SITE_ORIGIN` | `https://clinicamedicinahumana.com.br` |
 
-**Trocar o destinatário depois = mudar só o `MAIL_TO`.** Nada no site muda,
-nenhuma ativação, nada quebra.
+### Destinos separados por formulário
+
+A função atende dois formulários. Enquanto existir só o `MAIL_TO`, os dois
+caem na mesma caixa. Para separar, crie:
+
+| Nome | Quem recebe |
+|---|---|
+| `MAIL_TO_OUVIDORIA` | mensagens de `ouvidoria.html` |
+| `MAIL_TO_CONTATOS` | mensagens de `contatos.html` (comercial) |
+
+Cada um sobrepõe o `MAIL_TO` no seu formulário. **Trocar destinatário =
+mudar o secret.** Nada no site muda, nenhuma ativação, nada quebra.
+
+> O site manda só o **nome do formulário** (`ouvidoria` / `contatos`), nunca o
+> endereço de destino. Se o endereço viesse do navegador, qualquer um poderia
+> mandar spam em nome da clínica para quem quisesse.
 
 ## 4. Apontar o site para a função
 
