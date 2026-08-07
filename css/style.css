@@ -1009,3 +1009,200 @@ html,body{overflow-x:hidden;max-width:100%}
 .news-dots{display:flex;justify-content:center;gap:.55rem;margin-top:1.9rem}
 .news-dots button{width:9px;height:9px;padding:0;border:0;border-radius:50%;background:#cdd8e6;cursor:pointer;transition:.28s}
 .news-dots button.is-active{width:28px;border-radius:6px;background:var(--brand,#0c5fbf)}
+/* ============================================================
+   AVISO DE ABERTURA — comunicado institucional
+   A peca entra desfocada e vem para o foco; em seguida o titulo
+   e escrito letra a letra.
+   ============================================================ */
+.aviso{
+  position:fixed;inset:0;z-index:99999;
+  display:none;align-items:center;justify-content:center;
+  padding:24px;
+}
+.aviso.is-on{display:flex}
+body.aviso-aberto{overflow:hidden}
+
+/* ---- Véu: escurece e embaça o resto da tela ---- */
+.aviso__fundo{
+  position:absolute;inset:0;
+  background:rgba(9,26,46,0);
+  backdrop-filter:blur(0px);
+  -webkit-backdrop-filter:blur(0px);
+  transition:background .45s var(--ease), backdrop-filter .45s var(--ease), -webkit-backdrop-filter .45s var(--ease);
+}
+.aviso.is-vis .aviso__fundo{
+  background:rgba(9,26,46,.55);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+/* ---- A peça: entra desfocada e maior, e vem para o foco ---- */
+.aviso__caixa{
+  position:relative;
+  width:min(520px,100%);
+  background:var(--white);
+  border-radius:20px;
+  overflow:hidden;
+  text-align:center;
+  opacity:0;
+  transform:scale(1.04);
+  filter:blur(14px);
+  box-shadow:0 10px 30px rgba(6,22,42,.10);
+  /* camada propria: o repaint da digitacao nao reprocessa o desfoque do fundo */
+  isolation:isolate;
+  contain:layout paint;
+  backface-visibility:hidden;
+}
+.aviso.is-vis .aviso__caixa{animation:avisoFoco .8s cubic-bezier(.22,.61,.36,1) forwards}
+@keyframes avisoFoco{
+  0%  {opacity:0;transform:scale(1.04);filter:blur(14px);box-shadow:0 10px 30px rgba(6,22,42,.10)}
+  30% {opacity:1}
+  100%{opacity:1;transform:scale(1);filter:blur(0);box-shadow:0 30px 80px rgba(6,22,42,.32)}
+}
+
+/* faixa da marca no topo: abre do centro, ja com a peca em foco */
+.aviso__caixa::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:5px;
+  background:var(--grad);
+  transform:scaleX(0);transform-origin:50% 50%;
+}
+.aviso.is-vis .aviso__caixa::before{
+  animation:avisoFaixa .72s .34s cubic-bezier(.22,.61,.36,1) forwards;
+}
+@keyframes avisoFaixa{to{transform:scaleX(1)}}
+
+/* ---- Conteúdo ---- */
+.aviso__corpo{
+  padding:44px 44px 38px;
+  opacity:0;
+  transition:opacity .55s var(--ease);
+}
+.aviso.is-ligada .aviso__corpo{opacity:1}
+
+.aviso__logo{
+  height:52px;width:auto;margin:0 auto 22px;
+  object-fit:contain;
+}
+
+.aviso__tag{
+  display:inline-block;
+  font-family:'Poppins',sans-serif;font-weight:600;
+  font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--brand-dark);
+  background:var(--brand-pale);
+  padding:.4rem .9rem;border-radius:999px;
+}
+
+.aviso__titulo{
+  font-family:'Poppins',sans-serif;font-weight:600;
+  font-size:clamp(1.35rem,3.6vw,1.7rem);line-height:1.28;
+  color:var(--ink);margin:18px 0 0;
+}
+.aviso__titulo strong{color:var(--brand-dark);font-weight:700}
+
+/* O titulo inteiro ja existe no DOM desde o inicio: as letras nascem
+   transparentes e so acendem. O layout nunca muda, entao nao ha reflow
+   nem salto de quebra de linha durante a escrita. */
+.aviso__l{position:relative;color:transparent;transition:color .14s linear}
+.aviso__l.is-on{color:inherit}
+
+/* cursor desenhado fora do fluxo — nao empurra nenhuma letra */
+.aviso__l.is-caret::after,
+.aviso__l.is-caret-ini::before{
+  content:'';position:absolute;top:.16em;
+  width:2px;height:.98em;border-radius:1px;
+  background:var(--brand);
+  animation:avisoPisca 1.05s steps(1,end) infinite;
+}
+.aviso__l.is-caret::after{right:-4px}
+.aviso__l.is-caret-ini::before{left:-4px}
+@keyframes avisoPisca{0%,50%{opacity:1}50.01%,100%{opacity:0}}
+
+.aviso.is-escrito .aviso__l.is-caret::after,
+.aviso.is-escrito .aviso__l.is-caret-ini::before{
+  animation:none;opacity:0;transition:opacity .35s var(--ease);
+}
+
+.aviso__divisor{
+  width:0;height:3px;margin:18px auto 0;border-radius:99px;
+  background:var(--brand);opacity:.85;
+  transition:width .55s var(--ease);
+}
+.aviso.is-escrito .aviso__divisor{width:52px}
+
+.aviso__texto{
+  margin:18px auto 0;max-width:40ch;
+  font-size:1.05rem;line-height:1.66;font-weight:500;
+  color:#2f4f6d;
+  text-align:justify;
+  /* ultima linha centralizada para nao destoar do card centralizado */
+  text-align-last:center;
+  /* hifenizacao evita os vaos largos tipicos de coluna estreita */
+  hyphens:auto;-webkit-hyphens:auto;-ms-hyphens:auto;
+}
+
+.aviso__acoes{margin-top:30px}
+.aviso__btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:'Poppins',sans-serif;font-weight:600;font-size:.98rem;
+  padding:.85rem 2.4rem;border-radius:999px;cursor:pointer;border:0;
+  background:var(--grad);color:var(--white);
+  box-shadow:var(--shadow-sm);
+  transition:transform .26s var(--ease), box-shadow .26s var(--ease);
+}
+.aviso__btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+
+/* revelados depois que o titulo termina de ser escrito */
+.aviso__pos{
+  opacity:0;transform:translateY(8px);
+  transition:opacity .5s var(--ease), transform .5s var(--ease);
+  transition-delay:var(--d,0s);
+}
+.aviso.is-escrito .aviso__pos{opacity:1;transform:translateY(0)}
+
+.aviso__x{
+  position:absolute;top:16px;right:16px;z-index:2;
+  width:34px;height:34px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.25rem;line-height:1;cursor:pointer;
+  background:transparent;color:var(--muted);border:1px solid var(--line);
+  transition:.24s var(--ease);
+}
+.aviso__x:hover{background:var(--brand-pale);color:var(--brand-dark);border-color:var(--brand-pale)}
+
+/* ---- Fechar: sai de foco ---- */
+.aviso.is-saindo .aviso__caixa{animation:avisoDesfoca .38s var(--ease) forwards}
+@keyframes avisoDesfoca{
+  0%  {opacity:1;transform:scale(1);filter:blur(0)}
+  100%{opacity:0;transform:scale(1.03);filter:blur(10px)}
+}
+.aviso.is-saindo .aviso__fundo{
+  background:rgba(9,26,46,0);
+  backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);
+  transition-duration:.38s;
+}
+
+/* ---- Mobile ---- */
+@media (max-width:560px){
+  .aviso{padding:18px}
+  .aviso__corpo{padding:38px 26px 30px}
+  .aviso__logo{height:44px}
+  .aviso__texto{font-size:.95rem}
+  .aviso__btn{width:100%}
+}
+
+/* ---- Acessibilidade: sem movimento ---- */
+@media (prefers-reduced-motion: reduce){
+  .aviso__fundo,.aviso__corpo,.aviso__pos,.aviso__divisor{transition:none}
+  .aviso.is-vis .aviso__caixa,
+  .aviso.is-saindo .aviso__caixa,
+  .aviso.is-vis .aviso__caixa::before{animation:none}
+  .aviso.is-vis .aviso__caixa{opacity:1;transform:none;filter:none}
+  .aviso.is-saindo .aviso__caixa{opacity:0}
+  .aviso__caixa::before{transform:scaleX(1)}
+  .aviso__l{color:inherit}
+  .aviso__l.is-caret::after,.aviso__l.is-caret-ini::before{display:none}
+}
+body.a11y-noanim .aviso__l{color:inherit}
+body.a11y-noanim .aviso__l.is-caret::after,
+body.a11y-noanim .aviso__l.is-caret-ini::before{display:none}

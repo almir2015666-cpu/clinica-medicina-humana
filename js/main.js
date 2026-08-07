@@ -162,6 +162,9 @@
       heroEl.addEventListener('mouseleave', play);
     }
     play();
+
+    // exposto para pausar o carrossel enquanto houver modal por cima
+    window.__cmhHero = { play: play, stop: stop };
   }
 
   /* ---- Widget de acessibilidade ---- */
@@ -292,5 +295,204 @@
       s.onload = function () { try { new window.VLibras.Widget('https://vlibras.gov.br/app'); } catch (e) {} };
       document.body.appendChild(s);
     }
+  })();
+
+  /* ============================================================
+     Aviso de abertura — retomada do atendimento assistencial
+     Aparece uma vez por sessao, em qualquer pagina de entrada.
+     Para rever durante os testes: acrescente ?aviso=1 na URL.
+     ============================================================ */
+  (function () {
+    var CHAVE = 'cmh-aviso-assistencial-v1';
+    var forcar = /[?&]aviso=1/.test(window.location.search);
+
+    try {
+      if (!forcar && sessionStorage.getItem(CHAVE) === 'visto') return;
+    } catch (e) { /* sessionStorage bloqueado: mostra assim mesmo */ }
+
+    // Titulo escrito letra a letra, em ritmo continuo.
+    var TITULO = [
+      { texto: 'Estamos de volta com o ', forte: false },
+      { texto: 'Assistencial', forte: true }
+    ];
+    var TITULO_TXT = 'Estamos de volta com o Assistencial';
+    var VEL = 42; // ms por caractere
+
+    var semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+                       document.body.classList.contains('a11y-noanim');
+
+    var wrap = document.createElement('div');
+    wrap.className = 'aviso';
+    wrap.id = 'avisoAssistencial';
+    wrap.setAttribute('role', 'dialog');
+    wrap.setAttribute('aria-modal', 'true');
+    wrap.setAttribute('aria-label', 'Comunicado: ' + TITULO_TXT);
+    wrap.innerHTML =
+      '<div class="aviso__fundo"></div>' +
+      '<div class="aviso__caixa">' +
+        '<button class="aviso__x" type="button" aria-label="Fechar aviso">&times;</button>' +
+        '<div class="aviso__corpo">' +
+          '<img class="aviso__logo" src="assets/logo.png" alt="Clínica Medicina Humana" ' +
+               'onerror="this.style.display=\'none\'" />' +
+          '<span class="aviso__tag">Comunicado</span>' +
+          '<h2 class="aviso__titulo" aria-hidden="true"></h2>' +
+          '<div class="aviso__divisor" aria-hidden="true"></div>' +
+          '<p class="aviso__texto aviso__pos" style="--d:.10s">' +
+            'Informamos que o atendimento assistencial da Clínica Medicina Humana ' +
+            'está novamente disponível. Nossa equipe segue à disposição para cuidar ' +
+            'de você e da sua família.' +
+          '</p>' +
+          '<div class="aviso__acoes aviso__pos" style="--d:.24s">' +
+            '<button class="aviso__btn" type="button" data-fechar>Entendi</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(wrap);
+
+    var titulo = wrap.querySelector('.aviso__titulo');
+    var timers = [];
+    var quadro = 0;
+    function agendar(fn, ms) { timers.push(setTimeout(fn, ms)); }
+
+    // Monta o titulo completo de uma vez. Cada letra vira um span
+    // transparente; os espacos ficam como texto solto para a quebra de
+    // linha ser exatamente a final desde o primeiro quadro.
+    var letras = [];
+    TITULO.forEach(function (seg) {
+      var destino = titulo;
+      if (seg.forte) {
+        destino = document.createElement('strong');
+        titulo.appendChild(destino);
+      }
+      for (var k = 0; k < seg.texto.length; k++) {
+        var ch = seg.texto.charAt(k);
+        if (ch === ' ') { destino.appendChild(document.createTextNode(' ')); continue; }
+        var s = document.createElement('span');
+        s.className = 'aviso__l';
+        s.textContent = ch;
+        destino.appendChild(s);
+        letras.push(s);
+      }
+    });
+
+    var fechado = false;
+    function fechar() {
+      if (fechado) return;
+      fechado = true;
+      timers.forEach(clearTimeout);
+      if (quadro) cancelAnimationFrame(quadro);
+      try { sessionStorage.setItem(CHAVE, 'visto'); } catch (e) {}
+      wrap.classList.remove('is-vis');
+      wrap.classList.add('is-saindo');
+      document.removeEventListener('keydown', onTecla);
+      // devolve o carrossel do hero
+      if (window.__cmhHero) { try { window.__cmhHero.play(); } catch (e) {} }
+      setTimeout(function () {
+        wrap.remove();
+        document.body.classList.remove('aviso-aberto');
+      }, 400);
+    }
+    function onTecla(e) { if (e.key === 'Escape') fechar(); }
+
+    wrap.querySelector('.aviso__x').addEventListener('click', fechar);
+    wrap.querySelector('[data-fechar]').addEventListener('click', fechar);
+    wrap.querySelector('.aviso__fundo').addEventListener('click', fechar);
+    document.addEventListener('keydown', onTecla);
+
+    // Deixa o titulo pronto de uma vez. Rede de seguranca para quando a
+    // escrita nao comeca ou trava no meio — requestAnimationFrame nao roda
+    // com a aba em segundo plano, e as fontes podem demorar. Melhor o titulo
+    // aparecer inteiro do que ficar invisivel.
+    function acenderTudo() {
+      if (fechado || wrap.classList.contains('is-escrito')) return;
+      if (quadro) { cancelAnimationFrame(quadro); quadro = 0; }
+      letras.forEach(function (L) {
+        L.classList.add('is-on');
+        L.classList.remove('is-caret', 'is-caret-ini');
+      });
+      wrap.classList.add('is-escrito');
+    }
+
+    // Acende uma letra por vez. Nenhum no e criado ou removido durante a
+    // escrita — so muda a cor —, por isso nao ha reflow nem engasgo.
+    function escrever() {
+      var i = 0;
+      var proximo = 0;
+      var atual = null;
+
+      // cursor piscando a esquerda da 1a letra, antes de comecar
+      if (letras.length) letras[0].classList.add('is-caret-ini');
+
+      function frame(ts) {
+        if (fechado) return;
+        if (!proximo) proximo = ts;
+
+        while (i < letras.length && ts >= proximo) {
+          var L = letras[i];
+          if (i === 0) L.classList.remove('is-caret-ini');
+          if (atual) atual.classList.remove('is-caret');
+          L.classList.add('is-on', 'is-caret');
+          atual = L;
+          i++;
+          proximo += VEL;
+        }
+
+        if (i < letras.length) quadro = requestAnimationFrame(frame);
+        else concluir();
+      }
+      quadro = requestAnimationFrame(frame);
+    }
+
+    function concluir() {
+      agendar(function () {
+        wrap.classList.add('is-escrito');
+        var btn = wrap.querySelector('.aviso__btn');
+        agendar(function () {
+          try { btn.focus({ preventScroll: true }); } catch (e) {}
+        }, 600);
+      }, 260);
+    }
+
+    agendar(function () {
+      document.body.classList.add('aviso-aberto');
+      wrap.classList.add('is-on');
+      // congela o carrossel: fundo parado deixa o desfoque barato de repintar
+      if (window.__cmhHero) { try { window.__cmhHero.stop(); } catch (e) {} }
+
+      // 'is-vis' precisa entrar de forma sincrona. Se dependesse de
+      // requestAnimationFrame, uma aba aberta em segundo plano nao receberia
+      // a classe e o modal ficaria invisivel porem cobrindo a tela, travando
+      // rolagem e cliques. O reflow abaixo faz a transicao valer sem rAF.
+      void wrap.offsetWidth;
+      wrap.classList.add('is-vis');
+
+      if (semMovimento) {
+        wrap.classList.add('is-ligada');
+        acenderTudo();
+        return;
+      }
+
+      // a peca entra em foco -> o conteudo acende. Sem rAF aqui de proposito:
+      // precisa valer mesmo com a aba em segundo plano.
+      agendar(function () { wrap.classList.add('is-ligada'); }, 300);
+
+      // A escrita normal termina por volta de 2,5s. Passando disso, algo
+      // travou: mostra o titulo inteiro. Nao faz nada se ja terminou.
+      agendar(acenderTudo, 4200);
+
+      // So escreve depois que as fontes estao prontas: um swap do Poppins 700
+      // no meio da animacao remontaria a linha e causaria engasgo.
+      agendar(function () {
+        if (fechado) return;
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(function () {
+            if (!fechado) escrever();
+          })['catch'](function () { if (!fechado) escrever(); });
+        } else {
+          escrever();
+        }
+      }, 980);
+    }, 400);
   })();
 })();
