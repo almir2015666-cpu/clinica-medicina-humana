@@ -843,13 +843,15 @@ body.a11y-readguide .a11y-readbar{display:block}
 .slide__bg--1{background:url('../assets/unidade-1.jpg') center/cover no-repeat,#0a2e5c url('https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?auto=format&fit=crop&w=1900&q=80') center/cover no-repeat}
 .slide__bg--2{background:#0a2e5c url('../assets/unidade-2.png') center 45%/cover no-repeat!important;background-image:url('../assets/unidade-2.png')!important;background-position:center 45%!important;transform:none!important}
 .slide.is-active .slide__bg--2,.slide__bg--2{transform:none!important}
-.hero__track .slide:nth-child(2) .slide__scrim{background:none!important}
-.hero__track .slide:nth-child(2) .slide__decor{display:none}
+/* Ancorado na classe do fundo, e nao na posicao: assim a ordem dos slides
+   pode mudar sem desalinhar o scrim e o decor. */
+.hero__track .slide:has(.slide__bg--2) .slide__scrim{background:none!important}
+.hero__track .slide:has(.slide__bg--2) .slide__decor{display:none}
 .slide__bg--3{background:#0a2e5c url('../assets/unidade-3.png') center 28%/cover no-repeat!important;background-image:url('../assets/unidade-3.png')!important;background-position:center 28%!important;transform:none!important}
 /* slide 3: sem zoom (direto no elemento, sem depender de :has), sem overlays */
 .slide.is-active .slide__bg--3,.slide__bg--3{transform:none!important}
-.hero__track .slide:nth-child(3) .slide__scrim{background:none!important}
-.hero__track .slide:nth-child(3) .slide__decor{display:none}
+.hero__track .slide:has(.slide__bg--3) .slide__scrim{background:none!important}
+.hero__track .slide:has(.slide__bg--3) .slide__decor{display:none}
 /* slide 4: "Pegue seu ASO" — imagem ja traz o navy a esquerda para o texto */
 .slide__bg--4{background:#0a2e5c url('../assets/aso-hero.png') center/cover no-repeat!important;background-image:url('../assets/aso-hero.png')!important;background-position:center!important;transform:none!important}
 .slide.is-active .slide__bg--4,.slide__bg--4{transform:none!important}
@@ -859,10 +861,36 @@ body.a11y-readguide .a11y-readbar{display:block}
 
 /* slide 6: "Agende seus exames ocupacionais" — mesma foto que o site já usava
    para agendamento (era o fundo original do card "Agende seus exames"). */
-.slide__bg--6{background:#0a2e5c url('https://images.unsplash.com/photo-1580281658626-ee379f3cce93?auto=format&fit=crop&w=1900&q=80') center/cover no-repeat!important;transform:none!important}
+.slide__bg--6{background:#0a2e5c url('../assets/exames-ocupacionais-hero.png') center/cover no-repeat!important;background-image:url('../assets/exames-ocupacionais-hero.png')!important;background-position:center!important;transform:none!important}
 .slide.is-active .slide__bg--6,.slide__bg--6{transform:none!important}
-.hero__track .slide:nth-child(4) .slide__scrim{background:none!important}
-.hero__track .slide:nth-child(4) .slide__decor{display:none}
+/* imagem ja tratada com o degrade azul a esquerda: dispensa scrim e decor */
+.hero__track .slide:has(.slide__bg--6) .slide__scrim{background:none!important}
+.hero__track .slide:has(.slide__bg--6) .slide__decor{display:none}
+/* na tela estreita, puxa para a direita para os EPIs entrarem no quadro */
+@media(max-width:760px){
+  .slide__bg--6{background-position:70% center!important}
+  .hero__track .slide:has(.slide__bg--6) .slide__scrim{
+    background:linear-gradient(180deg,rgba(10,46,92,.78) 0%,rgba(10,46,92,.52) 52%,rgba(10,46,92,.34) 100%)!important;
+  }
+}
+.hero__track .slide:has(.slide__bg--4) .slide__scrim{background:none!important}
+.hero__track .slide:has(.slide__bg--4) .slide__decor{display:none}
+
+/* slide "Estamos de volta com o Assistencial" — imagem ja tratada com o
+   degrade azul a esquerda, onde entra o texto; dispensa scrim e decor */
+.slide__bg--7{background:#0a2e5c url('../assets/assistencial-hero.png') center/cover no-repeat!important;background-image:url('../assets/assistencial-hero.png')!important;background-position:center!important;transform:none!important}
+.slide.is-active .slide__bg--7,.slide__bg--7{transform:none!important}
+.hero__track .slide:has(.slide__bg--7) .slide__scrim{background:none!important}
+.hero__track .slide:has(.slide__bg--7) .slide__decor{display:none}
+/* Na tela estreita o corte e bem maior. Puxa para a direita para os objetos
+   (cruz, coracao, prancheta) entrarem no quadro, senao sobra so o degrade
+   liso; o scrim devolve o contraste do texto sobre o marmore claro. */
+@media(max-width:760px){
+  .slide__bg--7{background-position:72% center!important}
+  .hero__track .slide:has(.slide__bg--7) .slide__scrim{
+    background:linear-gradient(180deg,rgba(10,46,92,.78) 0%,rgba(10,46,92,.52) 52%,rgba(10,46,92,.34) 100%)!important;
+  }
+}
 
 /* Bloco do fundador: card contido e bem encaixado */
 .founder-band{padding:4rem 0}
@@ -955,8 +983,8 @@ html,body{overflow-x:hidden;max-width:100%}
 /* Slide "Bem-vindos": imagem da fachada (Unidade 01) */
 .slide__bg--1{background:#0a2e5c url('../assets/unidade-1.png') center 45%/cover no-repeat!important;background-image:url('../assets/unidade-1.png')!important;background-position:center 45%!important;transform:none!important}
 .slide.is-active .slide__bg--1,.slide__bg--1{transform:none!important}
-.hero__track .slide:nth-child(1) .slide__scrim{background:none!important}
-.hero__track .slide:nth-child(1) .slide__decor{display:none}
+.hero__track .slide:has(.slide__bg--1) .slide__scrim{background:none!important}
+.hero__track .slide:has(.slide__bg--1) .slide__decor{display:none}
 
 /* Home: 4 cards (Agende, Especialidades, Pegue seu ASO, Area Medica) */
 @media(min-width:1025px){.cards .container{max-width:1280px}.cards__grid{grid-template-columns:repeat(4,1fr);max-width:1280px}}

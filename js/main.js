@@ -138,7 +138,7 @@
   if (slides.length > 1) {
     let idx = 0;
     let timer = null;
-    const DUR = 6000;
+    const DUR = 3500;
     const track = document.getElementById('heroTrack');
     const go = (n) => {
       slides[idx].classList.remove('is-active');
