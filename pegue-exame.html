@@ -68,11 +68,25 @@
     var INTERNAL_IPS = ["187.44.242.222"];
 
     // Para onde mandar cada perfil:
-    var INTERNAL_URL = "http://192.168.0.245/web_laudos/";                         // dentro da clínica
-    var EXTERNAL_URL = "https://link1.medicinahumana.com.br:30330/web_laudos/login.asp?classico=S"; // pacientes (fora)
+    var INTERNAL_URL = "http://192.168.0.245/web_laudos/"; // dentro da clínica
+
+    // Pacientes (fora da clínica): link diferente para celular e computador
+    var EXTERNAL_MOBILE_URL  = "https://link1.medicinahumana.com.br:30330/web_laudos/m/login.asp";
+    var EXTERNAL_DESKTOP_URL = "https://link1.medicinahumana.com.br:30330/web_laudos/login.asp?classico=S";
 
     var IP_TIMEOUT_MS = 4000; // se a checagem de IP demorar, assume externo
     // =======================================================
+
+    // Celular/tablet vai para a versão mobile; o resto vai para a clássica.
+    function isMobile() {
+      var ua = navigator.userAgent || "";
+      if (/Android|iPhone|iPod|iPad|Windows Phone|webOS|BlackBerry|Opera Mini|IEMobile/i.test(ua)) return true;
+      // iPad com iPadOS 13+ se identifica como "Macintosh"
+      if (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) return true;
+      return window.innerWidth <= 820;
+    }
+
+    var EXTERNAL_URL = isMobile() ? EXTERNAL_MOBILE_URL : EXTERNAL_DESKTOP_URL;
 
     var decided = false;
 
