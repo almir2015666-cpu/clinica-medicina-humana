@@ -1038,9 +1038,9 @@ html,body{overflow-x:hidden;max-width:100%}
 .news-dots button{width:9px;height:9px;padding:0;border:0;border-radius:50%;background:#cdd8e6;cursor:pointer;transition:.28s}
 .news-dots button.is-active{width:28px;border-radius:6px;background:var(--brand,#0c5fbf)}
 /* ============================================================
-   AVISO DE ABERTURA — comunicado institucional
-   A peca entra desfocada e vem para o foco; em seguida o titulo
-   e escrito letra a letra.
+   AVISO DE ABERTURA — vídeo de divulgação (reels 9:16)
+   A peça sobe suavemente; o vídeo toca mudo em loop e a pessoa
+   liga o som se quiser. Markup montado em js/main.js.
    ============================================================ */
 .aviso{
   position:fixed;inset:0;z-index:99999;
@@ -1059,178 +1059,189 @@ body.aviso-aberto{overflow:hidden}
   transition:background .45s var(--ease), backdrop-filter .45s var(--ease), -webkit-backdrop-filter .45s var(--ease);
 }
 .aviso.is-vis .aviso__fundo{
-  background:rgba(9,26,46,.55);
+  background:rgba(9,26,46,.62);
   backdrop-filter:blur(8px);
   -webkit-backdrop-filter:blur(8px);
 }
 
-/* ---- A peça: entra desfocada e maior, e vem para o foco ---- */
+/* ---- A peça: largura vem do vídeo, não o contrário ---- */
 .aviso__caixa{
   position:relative;
-  width:min(520px,100%);
+  width:auto;max-width:100%;
+  /* rede de seguranca: se o navegador nao deduzir a largura do video a
+     partir de altura + aspect-ratio, a caixa ainda fica utilizavel */
+  min-width:min(300px,calc(100vw - 48px));
   background:var(--white);
   border-radius:20px;
   overflow:hidden;
   text-align:center;
   opacity:0;
-  transform:scale(1.04);
-  filter:blur(14px);
-  box-shadow:0 10px 30px rgba(6,22,42,.10);
-  /* camada propria: o repaint da digitacao nao reprocessa o desfoque do fundo */
+  box-shadow:0 30px 80px rgba(6,22,42,.32);
   isolation:isolate;
-  contain:layout paint;
   backface-visibility:hidden;
 }
-.aviso.is-vis .aviso__caixa{animation:avisoFoco .8s cubic-bezier(.22,.61,.36,1) forwards}
-@keyframes avisoFoco{
-  0%  {opacity:0;transform:scale(1.04);filter:blur(14px);box-shadow:0 10px 30px rgba(6,22,42,.10)}
-  30% {opacity:1}
-  100%{opacity:1;transform:scale(1);filter:blur(0);box-shadow:0 30px 80px rgba(6,22,42,.32)}
+/* sem filter:blur aqui de proposito — desfocar uma caixa com video
+   rodando dentro custa caro e engasga em maquina fraca */
+.aviso.is-vis .aviso__caixa{animation:avisoSobe .5s var(--ease) forwards}
+@keyframes avisoSobe{
+  0%  {opacity:0;transform:scale(.96) translateY(12px)}
+  100%{opacity:1;transform:none}
 }
 
-/* faixa da marca no topo: abre do centro, ja com a peca em foco */
+/* faixa da marca no topo */
 .aviso__caixa::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:5px;
+  content:'';position:absolute;top:0;left:0;right:0;height:5px;z-index:4;
   background:var(--grad);
   transform:scaleX(0);transform-origin:50% 50%;
 }
 .aviso.is-vis .aviso__caixa::before{
-  animation:avisoFaixa .72s .34s cubic-bezier(.22,.61,.36,1) forwards;
+  animation:avisoFaixa .72s .28s cubic-bezier(.22,.61,.36,1) forwards;
 }
 @keyframes avisoFaixa{to{transform:scaleX(1)}}
 
 /* ---- Conteúdo ---- */
 .aviso__corpo{
-  padding:44px 44px 38px;
+  padding:20px 18px 18px;
   opacity:0;
-  transition:opacity .55s var(--ease);
+  transition:opacity .5s var(--ease);
 }
 .aviso.is-ligada .aviso__corpo{opacity:1}
 
 .aviso__logo{
-  height:52px;width:auto;margin:0 auto 22px;
-  object-fit:contain;
+  height:40px;width:auto;margin:0 auto 14px;
+  object-fit:contain;display:block;
 }
 
-.aviso__tag{
-  display:inline-block;
-  font-family:'Poppins',sans-serif;font-weight:600;
-  font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
-  color:var(--brand-dark);
-  background:var(--brand-pale);
-  padding:.4rem .9rem;border-radius:999px;
+/* ---- Moldura do vídeo ----
+   A altura manda: 9:16 a partir de uma altura segura de viewport, e o
+   max-width em unidade de viewport (nao %) evita dependencia circular
+   com a caixa, que e shrink-to-fit. */
+.aviso__video{
+  position:relative;
+  height:min(62vh,560px);
+  max-width:min(340px,calc(100vw - 88px));
+  aspect-ratio:9/16;
+  margin:0 auto;
+  border-radius:14px;
+  overflow:hidden;
+  background:#0a1a2b;
+}
+.aviso__player{
+  width:100%;height:100%;
+  object-fit:cover;display:block;
+  background:#0a1a2b;cursor:pointer;
 }
 
-.aviso__titulo{
-  font-family:'Poppins',sans-serif;font-weight:600;
-  font-size:clamp(1.35rem,3.6vw,1.7rem);line-height:1.28;
-  color:var(--ink);margin:18px 0 0;
+/* enquanto nao da para tocar, um giro discreto no lugar da caixa preta */
+.aviso__carregando{
+  position:absolute;inset:0;z-index:2;
+  display:grid;place-items:center;
+  background:#0a1a2b;
+  transition:opacity .4s var(--ease),visibility .4s;
 }
-.aviso__titulo strong{color:var(--brand-dark);font-weight:700}
-
-/* O titulo inteiro ja existe no DOM desde o inicio: as letras nascem
-   transparentes e so acendem. O layout nunca muda, entao nao ha reflow
-   nem salto de quebra de linha durante a escrita. */
-.aviso__l{position:relative;color:transparent;transition:color .14s linear}
-.aviso__l.is-on{color:inherit}
-
-/* cursor desenhado fora do fluxo — nao empurra nenhuma letra */
-.aviso__l.is-caret::after,
-.aviso__l.is-caret-ini::before{
-  content:'';position:absolute;top:.16em;
-  width:2px;height:.98em;border-radius:1px;
-  background:var(--brand);
-  animation:avisoPisca 1.05s steps(1,end) infinite;
+.aviso.is-pronto .aviso__carregando{opacity:0;visibility:hidden}
+.aviso__carregando span{
+  width:34px;height:34px;border-radius:50%;
+  border:3px solid rgba(255,255,255,.22);border-top-color:#fff;
+  animation:avisoGira .8s linear infinite;
 }
-.aviso__l.is-caret::after{right:-4px}
-.aviso__l.is-caret-ini::before{left:-4px}
-@keyframes avisoPisca{0%,50%{opacity:1}50.01%,100%{opacity:0}}
+@keyframes avisoGira{to{transform:rotate(360deg)}}
 
-.aviso.is-escrito .aviso__l.is-caret::after,
-.aviso.is-escrito .aviso__l.is-caret-ini::before{
-  animation:none;opacity:0;transition:opacity .35s var(--ease);
+/* autoplay barrado pelo navegador: mostra que da para tocar */
+.aviso.is-pausado .aviso__video::after{
+  content:'';position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:rgba(9,26,46,.45) no-repeat center/56px 56px
+    url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cpath d='M8 5.2v13.6L19 12z'/%3E%3C/svg%3E");
 }
 
-.aviso__divisor{
-  width:0;height:3px;margin:18px auto 0;border-radius:99px;
-  background:var(--brand);opacity:.85;
-  transition:width .55s var(--ease);
+/* ---- Botão de som ---- */
+.aviso__som{
+  position:absolute;right:10px;bottom:10px;z-index:3;
+  width:42px;height:42px;border-radius:50%;border:0;cursor:pointer;
+  background:rgba(9,26,46,.55);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  color:#fff;display:grid;place-items:center;
+  transition:background .25s var(--ease),transform .25s var(--ease);
 }
-.aviso.is-escrito .aviso__divisor{width:52px}
-
-.aviso__texto{
-  margin:18px auto 0;max-width:40ch;
-  font-size:1.05rem;line-height:1.66;font-weight:500;
-  color:#2f4f6d;
-  text-align:justify;
-  /* ultima linha centralizada para nao destoar do card centralizado */
-  text-align-last:center;
-  /* hifenizacao evita os vaos largos tipicos de coluna estreita */
-  hyphens:auto;-webkit-hyphens:auto;-ms-hyphens:auto;
+.aviso__som:hover{background:rgba(9,26,46,.85);transform:scale(1.08)}
+.aviso__som svg{width:20px;height:20px}
+/* anel pulsando enquanto esta mudo — convida a ligar o som */
+.aviso__som::after{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  border:2px solid rgba(255,255,255,.75);
+  animation:avisoPulso 2.2s var(--ease) infinite;
+}
+.aviso.is-com-som .aviso__som::after{display:none}
+@keyframes avisoPulso{
+  0%  {transform:scale(1);opacity:.75}
+  70% {transform:scale(1.45);opacity:0}
+  100%{transform:scale(1.45);opacity:0}
 }
 
-.aviso__acoes{margin-top:30px}
+/* ---- Ações ---- */
+.aviso__acoes{margin-top:16px;display:flex;flex-direction:column;align-items:stretch;gap:8px}
 .aviso__btn{
   display:inline-flex;align-items:center;justify-content:center;
-  font-family:'Poppins',sans-serif;font-weight:600;font-size:.98rem;
-  padding:.85rem 2.4rem;border-radius:999px;cursor:pointer;border:0;
-  background:var(--grad);color:var(--white);
+  font-family:'Poppins',sans-serif;font-weight:600;font-size:.95rem;
+  padding:.8rem 1.6rem;border-radius:999px;cursor:pointer;border:0;
+  background:var(--grad);color:var(--white);text-decoration:none;
   box-shadow:var(--shadow-sm);
   transition:transform .26s var(--ease), box-shadow .26s var(--ease);
 }
-.aviso__btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
-
-/* revelados depois que o titulo termina de ser escrito */
-.aviso__pos{
-  opacity:0;transform:translateY(8px);
-  transition:opacity .5s var(--ease), transform .5s var(--ease);
-  transition-delay:var(--d,0s);
+.aviso__btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);color:var(--white)}
+.aviso__fechar-txt{
+  background:none;border:0;cursor:pointer;
+  font-family:'Poppins',sans-serif;font-weight:500;font-size:.85rem;
+  color:var(--muted);padding:.35rem;
+  transition:color .22s var(--ease);
 }
-.aviso.is-escrito .aviso__pos{opacity:1;transform:translateY(0)}
+.aviso__fechar-txt:hover{color:var(--brand-dark)}
 
 .aviso__x{
-  position:absolute;top:16px;right:16px;z-index:2;
+  position:absolute;top:14px;right:14px;z-index:5;
   width:34px;height:34px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   font-size:1.25rem;line-height:1;cursor:pointer;
-  background:transparent;color:var(--muted);border:1px solid var(--line);
+  background:var(--white);color:var(--muted);border:1px solid var(--line);
   transition:.24s var(--ease);
 }
 .aviso__x:hover{background:var(--brand-pale);color:var(--brand-dark);border-color:var(--brand-pale)}
 
-/* ---- Fechar: sai de foco ---- */
-.aviso.is-saindo .aviso__caixa{animation:avisoDesfoca .38s var(--ease) forwards}
-@keyframes avisoDesfoca{
-  0%  {opacity:1;transform:scale(1);filter:blur(0)}
-  100%{opacity:0;transform:scale(1.03);filter:blur(10px)}
+/* ---- Fechar ---- */
+.aviso.is-saindo .aviso__caixa{animation:avisoDesce .34s var(--ease) forwards}
+@keyframes avisoDesce{
+  0%  {opacity:1;transform:none}
+  100%{opacity:0;transform:scale(.97) translateY(8px)}
 }
 .aviso.is-saindo .aviso__fundo{
   background:rgba(9,26,46,0);
   backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);
-  transition-duration:.38s;
+  transition-duration:.34s;
 }
 
 /* ---- Mobile ---- */
 @media (max-width:560px){
-  .aviso{padding:18px}
-  .aviso__corpo{padding:38px 26px 30px}
-  .aviso__logo{height:44px}
-  .aviso__texto{font-size:.95rem}
-  .aviso__btn{width:100%}
+  .aviso{padding:16px}
+  .aviso__corpo{padding:16px 14px 14px}
+  .aviso__logo{height:34px;margin-bottom:10px}
+  .aviso__video{height:min(64vh,560px);max-width:calc(100vw - 60px)}
+  .aviso__x{top:10px;right:10px;width:30px;height:30px}
+}
+/* telas baixas (notebook 768p, celular deitado) */
+@media (max-height:680px){
+  .aviso__logo{height:30px;margin-bottom:8px}
+  .aviso__video{height:min(56vh,440px)}
+  .aviso__acoes{margin-top:12px}
 }
 
 /* ---- Acessibilidade: sem movimento ---- */
 @media (prefers-reduced-motion: reduce){
-  .aviso__fundo,.aviso__corpo,.aviso__pos,.aviso__divisor{transition:none}
+  .aviso__fundo,.aviso__corpo{transition:none}
   .aviso.is-vis .aviso__caixa,
   .aviso.is-saindo .aviso__caixa,
   .aviso.is-vis .aviso__caixa::before{animation:none}
-  .aviso.is-vis .aviso__caixa{opacity:1;transform:none;filter:none}
+  .aviso.is-vis .aviso__caixa{opacity:1;transform:none}
   .aviso.is-saindo .aviso__caixa{opacity:0}
   .aviso__caixa::before{transform:scaleX(1)}
-  .aviso__l{color:inherit}
-  .aviso__l.is-caret::after,.aviso__l.is-caret-ini::before{display:none}
+  .aviso__som::after,.aviso__carregando span{animation:none}
 }
-body.a11y-noanim .aviso__l{color:inherit}
-body.a11y-noanim .aviso__l.is-caret::after,
-body.a11y-noanim .aviso__l.is-caret-ini::before{display:none}

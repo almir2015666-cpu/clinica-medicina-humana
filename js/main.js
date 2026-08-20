@@ -298,97 +298,143 @@
   })();
 
   /* ============================================================
-     Aviso de abertura — retomada do atendimento assistencial
+     Aviso de abertura — video de divulgacao (formato reels 9:16)
      Aparece uma vez por sessao, em qualquer pagina de entrada.
      Para rever durante os testes: acrescente ?aviso=1 na URL.
+
+     >>> PARA TROCAR O VIDEO, mexa so no bloco VIDEO abaixo. <<<
+     Depois de trocar o arquivo, mude tambem o final da CHAVE
+     (v2 -> v3) para que quem ja viu o anterior veja o novo.
      ============================================================ */
   (function () {
-    var CHAVE = 'cmh-aviso-assistencial-v1';
+    var VIDEO = {
+      arquivo: 'assets/videos/humana-reels.mp4',
+      capa:    'assets/videos/humana-reels.jpg',
+      titulo:  'Conheça a Clínica Medicina Humana',
+      cta: {
+        texto: 'Agende sua consulta',
+        link: 'https://wa.me/5571993010103?text=Ol%C3%A1%2C%20Zezinho.%20Vi%20o%20v%C3%ADdeo%20no%20site%20e%20gostaria%20de%20agendar%20uma%20consulta.'
+      }
+    };
+
+    var CHAVE = 'cmh-aviso-video-v2';
     var forcar = /[?&]aviso=1/.test(window.location.search);
 
     try {
       if (!forcar && sessionStorage.getItem(CHAVE) === 'visto') return;
     } catch (e) { /* sessionStorage bloqueado: mostra assim mesmo */ }
 
-    // Titulo escrito letra a letra, em ritmo continuo.
-    var TITULO = [
-      { texto: 'Estamos de volta com o ', forte: false },
-      { texto: 'Assistencial', forte: true }
-    ];
-    var TITULO_TXT = 'Estamos de volta com o Assistencial';
-    var VEL = 42; // ms por caractere
-
     var semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
                        document.body.classList.contains('a11y-noanim');
 
+    var IC_MUDO =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M11 5 6 9H3v6h3l5 4z"/><path d="m17 9 4 6M21 9l-4 6"/></svg>';
+    var IC_SOM =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/>' +
+      '<path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+
     var wrap = document.createElement('div');
-    wrap.className = 'aviso';
-    wrap.id = 'avisoAssistencial';
+    wrap.className = 'aviso aviso--video';
+    wrap.id = 'avisoVideo';
     wrap.setAttribute('role', 'dialog');
     wrap.setAttribute('aria-modal', 'true');
-    wrap.setAttribute('aria-label', 'Comunicado: ' + TITULO_TXT);
+    wrap.setAttribute('aria-label', VIDEO.titulo);
     wrap.innerHTML =
       '<div class="aviso__fundo"></div>' +
       '<div class="aviso__caixa">' +
-        '<button class="aviso__x" type="button" aria-label="Fechar aviso">&times;</button>' +
+        '<button class="aviso__x" type="button" aria-label="Fechar">&times;</button>' +
         '<div class="aviso__corpo">' +
           '<img class="aviso__logo" src="assets/logo.png" alt="Clínica Medicina Humana" ' +
                'onerror="this.style.display=\'none\'" />' +
-          '<span class="aviso__tag">Comunicado</span>' +
-          '<h2 class="aviso__titulo" aria-hidden="true"></h2>' +
-          '<div class="aviso__divisor" aria-hidden="true"></div>' +
-          '<p class="aviso__texto aviso__pos" style="--d:.10s">' +
-            'Informamos que o atendimento assistencial da Clínica Medicina Humana ' +
-            'está novamente disponível. Nossa equipe segue à disposição para cuidar ' +
-            'de você e da sua família.' +
-          '</p>' +
-          '<div class="aviso__acoes aviso__pos" style="--d:.24s">' +
-            '<button class="aviso__btn" type="button" data-fechar>Entendi</button>' +
+          '<div class="aviso__video">' +
+            '<div class="aviso__carregando" aria-hidden="true"><span></span></div>' +
+            '<button class="aviso__som" type="button" aria-label="Ativar som">' +
+              IC_MUDO +
+            '</button>' +
+          '</div>' +
+          '<div class="aviso__acoes">' +
+            '<a class="aviso__btn" href="' + VIDEO.cta.link + '" target="_blank" rel="noopener">' +
+              VIDEO.cta.texto +
+            '</a>' +
+            '<button class="aviso__fechar-txt" type="button" data-fechar>Fechar</button>' +
           '</div>' +
         '</div>' +
       '</div>';
 
     document.body.appendChild(wrap);
 
-    var titulo = wrap.querySelector('.aviso__titulo');
-    var timers = [];
-    var quadro = 0;
-    function agendar(fn, ms) { timers.push(setTimeout(fn, ms)); }
+    /* ---- o player ----
+       'muted' precisa estar na propriedade (nao so no atributo) antes do
+       play, senao o iOS bloqueia o autoplay e o video fica parado. */
+    var video = document.createElement('video');
+    video.className = 'aviso__player';
+    video.src = VIDEO.arquivo;
+    if (VIDEO.capa) video.poster = VIDEO.capa;
+    video.muted = true;
+    video.defaultMuted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.autoplay = true;
+    video.preload = 'auto';
+    video.setAttribute('muted', '');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    video.setAttribute('disablepictureinpicture', '');
+    video.setAttribute('tabindex', '-1');
 
-    // Monta o titulo completo de uma vez. Cada letra vira um span
-    // transparente; os espacos ficam como texto solto para a quebra de
-    // linha ser exatamente a final desde o primeiro quadro.
-    var letras = [];
-    TITULO.forEach(function (seg) {
-      var destino = titulo;
-      if (seg.forte) {
-        destino = document.createElement('strong');
-        titulo.appendChild(destino);
-      }
-      for (var k = 0; k < seg.texto.length; k++) {
-        var ch = seg.texto.charAt(k);
-        if (ch === ' ') { destino.appendChild(document.createTextNode(' ')); continue; }
-        var s = document.createElement('span');
-        s.className = 'aviso__l';
-        s.textContent = ch;
-        destino.appendChild(s);
-        letras.push(s);
-      }
+    var caixaVideo = wrap.querySelector('.aviso__video');
+    caixaVideo.insertBefore(video, caixaVideo.firstChild);
+
+    video.addEventListener('canplay', function () {
+      wrap.classList.add('is-pronto');
     });
+    video.addEventListener('playing', function () {
+      wrap.classList.add('is-pronto');
+      wrap.classList.remove('is-pausado');
+    });
+    // se o video nao carregar, o modal nao pode ficar preso na caixa preta
+    video.addEventListener('error', function () {
+      wrap.classList.add('is-pronto', 'is-falhou');
+    });
+
+    // clicar no video tambem liga/desliga o som
+    video.addEventListener('click', function () { alternarSom(); });
+
+    var btnSom = wrap.querySelector('.aviso__som');
+    function alternarSom() {
+      video.muted = !video.muted;
+      btnSom.innerHTML = video.muted ? IC_MUDO : IC_SOM;
+      btnSom.setAttribute('aria-label', video.muted ? 'Ativar som' : 'Desativar som');
+      wrap.classList.toggle('is-com-som', !video.muted);
+      if (!video.muted) { try { video.play(); } catch (e) {} }
+    }
+    btnSom.addEventListener('click', function (e) {
+      e.stopPropagation();
+      alternarSom();
+    });
+
+    var timers = [];
+    function agendar(fn, ms) { timers.push(setTimeout(fn, ms)); }
 
     var fechado = false;
     function fechar() {
       if (fechado) return;
       fechado = true;
       timers.forEach(clearTimeout);
-      if (quadro) cancelAnimationFrame(quadro);
       try { sessionStorage.setItem(CHAVE, 'visto'); } catch (e) {}
+      try { video.pause(); } catch (e) {}
       wrap.classList.remove('is-vis');
       wrap.classList.add('is-saindo');
       document.removeEventListener('keydown', onTecla);
       // devolve o carrossel do hero
       if (window.__cmhHero) { try { window.__cmhHero.play(); } catch (e) {} }
       setTimeout(function () {
+        // zera o src para o download parar de consumir dados ao fechar
+        try { video.removeAttribute('src'); video.load(); } catch (e) {}
         wrap.remove();
         document.body.classList.remove('aviso-aberto');
       }, 400);
@@ -399,60 +445,6 @@
     wrap.querySelector('[data-fechar]').addEventListener('click', fechar);
     wrap.querySelector('.aviso__fundo').addEventListener('click', fechar);
     document.addEventListener('keydown', onTecla);
-
-    // Deixa o titulo pronto de uma vez. Rede de seguranca para quando a
-    // escrita nao comeca ou trava no meio — requestAnimationFrame nao roda
-    // com a aba em segundo plano, e as fontes podem demorar. Melhor o titulo
-    // aparecer inteiro do que ficar invisivel.
-    function acenderTudo() {
-      if (fechado || wrap.classList.contains('is-escrito')) return;
-      if (quadro) { cancelAnimationFrame(quadro); quadro = 0; }
-      letras.forEach(function (L) {
-        L.classList.add('is-on');
-        L.classList.remove('is-caret', 'is-caret-ini');
-      });
-      wrap.classList.add('is-escrito');
-    }
-
-    // Acende uma letra por vez. Nenhum no e criado ou removido durante a
-    // escrita — so muda a cor —, por isso nao ha reflow nem engasgo.
-    function escrever() {
-      var i = 0;
-      var proximo = 0;
-      var atual = null;
-
-      // cursor piscando a esquerda da 1a letra, antes de comecar
-      if (letras.length) letras[0].classList.add('is-caret-ini');
-
-      function frame(ts) {
-        if (fechado) return;
-        if (!proximo) proximo = ts;
-
-        while (i < letras.length && ts >= proximo) {
-          var L = letras[i];
-          if (i === 0) L.classList.remove('is-caret-ini');
-          if (atual) atual.classList.remove('is-caret');
-          L.classList.add('is-on', 'is-caret');
-          atual = L;
-          i++;
-          proximo += VEL;
-        }
-
-        if (i < letras.length) quadro = requestAnimationFrame(frame);
-        else concluir();
-      }
-      quadro = requestAnimationFrame(frame);
-    }
-
-    function concluir() {
-      agendar(function () {
-        wrap.classList.add('is-escrito');
-        var btn = wrap.querySelector('.aviso__btn');
-        agendar(function () {
-          try { btn.focus({ preventScroll: true }); } catch (e) {}
-        }, 600);
-      }, 260);
-    }
 
     agendar(function () {
       document.body.classList.add('aviso-aberto');
@@ -467,32 +459,17 @@
       void wrap.offsetWidth;
       wrap.classList.add('is-vis');
 
-      if (semMovimento) {
-        wrap.classList.add('is-ligada');
-        acenderTudo();
-        return;
-      }
+      wrap.classList.add('is-ligada');
 
-      // a peca entra em foco -> o conteudo acende. Sem rAF aqui de proposito:
-      // precisa valer mesmo com a aba em segundo plano.
-      agendar(function () { wrap.classList.add('is-ligada'); }, 300);
+      // Rede de seguranca: se o 'canplay' nao vier (conexao ruim, codec),
+      // mostra assim mesmo em vez de deixar a caixa preta para sempre.
+      agendar(function () { wrap.classList.add('is-pronto'); }, 3500);
 
-      // A escrita normal termina por volta de 2,5s. Passando disso, algo
-      // travou: mostra o titulo inteiro. Nao faz nada se ja terminou.
-      agendar(acenderTudo, 4200);
-
-      // So escreve depois que as fontes estao prontas: um swap do Poppins 700
-      // no meio da animacao remontaria a linha e causaria engasgo.
-      agendar(function () {
-        if (fechado) return;
-        if (document.fonts && document.fonts.ready) {
-          document.fonts.ready.then(function () {
-            if (!fechado) escrever();
-          })['catch'](function () { if (!fechado) escrever(); });
-        } else {
-          escrever();
-        }
-      }, 980);
-    }, 400);
+      // alguns navegadores ignoram o atributo autoplay em elemento criado
+      // por script; o play() explicito resolve. Se ainda assim for bloqueado,
+      // o poster continua na tela e o botao de som serve como play.
+      var p = video.play();
+      if (p && p['catch']) p['catch'](function () { wrap.classList.add('is-pausado'); });
+    }, semMovimento ? 0 : 400);
   })();
 })();
