@@ -125,11 +125,11 @@
     /* ---------------------------------------------------------- título */
     h1{font:700 2.15rem/1 'Playfair Display','Georgia',serif;
       color:var(--navy);letter-spacing:.3em;text-align:center;
-      margin:.85rem 0 0;text-indent:.3em}
+      margin:.7rem 0 0;text-indent:.3em}
     /* o risco com losangos nas pontas: o mesmo papel do fio da moldura,
        em miniatura — é o que faz a peça parecer desenhada e não montada */
     .risco{display:flex;align-items:center;justify-content:center;gap:.55rem;
-      margin:.5rem auto .7rem}
+      margin:.42rem auto .55rem}
     .risco i{display:block;width:74px;height:2px;background:var(--ouro)}
     .risco u{display:block;width:6px;height:6px;background:var(--ouro);
       transform:rotate(45deg);text-decoration:none}
@@ -142,7 +142,7 @@
     .nome.longo{font-size:1.72rem}
     .nome.muitolongo{font-size:1.42rem}
     .cpf{text-align:center;color:var(--fraco);font-size:.86rem;
-      letter-spacing:.04em;margin-bottom:.75rem}
+      letter-spacing:.04em;margin-bottom:.55rem}
 
     .texto{text-align:center;font-size:.95rem;line-height:1.72;
       max-width:770px;margin:0 auto;color:#2b3947}
@@ -170,25 +170,62 @@
 
     /* ---------------------------------------------------- assinaturas */
     .assinaturas{margin-top:auto;display:flex;justify-content:center;
-      gap:5.5rem;padding-bottom:2.6rem}
-    .ass{text-align:center;min-width:240px;max-width:300px}
+      gap:5.5rem;padding-bottom:3.1rem}
+    .ass{text-align:center;min-width:240px;max-width:300px;position:relative}
     .ass hr{border:0;border-top:1.2px solid rgba(22,32,44,.55);
       margin:0 0 .35rem}
     .ass b{display:block;font:600 .88rem 'Poppins',sans-serif;
       color:var(--navy)}
-    .ass span{display:block;font-size:.74rem;color:var(--fraco);
-      line-height:1.45}
+    /* Quatro linhas embaixo do nome agora (dois cargos, a função e o
+       registro). Com o entrelinha antigo a coluna passava por cima do
+       rodapé numa folha de altura fixa. */
+    .ass span{display:block;font-size:.72rem;color:var(--fraco);
+      line-height:1.3}
+    /* A rubrica. A altura é fixa e existe MESMO SEM IMAGEM: assim a coluna
+       de quem assina e a do aluno ficam com a linha na mesma altura, e o
+       certificado não muda de desenho conforme a assinatura esteja
+       carregada ou não. */
+    /* A rubrica NÃO ocupa altura. Ela flutua logo acima da linha, ancorada
+       nela, e por isso não empurra nada.
+       Medido: com ela no fluxo, mais a linha nova do segundo cargo, a coluna
+       cresceu 73px numa folha de altura fixa (540pt). O texto transbordava
+       o miolo e ia parar por cima do rodapé, que é posicionado pelo pé da
+       folha. Fora do fluxo, o desenho volta a ser o mesmo com ou sem
+       assinatura carregada. */
+    .ass__rubrica{position:absolute;left:0;right:0;bottom:100%;height:52px;
+      display:flex;align-items:flex-end;justify-content:center;
+      pointer-events:none}
+    .ass__rubrica img{max-height:52px;max-width:220px;object-fit:contain;
+      /* multiply apaga o fundo branco de um escaneado comum: quem mandar
+         PNG com fundo transparente ganha o mesmo resultado, e quem mandar
+         JPG do papel não fica com um retângulo branco sobre a linha */
+      mix-blend-mode:multiply}
 
     /* ------------------------------------------------------- rodapé */
     .rodape{position:absolute;left:52px;right:52px;bottom:18px;
       display:flex;justify-content:space-between;align-items:center;
-      font-size:.68rem;color:var(--fraco);z-index:4}
+      gap:1rem;font-size:.68rem;color:var(--fraco);z-index:4}
+    /* O endereço do site em navy: é a assinatura visual da clínica no
+       papel, e some no cinza do resto do rodapé se ficar igual. */
+    .rodape__site{font:700 .72rem 'Poppins',sans-serif;color:var(--navy);
+      letter-spacing:.02em}
     /* O código num quadro próprio, como selo fiscal: é o que o auditor
        digita, e ele precisa saltar do resto do rodapé. */
     .codigo{font:700 .8rem 'Consolas',monospace;color:var(--navy);
       letter-spacing:.1em;border:1.2px solid var(--ouro);
       padding:.24rem .6rem;background:rgba(255,255,255,.75);
       border-radius:3px;white-space:nowrap}
+    /* O QR e o código andam juntos: quem tem câmera aponta, quem não tem
+       digita. Os dois levam à mesma conferência, e o papel serve nos dois
+       casos. */
+    .confere{display:flex;align-items:center;gap:.5rem;position:relative}
+    /* O QR flutua acima do código, na goteira direita. Fora do fluxo ele
+       não tem altura, e o rodapé volta a ter a altura de uma linha de
+       texto. Medido: no fluxo, ele levava o topo do rodapé de 469 para
+       442px e passava por cima do registro profissional. */
+    .qr{position:absolute;right:0;bottom:100%;margin-bottom:5px;
+       width:46px;height:46px;line-height:0}
+    .qr svg{width:46px;height:46px;display:block;shape-rendering:crispEdges}
 
     /* ------------------------------------- verso: conteúdo programático */
     .verso h2{font:700 1.28rem 'Playfair Display','Georgia',serif;
@@ -241,6 +278,7 @@
 
   <script src="../js/supabase-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
   <script>
   (function () {
     // =================================================================
@@ -250,9 +288,63 @@
     var INSTRUTORA = {
       nome: 'Anandda Fortuna Ferreira Lima',
       cargo: 'Engenheira de Segurança do Trabalho',
+      cargo2: 'Higienista Ocupacional',
+      cargo3: 'Responsável Técnica / Instrutora',
       registro: 'CREA-BA: 0518911586'
     };
     var CIDADE = 'Camaçari';
+    var SITE = 'clinicamedicinahumana.com.br';
+
+    // A imagem da assinatura, no bucket PRIVADO. Caminho fixo: o admin
+    // sobrescreve este arquivo quando a responsável muda.
+    //
+    // Não fica no site junto com as outras imagens de propósito. Assinatura
+    // escaneada em endereço público e adivinhável é assinatura que qualquer
+    // um baixa e cola em qualquer papel. Aqui ela só sai para quem está
+    // logado, e a página de conferência pública não a mostra: para o
+    // auditor, o que prova o documento é o código.
+    var ASSINATURA = 'responsavel/assinatura.png';
+
+    // O QR LEVA DIRETO PARA A CONFERÊNCIA, com o código já preenchido.
+    //
+    // É o que muda o jogo contra falsificação. A imagem da assinatura não
+    // protege nada: quem quer falsificar recorta a rubrica do PDF e cola
+    // em outro papel, e nenhum desenho impede isso. O que denuncia a
+    // fraude é a consulta: se o nome do papel não bate com o nome que o
+    // site devolve, o documento é falso, e não há como falsificar a
+    // resposta do servidor da clínica.
+    //
+    // Só que conferência que dá trabalho não é feita. Digitar um código de
+    // catorze caracteres a mão é trabalho; apontar a câmera não é. O QR
+    // existe para tirar a desculpa de não conferir.
+    function qrDoCodigo(codigo) {
+      try {
+        if (typeof qrcode !== 'function') return '';
+        // Correção M, e não H. H aguenta mais estrago no papel, mas exige
+        // mais módulos para o mesmo endereço, e módulo menor no espaço que
+        // o rodapé permite é o que de fato impede a câmera de ler. Entre
+        // resistir a mancha e ser legível, legível ganha.
+        var q = qrcode(0, 'M');
+        q.addData('https://' + SITE + '/treinamento/validar.html?c=' + codigo);
+        q.make();
+        return q.createSvgTag({ cellSize: 2, margin: 0, scalable: true });
+      } catch (e) {
+        // Sem QR o certificado continua válido: o código impresso e a
+        // página de conferência não dependem dele.
+        return '';
+      }
+    }
+
+    // Se não houver imagem, o certificado sai com a linha em branco, para
+    // assinar à mão. Nunca sai quebrado nem com um ícone de imagem faltando.
+    var urlAssinatura = null;
+    async function buscarAssinatura() {
+      try {
+        var r = await sb.storage.from('treinamentos')
+          .createSignedUrl(ASSINATURA, 60 * 10);
+        if (!r.error && r.data && r.data.signedUrl) urlAssinatura = r.data.signedUrl;
+      } catch (e) { urlAssinatura = null; }
+    }
 
     var sb = supabase.createClient(window.SUPA.url, window.SUPA.key);
     var alvo = document.getElementById('conteudo');
@@ -350,17 +442,31 @@
         '</p>' +
         '<p class="cidade">' + CIDADE + ', ' + porExtenso(d.cert.emitido_em) + '.</p>' +
         '<div class="assinaturas">' +
-          '<div class="ass"><hr /><b>' + INSTRUTORA.nome + '</b>' +
+          '<div class="ass">' +
+            // A rubrica fica ACIMA da linha, encostada nela, como assinatura
+            // de verdade. O espaço é reservado esteja ela lá ou não, senão a
+            // coluna da esquerda sobe e as duas linhas ficam desalinhadas.
+            '<div class="ass__rubrica">' +
+              (urlAssinatura
+                ? '<img src="' + urlAssinatura + '" alt="" />' : '') +
+            '</div><hr /><b>' + INSTRUTORA.nome + '</b>' +
             '<span>' + INSTRUTORA.cargo + '</span>' +
+            '<span>' + INSTRUTORA.cargo2 + '</span>' +
+            '<span>' + INSTRUTORA.cargo3 + '</span>' +
             '<span>' + INSTRUTORA.registro + '</span></div>' +
-          '<div class="ass"><hr /><b>' + seguro(d.aluno.nome) + '</b>' +
+          '<div class="ass"><div class="ass__rubrica"></div><hr /><b>' +
+            seguro(d.aluno.nome) + '</b>' +
             '<span>Colaborador</span>' +
             '<span>CPF: ' + cpfBonito(d.aluno.cpf) + '</span></div>' +
         '</div>' +
         '<div class="rodape">' +
-          '<span>Confira a autenticidade em ' +
-            'clinicamedicinahumana.com.br/treinamento/validar.html</span>' +
-          '<span class="codigo">' + seguro(d.cert.codigo) + '</span>' +
+          '<span><b class="rodape__site">' + SITE + '</b></span>' +
+          '<span>Aponte a câmera para o código ao lado, ou confira em ' +
+            SITE + '/treinamento/validar.html</span>' +
+          '<span class="confere">' +
+            '<i class="qr">' + qrDoCodigo(d.cert.codigo) + '</i>' +
+            '<b class="codigo">' + seguro(d.cert.codigo) + '</b>' +
+          '</span>' +
         '</div>' +
       '</div></div>';
     }
@@ -455,9 +561,10 @@
             amostra = { cert: AMOSTRA.cert, aluno: AMOSTRA.aluno, curso: c };
           }
         }
+        await buscarAssinatura();
         alvo.innerHTML = folhaFrente(amostra) + folhaVerso(amostra);
         document.title = 'Certificado (amostra)';
-        document.querySelectorAll('.rodape span:first-child').forEach(
+        document.querySelectorAll('.rodape span:nth-child(2)').forEach(
           function (s) { s.textContent = 'AMOSTRA: não é documento válido'; });
         if (qual && amostra === AMOSTRA) {
           alvo.insertAdjacentHTML('afterbegin', '<p class="aviso">Não achei ' +
@@ -543,6 +650,7 @@
           empresa: congelado.empresa || perfil.data.empresa
         }
       };
+      await buscarAssinatura();
       alvo.innerHTML = folhaFrente(d) + folhaVerso(d);
       document.title = 'Certificado de ' + d.aluno.nome;
     })();

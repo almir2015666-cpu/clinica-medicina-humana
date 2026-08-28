@@ -138,10 +138,21 @@
         .replace(/"/g, '&quot;');
     }
 
-    $('formVal').addEventListener('submit', async function (ev) {
+    $('formVal').addEventListener('submit', function (ev) {
       ev.preventDefault();
-      var codigo = $('codigo').value.trim();
+      conferir($('codigo').value.trim());
+    });
+
+    // CONFERIR PELO ENDEREÇO, e não só pelo formulário.
+    //
+    // O QR do certificado leva para esta página com o código junto. Sem
+    // isto, quem lê o QR cai num formulário vazio e tem de digitar o
+    // código à mão, que é exatamente o trabalho que o QR existe para
+    // evitar. E conferência que dá trabalho é conferência que não é feita:
+    // um certificado falso só é descoberto se alguém olhar.
+    async function conferir(codigo) {
       if (!codigo) return;
+      $('codigo').value = codigo;
 
       var b = $('btnVal');
       b.disabled = true; b.textContent = 'Conferindo…';
@@ -197,7 +208,20 @@
         '</dl>' +
         (vencido ? '<p>O treinamento é verdadeiro, mas o prazo de reciclagem ' +
                    'já passou. Procure a empresa para renovar.</p>' : '');
-    });
+    }
+
+    // Aceita ?c=CODIGO e também #CODIGO: o primeiro é o que o QR usa, o
+    // segundo é o que sobrevive quando alguém copia o endereço no
+    // WhatsApp e o aplicativo corta a query.
+    (function () {
+      var url = new URLSearchParams(location.search);
+      var c = url.get('c') || url.get('codigo') ||
+              decodeURIComponent(String(location.hash || '').replace(/^#/, ''));
+      c = String(c || '').trim().slice(0, 60);
+      // Só dígitos, letras e traço. O código entra num innerHTML mais
+      // adiante, e endereço é coisa que qualquer um monta.
+      if (c && /^[A-Za-z0-9-]+$/.test(c)) conferir(c);
+    })();
   })();
   </script>
   <script src="../js/idioma.js?v=3"></script>
