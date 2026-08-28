@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Aulas e vídeos | Administração</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/interno.css?v=1" />
+  <link rel="icon" type="image/png" href="../assets/favicon.png?v=2" />
+  <style>
+    /* =================================================================
+       Só a equipe da clínica entra aqui. Usa o tema escuro da área
+       interna para não ter uma terceira cara no projeto — e os cursos
+       aparecem em cartões no meio, iguais aos do aluno, para você ver a
+       plataforma do mesmo jeito que ela é vista do outro lado.
+       ================================================================= */
+    .adm{padding:3rem 0 4rem}
+    .adm__cab{margin-bottom:2rem}
+    .adm__cab h1{font-size:clamp(1.5rem,3vw,2.1rem)}
+    .adm__cab p{color:var(--meio);margin:.6rem 0 0}
+
+    /* o cartão do curso: o número de aulas é o que importa aqui, então
+       ele vem grande. Sem vídeo é um problema, e tem de gritar. */
+    .cadm{position:relative;background:var(--carvao);
+      border:1px solid var(--linha-i);border-radius:16px;padding:1.5rem 1.4rem;
+      cursor:pointer;display:flex;flex-direction:column;min-height:180px;
+      transition:transform .3s cubic-bezier(.22,.61,.36,1),border-color .3s,
+      box-shadow .3s;text-align:left;font:inherit;color:inherit;width:100%}
+    .cadm:hover{transform:translateY(-6px);border-color:var(--ambar);
+      box-shadow:0 18px 44px rgba(0,0,0,.5)}
+    .cadm__tag{align-self:flex-start;background:var(--carvao2);
+      color:var(--ambar);border:1px solid var(--linha-i);
+      font:700 .74rem 'Poppins',sans-serif;letter-spacing:.05em;
+      padding:.3rem .66rem;border-radius:999px;margin-bottom:.85rem}
+    .cadm h3{font-size:1.06rem;margin-bottom:.35rem}
+    .cadm p{color:var(--meio);font-size:.86rem;margin:0}
+    .cadm__pe{margin-top:auto;padding-top:1rem;display:flex;
+      align-items:baseline;gap:.5rem}
+    .cadm__n{font:800 1.9rem/1 'Poppins',sans-serif;color:var(--claro)}
+    .cadm__n.zero{color:var(--vermelho)}
+    .cadm__un{font-size:.84rem;color:var(--meio)}
+    .cadm__ir{margin-left:auto;color:var(--ambar);
+      font:600 .88rem 'Poppins',sans-serif}
+    .cadm.inativo{opacity:.5}
+
+    .voltar{border:1px solid var(--linha-i);background:transparent;
+      color:var(--claro);cursor:pointer;font:600 .85rem 'Poppins',sans-serif;
+      padding:.5rem 1.1rem;border-radius:999px;margin-bottom:1.4rem}
+    .voltar:hover{border-color:var(--ambar);color:var(--ambar)}
+
+    .aulaadm{background:var(--carvao);border:1px solid var(--linha-i);
+      border-radius:12px;padding:1.05rem 1.2rem;margin-bottom:.7rem;
+      display:flex;align-items:center;gap:1rem}
+    .aulaadm__n{width:28px;height:28px;border-radius:50%;flex-shrink:0;
+      background:var(--carvao2);border:1px solid var(--linha-i);
+      display:flex;align-items:center;justify-content:center;
+      font:700 .78rem 'Poppins',sans-serif;color:var(--meio)}
+    .aulaadm__txt{flex:1;min-width:0}
+    .aulaadm__txt b{display:block;color:var(--claro);font-weight:500;
+      font-size:.95rem}
+    .aulaadm__txt span{font-size:.8rem;color:var(--meio)}
+    .aulaadm__txt span.sem{color:var(--vermelho)}
+    .aulaadm__acoes{display:flex;gap:.4rem;flex-shrink:0}
+    .mini{border:1px solid var(--linha-i);background:transparent;
+      color:var(--claro);cursor:pointer;font:600 .78rem 'Poppins',sans-serif;
+      padding:.4rem .78rem;border-radius:999px}
+    .mini:hover{border-color:var(--ambar);color:var(--ambar)}
+    .mini.perigo:hover{border-color:var(--vermelho);color:var(--vermelho)}
+
+    .form-aula{background:var(--carvao);border:1px solid var(--linha-i);
+      border-radius:12px;padding:1.5rem;margin-top:1.6rem}
+    .form-aula h3{font-size:1.02rem;margin-bottom:1rem}
+    .form-aula label{display:block;font-size:.82rem;font-weight:600;
+      color:var(--claro);margin:.9rem 0 .35rem}
+    .form-aula input[type=text],.form-aula textarea{
+      width:100%;padding:.7rem .9rem;border:1px solid var(--linha-i);
+      border-radius:9px;background:var(--preto);color:var(--claro);
+      font:400 .92rem 'Inter',sans-serif}
+    .form-aula textarea{min-height:70px;resize:vertical}
+    .form-aula input[type=file]{width:100%;color:var(--meio);font-size:.88rem;
+      padding:.7rem 0}
+    .prog{height:6px;border-radius:3px;background:var(--carvao2);
+      overflow:hidden;margin-top:.7rem;display:none}
+    .prog i{display:block;height:100%;background:var(--ambar);width:0;
+      transition:width .3s}
+    .msg{margin-top:1rem;padding:.8rem 1rem;border-radius:9px;font-size:.88rem;
+      display:none;line-height:1.6}
+    .msg.bom{background:rgba(53,196,122,.12);color:var(--verde)}
+    .msg.ruim{background:rgba(239,106,104,.12);color:var(--vermelho)}
+    .login-adm{max-width:400px;margin:5rem auto;background:var(--carvao);
+      border:1px solid var(--linha-i);border-radius:14px;padding:2rem}
+    .login-adm input{width:100%;padding:.7rem .9rem;
+      border:1px solid var(--linha-i);border-radius:9px;background:var(--preto);
+      color:var(--claro);font:400 .92rem 'Inter',sans-serif}
+    .login-adm label{display:block;font-size:.82rem;font-weight:600;
+      color:var(--claro);margin:.9rem 0 .35rem}
+  </style>
+</head>
+<body class="interno">
+
+  <header class="i-topo">
+    <div class="i-container i-topo__in">
+      <a class="i-marca" href="admin.html">
+        <img src="img/logo.png" alt="Clínica Medicina Humana" />
+        <span><b>Medicina Humana</b><span>Administração</span></span>
+      </a>
+      <div class="i-topo__dir">
+        <span class="i-quem" id="quem"></span>
+        <button class="i-sair" id="sair" style="display:none">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- login da equipe -->
+  <div id="viewLogin" style="display:none">
+    <div class="login-adm">
+      <h2 style="font-size:1.2rem;margin-bottom:.4rem">Administração</h2>
+      <p style="color:var(--meio);font-size:.9rem;margin:0 0 1.2rem">
+        Entre com o seu usuário e senha do SistemaCMH.</p>
+      <label for="u">Usuário</label>
+      <input id="u" type="text" autocomplete="username" placeholder="ex.: admin" />
+      <label for="p">Senha</label>
+      <input id="p" type="password" autocomplete="current-password" />
+      <div class="msg ruim" id="erroLogin"></div>
+      <button class="i-botao" id="btnEntrar" style="width:100%;margin-top:1.2rem">
+        Entrar</button>
+    </div>
+  </div>
+
+  <!-- os cursos, no meio -->
+  <main class="adm" id="viewAdm" style="display:none">
+    <div class="i-container">
+      <div id="painelCursos">
+        <div class="adm__cab">
+          <h1>Cursos</h1>
+          <p>Clique num curso para ver as aulas dele e subir os vídeos.</p>
+        </div>
+        <div class="modulos" id="grade"></div>
+      </div>
+
+      <div id="painelAulas" style="display:none">
+        <button class="voltar" id="voltar">← Cursos</button>
+        <div id="corpo"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  (function () {
+    var sb = supabase.createClient(window.SUPA.url, window.SUPA.key);
+    var $ = function (id) { return document.getElementById(id); };
+    var cursos = [], porCurso = {}, atual = null;
+
+    // 2 GB é o teto de um upload direto no Storage do Supabase. Aula de
+    // treinamento passa longe disso, mas avisar antes é melhor do que a
+    // pessoa esperar meia hora para o envio falhar no fim.
+    var LIMITE = 2 * 1024 * 1024 * 1024;
+
+    function seguro(t) {
+      return String(t == null ? '' : t)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function relogio(s) {
+      s = Math.floor(s || 0);
+      return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    }
+    function recado(el, texto, bom) {
+      el.className = 'msg ' + (bom ? 'bom' : 'ruim');
+      el.style.display = texto ? 'block' : 'none';
+      el.innerHTML = texto;
+    }
+
+    // ------------------------------------------------------------- entrar
+    $('btnEntrar').addEventListener('click', entrar);
+    $('p').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') entrar();
+    });
+    $('u').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') $('p').focus();
+    });
+
+    async function entrar() {
+      // TEM de bater com o `normalizar()` do SistemaCMH: lá o acento é
+      // retirado da letra (josé -> jose) antes de a pontuação cair. Aqui,
+      // filtrar direto por [^a-z0-9] comeria o "é" inteiro e viraria "jos",
+      // que é um usuário que não existe — login recusado sem explicação.
+      var login = $('u').value.trim()
+        .normalize('NFKD').replace(/[̀-ͯ]/g, '')
+        .toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!login) return recado($('erroLogin'), 'Digite o usuário.');
+      var r = await sb.auth.signInWithPassword({
+        // o mesmo domínio interno que o SistemaCMH usa
+        email: login + '@orcamentos.clinicamedicinahumana.com.br',
+        password: $('p').value
+      });
+      if (r.error) return recado($('erroLogin'), 'Usuário ou senha incorretos.');
+      abrir();
+    }
+
+    $('sair').addEventListener('click', async function () {
+      await sb.auth.signOut(); location.reload();
+    });
+
+    async function abrir() {
+      var u = (await sb.auth.getUser()).data.user;
+      // quem entrou é mesmo da equipe? A RLS já barraria a gravação, mas
+      // deixar a tela abrir para quem não pode salvar é enganar a pessoa.
+      var eu = (await sb.from('orc_usuarios').select('nome,ativo')
+        .eq('id', u.id).maybeSingle()).data;
+      if (!eu || !eu.ativo) {
+        await sb.auth.signOut();
+        $('viewLogin').style.display = 'block';
+        return recado($('erroLogin'),
+          'Esse usuário não tem acesso à administração.');
+      }
+      $('quem').textContent = eu.nome || '';
+      $('sair').style.display = 'inline-block';
+      $('viewLogin').style.display = 'none';
+      $('viewAdm').style.display = 'block';
+      carregarCursos();
+    }
+
+    // -------------------------------------------------- os cursos no meio
+    async function carregarCursos() {
+      var r = await sb.from('trein_curso')
+        .select('id,codigo,titulo,carga_horaria,ativo').order('ordem');
+      if (r.error) {
+        $('grade').innerHTML = '<p style="color:var(--vermelho)">Não consegui ' +
+          'ler os cursos: ' + seguro(r.error.message) + '</p>';
+        return;
+      }
+      cursos = r.data || [];
+
+      var aulas = (await sb.from('trein_aula').select('id,curso_id')).data || [];
+      porCurso = {};
+      aulas.forEach(function (a) {
+        porCurso[a.curso_id] = (porCurso[a.curso_id] || 0) + 1;
+      });
+
+      if (!cursos.length) {
+        $('grade').innerHTML = '<p style="color:var(--meio)">Nenhum curso no ' +
+          'catálogo. Rode o 02-cursos.sql no Supabase.</p>';
+        return;
+      }
+
+      $('grade').innerHTML = cursos.map(function (c, i) {
+        var n = porCurso[c.id] || 0;
+        return '<button class="cadm entra' + (c.ativo ? '' : ' inativo') +
+          '" data-id="' + c.id + '" style="animation-delay:' +
+          (i * 0.04) + 's">' +
+          '<span class="cadm__tag">' + seguro(c.codigo) + '</span>' +
+          '<h3>' + seguro(c.titulo) + '</h3>' +
+          '<p>' + (c.carga_horaria ? c.carga_horaria + ' horas' : '&nbsp;') +
+            (c.ativo ? '' : ' · inativo') + '</p>' +
+          '<span class="cadm__pe">' +
+            '<span class="cadm__n' + (n ? '' : ' zero') + '">' + n + '</span>' +
+            '<span class="cadm__un">' + (n === 1 ? 'aula' : 'aulas') + '</span>' +
+            '<span class="cadm__ir">' + (n ? 'Ver' : 'Subir vídeo') + ' →</span>' +
+          '</span></button>';
+      }).join('');
+
+      $('grade').querySelectorAll('.cadm').forEach(function (el) {
+        el.addEventListener('click', function () {
+          atual = cursos.find(function (c) { return c.id === el.dataset.id; });
+          $('painelCursos').style.display = 'none';
+          $('painelAulas').style.display = 'block';
+          window.scrollTo({ top: 0 });
+          verCurso();
+        });
+      });
+    }
+
+    $('voltar').addEventListener('click', function () {
+      $('painelAulas').style.display = 'none';
+      $('painelCursos').style.display = 'block';
+      atual = null;
+      carregarCursos();
+    });
+
+    // --------------------------------------------------- as aulas do curso
+    async function verCurso() {
+      $('corpo').innerHTML = '<p style="color:var(--meio)">Carregando…</p>';
+      var aulas = (await sb.from('trein_aula')
+        .select('id,titulo,descricao,video_url,duracao_seg,ordem')
+        .eq('curso_id', atual.id).order('ordem')).data || [];
+
+      var html = '<div class="adm__cab"><h1>' + seguro(atual.titulo) + '</h1>' +
+        '<p>' + seguro(atual.codigo) + ' · ' + aulas.length + ' aula(s). ' +
+        'O aluno assiste na ordem, e só libera a próxima depois de terminar ' +
+        'a anterior.</p></div>';
+
+      html += aulas.map(function (a, i) {
+        var temVideo = !!a.video_url;
+        return '<div class="aulaadm">' +
+          '<span class="aulaadm__n">' + (i + 1) + '</span>' +
+          '<span class="aulaadm__txt"><b>' + seguro(a.titulo) + '</b>' +
+          '<span class="' + (temVideo ? '' : 'sem') + '">' +
+            (temVideo
+              ? 'vídeo publicado' + (a.duracao_seg ? ' · ' + relogio(a.duracao_seg) : '')
+              : 'SEM VÍDEO — o aluno não consegue assistir') +
+          '</span></span>' +
+          '<span class="aulaadm__acoes">' +
+            (i > 0 ? '<button class="mini" data-sobe="' + a.id + '">↑</button>' : '') +
+            (i < aulas.length - 1 ? '<button class="mini" data-desce="' + a.id + '">↓</button>' : '') +
+            '<button class="mini perigo" data-apaga="' + a.id + '">Tirar</button>' +
+          '</span></div>';
+      }).join('') || '<p style="color:var(--meio)">Nenhuma aula ainda. ' +
+        'Suba a primeira aqui embaixo.</p>';
+
+      html += '<div class="form-aula">' +
+        '<h3>Nova aula</h3>' +
+        '<label for="t">Título</label>' +
+        '<input id="t" type="text" placeholder="ex.: Aula 1 — o que a norma exige" />' +
+        '<label for="d">Descrição <span style="font-weight:400;color:var(--meio)">(opcional)</span></label>' +
+        '<textarea id="d" placeholder="aparece embaixo do vídeo"></textarea>' +
+        '<label for="arq">Vídeo</label>' +
+        '<input id="arq" type="file" accept="video/*" />' +
+        '<div class="prog" id="prog"><i id="progI"></i></div>' +
+        '<div class="msg" id="msgAula"></div>' +
+        '<button class="i-botao" id="salvar" style="margin-top:1.2rem">' +
+        'Publicar aula</button>' +
+        '</div>';
+
+      $('corpo').innerHTML = html;
+      $('salvar').addEventListener('click', function () { salvarAula(aulas); });
+      $('corpo').querySelectorAll('[data-apaga]').forEach(function (b) {
+        b.addEventListener('click', function () { apagar(b.dataset.apaga); });
+      });
+      $('corpo').querySelectorAll('[data-sobe]').forEach(function (b) {
+        b.addEventListener('click', function () { mover(b.dataset.sobe, -1, aulas); });
+      });
+      $('corpo').querySelectorAll('[data-desce]').forEach(function (b) {
+        b.addEventListener('click', function () { mover(b.dataset.desce, 1, aulas); });
+      });
+    }
+
+    // ------------------------------------------------------- salvar a aula
+    async function salvarAula(aulas) {
+      var titulo = $('t').value.trim();
+      var arquivo = $('arq').files[0];
+      var msg = $('msgAula'), botao = $('salvar');
+      if (!titulo) return recado(msg, 'Dê um título à aula.');
+      if (!arquivo) return recado(msg, 'Escolha o arquivo de vídeo.');
+      if (arquivo.size > LIMITE) {
+        return recado(msg, 'O arquivo tem ' +
+          (arquivo.size / 1073741824).toFixed(1) + ' GB. O limite é 2 GB — ' +
+          'comprima o vídeo ou divida em duas aulas.');
+      }
+
+      botao.disabled = true; botao.textContent = 'Enviando…';
+      $('prog').style.display = 'block';
+      $('progI').style.width = '15%';
+      recado(msg, '');
+
+      // o caminho começa pelo id do curso: é assim que a regra do Storage
+      // sabe se aquele aluno pode baixar (ela lê a primeira pasta)
+      var ext = (arquivo.name.split('.').pop() || 'mp4').toLowerCase();
+      var caminho = atual.id + '/' + Date.now() + '.' + ext;
+
+      // a duração sai do próprio arquivo: pedir para digitar é pedir para
+      // errar, e o número aparece para o aluno
+      var duracao = await new Promise(function (ok) {
+        var v = document.createElement('video');
+        v.preload = 'metadata';
+        v.onloadedmetadata = function () {
+          URL.revokeObjectURL(v.src); ok(Math.round(v.duration) || null);
+        };
+        v.onerror = function () { ok(null); };
+        v.src = URL.createObjectURL(arquivo);
+      });
+
+      var envio = await sb.storage.from('treinamentos')
+        .upload(caminho, arquivo, { upsert: false, contentType: arquivo.type });
+      $('progI').style.width = '100%';
+
+      if (envio.error) {
+        botao.disabled = false; botao.textContent = 'Publicar aula';
+        $('prog').style.display = 'none';
+        return recado(msg, 'Não consegui enviar o vídeo: ' + envio.error.message);
+      }
+
+      var r = await sb.from('trein_aula').insert({
+        curso_id: atual.id, titulo: titulo,
+        descricao: $('d').value.trim() || null,
+        video_url: caminho, duracao_seg: duracao,
+        ordem: aulas.length + 1
+      });
+      botao.disabled = false; botao.textContent = 'Publicar aula';
+      $('prog').style.display = 'none';
+
+      if (r.error) {
+        // o vídeo subiu mas a aula não gravou: apaga o arquivo, senão fica
+        // ocupando espaço sem nada apontando para ele
+        await sb.storage.from('treinamentos').remove([caminho]);
+        return recado(msg, 'Não consegui salvar a aula: ' + r.error.message);
+      }
+      verCurso();
+    }
+
+    async function apagar(id) {
+      if (!confirm('Tirar esta aula? O vídeo também é apagado.')) return;
+      var a = (await sb.from('trein_aula').select('video_url')
+        .eq('id', id).maybeSingle()).data;
+      await sb.from('trein_aula').delete().eq('id', id);
+      if (a && a.video_url) {
+        await sb.storage.from('treinamentos').remove([a.video_url]);
+      }
+      verCurso();
+    }
+
+    async function mover(id, passo, aulas) {
+      var i = aulas.findIndex(function (a) { return a.id === id; });
+      var j = i + passo;
+      if (j < 0 || j >= aulas.length) return;
+      // troca a ordem das duas: mexer só numa deixaria duas aulas com o
+      // mesmo número, e aí a sequência vira sorteio
+      await sb.from('trein_aula').update({ ordem: aulas[j].ordem }).eq('id', aulas[i].id);
+      await sb.from('trein_aula').update({ ordem: aulas[i].ordem }).eq('id', aulas[j].id);
+      verCurso();
+    }
+
+    // ------------------------------------------------------------- início
+    sb.auth.getSession().then(function (s) {
+      if (s.data.session) abrir();
+      else $('viewLogin').style.display = 'block';
+    });
+  })();
+  </script>
+</body>
+</html>

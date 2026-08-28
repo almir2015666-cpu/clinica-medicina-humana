@@ -1,0 +1,352 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Entrar | Treinamentos em NRs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/estilo.css?v=1" />
+  <link rel="stylesheet" href="css/acessibilidade.css?v=1" />
+  <link rel="icon" type="image/png" href="../assets/favicon.png?v=2" />
+</head>
+<body>
+
+  <div class="faixa">
+    <div class="container faixa__in">
+      <span>(71) 3493-7205</span>
+      <a href="https://wa.me/5571993010103?text=Ol%C3%A1%21%20Gostaria%20de%20falar%20sobre%20treinamentos%20em%20NRs." target="_blank" rel="noopener">Comercial: (71) 99301-0103</a>
+      <div class="faixa__dir">
+        <a href="../index.html">Site da clínica</a>
+        <a href="../contatos.html">Contatos</a>
+      </div>
+    </div>
+  </div>
+
+  <header class="topo" id="topo">
+    <div class="container topo__in">
+      <!-- a logo VAI dentro do marca__chip. Solta, ela sai no tamanho
+           natural do arquivo e estoura o cabeçalho — era o que acontecia
+           aqui, e só aqui: as outras páginas já usavam o chip. -->
+      <a class="marca" href="index.html">
+        <span class="marca__chip"><img src="img/logo.png" alt="Clínica Medicina Humana" /></span>
+        <span class="marca__txt"><b>Medicina Humana</b><span>Treinamentos em NRs</span></span>
+      </a>
+      <nav class="topo__nav">
+        <a href="index.html#cursos">Cursos</a>
+        <a href="index.html#como">Como funciona</a>
+        <a href="validar.html">Validar certificado</a>
+        <a class="btn btn--zap" target="_blank" rel="noopener" href="https://wa.me/5571993010103?text=Ol%C3%A1%21%20Gostaria%20de%20solicitar%20um%20or%C3%A7amento%20de%20treinamento%20em%20NRs."><svg viewBox="0 0 32 32" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.2 1.6 6L4 27l6.2-1.6c1.7.9 3.7 1.4 5.8 1.4 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 21.8c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.7 1 1-3.6-.2-.4c-1-1.6-1.5-3.4-1.5-5.2 0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 9.8-10 9.8zm5.5-7.3c-.3-.2-1.8-.9-2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.4.5-.6.1-.2.2-.3.3-.5.1-.2 0-.4 0-.6-.1-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.2-.5-.4z"/></svg><span class="btn__longo">Solicitar orçamento</span><span class="btn__curto">Orçamento</span></a>
+        <a class="btn btn--ambar" href="index.html">Ver os cursos</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="entrar">
+    <div class="container">
+      <div class="secao__cab">
+        <span class="risco"></span>
+        <h2>Área do Aluno</h2>
+        <p>Entre com o seu CPF, ou use o código que a sua empresa enviou.</p>
+      </div>
+<!-- ============ ENTRAR ============ -->
+        <div class="caixa" id="viewLogin">
+          <div class="abas">
+            <button class="aba on" id="abaEntrar" type="button">Já tenho conta</button>
+            <button class="aba" id="abaResgatar" type="button">Tenho um código</button>
+            <!-- "Esqueci a senha" NÃO é aba. Recuperar senha é coisa rara e
+                 de exceção; ocupar um terço do topo com isso dava a ela o
+                 mesmo peso de entrar e de resgatar. Fica no link embaixo do
+                 formulário, onde a pessoa olha quando a senha não funciona. -->
+          </div>
+
+          <form class="form" id="formLogin" autocomplete="on">
+            <h2>Entrar</h2>
+            <label for="loginCpf">CPF</label>
+            <input id="loginCpf" type="text" inputmode="numeric" autocomplete="username"
+                   placeholder="000.000.000-00" maxlength="14" />
+            <label for="loginSenha">Senha</label>
+            <input id="loginSenha" type="password" autocomplete="current-password"
+                   placeholder="a senha que você criou" />
+            <p class="erro" id="erroLogin" role="alert"></p>
+            <button class="btn btn--navy " id="btnEntrar" type="submit">Entrar</button>
+            <p class="dica">Primeira vez? Use a aba <strong>Tenho um código</strong> com o
+              cupom que a sua empresa enviou.<br />
+              Esqueceu a senha? <a href="#senha" id="linkSenha">Crie uma nova
+              com o código da empresa</a>.</p>
+          </form>
+
+          <form class="form" id="formSenha" style="display:none" autocomplete="off">
+            <h2>Criar uma senha nova</h2>
+            <p class="dica" style="margin:0 0 .4rem">Use o mesmo código que a sua
+              empresa enviou. Se não tiver mais o código em mãos, peça ao RH.</p>
+            <label for="recCpf">CPF</label>
+            <input id="recCpf" type="text" inputmode="numeric" autocomplete="username"
+                   placeholder="000.000.000-00" maxlength="14" />
+            <label for="recCodigo">Código da empresa</label>
+            <input id="recCodigo" type="text" placeholder="NR35-0000-0000-0000" autocomplete="off" />
+            <label for="recSenha">Nova senha</label>
+            <input id="recSenha" type="password" autocomplete="new-password"
+                   placeholder="pelo menos 6 caracteres" />
+            <p class="erro" id="erroSenha" role="alert"></p>
+            <button class="btn btn--navy " id="btnSenha" type="submit">Criar nova senha</button>
+            <p class="dica"><a href="#" id="voltarLogin">← Voltar para o login</a></p>
+          </form>
+
+          <form class="form" id="formResgate" style="display:none" autocomplete="on">
+            <h2>Usar o código da empresa</h2>
+            <label for="resCodigo">Código do cupom</label>
+            <input id="resCodigo" type="text" placeholder="NR35-0000-0000-0000" autocomplete="off" />
+            <div class="cupom" id="cupomInfo"></div>
+
+            <label for="resNome">Nome completo</label>
+            <input id="resNome" type="text" autocomplete="name"
+                   placeholder="como deve sair no certificado" />
+            <label for="resCpf">CPF</label>
+            <input id="resCpf" type="text" inputmode="numeric" autocomplete="username"
+                   placeholder="000.000.000-00" maxlength="14" />
+            <!-- o e-mail NÃO recupera senha (quem faz isso é o código da
+                 empresa, no link embaixo do login). Fica só como contato. -->
+            <label for="resEmail">E-mail <span>(opcional)</span></label>
+            <input id="resEmail" type="email" autocomplete="email" placeholder="para a clínica falar com você" />
+            <label for="resSenha">Crie uma senha</label>
+            <input id="resSenha" type="password" autocomplete="new-password"
+                   placeholder="pelo menos 6 caracteres" />
+            <p class="erro" id="erroResgate" role="alert"></p>
+            <button class="btn btn--navy " id="btnResgatar" type="submit">Liberar meus cursos</button>
+            <p class="dica">O nome e o CPF saem no certificado. Confira antes de continuar.</p>
+          </form>
+        </div>
+
+        <!-- Aqui NÃO existe mais painel de cursos.
+             Ele foi para o painel.html, na área interna escura, e esta
+             página voltou a ser só a porta de entrada. Enquanto os dois
+             existiam, o aluno logado caía nesta tela clara e vazia em vez
+             do painel de verdade. -->
+        <p class="dica" id="jaEntrou" style="display:none;text-align:center">
+          Você já está conectado. <a href="painel.html">Ir para os meus
+          treinamentos →</a>
+        </p>
+
+    </div>
+  </main>
+
+  <footer class="rodape">
+    <div class="container">
+      <div class="rodape__grade">
+        <div>
+          <h4>Precisa de ajuda?</h4>
+          <p>Se o código não funcionar ou as vagas tiverem acabado, fale com o
+             RH da sua empresa.</p>
+          <p>Comercial: (71) 99301-0103</p>
+        </div>
+        <div><h4>Treinamentos</h4>
+          <a href="index.html#cursos">Todos os cursos</a>
+          <a href="index.html#como">Como funciona</a>
+          <a href="validar.html">Validar certificado</a></div>
+        <div><h4>A clínica</h4>
+          <a href="../index.html">Site principal</a>
+          <a href="../contatos.html">Contatos</a></div>
+      </div>
+      <div class="rodape__fim">© 2026 Clínica Medicina Humana. Todos os direitos reservados.</div>
+    </div>
+  </footer>
+
+  <script src="js/acessibilidade.js?v=1"></script>
+  <script src="../js/supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+  (function () {
+    var sb = supabase.createClient(window.SUPA.url, window.SUPA.key);
+    var $ = function (id) { return document.getElementById(id); };
+    var digitos = function (s) { return String(s || '').replace(/\D/g, ''); };
+
+    // ---- máscara de CPF, só para ficar legível enquanto digita ----------
+    function mascaraCpf(el) {
+      el.addEventListener('input', function () {
+        var d = digitos(el.value).slice(0, 11), s = d;
+        if (d.length > 9) s = d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6,9)+'-'+d.slice(9);
+        else if (d.length > 6) s = d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6);
+        else if (d.length > 3) s = d.slice(0,3)+'.'+d.slice(3);
+        el.value = s;
+      });
+    }
+    mascaraCpf($('loginCpf')); mascaraCpf($('resCpf')); mascaraCpf($('recCpf'));
+
+    function erro(el, texto) { el.textContent = texto || ''; el.style.display = texto ? 'block' : 'none'; }
+
+    // ---- trocar de aba -------------------------------------------------
+    var ABAS = { entrar: 'formLogin', resgatar: 'formResgate', senha: 'formSenha' };
+    function aba(qual) {
+      Object.keys(ABAS).forEach(function (k) {
+        $(ABAS[k]).style.display = (k === qual) ? 'block' : 'none';
+      });
+      // com o formulário da senha aberto nenhuma aba fica marcada: ele não
+      // é aba, é um desvio de dentro do "Já tenho conta"
+      $('abaEntrar').classList.toggle('on', qual === 'entrar');
+      $('abaResgatar').classList.toggle('on', qual === 'resgatar');
+      erro($('erroLogin'), ''); erro($('erroResgate'), ''); erro($('erroSenha'), '');
+    }
+    $('abaEntrar').addEventListener('click', function () { aba('entrar'); });
+    $('abaResgatar').addEventListener('click', function () { aba('resgatar'); });
+    $('linkSenha').addEventListener('click', function (ev) {
+      ev.preventDefault(); aba('senha');
+    });
+    $('voltarLogin').addEventListener('click', function (ev) {
+      ev.preventDefault(); aba('entrar');
+    });
+    // quem chega pelo link "usar meu código" já cai na aba certa
+    if (location.hash === '#codigo') aba('resgatar');
+    if (location.hash === '#senha') aba('senha');
+
+    // ---- espiar o cupom enquanto digita ---------------------------------
+    // Mostra o que o código dá ANTES de a pessoa preencher o resto. Se ela
+    // digitou errado, descobre agora, e não depois de escrever tudo.
+    var timerCupom = null;
+    $('resCodigo').addEventListener('input', function () {
+      clearTimeout(timerCupom);
+      var cod = $('resCodigo').value.trim();
+      var caixa = $('cupomInfo');
+      if (cod.length < 4) { caixa.className = 'cupom'; caixa.innerHTML = ''; return; }
+      timerCupom = setTimeout(async function () {
+        var r = await sb.rpc('trein_espiar_cupom', { p_codigo: cod });
+        var d = r && r.data;
+        if (!d || !d.valido) {
+          caixa.className = 'cupom ruim';
+          caixa.textContent = (d && d.motivo === 'esgotado')
+            ? 'As vagas desse código acabaram. Procure o RH da sua empresa.'
+            : 'Código não encontrado ou fora do prazo.';
+          return;
+        }
+        var lista = (d.cursos || []).map(function (c) {
+          return '<li>' + c.titulo + (c.carga_horaria ? ' · ' + c.carga_horaria + 'h' : '') + '</li>';
+        }).join('');
+        caixa.className = 'cupom bom';
+        caixa.innerHTML = '<strong>' + (d.empresa || 'Código válido') + '</strong>'
+                        + '<ul>' + lista + '</ul>';
+      }, 400);
+    });
+
+    // ---- resgatar -------------------------------------------------------
+    $('formResgate').addEventListener('submit', async function (ev) {
+      ev.preventDefault();
+      erro($('erroResgate'), '');
+      var b = $('btnResgatar');
+      var cpf = digitos($('resCpf').value);
+      var senha = $('resSenha').value;
+      if (!$('resCodigo').value.trim()) return erro($('erroResgate'), 'Digite o código do cupom.');
+      if ($('resNome').value.trim().split(/\s+/).length < 2)
+        return erro($('erroResgate'), 'Escreva o nome completo. Ele sai no certificado.');
+      if (cpf.length !== 11) return erro($('erroResgate'), 'Digite um CPF válido (11 dígitos).');
+      if (senha.length < 6) return erro($('erroResgate'), 'A senha precisa de pelo menos 6 caracteres.');
+
+      b.disabled = true; b.textContent = 'Liberando…';
+      var resp;
+      try {
+        resp = await fetch(window.SUPA.url + '/functions/v1/' + window.SUPA.resgateFunction, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', apikey: window.SUPA.key },
+          body: JSON.stringify({
+            codigo: $('resCodigo').value.trim(), cpf: cpf,
+            nome: $('resNome').value.trim(), senha: senha,
+            email: $('resEmail').value.trim() || null
+          })
+        }).then(function (r) { return r.json(); });
+      } catch (e) {
+        b.disabled = false; b.textContent = 'Liberar meus cursos';
+        return erro($('erroResgate'), 'Não consegui falar com o servidor. Tente de novo.');
+      }
+      b.disabled = false; b.textContent = 'Liberar meus cursos';
+      if (!resp || resp.error) return erro($('erroResgate'), (resp && resp.error) || 'Não consegui resgatar o código.');
+
+      // resgatou: já entra, para não pedir a senha que ele acabou de criar
+      var r = await sb.auth.signInWithPassword({
+        email: cpf + '@' + window.SUPA.alunoEmailDomain, password: senha
+      });
+      if (r.error) { aba('entrar'); return erro($('erroLogin'), 'Cursos liberados! Agora entre com o seu CPF e a senha que você criou.'); }
+      location.href = 'painel.html';
+    });
+
+    // ---- entrar ---------------------------------------------------------
+    $('formLogin').addEventListener('submit', async function (ev) {
+      ev.preventDefault();
+      erro($('erroLogin'), '');
+      var cpf = digitos($('loginCpf').value);
+      if (cpf.length !== 11) return erro($('erroLogin'), 'Digite um CPF válido (11 dígitos).');
+      var b = $('btnEntrar');
+      b.disabled = true; b.textContent = 'Entrando…';
+      var r = await sb.auth.signInWithPassword({
+        email: cpf + '@' + window.SUPA.alunoEmailDomain, password: $('loginSenha').value
+      });
+      b.disabled = false; b.textContent = 'Entrar';
+      if (r.error) return erro($('erroLogin'), 'CPF ou senha incorretos. Se é a primeira vez, use a aba "Tenho um código".');
+      location.href = 'painel.html';
+    });
+
+    // ---- criar uma senha nova -------------------------------------------
+    // Quem autoriza é o código da empresa, o mesmo que autorizou a conta a
+    // existir. O servidor confere que ESTE CPF resgatou ESTE código — não
+    // basta o código ser válido.
+    $('formSenha').addEventListener('submit', async function (ev) {
+      ev.preventDefault();
+      erro($('erroSenha'), '');
+      var cpf = digitos($('recCpf').value);
+      var senha = $('recSenha').value;
+      if (cpf.length !== 11) return erro($('erroSenha'), 'Digite um CPF válido (11 dígitos).');
+      if (!$('recCodigo').value.trim()) return erro($('erroSenha'), 'Digite o código da empresa.');
+      if (senha.length < 6) return erro($('erroSenha'), 'A senha nova precisa de pelo menos 6 caracteres.');
+
+      var b = $('btnSenha');
+      b.disabled = true; b.textContent = 'Trocando…';
+      var resp;
+      try {
+        resp = await fetch(window.SUPA.url + '/functions/v1/recuperar-senha', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', apikey: window.SUPA.key },
+          body: JSON.stringify({
+            cpf: cpf, codigo: $('recCodigo').value.trim(), senha: senha
+          })
+        }).then(function (r) { return r.json(); });
+      } catch (e) {
+        b.disabled = false; b.textContent = 'Criar nova senha';
+        return erro($('erroSenha'), 'Não consegui falar com o servidor. Tente de novo.');
+      }
+      b.disabled = false; b.textContent = 'Criar nova senha';
+      if (!resp || resp.error) {
+        return erro($('erroSenha'), (resp && resp.error) || 'Não consegui trocar a senha.');
+      }
+
+      // trocou: entra com ela na hora, para não pedir de novo o que a
+      // pessoa acabou de digitar
+      var r = await sb.auth.signInWithPassword({
+        email: cpf + '@' + window.SUPA.alunoEmailDomain, password: senha
+      });
+      if (r.error) {
+        aba('entrar');
+        return erro($('erroLogin'), 'Senha trocada! Agora entre com o seu CPF e a senha nova.');
+      }
+      location.href = 'painel.html';
+    });
+
+    // A lista de cursos não é mais desenhada aqui — ela é o painel.html.
+
+    // Já estava logado? Então esta página não tem nada a oferecer: vai
+    // direto para o painel.
+    //
+    // A EXCEÇÃO É O #codigo. O painel manda para cá quem ainda não tem
+    // curso nenhum ("use o código da sua empresa"). Se o desvio fosse
+    // cego, os dois ficariam se empurrando num laço infinito. Com o
+    // #codigo a página fica, mostra a aba do cupom e avisa que ele já está
+    // conectado — resgatar um código novo com a conta aberta funciona, o
+    // servidor reaproveita o CPF em vez de criar outra conta.
+    sb.auth.getSession().then(function (res) {
+      if (!(res && res.data && res.data.session)) return;
+      if (location.hash !== '#codigo') { location.replace('painel.html'); return; }
+      aba('resgatar');
+      $('jaEntrou').style.display = 'block';
+    });
+  })();
+  </script>
+</body>
+</html>

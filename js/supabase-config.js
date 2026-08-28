@@ -9,6 +9,11 @@ window.SUPA = {
   adminEmailDomain: 'admin.clinicamedicinahumana.com.br',
   // Médico entra por CRM (normalizado) -> e-mail interno
   medicoEmailDomain: 'medico.clinicamedicinahumana.com.br',
+  // Aluno dos treinamentos em NR entra por CPF -> e-mail interno.
+  // A conta dele nasce no resgate do cupom, e não num cadastro nosso.
+  alunoEmailDomain: 'aluno.clinicamedicinahumana.com.br',
+  // Edge Function que resgata o cupom e cria a conta do aluno
+  resgateFunction: 'resgatar-cupom',
   // Nome da Edge Function publicada (o slug ficou "swift-api" no deploy)
   functionName: 'swift-api',
   // Envio do formulário da Ouvidoria por e-mail.
