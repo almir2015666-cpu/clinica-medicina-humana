@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -116,7 +116,8 @@
         <a data-view="lancar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg> Lançar resultado</a>
         <a data-view="pendentes" id="navPend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Pendentes <span class="pill" id="pendPill">0</span></a>
         <a data-view="funcionarios" id="navFunc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M13 9h5M13 13h5M6 16h6"/></svg> Funcionários</a>
-      </nav>
+        <div class="lang" id="cmh-idioma"></div>
+</nav>
       <div class="side__user">
         <b id="uNome"></b><span id="uPapel"></span>
         <button class="side__logout" id="logoutBtn">Sair</button>
@@ -419,5 +420,6 @@
     sb.auth.getSession().then(function(r){if(r.data.session)entrar();});
   })();
   </script>
+  <script src="js/idioma.js"></script>
 </body>
 </html>
