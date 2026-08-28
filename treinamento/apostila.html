@@ -75,6 +75,29 @@
       font-size:1rem;line-height:1.7;color:#4a3a12}
     .apo blockquote strong{color:#7a5c00}
 
+    /* PASSO A PASSO. Número dentro de um disco, à esquerda, na mesma
+       coluna da bolinha da outra lista — as duas listas ficam alinhadas
+       uma sob a outra quando o texto alterna entre elas. */
+    .apo ol{margin:.9rem 0;padding:0;list-style:none;counter-reset:passo}
+    .apo ol>li{counter-increment:passo;padding-left:2.3rem;min-height:1.7rem}
+    .apo ol>li::before{content:counter(passo);left:0;top:.15em;
+      width:1.55rem;height:1.55rem;border-radius:50%;background:#0a2e5c;
+      color:#fff;font:700 .8rem/1.55rem 'Poppins',sans-serif;
+      text-align:center}
+
+    /* QUADRO. A rolagem lateral fica no invólucro: num celular estreito o
+       quadro rola sozinho e a página continua parada. */
+    .apo-tab{margin:1.3rem 0;overflow-x:auto;border:1px solid #dfe7ef;
+      border-radius:10px;-webkit-overflow-scrolling:touch}
+    .apo-tab table{border-collapse:collapse;width:100%;min-width:min(100%,420px)}
+    .apo-tab th,.apo-tab td{padding:.6rem .8rem;text-align:left;
+      font-size:.95rem;line-height:1.55;border-bottom:1px solid #eaf0f6;
+      vertical-align:top}
+    .apo-tab th{background:#0a2e5c;color:#fff;font:600 .85rem 'Poppins',sans-serif;
+      white-space:nowrap}
+    .apo-tab tbody tr:nth-child(even){background:#f7fafd}
+    .apo-tab tbody tr:last-child td{border-bottom:0}
+
     .apo-pe{max-width:760px;margin:0 auto 3rem;text-align:center;
       color:#5b6b7a;font-size:.85rem;padding:0 1.1rem}
     .apo-vazio{max-width:600px;margin:3rem auto;text-align:center;
@@ -96,6 +119,15 @@
       .apo-folha{box-shadow:none;margin:0;max-width:none;padding:0}
       .apo h2{break-after:avoid}
       .apo blockquote{break-inside:avoid}
+      /* No papel não existe rolagem lateral: o que ficasse fora da faixa
+         visível sairia cortado da folha. */
+      .apo-tab{overflow:visible;break-inside:avoid}
+      .apo-tab table{min-width:0}
+      .apo-tab th{background:#0a2e5c!important;color:#fff!important;
+        print-color-adjust:exact;-webkit-print-color-adjust:exact}
+      .apo ol>li::before{background:#0a2e5c!important;color:#fff!important;
+        print-color-adjust:exact;-webkit-print-color-adjust:exact}
+      .apo li{break-inside:avoid}
     }
   </style>
 </head>
@@ -143,7 +175,7 @@
     // pode acontecer — e é inofensivo.
     function desenharMarkdown(bruto) {
       var linhas = String(bruto || '').replace(/\r/g, '').split('\n');
-      var html = '', lista = false, paragrafo = [];
+      var html = '', lista = '', paragrafo = [], tabela = [];
 
       function fecharParagrafo() {
         if (paragrafo.length) {
@@ -151,9 +183,47 @@
           paragrafo = [];
         }
       }
+      // Uma variável para os dois tipos de lista: com `lista` guardando a
+      // etiqueta aberta ('ul' ou 'ol'), trocar de bolinha para número no
+      // meio do texto fecha uma e abre a outra sozinho.
       function fecharLista() {
-        if (lista) { html += '</ul>'; lista = false; }
+        if (lista) { html += '</' + lista + '>'; lista = ''; }
       }
+
+      // TABELA. Fica guardada até a linha deixar de começar com barra: só
+      // então dá para saber quantas colunas ela tem e onde termina.
+      //
+      // A linha de tracinhos é engolida, não desenhada. Ela é a marca que
+      // separa o cabeçalho do corpo — é assim que se escreve tabela em
+      // markdown, e quem editar pelo admin vai escrever assim sem pensar.
+      function fecharTabela() {
+        if (!tabela.length) return;
+        var corpo = tabela, cab = null;
+        if (corpo.length > 1 && /^[\s|:-]+$/.test(corpo[1])) {
+          cab = corpo[0]; corpo = corpo.slice(2);
+        }
+        function celulas(linha) {
+          return linha.replace(/^\||\|$/g, '').split('|');
+        }
+        // `overflow-x` no invólucro, e não na tabela: num celular de 360px
+        // um quadro de quatro colunas rola sozinho, na horizontal, sem
+        // empurrar a página inteira para o lado.
+        var t = '<div class="apo-tab"><table>';
+        if (cab) {
+          t += '<thead><tr>' + celulas(cab).map(function (c) {
+            return '<th>' + enfeitar(c.trim()) + '</th>';
+          }).join('') + '</tr></thead>';
+        }
+        t += '<tbody>' + corpo.map(function (l) {
+          return '<tr>' + celulas(l).map(function (c) {
+            return '<td>' + enfeitar(c.trim()) + '</td>';
+          }).join('') + '</tr>';
+        }).join('') + '</tbody></table></div>';
+        html += t;
+        tabela = [];
+      }
+      function fecharTudo() { fecharParagrafo(); fecharLista(); fecharTabela(); }
+
       // negrito, e mais nada. `**` é o único inline que a apostila usa.
       function enfeitar(t) {
         return seguro(t).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
@@ -161,7 +231,14 @@
 
       linhas.forEach(function (linha) {
         var t = linha.trim();
-        if (!t) { fecharParagrafo(); fecharLista(); return; }
+        if (!t) { fecharTudo(); return; }
+
+        if (t.charAt(0) === '|') {
+          fecharParagrafo(); fecharLista();
+          tabela.push(t);
+          return;
+        }
+        fecharTabela();
 
         if (t.indexOf('### ') === 0) {
           fecharParagrafo(); fecharLista();
@@ -177,14 +254,21 @@
           html += '<blockquote>' + enfeitar(t.replace(/^>\s?/, '')) + '</blockquote>';
         } else if (t.indexOf('- ') === 0 || t.indexOf('* ') === 0) {
           fecharParagrafo();
-          if (!lista) { html += '<ul>'; lista = true; }
+          if (lista !== 'ul') { fecharLista(); html += '<ul>'; lista = 'ul'; }
           html += '<li>' + enfeitar(t.slice(2)) + '</li>';
+        } else if (/^\d+[.)]\s/.test(t)) {
+          // Passo a passo. Numa apostila de segurança a ORDEM é o conteúdo:
+          // testar o detector antes e depois, aterrar antes de tocar. Com
+          // bolinha, a sequência vira sugestão.
+          fecharParagrafo();
+          if (lista !== 'ol') { fecharLista(); html += '<ol>'; lista = 'ol'; }
+          html += '<li>' + enfeitar(t.replace(/^\d+[.)]\s+/, '')) + '</li>';
         } else {
           fecharLista();
           paragrafo.push(t);
         }
       });
-      fecharParagrafo(); fecharLista();
+      fecharTudo();
       return html;
     }
 
