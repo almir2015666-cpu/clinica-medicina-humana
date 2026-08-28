@@ -177,6 +177,48 @@
 
     function erro(el, texto) { el.textContent = texto || ''; el.style.display = texto ? 'block' : 'none'; }
 
+    // O PRAZO VENCEU: A PESSOA NAO ENTRA MAIS.
+    //
+    // Antes ela entrava, via o painel com os cartoes marcados "Vencido" e
+    // nao conseguia abrir nada. Funcionava, mas dava a impressao de que a
+    // conta continuava valendo — e o acesso e o que foi vendido, com prazo.
+    //
+    // A conferencia e feita DEPOIS do login, e nao antes: so quem provou a
+    // senha pode saber se o prazo dela venceu. Perguntar antes seria dizer
+    // a qualquer um se um CPF tem conta aqui.
+    //
+    // Rede caindo NAO tranca ninguem: sem resposta do servidor a pessoa
+    // segue para o painel, que barra o que precisa ser barrado. Melhor
+    // deixar entrar e nao ver curso do que trancar quem esta em dia.
+    async function aindaPodeEntrar() {
+      var r = await sb.from('trein_matricula').select('expira_em,cancelada');
+      if (r.error) return true;
+      var m = r.data || [];
+
+      // Sem matricula NENHUMA nao e prazo vencido: e alguem que criou a
+      // conta e ainda nao usou o codigo. Esse entra e ve a tela que ensina
+      // a resgatar. So barra quem TEVE acesso e o acesso acabou.
+      if (!m.length) return true;
+
+      var hoje = new Date().toISOString().slice(0, 10);
+      return m.some(function (x) {
+        return !x.cancelada && String(x.expira_em) >= hoje;
+      });
+    }
+
+    async function entrarNoPainel() {
+      if (await aindaPodeEntrar()) {
+        await entrarNoPainel();
+        return;
+      }
+      await sb.auth.signOut();
+      aba('entrar');
+      erro($('erroLogin'),
+        'O prazo dos seus treinamentos venceu, e por isso o acesso foi '
+        + 'encerrado. Se precisa fazer o curso de novo, ou de uma segunda '
+        + 'via do certificado, fale com o RH da sua empresa.');
+    }
+
     // AVISO de sucesso, na cor de sucesso. "Cursos liberados!" e "Senha
     // trocada!" saíam na caixa VERMELHA de erro, no caminho em que o
     // resgate deu certo mas o login automático falhou. O aluno lia como
@@ -286,7 +328,7 @@
         email: cpf + '@' + window.SUPA.alunoEmailDomain, password: senha
       });
       if (r.error) { aba('entrar'); return aviso($('erroLogin'), 'Cursos liberados! Agora entre com o seu CPF e a senha que você criou.'); }
-      location.href = 'painel.html';
+      await entrarNoPainel();
     });
 
     // ---- entrar ---------------------------------------------------------
@@ -302,7 +344,7 @@
       });
       b.disabled = false; b.textContent = 'Entrar';
       if (r.error) return erro($('erroLogin'), 'CPF ou senha incorretos. Se é a primeira vez, use a aba "Tenho um código".');
-      location.href = 'painel.html';
+      await entrarNoPainel();
     });
 
     // ---- criar uma senha nova -------------------------------------------
@@ -347,7 +389,7 @@
         aba('entrar');
         return aviso($('erroLogin'), 'Senha trocada! Agora entre com o seu CPF e a senha nova.');
       }
-      location.href = 'painel.html';
+      await entrarNoPainel();
     });
 
     // A lista de cursos não é mais desenhada aqui — ela é o painel.html.
@@ -361,8 +403,20 @@
     // #codigo a página fica, mostra a aba do cupom e avisa que ele já está
     // conectado — resgatar um código novo com a conta aberta funciona, o
     // servidor reaproveita o CPF em vez de criar outra conta.
+    // O #venceu é a mesma proteção contra laço, por outro motivo: o painel
+    // desliga a sessão antes de mandar para cá, mas se o signOut não chegar
+    // ao servidor a sessão sobrevive — e os dois voltariam a se empurrar.
+    if (location.hash === '#venceu') {
+      aba('entrar');
+      erro($('erroLogin'),
+        'O prazo dos seus treinamentos venceu, e por isso o acesso foi '
+        + 'encerrado. Se precisa fazer o curso de novo, ou de uma segunda '
+        + 'via do certificado, fale com o RH da sua empresa.');
+    }
+
     sb.auth.getSession().then(function (res) {
       if (!(res && res.data && res.data.session)) return;
+      if (location.hash === '#venceu') { sb.auth.signOut(); return; }
       if (location.hash !== '#codigo') { location.replace('painel.html'); return; }
       aba('resgatar');
       $('jaEntrou').style.display = 'block';

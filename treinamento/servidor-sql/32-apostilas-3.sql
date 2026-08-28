@@ -1,51 +1,51 @@
 -- =====================================================================
---  APOSTILAS, GRUPO 3: EPI, ergonomia, sinalizacao, LOTO, trabalho a
---  quente, as duas integracoes e as duas direcoes defensivas
+--  APOSTILAS, GRUPO 3: EPI, ergonomia, sinalização, LOTO, trabalho a
+--  quente, as duas integrações e as duas direções defensivas
 --
---  Rode no SQL Editor. Pode rodar quantas vezes quiser: sao updates por
---  codigo, nao inserem nada e nao duplicam nada.
+--  Rode no SQL Editor. Pode rodar quantas vezes quiser: são updates por
+--  código, não inserem nada e não duplicam nada.
 --
---  ATENCAO: ESTE CONTEUDO PRECISA DA CONFERIDA DO RESPONSAVEL TECNICO
---  ANTES DE SER PUBLICADO. A apostila e o material que o aluno leva para
---  o trabalho e estuda antes da prova, e o conteudo programatico sai
---  IMPRESSO NO VERSO DO CERTIFICADO. Texto errado no verso e problema na
---  fiscalizacao, e orientacao errada na apostila e acidente. Quem assina
---  tecnicamente pelo curso e quem decide o que fica.
+--  ATENÇÃO: ESTE CONTEÚDO PRECISA DA CONFERIDA DO RESPONSÁVEL TÉCNICO
+--  ANTES DE SER PUBLICADO. A apostila é o material que o aluno leva para
+--  o trabalho e estuda antes da prova, e o conteúdo programático sai
+--  IMPRESSO NO VERSO DO CERTIFICADO. Texto errado no verso é problema na
+--  fiscalização, e orientação errada na apostila é acidente. Quem assina
+--  tecnicamente pelo curso é quem decide o que fica.
 --
 --  O QUE ESTE ARQUIVO GRAVA
 --  ------------------------
 --  Duas colunas por curso:
 --    conteudo_programatico : a ementa, um item por linha, frase curta e
---                            formal. E o verso do certificado.
+--                            formal. É o verso do certificado.
 --    apostila              : o material de estudo, em markdown simples.
---                            So titulo, subtitulo, paragrafo, lista,
+--                            Só título, subtítulo, parágrafo, lista,
 --                            negrito e linha de destaque.
 --
---  OS PARES SAO DE PROPOSITO DIFERENTES
+--  OS PARES SÃO DE PROPÓSITO DIFERENTES
 --  ------------------------------------
---  NR-01-INT4 e NR-01-INT8 sao o mesmo assunto em profundidades
---  diferentes, e as apostilas nao se repetem. A de 4 horas e para quem
+--  NR-01-INT4 e NR-01-INT8 são o mesmo assunto em profundidades
+--  diferentes, e as apostilas não se repetem. A de 4 horas é para quem
 --  foi admitido ontem: o que ele precisa saber para atravessar a primeira
---  semana inteiro. A de 8 horas e gestao de risco: GRO, inventario, plano
---  de acao e hierarquia de controle.
+--  semana inteiro. A de 8 horas é gestão de risco: GRO, inventário, plano
+--  de ação e hierarquia de controle.
 --
---  DD e DD-REC seguem a mesma logica. O DD ensina a conduzir com
---  seguranca. O DD-REC e para quem ja dirige ha anos e trata do que
+--  DD e DD-REC seguem a mesma lógica. O DD ensina a conduzir com
+--  segurança. O DD-REC é para quem já dirige há anos e trata do que
 --  derruba motorista experiente: fadiga, noite, chuva, carga mal presa,
 --  pressa e os primeiros minutos depois de uma batida.
 --
---  SEM TRAVESSAO
+--  SEM TRAVESSÃO
 --  -------------
---  Os arquivos 06 e 08 tiraram o travessao do catalogo porque no
---  documento impresso ele fica estranho. Este arquivo ja nasce sem
+--  Os arquivos 06 e 08 tiraram o travessão do catálogo porque no
+--  documento impresso ele fica estranho. Este arquivo já nasce sem
 --  nenhum, em qualquer das duas colunas.
 --
---  NAO HA APOSTROFO NO TEXTO. As frases foram escritas sem apostrofo de
---  proposito, para nao quebrar o literal do Postgres.
+--  NÃO HÁ APÓSTROFO NO TEXTO. As frases foram escritas sem apóstrofo de
+--  propósito, para não quebrar o literal do Postgres.
 -- =====================================================================
 
 -- A coluna da apostila, caso este arquivo seja o primeiro do grupo a
--- rodar neste banco. Se ja existir, nao acontece nada.
+-- rodar neste banco. Se já existir, não acontece nada.
 alter table public.trein_curso
   add column if not exists apostila text;
 
@@ -55,84 +55,84 @@ alter table public.trein_curso
 -- =====================================================================
 update public.trein_curso set
   conteudo_programatico =
-'Conceito de EPI e de EPC, e a ordem de prioridade das medidas de protecao.
-Obrigacoes do empregador quanto ao fornecimento, higienizacao e substituicao.
-Obrigacoes do trabalhador quanto ao uso, guarda e conservacao.
-Certificado de Aprovacao: para que serve e como se confere a validade.
-Protecao da cabeca: capacete, jugular e criterios de descarte.
-Protecao dos olhos e da face: oculos, protetor facial e mascara de solda.
-Protecao auditiva: tipos de protetor, atenuacao e uso continuo na exposicao.
-Protecao respiratoria: escolha do filtro, vedacao e limites de uso.
-Protecao das maos, dos pes e do corpo conforme o risco de cada tarefa.
-Protecao contra quedas: cinto paraquedista, talabarte e ponto de ancoragem.
-Inspecao antes do uso, higienizacao, guarda e descarte do equipamento.
-Ficha de entrega, registro de treinamento e comunicacao de EPI danificado.',
+'Conceito de EPI e de EPC, e a ordem de prioridade das medidas de proteção.
+Obrigações do empregador quanto ao fornecimento, higienização e substituição.
+Obrigações do trabalhador quanto ao uso, guarda e conservação.
+Certificado de Aprovação: para que serve e como se confere a validade.
+Proteção da cabeça: capacete, jugular e critérios de descarte.
+Proteção dos olhos e da face: óculos, protetor facial e máscara de solda.
+Proteção auditiva: tipos de protetor, atenuação e uso contínuo na exposição.
+Proteção respiratória: escolha do filtro, vedação e limites de uso.
+Proteção das mãos, dos pés e do corpo conforme o risco de cada tarefa.
+Proteção contra quedas: cinto paraquedista, talabarte e ponto de ancoragem.
+Inspeção antes do uso, higienização, guarda e descarte do equipamento.
+Ficha de entrega, registro de treinamento e comunicação de EPI danificado.',
   apostila =
 '## Por que esta norma existe
 
-O equipamento de protecao individual e a ultima barreira entre voce e o risco. Nao e a primeira. Antes dele vem eliminar o perigo, trocar o produto por um menos agressivo, isolar a maquina, enclausurar o ruido, instalar exaustao, mudar o jeito de fazer a tarefa. So quando nada disso resolve por completo e que entra o EPI.
+O equipamento de proteção individual é a última barreira entre você e o risco. Não é a primeira. Antes dele vem eliminar o perigo, trocar o produto por um menos agressivo, isolar a máquina, enclausurar o ruído, instalar exaustão, mudar o jeito de fazer a tarefa. Só quando nada disso resolve por completo é que entra o EPI.
 
-Isso muda como voce deve olhar para o capacete e para o protetor auricular. Eles nao tornam o local seguro. Eles reduzem o dano quando o resto falhar. Um trabalhador de capacete embaixo de uma carga suspensa continua correndo risco de morte.
+Isso muda como você deve olhar para o capacete e para o protetor auricular. Eles não tornam o local seguro. Eles reduzem o dano quando o resto falhar. Um trabalhador de capacete embaixo de uma carga suspensa continua correndo risco de morte.
 
-A NR-06 existe para garantir tres coisas: que o equipamento certo seja escolhido para o risco certo, que ele seja entregue de graca e em bom estado, e que quem usa saiba usar.
+A NR-06 existe para garantir três coisas: que o equipamento certo seja escolhido para o risco certo, que ele seja entregue de graça e em bom estado, e que quem usa saiba usar.
 
-> EPI que fica na mochila protege exatamente zero por cento. O numero de acidentes com equipamento entregue e nao usado e maior do que o de equipamento que falhou.
+> EPI que fica na mochila protege exatamente zero por cento. O número de acidentes com equipamento entregue e não usado é maior do que o de equipamento que falhou.
 
-## Quando ela se aplica a voce
+## Quando ela se aplica a você
 
-Sempre que houver risco que as medidas coletivas nao eliminaram. Na pratica isso cobre quase todo servico de obra, de industria e de manutencao: ruido acima do limite, poeira, produto quimico, respingo de solda, borda viva, piso escorregadio, trabalho acima de dois metros, energia eletrica.
+Sempre que houver risco que as medidas coletivas não eliminaram. Na prática isso cobre quase todo serviço de obra, de indústria e de manutenção: ruído acima do limite, poeira, produto químico, respingo de solda, borda viva, piso escorregadio, trabalho acima de dois metros, energia elétrica.
 
-A empresa e obrigada a fornecer sem cobrar nada. Se o equipamento quebrou ou vencer, ela troca. Se o seu servico mudou e o risco mudou junto, ela fornece o novo. Voce nao paga por EPI, nem quando o dano foi seu.
+A empresa é obrigada a fornecer sem cobrar nada. Se o equipamento quebrou ou venceu, ela troca. Se o seu serviço mudou e o risco mudou junto, ela fornece o novo. Você não paga por EPI, nem quando o dano foi seu.
 
-## Antes de comecar
+## Antes de começar
 
-Todo EPI tem um numero de Certificado de Aprovacao, o CA, gravado no proprio equipamento ou na etiqueta. Ele diz que aquele modelo foi ensaiado e aprovado para aquele risco. CA vencido ou ilegivel vale como equipamento sem protecao.
+Todo EPI tem um número de Certificado de Aprovação, o CA, gravado no próprio equipamento ou na etiqueta. Ele diz que aquele modelo foi ensaiado e aprovado para aquele risco. CA vencido ou ilegível vale como equipamento sem proteção.
 
-Antes de vestir, faca a inspecao rapida:
+Antes de vestir, faça a inspeção rápida:
 
 - Capacete: casco sem trinca, sem furo de parafuso, sem tinta ou solvente por cima, jugular inteira e presa.
-- Oculos: lente sem risco fundo que atrapalhe a visao, haste firme.
-- Protetor auditivo: plug limpo e sem endurecer, concha com almofada macia e arco com pressao.
+- Óculos: lente sem risco fundo que atrapalhe a visão, haste firme.
+- Protetor auditivo: plugue limpo e sem endurecer, concha com almofada macia e arco com pressão.
 - Luva: sem furo, sem corte, seca por dentro, do material certo para o produto.
 - Bota: solado com desenho vivo, biqueira intacta, sem rasgo no cabedal.
-- Cinto paraquedista: fita sem corte nem queimadura, costura inteira, fivela e mosquetao travando.
+- Cinto paraquedista: fita sem corte nem queimadura, costura inteira, fivela e mosquetão travando.
 
-**Equipamento reprovado na inspecao sai de circulacao na hora.** Nao volta para o armario para outro pegar por engano.
+**Equipamento reprovado na inspeção sai de circulação na hora.** Não volta para o armário para outro pegar por engano.
 
 ## Durante o trabalho
 
-O EPI so protege se estiver do jeito que foi projetado. Protetor auricular tipo plug precisa entrar no canal, nao encostar na orelha. Respirador precisa vedar na pele: barba fechada impede a vedacao e transforma a mascara em enfeite. Capacete com a jugular solta cai antes da cabeca bater.
+O EPI só protege se estiver do jeito que foi projetado. Protetor auricular tipo plugue precisa entrar no canal, não encostar na orelha. Respirador precisa vedar na pele: barba fechada impede a vedação e transforma a máscara em enfeite. Capacete com a jugular solta cai antes da cabeça bater.
 
-Tirar o protetor auditivo por cinco minutos parece pouco, mas a exposicao ao ruido conta pelo tempo total do dia. Cinco minutos de britadeira sem protecao jogam fora boa parte da protecao das oito horas.
+Tirar o protetor auditivo por cinco minutos parece pouco, mas a exposição ao ruído conta pelo tempo total do dia. Cinco minutos de britadeira sem proteção jogam fora boa parte da proteção das oito horas.
 
-Trocar EPI com colega tambem tem regra. Protetor auricular de insercao e respirador sao de uso pessoal, por causa de infeccao e de vedacao. Capacete e bota tem ajuste individual.
+Trocar EPI com colega também tem regra. Protetor auricular de inserção e respirador são de uso pessoal, por causa de infecção e de vedação. Capacete e bota têm ajuste individual.
 
 ## Equipamento e os cuidados
 
-Depois do turno, limpe. Protetor auricular com agua e sabao neutro. Mascara com o pano e o produto que a empresa indicar. Cinto pendurado, nunca dobrado no fundo da caixa junto com ferramenta. Luva de raspa seca ao ar, longe de calor.
+Depois do turno, limpe. Protetor auricular com água e sabão neutro. Máscara com o pano e o produto que a empresa indicar. Cinto pendurado, nunca dobrado no fundo da caixa junto com ferramenta. Luva de raspa seca ao ar, longe de calor.
 
-Guarde em lugar seco, sem sol direto e sem produto quimico ao lado. Plastico de capacete resseca com sol e com solvente: um capacete que passou o verao no painel do carro ja nao aguenta o impacto para o qual foi ensaiado.
+Guarde em lugar seco, sem sol direto e sem produto químico ao lado. O plástico do capacete resseca com sol e com solvente: um capacete que passou o verão no painel do carro já não aguenta o impacto para o qual foi ensaiado.
 
-Filtro de respirador tem vida util. Vence pelo prazo, pelo cheiro que comeca a passar e pela dificuldade de puxar o ar. Nao existe lavar filtro.
+Filtro de respirador tem vida útil. Vence pelo prazo, pelo cheiro que começa a passar e pela dificuldade de puxar o ar. Não existe lavar filtro.
 
-## O que a empresa deve, o que voce deve
+## O que a empresa deve, o que você deve
 
-A empresa deve escolher o equipamento adequado ao risco com orientacao do responsavel tecnico, fornecer gratuitamente, exigir o uso, treinar, substituir quando danificar ou vencer, higienizar quando for o caso e registrar tudo na ficha de entrega.
+A empresa deve escolher o equipamento adequado ao risco com orientação do responsável técnico, fornecer gratuitamente, exigir o uso, treinar, substituir quando danificar ou vencer, higienizar quando for o caso e registrar tudo na ficha de entrega.
 
-Voce deve usar apenas para o fim a que se destina, cuidar, guardar, comunicar qualquer alteracao que deixe o equipamento improprio e cumprir o que foi ensinado no treinamento. Assinar a ficha de entrega nao e formalidade: e a prova de que voce recebeu, e tambem de que a empresa cumpriu.
+Você deve usar apenas para o fim a que se destina, cuidar, guardar, comunicar qualquer alteração que deixe o equipamento impróprio e cumprir o que foi ensinado no treinamento. Assinar a ficha de entrega não é formalidade: é a prova de que você recebeu, e também de que a empresa cumpriu.
 
-Recusar o uso e falta grave e pode gerar sancao disciplinar. Mas o inverso tambem vale: se o EPI que voce recebeu machuca, aperta, embaca ou nao serve para o risco daquela tarefa, isso e problema tecnico e precisa ser comunicado, e nao resolvido tirando o equipamento escondido.
+Recusar o uso é falta grave e pode gerar sanção disciplinar. Mas o inverso também vale: se o EPI que você recebeu machuca, aperta, embaça ou não serve para o risco daquela tarefa, isso é problema técnico e precisa ser comunicado, e não resolvido tirando o equipamento escondido.
 
 ## Para lembrar
 
-- **O EPI e a ultima barreira, nao a primeira.** Se da para eliminar o risco, elimine.
-- Confira o **CA** e a validade. Sem CA nao ha protecao comprovada.
+- **O EPI é a última barreira, não a primeira.** Se dá para eliminar o risco, elimine.
+- Confira o **CA** e a validade. Sem CA não há proteção comprovada.
 - Inspecione antes de vestir, todo dia, e retire de uso o que reprovar.
-- **Respirador nao veda em rosto com barba.**
-- Protecao auditiva vale pelo tempo inteiro de exposicao, nao pela maior parte dele.
-- Limpe, seque e guarde longe de sol, calor e produto quimico.
-- EPI e gratuito. Voce nunca paga, nem por perda nem por dano.
-- Comunicou defeito e nao veio troca? Registre. Trabalhar sem protecao nao e opcao.'
+- **Respirador não veda em rosto com barba.**
+- Proteção auditiva vale pelo tempo inteiro de exposição, não pela maior parte dele.
+- Limpe, seque e guarde longe de sol, calor e produto químico.
+- EPI é gratuito. Você nunca paga, nem por perda nem por dano.
+- Comunicou defeito e não veio troca? Registre. Trabalhar sem proteção não é opção.'
 where codigo = 'NR-06';
 
 
@@ -141,176 +141,176 @@ where codigo = 'NR-06';
 -- =====================================================================
 update public.trein_curso set
   conteudo_programatico =
-'Conceito de ergonomia e adaptacao do trabalho as caracteristicas do trabalhador.
-Avaliacao ergonomica preliminar e analise ergonomica do trabalho.
+'Conceito de ergonomia e adaptação do trabalho às características do trabalhador.
+Avaliação ergonômica preliminar e análise ergonômica do trabalho.
 Levantamento, transporte e descarga manual de materiais.
-Postura sentada, postura em pe e alternancia entre elas.
-Mobiliario, bancada, assento e apoio para os pes.
-Trabalho com computador: tela, teclado, mouse e distancia de leitura.
-Movimentos repetitivos, forca excessiva e tempo de recuperacao.
-Organizacao do trabalho: ritmo, metas, pausas e revezamento.
-Condicoes ambientais: iluminacao, ruido, temperatura e ventilacao.
-Sinais precoces de lesao por esforco e distubios osteomusculares.
-Manuseio de cargas com auxilio mecanico e trabalho em dupla.
-Comunicacao de desconforto e acompanhamento pela saude ocupacional.',
+Postura sentada, postura em pé e alternância entre elas.
+Mobiliário, bancada, assento e apoio para os pés.
+Trabalho com computador: tela, teclado, mouse e distância de leitura.
+Movimentos repetitivos, força excessiva e tempo de recuperação.
+Organização do trabalho: ritmo, metas, pausas e revezamento.
+Condições ambientais: iluminação, ruído, temperatura e ventilação.
+Sinais precoces de lesão por esforço e distúrbios osteomusculares.
+Manuseio de cargas com auxílio mecânico e trabalho em dupla.
+Comunicação de desconforto e acompanhamento pela saúde ocupacional.',
   apostila =
 '## Por que esta norma existe
 
-Acidente de trabalho todo mundo reconhece: cai, corta, queima. A lesao por esforco nao tem esse barulho. Ela chega devagar, ao longo de meses, e quando incomoda de verdade ja virou tendinite, hernia de disco ou ombro que nao levanta mais.
+Acidente de trabalho todo mundo reconhece: cai, corta, queima. A lesão por esforço não tem esse barulho. Ela chega devagar, ao longo de meses, e quando incomoda de verdade já virou tendinite, hérnia de disco ou ombro que não levanta mais.
 
-A NR-17 existe para inverter a logica que sempre se usou. Em vez de exigir que o corpo do trabalhador aguente o posto de trabalho, ela manda **adaptar o posto ao corpo de quem trabalha**. A bancada e que sobe, o peso e que diminui, a pausa e que entra na conta da producao.
+A NR-17 existe para inverter a lógica que sempre se usou. Em vez de exigir que o corpo do trabalhador aguente o posto de trabalho, ela manda **adaptar o posto ao corpo de quem trabalha**. A bancada é que sobe, o peso é que diminui, a pausa é que entra na conta da produção.
 
-Isso vale para obra, para linha de producao, para almoxarifado, para escritorio e para teleatendimento. Onde ha gente trabalhando ha ergonomia.
+Isso vale para obra, para linha de produção, para almoxarifado, para escritório e para teleatendimento. Onde há gente trabalhando há ergonomia.
 
-## Quando ela se aplica a voce
+## Quando ela se aplica a você
 
-Se voce levanta peso, repete o mesmo movimento centenas de vezes por turno, fica muito tempo na mesma posicao, trabalha agachado, com o braco acima do ombro, com o pulso torcido, ou passa o dia numa cadeira ruim, a norma esta falando de voce.
+Se você levanta peso, repete o mesmo movimento centenas de vezes por turno, fica muito tempo na mesma posição, trabalha agachado, com o braço acima do ombro, com o pulso torcido, ou passa o dia numa cadeira ruim, a norma está falando de você.
 
-A empresa faz uma avaliacao ergonomica preliminar dos postos. Quando ela aponta risco, vem a analise ergonomica do trabalho, mais completa, feita por profissional habilitado, com recomendacoes que viram plano de acao.
+A empresa faz uma avaliação ergonômica preliminar dos postos. Quando ela aponta risco, vem a análise ergonômica do trabalho, mais completa, feita por profissional habilitado, com recomendações que viram plano de ação.
 
-> Dor que vai e volta sempre no mesmo lugar e no mesmo horario do turno nao e cansaco normal. E aviso.
+> Dor que vai e volta sempre no mesmo lugar e no mesmo horário do turno não é cansaço normal. É aviso.
 
-## Antes de comecar
+## Antes de começar
 
-Antes de erguer qualquer coisa, faca tres perguntas: quanto pesa, para onde vai, e da para nao carregar no braco.
+Antes de erguer qualquer coisa, faça três perguntas: quanto pesa, para onde vai, e dá para não carregar no braço.
 
-Boa parte das lesoes de coluna acontece em cargas que ninguem considerava pesadas. O que machuca nao e so o peso, e a combinacao de peso, distancia do corpo, altura de pega e giro de tronco. Vinte quilos colados no peito sao muito menos agressivos que dez quilos de braco esticado com o corpo torcido.
+Boa parte das lesões de coluna acontece em cargas que ninguém considerava pesadas. O que machuca não é só o peso, é a combinação de peso, distância do corpo, altura de pega e giro de tronco. Vinte quilos colados no peito são muito menos agressivos que dez quilos de braço esticado com o corpo torcido.
 
-Olhe o caminho antes: piso molhado, degrau, mangueira no chao, porta fechada, gente passando. Carga na frente do rosto tapa a vista, e o tropeco vem dai.
+Olhe o caminho antes: piso molhado, degrau, mangueira no chão, porta fechada, gente passando. Carga na frente do rosto tapa a vista, e o tropeço vem daí.
 
 ## Durante o trabalho
 
-O levantamento correto e sempre o mesmo desenho:
+O levantamento correto é sempre o mesmo desenho:
 
-- Chegue perto da carga, pes afastados na largura dos ombros.
+- Chegue perto da carga, pés afastados na largura dos ombros.
 - Dobre os joelhos e o quadril, e mantenha as costas retas.
-- Pegue firme, com as duas maos, e traga a carga junto ao corpo.
-- Suba com a forca das pernas, sem solavanco.
-- **Para mudar de direcao, mova os pes. Nunca gire o tronco com peso na mao.**
-- Para descer, dobre os joelhos de novo. Nao largue a carga de qualquer jeito.
+- Pegue firme, com as duas mãos, e traga a carga junto ao corpo.
+- Suba com a força das pernas, sem solavanco.
+- **Para mudar de direção, mova os pés. Nunca gire o tronco com peso na mão.**
+- Para descer, dobre os joelhos de novo. Não largue a carga de qualquer jeito.
 
-Se a carga e comprida, desengoncada, ou se voce precisa prender a respiracao para levantar, ela nao e sua sozinho. Chame ajuda ou use carrinho, paleteira, talha. Pedir equipamento nao e frescura, e a solucao que a norma manda usar primeiro.
+Se a carga é comprida, desengonçada, ou se você precisa prender a respiração para levantar, ela não é sua sozinho. Chame ajuda ou use carrinho, paleteira, talha. Pedir equipamento não é frescura, é a solução que a norma manda usar primeiro.
 
-Para quem fica em pe o turno inteiro: alterne o apoio, use um estrado para descansar um pe, e cadeira para as pausas. Para quem fica sentado: pes apoiados no chao ou no descanso, joelhos em angulo aberto, coluna encostada, tela na altura dos olhos, antebraco apoiado. Cotovelo no ar o dia todo vira dor de ombro.
+Para quem fica em pé o turno inteiro: alterne o apoio, use um estrado para descansar um pé, e cadeira para as pausas. Para quem fica sentado: pés apoiados no chão ou no descanso, joelhos em ângulo aberto, coluna encostada, tela na altura dos olhos, antebraço apoiado. Cotovelo no ar o dia todo vira dor de ombro.
 
-Movimento repetitivo pede tempo de recuperacao. Vinte minutos parados alongando resolvem menos do que pequenas trocas de tarefa distribuidas no turno.
+Movimento repetitivo pede tempo de recuperação. Vinte minutos parados alongando resolvem menos do que pequenas trocas de tarefa distribuídas ao longo do turno.
 
-### Luz, ruido e calor tambem sao ergonomia
+### Luz, ruído e calor também são ergonomia
 
-Iluminacao fraca faz o trabalhador aproximar o rosto da peca e curvar o pescoco o dia inteiro. Iluminacao forte e mal posicionada gera reflexo na tela e na chapa polida, e o resultado e o mesmo: dor de cabeca no fim do turno e postura torta para fugir do brilho. A luz deve chegar de lado, sobre a tarefa, e nao de frente para os olhos.
+Iluminação fraca faz o trabalhador aproximar o rosto da peça e curvar o pescoço o dia inteiro. Iluminação forte e mal posicionada gera reflexo na tela e na chapa polida, e o resultado é o mesmo: dor de cabeça no fim do turno e postura torta para fugir do brilho. A luz deve chegar de lado, sobre a tarefa, e não de frente para os olhos.
 
-Ruido continuo cansa mesmo abaixo do limite que causa surdez, porque obriga a atencao a trabalhar dobrado. Calor faz perder liquido, tira forca e aumenta o erro. Agua fresca ao alcance da mao e pausa em local ameno nao sao cortesia: sao medida de controle.
+Ruído contínuo cansa mesmo abaixo do limite que causa surdez, porque obriga a atenção a trabalhar dobrado. Calor faz perder líquido, tira força e aumenta o erro. Água fresca ao alcance da mão e pausa em local ameno não são cortesia: são medida de controle.
 
-## A organizacao do trabalho tambem e ergonomia
+## A organização do trabalho também é ergonomia
 
-Este e o ponto que mais se esquece. Uma bancada perfeita nao salva ninguem se a meta exige ritmo que impede parar. Pressao por producao, jornada esticada, banheiro contado, hora extra frequente e revezamento mal feito produzem lesao do mesmo jeito que ferramenta pesada.
+Este é o ponto que mais se esquece. Uma bancada perfeita não salva ninguém se a meta exige ritmo que impede parar. Pressão por produção, jornada esticada, banheiro contado, hora extra frequente e revezamento mal feito produzem lesão do mesmo jeito que ferramenta pesada.
 
-Por isso a norma trata de pausas, de metas, de ritmo e de conteudo da tarefa. Um posto ergonomico com ritmo desumano continua sendo um posto que adoece.
+Por isso a norma trata de pausas, de metas, de ritmo e de conteúdo da tarefa. Um posto ergonômico com ritmo desumano continua sendo um posto que adoece.
 
-## O que a empresa deve, o que voce deve
+## O que a empresa deve, o que você deve
 
-A empresa deve avaliar os postos, adequar mobiliario e equipamento, fornecer meio mecanico para cargas, organizar pausas, tratar as recomendacoes da analise ergonomica em plano de acao com prazo e responsavel, e acompanhar a saude de quem esta exposto.
+A empresa deve avaliar os postos, adequar mobiliário e equipamento, fornecer meio mecânico para cargas, organizar pausas, tratar as recomendações da análise ergonômica em plano de ação com prazo e responsável, e acompanhar a saúde de quem está exposto.
 
-Voce deve usar os recursos que existem, mesmo quando dao um pouco mais de trabalho, aplicar a tecnica de levantamento que aprendeu, fazer as pausas de verdade e, principalmente, **comunicar cedo**. Formigamento na mao ao acordar, dor no ombro que aparece sempre depois da mesma tarefa, ardencia no antebraco: isso vai para a saude ocupacional enquanto ainda tem conserto facil.
+Você deve usar os recursos que existem, mesmo quando dão um pouco mais de trabalho, aplicar a técnica de levantamento que aprendeu, fazer as pausas de verdade e, principalmente, **comunicar cedo**. Formigamento na mão ao acordar, dor no ombro que aparece sempre depois da mesma tarefa, ardência no antebraço: isso vai para a saúde ocupacional enquanto ainda tem conserto fácil.
 
-Esconder sintoma para nao perder producao ou para nao ser trocado de funcao e o caminho mais curto para o afastamento longo.
+Esconder sintoma para não perder produção ou para não ser trocado de função é o caminho mais curto para o afastamento longo.
 
 ## Para lembrar
 
-- Ergonomia e **adaptar o trabalho ao trabalhador**, e nao o contrario.
+- Ergonomia é **adaptar o trabalho ao trabalhador**, e não o contrário.
 - Peso longe do corpo e giro de tronco machucam mais que peso alto.
-- **Pernas levantam, costas nao.** Para virar, mexa os pes.
-- Carga que exige prender a respiracao pede ajuda ou equipamento.
-- Alterne postura e alterne tarefa: o corpo precisa de tempo de recuperacao.
-- Tela na altura dos olhos, pes apoiados, antebraco apoiado.
+- **Pernas levantam, costas não.** Para virar, mexa os pés.
+- Carga que exige prender a respiração pede ajuda ou equipamento.
+- Alterne postura e alterne tarefa: o corpo precisa de tempo de recuperação.
+- Tela na altura dos olhos, pés apoiados, antebraço apoiado.
 - Ritmo, meta e pausa fazem parte da ergonomia tanto quanto a bancada.
-- Dor que repete no mesmo lugar e no mesmo horario e para comunicar hoje.'
+- Dor que repete no mesmo lugar e no mesmo horário é para comunicar hoje.'
 where codigo = 'NR-17';
 
 
 -- =====================================================================
---  NR-26: sinalizacao de seguranca (4 horas)
+--  NR-26: sinalização de segurança (4 horas)
 -- =====================================================================
 update public.trein_curso set
   conteudo_programatico =
-'Finalidade da sinalizacao de seguranca e seus limites como medida de protecao.
-Cores de seguranca e seu significado padronizado no ambiente de trabalho.
+'Finalidade da sinalização de segurança e seus limites como medida de proteção.
+Cores de segurança e seu significado padronizado no ambiente de trabalho.
 Vermelho, amarelo, verde, azul, laranja e branco: onde cada um se aplica.
-Delimitacao de areas, faixas de circulacao e sinalizacao de piso.
-Identificacao de tubulacoes por cor e por rotulo de conteudo.
-Rotulagem preventiva de produtos quimicos e sistema globalmente harmonizado.
-Pictogramas de perigo, palavra de advertencia e frases de perigo.
-Ficha com dados de seguranca do produto quimico: onde fica e como se le.
-Sinalizacao de emergencia: saidas, extintores, hidrantes e chuveiro de seguranca.
-Placas de advertencia, de proibicao e de obrigacao em area de obra.
-Sinalizacao provisoria de servico, bloqueio de area e cones.
-Responsabilidade pelo respeito a sinalizacao e o que fazer quando ela falta.',
+Delimitação de áreas, faixas de circulação e sinalização de piso.
+Identificação de tubulações por cor e por rótulo de conteúdo.
+Rotulagem preventiva de produtos químicos e sistema globalmente harmonizado.
+Pictogramas de perigo, palavra de advertência e frases de perigo.
+Ficha com dados de segurança do produto químico: onde fica e como se lê.
+Sinalização de emergência: saídas, extintores, hidrantes e chuveiro de segurança.
+Placas de advertência, de proibição e de obrigação em área de obra.
+Sinalização provisória de serviço, bloqueio de área e cones.
+Responsabilidade pelo respeito à sinalização e o que fazer quando ela falta.',
   apostila =
 '## Por que esta norma existe
 
-Sinalizacao e a maneira mais barata e mais rapida de avisar de um perigo. Uma faixa no chao, uma cor numa tubulacao ou um pictograma num rotulo dizem em um segundo o que um procedimento leva tres paginas para explicar. E ha situacoes em que so existe esse segundo.
+Sinalização é a maneira mais barata e mais rápida de avisar de um perigo. Uma faixa no chão, uma cor numa tubulação ou um pictograma num rótulo dizem em um segundo o que um procedimento leva três páginas para explicar. E há situações em que só existe esse segundo.
 
-A NR-26 padroniza essas cores e esses rotulos. O ganho da padronizacao e que a mensagem funciona para quem chegou hoje, para o terceiro que nunca entrou naquela area e para o motorista que so veio entregar.
+A NR-26 padroniza essas cores e esses rótulos. O ganho da padronização é que a mensagem funciona para quem chegou hoje, para o terceiro que nunca entrou naquela área e para o motorista que só veio entregar.
 
-> Sinalizacao avisa, nao protege. Placa de alta tensao nao isola nada. Ela existe para que voce nao chegue perto do que continua energizado.
+> Sinalização avisa, não protege. Placa de alta tensão não isola nada. Ela existe para que você não chegue perto do que continua energizado.
 
-## Quando ela se aplica a voce
+## Quando ela se aplica a você
 
-Em toda a instalacao. Voce e afetado nas duas pontas: como quem **le** a sinalizacao para saber por onde andar e o que nao tocar, e como quem **coloca** sinalizacao quando abre um servico, isola uma area ou transfere um produto para outro recipiente.
+Em toda a instalação. Você é afetado nas duas pontas: como quem **lê** a sinalização para saber por onde andar e o que não tocar, e como quem **coloca** sinalização quando abre um serviço, isola uma área ou transfere um produto para outro recipiente.
 
-A segunda ponta e onde mais se erra. Quem passa produto quimico do tambor para o galao e nao rotula cria um risco que nao existia.
+A segunda ponta é onde mais se erra. Quem passa produto químico do tambor para o galão e não rotula cria um risco que não existia.
 
 ## As cores e o que elas dizem
 
-- **Vermelho**: identifica equipamento e material de combate a incendio. Extintor, hidrante, sirene, botao de parada de emergencia, caixa de mangueira. Por isso nao se pinta de vermelho o que nao for de emergencia, e nao se guarda nada em cima da area vermelha do piso.
-- **Amarelo**: cuidado, atencao. Corrimao, parapeito, borda de plataforma, batente de degrau, partes moveis de maquina, faixas de piso que avisam desnivel ou passagem baixa.
-- **Verde**: seguranca. Caixa de primeiros socorros, chuveiro de emergencia e lava olhos, macas, quadro de aviso de seguranca, EPI guardado.
-- **Azul**: acao obrigatoria e advertencia contra acionamento. Placa que manda usar protetor auricular, e o aviso posto no comando de equipamento em manutencao para que ninguem ligue.
-- **Laranja**: partes moveis e perigosas de maquina expostas, face interna de guarda que foi aberta, borda cortante.
-- **Branco**: circulacao. Faixa de pedestre interna, area de armazenamento demarcada, direcao de fluxo.
-- **Purpura**: risco de radiacao ionizante.
-- **Lilas**: perigo de radiacao nao ionizante em alguns arranjos, conforme o padrao interno.
+- **Vermelho**: identifica equipamento e material de combate a incêndio. Extintor, hidrante, sirene, botão de parada de emergência, caixa de mangueira. Por isso não se pinta de vermelho o que não for de emergência, e não se guarda nada em cima da área vermelha do piso.
+- **Amarelo**: cuidado, atenção. Corrimão, parapeito, borda de plataforma, batente de degrau, partes móveis de máquina, faixas de piso que avisam desnível ou passagem baixa.
+- **Verde**: segurança. Caixa de primeiros socorros, chuveiro de emergência e lava olhos, maca, quadro de aviso de segurança, EPI guardado.
+- **Azul**: ação obrigatória e advertência contra acionamento. Placa que manda usar protetor auricular, e o aviso posto no comando de equipamento em manutenção para que ninguém ligue.
+- **Laranja**: partes móveis e perigosas de máquina expostas, face interna de guarda que foi aberta, borda cortante.
+- **Branco**: circulação. Faixa de pedestre interna, área de armazenamento demarcada, direção de fluxo.
+- **Púrpura**: risco de radiação ionizante.
+- **Lilás**: identificação de canalizações e sinalizações específicas conforme o padrão adotado na instalação.
 
-O que voce nao pode fazer e inventar cor. Fita amarela improvisada para dizer proibido passar confunde: amarelo e atencao, isolamento de area e feito com o material e a placa que a empresa definiu.
+O que você não pode fazer é inventar cor. Fita amarela improvisada para dizer proibido passar confunde: amarelo é atenção, e isolamento de área se faz com o material e a placa que a empresa definiu.
 
-## Tubulacao: a cor do tubo salva vida
+## Tubulação: a cor do tubo salva vida
 
-Numa industria passam agua, vapor, ar comprimido, gas combustivel, acido e produto inflamavel pelo mesmo corredor de tubos. Abrir a valvula errada, ou soldar no tubo errado, e acidente grave.
+Numa indústria passam água, vapor, ar comprimido, gás combustível, ácido e produto inflamável pelo mesmo corredor de tubos. Abrir a válvula errada, ou soldar no tubo errado, é acidente grave.
 
-Por isso a tubulacao recebe cor de identificacao e, junto dela, **rotulo com o nome do produto e seta indicando o sentido do fluxo**. A regra pratica e simples: se voce nao consegue ler no proprio tubo o que passa dentro dele, voce nao abre, nao corta, nao solda e nao apoia nada nele. Vai perguntar.
+Por isso a tubulação recebe cor de identificação e, junto dela, **rótulo com o nome do produto e seta indicando o sentido do fluxo**. A regra prática é simples: se você não consegue ler no próprio tubo o que passa dentro dele, você não abre, não corta, não solda e não apoia nada nele. Vai perguntar.
 
-## Rotulo de produto quimico
+## Rótulo de produto químico
 
-O rotulo preventivo segue o sistema harmonizado e traz sempre os mesmos elementos: **pictograma** em losango vermelho, **palavra de advertencia** (perigo ou atencao), nome do produto, frases de perigo, frases de precaucao e quem fabrica.
+O rótulo preventivo segue o sistema harmonizado e traz sempre os mesmos elementos: **pictograma** em losango vermelho, **palavra de advertência** (perigo ou atenção), nome do produto, frases de perigo, frases de precaução e quem fabrica.
 
-Os pictogramas mais comuns na obra e na industria sao chama para inflamavel, caveira para toxico agudo, ponto de exclamacao para irritante, tubos de ensaio derramando para corrosivo, e o busto com a mancha no torax para produto que causa dano grave a longo prazo.
+Os pictogramas mais comuns na obra e na indústria são a chama para inflamável, a caveira para tóxico agudo, o ponto de exclamação para irritante, os tubos de ensaio derramando para corrosivo, e o busto com a mancha no tórax para produto que causa dano grave à saúde.
 
-Cada produto tem tambem a ficha com dados de seguranca. E o documento que diz o que fazer no derramamento, no contato com a pele, na inalacao e no incendio. Ela precisa estar acessivel onde o produto e usado, e nao trancada numa gaveta do escritorio.
+Cada produto tem também a ficha com dados de segurança. É o documento que diz o que fazer no derramamento, no contato com a pele, na inalação e no incêndio. Ela precisa estar acessível onde o produto é usado, e não trancada numa gaveta do escritório.
 
-**Recipiente sem rotulo se trata como desconhecido: ninguem abre, ninguem cheira, ninguem usa.** Garrafa de refrigerante com liquido dentro e um dos acidentes mais antigos e mais bobos que existem.
+**Recipiente sem rótulo se trata como desconhecido: ninguém abre, ninguém cheira, ninguém usa.** Garrafa de refrigerante com líquido dentro é um dos acidentes mais antigos e mais bobos que existem.
 
-## Emergencia
+## Emergência
 
-A sinalizacao de emergencia so funciona se estiver visivel no dia ruim, com fumaca, correria e pouca luz. Saida de emergencia, luminaria autonoma, seta de rota de fuga, extintor e chuveiro lava olhos precisam estar desobstruidos o tempo todo.
+A sinalização de emergência só funciona se estiver visível no dia ruim, com fumaça, correria e pouca luz. Saída de emergência, luminária autônoma, seta de rota de fuga, extintor e chuveiro lava olhos precisam estar desobstruídos o tempo todo.
 
-Ninguem encosta pallet na frente do hidrante, nem guarda material no corredor de saida, nem pendura pano no extintor. Se voce viu isso, tirar leva trinta segundos e faz parte do seu trabalho.
+Ninguém encosta pallet na frente do hidrante, nem guarda material no corredor de saída, nem pendura pano no extintor. Se você viu isso, tirar leva trinta segundos e faz parte do seu trabalho.
 
-## O que a empresa deve, o que voce deve
+## O que a empresa deve, o que você deve
 
-A empresa deve padronizar e manter a sinalizacao, rotular tudo, identificar tubulacoes, disponibilizar as fichas de seguranca, treinar os trabalhadores no significado das cores e dos pictogramas, e repor placa apagada ou quebrada.
+A empresa deve padronizar e manter a sinalização, rotular tudo, identificar tubulações, disponibilizar as fichas de segurança, treinar os trabalhadores no significado das cores e dos pictogramas, e repor placa apagada ou quebrada.
 
-Voce deve respeitar a sinalizacao mesmo quando ela atrapalha o caminho, sinalizar o servico que abrir, rotular todo recipiente que encher, nao remover placa nem isolamento de area que nao seja seu, e avisar quando faltar sinalizacao ou quando ela estiver ilegivel.
+Você deve respeitar a sinalização mesmo quando ela atrapalha o caminho, sinalizar o serviço que abrir, rotular todo recipiente que encher, não remover placa nem isolamento de área que não seja seu, e avisar quando faltar sinalização ou quando ela estiver ilegível.
 
 ## Para lembrar
 
-- **Sinalizacao avisa, nao protege.** Continue tratando o perigo como perigo.
-- Vermelho e incendio, amarelo e cuidado, verde e seguranca, azul e obrigacao.
-- Nao se guarda nem se encosta nada sobre area vermelha ou de emergencia.
-- Tubo sem identificacao legivel nao se abre, nao se corta e nao se solda.
-- Todo recipiente rotulado, inclusive o pequeno que voce encheu agora.
-- **Recipiente sem rotulo e produto desconhecido e ninguem usa.**
-- A ficha de seguranca fica onde o produto e usado.
-- Servico aberto e area isolada, com a placa e a barreira que a empresa definiu.'
+- **Sinalização avisa, não protege.** Continue tratando o perigo como perigo.
+- Vermelho é incêndio, amarelo é cuidado, verde é segurança, azul é obrigação.
+- Não se guarda nem se encosta nada sobre área vermelha ou de emergência.
+- Tubo sem identificação legível não se abre, não se corta e não se solda.
+- Todo recipiente rotulado, inclusive o pequeno que você encheu agora.
+- **Recipiente sem rótulo é produto desconhecido e ninguém usa.**
+- A ficha de segurança fica onde o produto é usado.
+- Serviço aberto é área isolada, com a placa e a barreira que a empresa definiu.'
 where codigo = 'NR-26';
 
 
@@ -319,108 +319,108 @@ where codigo = 'NR-26';
 -- =====================================================================
 update public.trein_curso set
   conteudo_programatico =
-'Objetivo do bloqueio e etiquetagem e sua relacao com a seguranca em maquinas.
+'Objetivo do bloqueio e etiquetagem e sua relação com a segurança em máquinas.
 Acidentes por partida inesperada e por energia residual armazenada.
-Tipos de energia perigosa: eletrica, mecanica, hidraulica, pneumatica e termica.
-Energia quimica, gravitacional e energia acumulada em molas e capacitores.
-Identificacao dos pontos de isolamento de cada equipamento.
-Dispositivos de bloqueio: cadeado, garra multipla, bloqueador de valvula e disjuntor.
-Etiqueta de identificacao: quem bloqueou, quando e por que.
-Sequencia de aplicacao do bloqueio, do desligamento a dissipacao de energia.
-Teste de energia zero antes de iniciar a intervencao.
+Tipos de energia perigosa: elétrica, mecânica, hidráulica, pneumática e térmica.
+Energia química, gravitacional e energia acumulada em molas e capacitores.
+Identificação dos pontos de isolamento de cada equipamento.
+Dispositivos de bloqueio: cadeado, garra múltipla, bloqueador de válvula e de disjuntor.
+Etiqueta de identificação: quem bloqueou, quando e por quê.
+Sequência de aplicação do bloqueio, do desligamento à dissipação de energia.
+Teste de energia zero antes de iniciar a intervenção.
 Bloqueio individual, bloqueio de grupo e caixa de bloqueio coletivo.
-Passagem de turno com equipamento bloqueado e continuidade do servico.
-Sequencia de liberacao, retirada de cadeado esquecido e retomada segura.',
+Passagem de turno com equipamento bloqueado e continuidade do serviço.
+Sequência de liberação, retirada de cadeado esquecido e retomada segura.',
   apostila =
 '## Por que este procedimento existe
 
-A maioria dos acidentes graves de manutencao tem a mesma historia. O equipamento parou, o mecanico entrou, e alguem ligou. Ou o equipamento parou, o mecanico entrou, e a maquina se moveu sozinha porque ainda havia pressao no circuito, peso suspenso ou mola comprimida.
+A maioria dos acidentes graves de manutenção tem a mesma história. O equipamento parou, o mecânico entrou, e alguém ligou. Ou o equipamento parou, o mecânico entrou, e a máquina se moveu sozinha porque ainda havia pressão no circuito, peso suspenso ou mola comprimida.
 
-LOTO vem de lockout e tagout: **bloquear** a fonte de energia com um cadeado fisico e **etiquetar** dizendo quem bloqueou. Nao e norma numerada no Brasil, mas e exigido na pratica pela NR-12 e por qualquer sistema de gestao serio, porque e o unico jeito comprovado de garantir que a maquina nao volte a funcionar enquanto tem gente dentro dela.
+LOTO vem de lockout e tagout: **bloquear** a fonte de energia com um cadeado físico e **etiquetar** dizendo quem bloqueou. Não é norma numerada no Brasil, mas é exigido na prática pela NR-12 e por qualquer sistema de gestão sério, porque é o único jeito comprovado de garantir que a máquina não volte a funcionar enquanto tem gente dentro dela.
 
-> Aviso verbal nao e bloqueio. Cartaz sozinho nao e bloqueio. Botao de emergencia apertado nao e bloqueio. Bloqueio e cadeado.
+> Aviso verbal não é bloqueio. Cartaz sozinho não é bloqueio. Botão de emergência apertado não é bloqueio. Bloqueio é cadeado.
 
-## Quando ele se aplica a voce
+## Quando ele se aplica a você
 
-Sempre que voce for intervir num equipamento em que a partida inesperada, o movimento residual ou a liberacao de energia possam machucar alguem. Manutencao mecanica ou eletrica, limpeza interna, desobstrucao, troca de ferramenta, ajuste, inspecao dentro de zona de risco, retirada de protecao.
+Sempre que você for intervir num equipamento em que a partida inesperada, o movimento residual ou a liberação de energia possam machucar alguém. Manutenção mecânica ou elétrica, limpeza interna, desobstrução, troca de ferramenta, ajuste, inspeção dentro de zona de risco, retirada de proteção.
 
-A duvida comum e o servico rapido. **Servico rapido e o que mais mata**, exatamente porque a pessoa acha que nao vale a pena bloquear por dois minutos. Vale.
+A dúvida comum é o serviço rápido. **Serviço rápido é o que mais mata**, exatamente porque a pessoa acha que não vale a pena bloquear por dois minutos. Vale.
 
-Vale a pena dizer tambem o que **nao** conta como bloqueio, porque cada um destes ja apareceu em relatorio de acidente grave:
+Vale a pena dizer também o que **não** conta como bloqueio, porque cada um destes já apareceu em relatório de acidente grave:
 
-- Botao de emergencia apertado. Ele para, mas nao impede que alguem gire e ligue.
+- Botão de emergência apertado. Ele para, mas não impede que alguém gire e ligue.
 - Chave geral desligada sem cadeado, com o painel destrancado.
-- Aviso no radio ou combinacao verbal com o operador.
+- Aviso no rádio ou combinação verbal com o operador.
 - Placa de papel colada no comando, sozinha.
-- Fusivel retirado e guardado no bolso.
-- Colega postado na frente do painel para nao deixar ninguem ligar.
+- Fusível retirado e guardado no bolso.
+- Colega postado na frente do painel para não deixar ninguém ligar.
 
-Todos falham do mesmo jeito: dependem de alguem lembrar. O cadeado nao depende.
+Todos falham do mesmo jeito: dependem de alguém lembrar. O cadeado não depende.
 
-## Todas as energias, nao so a eletrica
+## Todas as energias, não só a elétrica
 
-Bloquear o disjuntor e o passo mais lembrado e quase nunca e o unico. Faca a lista do equipamento:
+Bloquear o disjuntor é o passo mais lembrado e quase nunca é o único. Faça a lista do equipamento:
 
-- **Eletrica**: painel, disjuntor, chave seccionadora, tomada industrial.
-- **Mecanica**: eixo girando por inercia, volante, correia, rolo que continua rodando depois de desligado.
-- **Hidraulica**: pressao no cilindro e na tubulacao, mesmo com a bomba parada.
-- **Pneumatica**: ar comprimido no reservatorio e nas linhas.
-- **Gravitacional**: caçamba levantada, mesa elevatoria, carga suspensa, contrapeso.
-- **Termica**: vapor, agua quente, superficie que ainda esta a duzentos graus.
-- **Quimica**: produto na linha, gas residual, vapor inflamavel.
-- **Acumulada**: mola comprimida, capacitor carregado, acumulador hidraulico.
+- **Elétrica**: painel, disjuntor, chave seccionadora, tomada industrial.
+- **Mecânica**: eixo girando por inércia, volante, correia, rolo que continua rodando depois de desligado.
+- **Hidráulica**: pressão no cilindro e na tubulação, mesmo com a bomba parada.
+- **Pneumática**: ar comprimido no reservatório e nas linhas.
+- **Gravitacional**: caçamba levantada, mesa elevatória, carga suspensa, contrapeso.
+- **Térmica**: vapor, água quente, superfície que ainda está a duzentos graus.
+- **Química**: produto na linha, gás residual, vapor inflamável.
+- **Acumulada**: mola comprimida, capacitor carregado, acumulador hidráulico.
 
-Cada uma dessas precisa ser isolada e depois **dissipada**: abrir o purgador, aliviar a pressao, descer a carga e apoiar no calco, aterrar, drenar, esperar esfriar.
+Cada uma dessas precisa ser isolada e depois **dissipada**: abrir o purgador, aliviar a pressão, descer a carga e apoiar no calço, aterrar, drenar, esperar esfriar.
 
-## A sequencia do bloqueio
+## A sequência do bloqueio
 
 - Avise quem opera e quem depende do equipamento.
 - Desligue pelo comando normal, na ordem correta de parada.
-- Isole cada fonte de energia identificada no ponto proprio.
+- Isole cada fonte de energia identificada no ponto próprio.
 - Aplique o **seu** dispositivo de bloqueio em cada ponto isolado.
 - Prenda a etiqueta com o seu nome, a data, a hora e o motivo.
 - Dissipe a energia residual: alivie, drene, descarregue, calce, aterre.
-- Faca o **teste de energia zero**: tente acionar pelo comando, meça com instrumento, confirme que nao ha pressao nem movimento.
-- So depois disso ponha a mao no equipamento.
+- Faça o **teste de energia zero**: tente acionar pelo comando, meça com instrumento, confirme que não há pressão nem movimento.
+- Só depois disso ponha a mão no equipamento.
 
-O teste de energia zero e o passo que ninguem pode pular. Ele e a diferenca entre acreditar que a maquina esta desligada e saber que esta.
+O teste de energia zero é o passo que ninguém pode pular. Ele é a diferença entre acreditar que a máquina está desligada e saber que está.
 
 ## Cada um com o seu cadeado
 
-O cadeado e individual, e a chave fica com quem esta trabalhando, no bolso. Nao existe cadeado do setor pendurado com a chave no quadro.
+O cadeado é individual, e a chave fica com quem está trabalhando, no bolso. Não existe cadeado do setor pendurado com a chave no quadro.
 
-Quando a equipe e grande, usa se garra multipla, que aceita varios cadeados no mesmo ponto, ou caixa de bloqueio coletivo: a chave do bloqueio principal fica trancada dentro da caixa, e cada trabalhador poe o seu cadeado na tampa. **Enquanto houver um unico cadeado na caixa, a chave nao sai, e o equipamento nao liga.**
+Quando a equipe é grande, usa-se garra múltipla, que aceita vários cadeados no mesmo ponto, ou caixa de bloqueio coletivo: a chave do bloqueio principal fica trancada dentro da caixa, e cada trabalhador põe o seu cadeado na tampa. **Enquanto houver um único cadeado na caixa, a chave não sai, e o equipamento não liga.**
 
-Se o servico atravessa a troca de turno, o bloqueio nao e retirado. Quem entra coloca o cadeado antes de quem sai retirar o seu, e o equipamento nunca fica sem protecao no intervalo.
+Se o serviço atravessa a troca de turno, o bloqueio não é retirado. Quem entra coloca o cadeado antes de quem sai retirar o seu, e o equipamento nunca fica sem proteção no intervalo.
 
-## A liberacao
+## A liberação
 
 Liberar tem regra tanto quanto bloquear:
 
-- Termine o servico e recoloque todas as protecoes que foram retiradas.
-- Retire ferramenta, pano, escada e peca de dentro da maquina.
-- Confira que nao ha ninguem na zona de risco, e avise em voz alta.
-- Cada trabalhador retira o proprio cadeado e a propria etiqueta.
+- Termine o serviço e recoloque todas as proteções que foram retiradas.
+- Retire ferramenta, pano, escada e peça de dentro da máquina.
+- Confira que não há ninguém na zona de risco, e avise em voz alta.
+- Cada trabalhador retira o próprio cadeado e a própria etiqueta.
 - Religue e acompanhe a primeira partida.
 
-Cadeado esquecido por alguem que foi embora nao se corta por conta propria. Existe um procedimento de excecao, com autorizacao de quem responde pela area, tentativa de contato com o dono do cadeado e conferencia fisica de que nao ha pessoa no equipamento. **Cortar cadeado dos outros por pressa e uma das piores decisoes possiveis dentro de uma fabrica.**
+Cadeado esquecido por alguém que foi embora não se corta por conta própria. Existe um procedimento de exceção, com autorização de quem responde pela área, tentativa de contato com o dono do cadeado e conferência física de que não há pessoa no equipamento. **Cortar cadeado dos outros por pressa é uma das piores decisões possíveis dentro de uma fábrica.**
 
-## O que a empresa deve, o que voce deve
+## O que a empresa deve, o que você deve
 
 A empresa deve ter procedimento escrito por equipamento, com os pontos de isolamento mapeados, fornecer cadeados e dispositivos suficientes, treinar e autorizar formalmente quem bloqueia, e auditar.
 
-Voce deve bloquear sempre, com o seu cadeado, testar energia zero, nunca confiar em bloqueio feito por outro sem colocar o seu, nunca operar equipamento etiquetado por terceiro, e comunicar quando faltar dispositivo ou quando o ponto de isolamento nao existir.
+Você deve bloquear sempre, com o seu cadeado, testar energia zero, nunca confiar em bloqueio feito por outro sem colocar o seu, nunca operar equipamento etiquetado por terceiro, e comunicar quando faltar dispositivo ou quando o ponto de isolamento não existir.
 
 ## Para lembrar
 
-- **Bloqueio e cadeado fisico.** Aviso e cartaz nao bloqueiam nada.
-- Liste todas as energias, nao apenas a eletrica.
-- Isolou, dissipou. Pressao, carga suspensa, calor e mola tambem matam.
+- **Bloqueio é cadeado físico.** Aviso e cartaz não bloqueiam nada.
+- Liste todas as energias, não apenas a elétrica.
+- Isolou, dissipou. Pressão, carga suspensa, calor e mola também matam.
 - **Teste de energia zero antes de encostar.** Sempre.
 - Cadeado individual, chave no bolso do dono.
-- Um cadeado na caixa ja impede a partida de todo o conjunto.
-- Servico rapido tambem se bloqueia.
-- Cadeado de terceiro nao se corta: existe procedimento para isso.'
+- Um cadeado na caixa já impede a partida de todo o conjunto.
+- Serviço rápido também se bloqueia.
+- Cadeado de terceiro não se corta: existe procedimento para isso.'
 where codigo = 'LOTO';
 
 
@@ -429,540 +429,540 @@ where codigo = 'LOTO';
 -- =====================================================================
 update public.trein_curso set
   conteudo_programatico =
-'Definicao de trabalho a quente e atividades abrangidas pelo procedimento.
-Riscos de incendio, explosao, queimadura, radiacao e fumos metalicos.
-Permissao de trabalho: emissao, validade, encerramento e responsaveis.
-Analise de risco da tarefa e inspecao previa da area de execucao.
-Identificacao e remocao de materiais combustiveis no entorno.
-Medicao de gases e atmosferas explosivas antes e durante o servico.
-Isolamento da area, biombos, mantas e protecao de aberturas e drenos.
-Funcao do vigia de fogo, seus limites e a vigilancia apos o termino.
-Equipamentos de oxicorte: cilindros, mangueiras, valvulas e retorno de chama.
-Solda eletrica: cabos, aterramento, porta eletrodo e risco de choque.
-Protecao individual especifica: mascara de solda, vestimenta e respiratoria.
-Trabalho a quente em espaco confinado, em altura e proximo a inflamaveis.
-Ventilacao, exaustao e controle da exposicao a fumos de solda.
-Emergencia: combate a principio de incendio, alarme e atendimento a queimadura.',
+'Definição de trabalho a quente e atividades abrangidas pelo procedimento.
+Riscos de incêndio, explosão, queimadura, radiação e fumos metálicos.
+Permissão de trabalho: emissão, validade, encerramento e responsáveis.
+Análise de risco da tarefa e inspeção prévia da área de execução.
+Identificação e remoção de materiais combustíveis no entorno.
+Medição de gases e atmosferas explosivas antes e durante o serviço.
+Isolamento da área, biombos, mantas e proteção de aberturas e drenos.
+Função do vigia de fogo, seus limites e a vigilância após o término.
+Equipamentos de oxicorte: cilindros, mangueiras, válvulas e retorno de chama.
+Solda elétrica: cabos, aterramento, porta eletrodo e risco de choque.
+Proteção individual específica: máscara de solda, vestimenta e respiratória.
+Trabalho a quente em espaço confinado, em altura e próximo a inflamáveis.
+Ventilação, exaustão e controle da exposição a fumos de solda.
+Emergência: combate a princípio de incêndio, alarme e atendimento a queimadura.',
   apostila =
 '## Por que esta norma existe
 
-Trabalho a quente e toda atividade que produz chama, calor intenso ou faisca: solda eletrica, oxicorte, esmerilhamento, maçarico, aquecimento com macarico, corte com disco abrasivo.
+Trabalho a quente é toda atividade que produz chama, calor intenso ou faísca: solda elétrica, oxicorte, esmerilhamento, maçarico, aquecimento, corte com disco abrasivo.
 
-O item 34.5 da NR-34 organizou esse trabalho na industria naval, e o procedimento que ele descreve virou referencia para obra e para industria em geral, junto com o que a NR-20 exige perto de inflamaveis.
+O item 34.5 da NR-34 organizou esse trabalho na indústria naval, e o procedimento que ele descreve virou referência para obra e para indústria em geral, junto com o que a NR-20 exige perto de inflamáveis.
 
-A razao e simples de entender e dificil de esquecer depois que se ve uma vez. Uma faisca de esmeril viaja mais de dez metros, entra por fresta, cai por vao de piso e continua quente depois de cair. Ela nao precisa iniciar o fogo na hora: pode ficar horas em uma poeira de serragem ou em um pano com oleo e virar incendio quando ja nao ha ninguem no local.
+A razão é simples de entender e difícil de esquecer depois que se vê uma vez. Uma faísca de esmeril viaja mais de dez metros, entra por fresta, cai por vão de piso e continua quente depois de cair. Ela não precisa iniciar o fogo na hora: pode ficar horas numa poeira de serragem ou num pano com óleo e virar incêndio quando já não há ninguém no local.
 
-> Grande parte dos incendios industriais comeca em servico de solda ja terminado. O fogo aparece depois que a equipe foi embora.
+> Grande parte dos incêndios industriais começa em serviço de solda já terminado. O fogo aparece depois que a equipe foi embora.
 
-## Quando ela se aplica a voce
+## Quando ela se aplica a você
 
-Sempre que houver chama, calor ou faisca fora de um local fixo e preparado para isso. Numa bancada de solda, com piso incombustivel e exaustao, o risco esta controlado pelo proprio arranjo do local. Fora dela, cada servico e um caso novo e precisa de **permissao de trabalho**.
+Sempre que houver chama, calor ou faísca fora de um local fixo e preparado para isso. Numa bancada de solda, com piso incombustível e exaustão, o risco está controlado pelo próprio arranjo do local. Fora dela, cada serviço é um caso novo e precisa de **permissão de trabalho**.
 
-A permissao nao e burocracia. E o documento em que alguem tecnicamente responsavel olhou aquela area, aquele dia e aquela tarefa e disse o que precisa ser feito antes de acender.
+A permissão não é burocracia. É o documento em que alguém tecnicamente responsável olhou aquela área, aquele dia e aquela tarefa e disse o que precisa ser feito antes de acender.
 
-## Antes de comecar
+## Antes de começar
 
-A permissao de trabalho traz a analise de risco e as condicoes. Antes de assinar e antes de acender, confira voce mesmo:
+A permissão de trabalho traz a análise de risco e as condições. Antes de assinar e antes de acender, confira você mesmo:
 
-- **Combustivel no entorno**: retire tudo que queima num raio adequado. Papelao, madeira, estopa, plastico, tambor vazio de solvente, isolamento termico, pintura fresca.
-- **O que nao da para retirar**: cobre com manta de protecao termica, nunca com lona plastica.
-- **Aberturas**: vao de piso, junta de dilatacao, canaleta, ralo, dreno e caixa de passagem sao por onde a faisca some. Tape.
-- **Atmosfera**: onde houver historico de gas, vapor ou liquido inflamavel, ha medicao antes e monitoramento durante. Tanque, linha e area classificada nao recebem chama sem liberacao explicita.
-- **Ventilacao**: fumo de solda em local fechado intoxica. Exaustao local ou ventilacao forcada.
-- **Extintor**: do tipo certo, carregado, ao alcance da mao, e nao a cinquenta metros.
-- **Isolamento**: biombo para proteger a vista de quem passa, sinalizacao e barreira.
+- **Combustível no entorno**: retire tudo que queima num raio adequado. Papelão, madeira, estopa, plástico, tambor vazio de solvente, isolamento térmico, pintura fresca.
+- **O que não dá para retirar**: cubra com manta de proteção térmica, nunca com lona plástica.
+- **Aberturas**: vão de piso, junta de dilatação, canaleta, ralo, dreno e caixa de passagem são por onde a faísca some. Tape.
+- **Atmosfera**: onde houver histórico de gás, vapor ou líquido inflamável, há medição antes e monitoramento durante. Tanque, linha e área classificada não recebem chama sem liberação explícita.
+- **Ventilação**: fumo de solda em local fechado intoxica. Exaustão local ou ventilação forçada.
+- **Extintor**: do tipo certo, carregado, ao alcance da mão, e não a cinquenta metros.
+- **Isolamento**: biombo para proteger a vista de quem passa, sinalização e barreira.
 
-Confira o equipamento tambem. Cabo de solda com emenda descascada, porta eletrodo trincado, mangueira de oxicorte ressecada, cilindro deitado ou sem capacete, valvula corta chamas ausente: nada disso entra em servico.
+Confira o equipamento também. Cabo de solda com emenda descascada, porta eletrodo trincado, mangueira de oxicorte ressecada, cilindro deitado ou sem capacete, válvula corta chamas ausente: nada disso entra em serviço.
 
 ## Durante o trabalho
 
-O vigia de fogo fica com uma tarefa unica: olhar o entorno e a trajetoria das faiscas, com extintor na mao. **Ele nao ajuda a segurar peca, nao busca ferramenta e nao vai almoçar antes.** No momento em que ele faz outra coisa, deixou de existir.
+O vigia de fogo fica com uma tarefa única: olhar o entorno e a trajetória das faíscas, com extintor na mão. **Ele não ajuda a segurar peça, não busca ferramenta e não vai almoçar antes.** No momento em que ele faz outra coisa, deixou de existir.
 
-Ele precisa saber acionar o alarme, saber onde fica o hidrante, e ter meio de comunicacao. Quando o servico e feito de um lado de uma parede ou de um piso, a vigilancia acontece **dos dois lados**: calor atravessa chapa e a faisca cai no andar de baixo.
+Ele precisa saber acionar o alarme, saber onde fica o hidrante, e ter meio de comunicação. Quando o serviço é feito de um lado de uma parede ou de um piso, a vigilância acontece **dos dois lados**: calor atravessa chapa e a faísca cai no andar de baixo.
 
-Para o soldador, tres cuidados que custam caro quando faltam:
+Para o soldador, três cuidados que custam caro quando faltam:
 
-- Aterramento do circuito de solda preso na peca, perto do ponto de trabalho. Retorno improvisado por estrutura faz corrente circular por onde ninguem espera.
-- Vestimenta de raspa ou tecido tratado, sem bolso aberto e sem bainha virada, que e onde a escoria se aloja. Nada de tecido sintetico por baixo: ele derrete na pele.
-- Mascara com o tom de lente adequado ao processo. Vista de solda queima em segundos e a dor chega horas depois.
+- Aterramento do circuito de solda preso na peça, perto do ponto de trabalho. Retorno improvisado pela estrutura faz corrente circular por onde ninguém espera.
+- Vestimenta de raspa ou tecido tratado, sem bolso aberto e sem bainha virada, que é onde a escória se aloja. Nada de tecido sintético por baixo: ele derrete na pele.
+- Máscara com o tom de lente adequado ao processo. Vista de solda queima em segundos e a dor chega horas depois.
 
-Em espaco confinado, trabalho a quente soma duas normas: nao entra sem liberacao de espaco confinado, sem vigia proprio e sem monitoramento continuo de atmosfera. Em altura, a faisca cai sobre gente e material que estao muito longe do seu campo de visao.
+Em espaço confinado, trabalho a quente soma duas normas: não se entra sem liberação de espaço confinado, sem vigia próprio e sem monitoramento contínuo de atmosfera. Em altura, a faísca cai sobre gente e material que estão muito longe do seu campo de visão.
 
 ## Cilindros e gases
 
-Cilindro fica em pe, amarrado, com valvula protegida e longe de fonte de calor. Oxigenio e graxa ou oleo formam combinacao explosiva: mao engraxada nao encosta em valvula de oxigenio.
+Cilindro fica em pé, amarrado, com válvula protegida e longe de fonte de calor. Oxigênio e graxa ou óleo formam combinação explosiva: mão engraxada não encosta em válvula de oxigênio.
 
-Mangueira tem cor propria por gas e nao se troca uma pela outra. **Valvula corta chamas nos dois lados evita o retorno de chama**, que e quando o fogo entra pela mangueira e chega ao cilindro. Vazamento se procura com agua e sabao, nunca com isqueiro.
+Mangueira tem cor própria por gás e não se troca uma pela outra. **Válvula corta chamas nos dois lados evita o retorno de chama**, que é quando o fogo entra pela mangueira e chega ao cilindro. Vazamento se procura com água e sabão, nunca com isqueiro.
 
-Ao terminar, feche primeiro a valvula do cilindro, alivie a pressao das mangueiras e recolha o conjunto.
+Ao terminar, feche primeiro a válvula do cilindro, alivie a pressão das mangueiras e recolha o conjunto.
 
 ## Depois de apagar: a parte esquecida
 
-O servico nao termina quando o maçarico apaga. A vigilancia continua por um periodo definido no procedimento, tipicamente pelo menos trinta minutos, e mais tempo quando ha material combustivel proximo, vao de piso ou dificuldade de acesso.
+O serviço não termina quando o maçarico apaga. A vigilância continua por um período definido no procedimento, tipicamente pelo menos trinta minutos, e mais tempo quando há material combustível próximo, vão de piso ou dificuldade de acesso.
 
-Passe a mao pela area com o dorso, olhe o piso de baixo, procure cheiro de queimado, confira as caixas e canaletas que voce tapou. So depois disso a permissao e encerrada e assinada.
+Passe a mão pela área com o dorso, olhe o piso de baixo, procure cheiro de queimado, confira as caixas e canaletas que você tapou. Só depois disso a permissão é encerrada e assinada.
 
-## Emergencia
+## Emergência
 
-Se o fogo comecou, ataque enquanto e principio, com o extintor certo e com saida garantida atras de voce. Se ele passou disso, acione o alarme, evacue e feche o que der para fechar.
+Se o fogo começou, ataque enquanto é princípio, com o extintor certo e com saída garantida atrás de você. Se ele passou disso, acione o alarme, evacue e feche o que der para fechar.
 
-Queimadura se resfria com agua corrente em abundancia, por varios minutos. Nao se passa pasta, pomada caseira, oleo nem manteiga, e nao se estoura bolha. Roupa colada na pele nao se arranca. Vista de solda queimada se trata com compressa fria, ambiente escuro e avaliacao medica.
+Queimadura se resfria com água corrente em abundância, por vários minutos. Não se passa pasta, pomada caseira, óleo nem manteiga, e não se estoura bolha. Roupa colada na pele não se arranca. Vista de solda queimada se trata com compressa fria, ambiente escuro e avaliação médica.
 
 ## Para lembrar
 
-- **Sem permissao de trabalho valida, nao acende.**
-- Faisca viaja longe, entra por fresta e cai por vao de piso: tape tudo.
-- Retire o combustivel; o que nao sair, cubra com manta, nunca com plastico.
-- Onde houver inflamavel, mede se gas antes e durante.
-- **Vigia de fogo nao faz outra coisa**, e vigia os dois lados da parede.
-- Cilindro em pe e amarrado; oxigenio nunca perto de graxa ou oleo.
-- Valvula corta chamas nos dois lados da mangueira.
-- **A vigilancia continua depois de apagar**, no minimo trinta minutos.
-- Queimadura: agua corrente e servico medico. Nada de pomada caseira.'
+- **Sem permissão de trabalho válida, não acende.**
+- Faísca viaja longe, entra por fresta e cai por vão de piso: tape tudo.
+- Retire o combustível; o que não sair, cubra com manta, nunca com plástico.
+- Onde houver inflamável, mede-se gás antes e durante.
+- **Vigia de fogo não faz outra coisa**, e vigia os dois lados da parede.
+- Cilindro em pé e amarrado; oxigênio nunca perto de graxa ou óleo.
+- Válvula corta chamas nos dois lados da mangueira.
+- **A vigilância continua depois de apagar**, no mínimo trinta minutos.
+- Queimadura: água corrente e serviço médico. Nada de pomada caseira.'
 where codigo = 'NR-34.5';
 
 
 -- =====================================================================
---  NR-01-INT4: integracao de seguranca, 4 horas
---  Publico: recem admitido. Foco: atravessar a primeira semana inteiro.
+--  NR-01-INT4: integração de segurança, 4 horas
+--  Público: recém admitido. Foco: atravessar a primeira semana inteiro.
 -- =====================================================================
 update public.trein_curso set
   conteudo_programatico =
-'Apresentacao da empresa, das areas e das regras de convivencia no local de trabalho.
-Direitos e deveres do trabalhador quanto a seguranca e a saude no trabalho.
-Ordem de servico: o que ela informa e por que deve ser assinada e compreendida.
-Riscos existentes nas areas por onde o trabalhador vai circular.
-Circulacao segura, faixas de pedestre, transito de veiculos e areas restritas.
-Equipamentos de protecao individual exigidos e como obte los.
-Regras basicas de altura, eletricidade, maquinas e produtos quimicos.
-Sinalizacao, isolamento de area e placas que nao podem ser ultrapassadas.
-Comunicacao de condicao insegura e a quem recorrer em cada situacao.
+'Apresentação da empresa, das áreas e das regras de convivência no local de trabalho.
+Direitos e deveres do trabalhador quanto à segurança e à saúde no trabalho.
+Ordem de serviço: o que ela informa e por que deve ser assinada e compreendida.
+Riscos existentes nas áreas por onde o trabalhador vai circular.
+Circulação segura, faixas de pedestre, trânsito de veículos e áreas restritas.
+Equipamentos de proteção individual exigidos e como obtê-los.
+Regras básicas de altura, eletricidade, máquinas e produtos químicos.
+Sinalização, isolamento de área e placas que não podem ser ultrapassadas.
+Comunicação de condição insegura e a quem recorrer em cada situação.
 Procedimento em caso de acidente, mal estar ou quase acidente.
-Rota de fuga, ponto de encontro e alarme de emergencia.
+Rota de fuga, ponto de encontro e alarme de emergência.
 O direito de recusar tarefa com risco grave e iminente.',
   apostila =
-'## Bem vindo, e a razao desta conversa
+'## Bem vindo, e a razão desta conversa
 
-Voce esta comecando. Este material trata de uma coisa so: **o que voce precisa saber hoje para chegar inteiro no fim da primeira semana.**
+Você está começando. Este material trata de uma coisa só: **o que você precisa saber hoje para chegar inteiro no fim da primeira semana.**
 
-Isso nao e exagero de treinamento. Trabalhador recem admitido se acidenta mais que o veterano, e nao por falta de capricho. E porque ele ainda nao sabe por onde a empilhadeira passa, nao sabe qual porta abre para dentro, nao sabe que aquele piso fica escorregadio depois da lavagem, e tem vergonha de perguntar.
+Isso não é exagero de treinamento. Trabalhador recém admitido se acidenta mais que o veterano, e não por falta de capricho. É porque ele ainda não sabe por onde a empilhadeira passa, não sabe qual porta abre para dentro, não sabe que aquele piso fica escorregadio depois da lavagem, e tem vergonha de perguntar.
 
-> A pergunta que voce nao fez hoje e o acidente da semana que vem. Ninguem aqui acha ruim que voce pergunte. Acham ruim quando voce adivinha.
+> A pergunta que você não fez hoje é o acidente da semana que vem. Ninguém aqui acha ruim que você pergunte. Acham ruim quando você adivinha.
 
 ## Seus direitos e seus deveres
 
-A lei e clara nos dois lados. A empresa deve informar os riscos do seu trabalho, fornecer equipamento de protecao de graca, treinar e manter o local seguro. Voce deve seguir as instrucoes, usar o que recebeu, cuidar da sua seguranca e da de quem esta ao seu lado, e avisar quando algo estiver errado.
+A lei é clara nos dois lados. A empresa deve informar os riscos do seu trabalho, fornecer equipamento de proteção de graça, treinar e manter o local seguro. Você deve seguir as instruções, usar o que recebeu, cuidar da sua segurança e da de quem está ao seu lado, e avisar quando algo estiver errado.
 
-Ha um direito que precisa ser dito com todas as letras: **voce pode interromper uma tarefa quando houver risco grave e iminente**, e deve comunicar imediatamente ao superior. Ninguem e punido por isso. Punido e quem manda alguem entrar num risco desses.
+Há um direito que precisa ser dito com todas as letras: **você pode interromper uma tarefa quando houver risco grave e iminente**, e deve comunicar imediatamente ao superior. Ninguém é punido por isso. Punido é quem manda alguém entrar num risco desses.
 
-## A ordem de servico
+## A ordem de serviço
 
-Logo no inicio voce recebe a ordem de servico da sua funcao. E um papel curto que diz quais riscos existem na sua atividade, como se protege deles, e o que e proibido.
+Logo no início você recebe a ordem de serviço da sua função. É um papel curto que diz quais riscos existem na sua atividade, como se protege deles, e o que é proibido.
 
-Leia antes de assinar. Se tiver palavra que voce nao entendeu, pergunte na hora. Assinatura em documento que voce nao leu nao ajuda voce em nada.
+Leia antes de assinar. Se tiver palavra que você não entendeu, pergunte na hora. Assinatura em documento que você não leu não ajuda você em nada.
 
 ## As primeiras coisas a aprender no local
 
-Antes de comecar o servico, procure saber, com quem ja esta la:
+Antes de começar o serviço, procure saber, com quem já está lá:
 
-- Onde ficam as **saidas de emergencia** e para onde vai a rota de fuga.
-- Onde e o **ponto de encontro** e como e o som do alarme.
-- Onde estao o extintor, o hidrante e a caixa de primeiros socorros.
-- Quem e o seu encarregado e quem e o tecnico de seguranca da area.
-- Por onde passa veiculo, empilhadeira ou carga suspensa.
-- Onde ficam o vestiario, o refeitorio e a agua potavel.
+- Onde ficam as **saídas de emergência** e para onde vai a rota de fuga.
+- Onde é o **ponto de encontro** e como é o som do alarme.
+- Onde estão o extintor, o hidrante e a caixa de primeiros socorros.
+- Quem é o seu encarregado e quem é o técnico de segurança da área.
+- Por onde passa veículo, empilhadeira ou carga suspensa.
+- Onde ficam o vestiário, o refeitório e a água potável.
 
-Circule pelas faixas marcadas. Area demarcada e isolada nao se atravessa por atalho, mesmo vazia: se esta isolada, alguem isolou por um motivo que voce ainda nao conhece.
+Circule pelas faixas marcadas. Área demarcada e isolada não se atravessa por atalho, mesmo vazia: se está isolada, alguém isolou por um motivo que você ainda não conhece.
 
-## O basico de cada risco
+## O básico de cada risco
 
-**Altura.** Acima de dois metros, so com treinamento especifico, cinto paraquedista e ponto de ancoragem definido. Escada apoiada nao e plataforma de trabalho, e ninguem sobe em caixa, tambor ou pallet empilhado.
+**Altura.** Acima de dois metros, só com treinamento específico, cinto paraquedista e ponto de ancoragem definido. Escada apoiada não é plataforma de trabalho, e ninguém sobe em caixa, tambor ou pallet empilhado.
 
-**Eletricidade.** Painel eletrico e area de eletricista autorizado. Voce nao abre, nao mexe e nao improvisa emenda. Fio descascado, tomada quente e cheiro de queimado se comunica na hora.
+**Eletricidade.** Painel elétrico é área de eletricista autorizado. Você não abre, não mexe e não improvisa emenda. Fio descascado, tomada quente e cheiro de queimado se comunica na hora.
 
-**Maquinas.** Protecao de maquina nao se retira nem se amarra para ficar aberta. Maquina com etiqueta ou cadeado de manutencao nao se liga por nenhum motivo, nem para testar.
+**Máquinas.** Proteção de máquina não se retira nem se amarra para ficar aberta. Máquina com etiqueta ou cadeado de manutenção não se liga por nenhum motivo, nem para testar.
 
-**Produto quimico.** Recipiente sem rotulo e produto desconhecido. Nao cheire, nao prove, nao transfira para garrafa de bebida. Antes de usar, leia o rotulo e pergunte qual protecao e exigida.
+**Produto químico.** Recipiente sem rótulo é produto desconhecido. Não cheire, não prove, não transfira para garrafa de bebida. Antes de usar, leia o rótulo e pergunte qual proteção é exigida.
 
-**Piso e organizacao.** Grande parte das quedas acontece em piso escorregadio, tropeço em cabo e ferramenta largada. Recolher o que voce usou faz parte da tarefa, e nao e servico de limpeza.
+**Piso e organização.** Grande parte das quedas acontece em piso escorregadio, tropeço em cabo e ferramenta largada. Recolher o que você usou faz parte da tarefa, e não é serviço de limpeza.
 
 ## Seu EPI
 
-O equipamento e entregue de graca, contra assinatura na ficha. Confira antes de usar e comunique defeito. Bota, capacete e o que mais a sua funcao exigir se usam o tempo todo em area de risco, e nao apenas quando passa a fiscalizacao.
+O equipamento é entregue de graça, contra assinatura na ficha. Confira antes de usar e comunique defeito. Bota, capacete e o que mais a sua função exigir se usam o tempo todo em área de risco, e não apenas quando passa a fiscalização.
 
-Se o equipamento nao serve, aperta ou machuca, isso se resolve pedindo troca, e nunca deixando de usar.
+Se o equipamento não serve, aperta ou machuca, isso se resolve pedindo troca, e nunca deixando de usar.
 
 ## Sobre pegar peso e sobre o corpo
 
-Muita gente se machuca na primeira semana tentando mostrar servico. Carga que pesa demais para um se leva em dois, ou com carrinho. Para levantar, chegue perto, dobre os joelhos, mantenha as costas retas e traga o peso junto ao corpo. **Para virar, mova os pes; nunca gire o tronco com peso na mao.**
+Muita gente se machuca na primeira semana tentando mostrar serviço. Carga que pesa demais para um se leva em dois, ou com carrinho. Para levantar, chegue perto, dobre os joelhos, mantenha as costas retas e traga o peso junto ao corpo. **Para virar, mova os pés; nunca gire o tronco com peso na mão.**
 
-Beba agua ao longo do turno, principalmente em servico ao sol. Desidratacao da tontura, camaibra e erro de atencao, e isso e acidente esperando acontecer. Se estiver tomando remedio que da sono, avise o encarregado antes de comecar.
+Beba água ao longo do turno, principalmente em serviço ao sol. Desidratação dá tontura, cãibra e erro de atenção, e isso é acidente esperando acontecer. Se estiver tomando remédio que dá sono, avise o encarregado antes de começar.
 
 ## Se acontecer alguma coisa
 
-- **Nao se mexe no acidentado sem necessidade.** Chame ajuda e a brigada.
-- Comunique o acidente imediatamente, por menor que pareça. Corte pequeno que infecciona vira afastamento, e acidente nao comunicado no dia complica o seu direito depois.
-- Mal estar, tontura, falta de ar e dor no peito param o servico na hora.
-- **Quase acidente tambem se comunica.** A carga que quase caiu hoje e a que cai amanha.
-- Ao ouvir o alarme, pare, desligue o que estiver na mao, saia pela rota e va ao ponto de encontro. Nao volte para buscar nada.
+- **Não se mexe no acidentado sem necessidade.** Chame ajuda e a brigada.
+- Comunique o acidente imediatamente, por menor que pareça. Corte pequeno que infecciona vira afastamento, e acidente não comunicado no dia complica o seu direito depois.
+- Mal estar, tontura, falta de ar e dor no peito param o serviço na hora.
+- **Quase acidente também se comunica.** A carga que quase caiu hoje é a que cai amanhã.
+- Ao ouvir o alarme, pare, desligue o que estiver na mão, saia pela rota e vá ao ponto de encontro. Não volte para buscar nada.
 
-## O que ninguem faz aqui
+## O que ninguém faz aqui
 
-- Nao se corre no local de trabalho, nem para atender ao radio.
-- Nao se usa celular caminhando em area de circulacao de veiculo.
-- Nao se trabalha sob efeito de alcool ou de medicamento que da sono sem avisar.
-- Nao se improvisa ferramenta nem se sobe em estrutura provisoria.
-- Nao se faz brincadeira de empurrar, assustar ou apontar mangueira de ar.
+- Não se corre no local de trabalho, nem para atender ao rádio.
+- Não se usa celular caminhando em área de circulação de veículo.
+- Não se trabalha sob efeito de álcool ou de medicamento que dá sono sem avisar.
+- Não se improvisa ferramenta nem se sobe em estrutura provisória.
+- Não se faz brincadeira de empurrar, assustar ou apontar mangueira de ar.
 
 ## Para lembrar
 
-- Na duvida, **pergunte antes**. Nunca adivinhe.
-- Saiba hoje onde ficam a saida, o alarme e o ponto de encontro.
-- Leia a ordem de servico antes de assinar.
-- Area isolada nao se atravessa; protecao de maquina nao se retira.
+- Na dúvida, **pergunte antes**. Nunca adivinhe.
+- Saiba hoje onde ficam a saída, o alarme e o ponto de encontro.
+- Leia a ordem de serviço antes de assinar.
+- Área isolada não se atravessa; proteção de máquina não se retira.
 - **Todo acidente e todo quase acidente se comunicam no mesmo dia.**
-- EPI e gratuito e se usa o tempo inteiro na area de risco.
-- Recipiente sem rotulo ninguem abre.
-- **Risco grave e iminente da a voce o direito de parar**, avisando o superior.'
+- EPI é gratuito e se usa o tempo inteiro na área de risco.
+- Recipiente sem rótulo ninguém abre.
+- **Risco grave e iminente dá a você o direito de parar**, avisando o superior.'
 where codigo = 'NR-01-INT4';
 
 
 -- =====================================================================
---  NR-01-INT8: integracao a NR-01, 8 horas
---  Publico: quem participa da gestao de risco. Foco: GRO, PGR, inventario,
---  plano de acao e hierarquia de controle.
+--  NR-01-INT8: integração à NR-01, 8 horas
+--  Público: quem participa da gestão de risco. Foco: GRO, PGR,
+--  inventário, plano de ação e hierarquia de controle.
 -- =====================================================================
 update public.trein_curso set
   conteudo_programatico =
 'Estrutura das Normas Regulamentadoras e o papel da NR-01 como norma geral.
-Gerenciamento de riscos ocupacionais: conceito, abrangencia e ciclo de melhoria.
-Programa de gerenciamento de riscos: composicao, guarda e prazos de revisao.
-Levantamento preliminar de perigos e fontes de informacao utilizadas.
-Inventario de riscos: identificacao, avaliacao e classificacao por severidade e probabilidade.
-Matriz de risco, criterios de tolerabilidade e priorizacao das acoes.
-Hierarquia de medidas de controle, da eliminacao ao equipamento individual.
-Plano de acao: medida, responsavel, prazo e verificacao de eficacia.
-Analise de acidentes e de quase acidentes e retorno ao inventario.
-Emergencias: cenarios previstos, recursos necessarios e simulados.
-Interfaces com o programa de controle medico e com o exame ocupacional.
-Papeis da direcao, do SESMT, da CIPA, das liderancas e dos trabalhadores.
-Contratantes e contratadas: responsabilidade solidaria e harmonizacao de riscos.
-Documentacao, indicadores, auditoria e fiscalizacao do trabalho.',
+Gerenciamento de riscos ocupacionais: conceito, abrangência e ciclo de melhoria.
+Programa de gerenciamento de riscos: composição, guarda e prazos de revisão.
+Levantamento preliminar de perigos e fontes de informação utilizadas.
+Inventário de riscos: identificação, avaliação e classificação dos riscos ocupacionais.
+Matriz de risco, critérios de tolerabilidade e priorização das ações.
+Hierarquia de medidas de controle, da eliminação ao equipamento individual.
+Plano de ação: medida, responsável, prazo e verificação de eficácia.
+Análise de acidentes e de quase acidentes e retorno ao inventário.
+Emergências: cenários previstos, recursos necessários e simulados.
+Interfaces com o programa de controle médico e com o exame ocupacional.
+Papéis da direção, do SESMT, da CIPA, das lideranças e dos trabalhadores.
+Contratantes e contratadas: responsabilidades e harmonização de riscos.
+Documentação, indicadores, auditoria e fiscalização do trabalho.',
   apostila =
 '## Por que esta norma existe
 
-As demais normas dizem como fazer cada tarefa perigosa. A NR-01 diz **como a empresa deve enxergar o proprio risco antes de qualquer tarefa comecar**. Ela e a norma que organiza as outras.
+As demais normas dizem como fazer cada tarefa perigosa. A NR-01 diz **como a empresa deve enxergar o próprio risco antes de qualquer tarefa começar**. Ela é a norma que organiza as outras.
 
-A mudanca de fundo foi trocar programa de papel por processo vivo. Nao basta ter um documento arquivado: e preciso saber quais perigos existem, quanto valem, o que esta sendo feito a respeito, por quem, ate quando, e se funcionou.
+A mudança de fundo foi trocar programa de papel por processo vivo. Não basta ter um documento arquivado: é preciso saber quais perigos existem, quanto valem, o que está sendo feito a respeito, por quem, até quando, e se funcionou.
 
-Este material e para quem participa desse processo: lideranca, membro de CIPA, encarregado, tecnico, quem emite ordem de servico e quem responde por contrato de terceiros.
+Este material é para quem participa desse processo: liderança, membro de CIPA, encarregado, técnico, quem emite ordem de serviço e quem responde por contrato de terceiros.
 
-> Inventario que nunca muda e sinal ruim. Se em dois anos nada foi acrescentado nem baixado, ninguem esta olhando para o processo real.
+> Inventário que nunca muda é sinal ruim. Se em dois anos nada foi acrescentado nem baixado, ninguém está olhando para o processo real.
 
 ## O gerenciamento de riscos ocupacionais
 
-O GRO nao e um documento, e um ciclo. Ele se repete sem parar:
+O GRO não é um documento, é um ciclo. Ele se repete sem parar:
 
-- **Levantar** os perigos de cada processo, area e funcao.
+- **Levantar** os perigos de cada processo, área e função.
 - **Avaliar** os riscos que decorrem deles.
 - **Classificar** por gravidade e probabilidade, para saber o que vem primeiro.
 - **Controlar**, seguindo a hierarquia de medidas.
-- **Acompanhar** a eficacia e voltar ao inicio quando algo muda.
+- **Acompanhar** a eficácia e voltar ao início quando algo muda.
 
-O que dispara uma nova volta do ciclo: maquina nova, produto novo, mudanca de layout, mudanca de processo, acidente, quase acidente, resultado de exame ocupacional que aponta grupo afetado, inspecao que encontra desvio repetido, e o prazo de revisao periodica.
+O que dispara uma nova volta do ciclo: máquina nova, produto novo, mudança de layout, mudança de processo, acidente, quase acidente, resultado de exame ocupacional que aponta grupo afetado, inspeção que encontra desvio repetido, e o prazo de revisão periódica.
 
 ## O documento: PGR
 
-O programa de gerenciamento de riscos e onde o ciclo fica registrado. Ele tem duas pecas centrais, e as duas precisam existir de verdade:
+O programa de gerenciamento de riscos é onde o ciclo fica registrado. Ele tem duas peças centrais, e as duas precisam existir de verdade:
 
-**Inventario de riscos.** A relacao dos perigos identificados, onde ocorrem, quem esta exposto, qual a consequencia possivel, quais controles ja existem e qual a classificacao resultante. Deve descrever o trabalho como ele acontece, incluindo a manutencao, a partida, a parada e o servico eventual, e nao apenas a operacao normal.
+**Inventário de riscos.** A relação dos perigos identificados, onde ocorrem, quem está exposto, qual a consequência possível, quais controles já existem e qual a classificação resultante. Deve descrever o trabalho como ele acontece, incluindo a manutenção, a partida, a parada e o serviço eventual, e não apenas a operação normal.
 
-**Plano de acao.** Cada risco que precisa ser tratado vira uma linha com quatro campos que nao podem ficar vazios: **a medida, o responsavel com nome, o prazo com data e a forma de verificar se deu certo**. Plano sem responsavel e sem data e lista de desejos.
+**Plano de ação.** Cada risco que precisa ser tratado vira uma linha com quatro campos que não podem ficar vazios: **a medida, o responsável com nome, o prazo com data e a forma de verificar se deu certo**. Plano sem responsável e sem data é lista de desejos.
 
-Micro e pequenas empresas de menor grau de risco tem tratamento simplificado, e a declaracao de inexistencia de risco so vale quando ela e verdadeira. Prestar declaracao falsa e problema serio, e cai por terra no primeiro acidente.
+Micro e pequenas empresas de menor grau de risco têm tratamento simplificado, e a declaração de inexistência de risco só vale quando ela é verdadeira. Prestar declaração falsa é problema sério, e cai por terra no primeiro acidente.
 
 ## Como se classifica um risco
 
-A classificacao combina duas perguntas: **quao grave e a consequencia possivel** e **qual a probabilidade de acontecer**. A matriz cruza as duas e devolve um nivel.
+A classificação combina duas perguntas: **quão grave é a consequência possível** e **qual a probabilidade de acontecer**. A matriz cruza as duas e devolve um nível.
 
-O que importa e o uso que se faz do resultado. O nivel define prazo e prioridade. Risco intoleravel exige medida antes de continuar a atividade. Risco moderado entra no plano com prazo. Risco baixo fica monitorado.
+O que importa é o uso que se faz do resultado. O nível define prazo e prioridade. Risco intolerável exige medida antes de continuar a atividade. Risco moderado entra no plano com prazo. Risco baixo fica monitorado.
 
-Dois erros comuns aparecem aqui. O primeiro e classificar pela frequencia do acidente passado, e nao pelo dano possivel: uma tarefa que nunca deu problema mas pode matar continua sendo risco alto. O segundo e classificar considerando o EPI como se ele eliminasse o risco. Ele reduz a consequencia; nao apaga o perigo.
+Dois erros comuns aparecem aqui. O primeiro é classificar pela frequência do acidente passado, e não pelo dano possível: uma tarefa que nunca deu problema mas pode matar continua sendo risco alto. O segundo é classificar considerando o EPI como se ele eliminasse o risco. Ele reduz a consequência; não apaga o perigo.
 
 ## Hierarquia de controle
 
-Esta e a espinha da NR-01 e vale a ordem, e nao apenas a lista:
+Esta é a espinha da NR-01 e vale a ordem, e não apenas a lista:
 
-- **Eliminacao** do perigo ou do fator de risco. Deixar de usar o produto, suprimir a etapa, mudar o projeto.
-- **Substituicao** por algo menos perigoso.
-- **Controles de engenharia**: enclausuramento, protecao fisica, exaustao, intertravamento, automacao, guarda corpo.
-- **Controles administrativos**: procedimento, permissao de trabalho, sinalizacao, rodizio, limitacao de tempo de exposicao, treinamento.
-- **Equipamento de protecao individual**, por ultimo.
+- **Eliminação** do perigo ou do fator de risco. Deixar de usar o produto, suprimir a etapa, mudar o projeto.
+- **Substituição** por algo menos perigoso.
+- **Controles de engenharia**: enclausuramento, proteção física, exaustão, intertravamento, automação, guarda corpo.
+- **Controles administrativos**: procedimento, permissão de trabalho, sinalização, rodízio, limitação de tempo de exposição, treinamento.
+- **Equipamento de proteção individual**, por último.
 
-Descer direto para o EPI e o atalho mais comum e o mais caro. Ele transfere a protecao inteira para o comportamento humano, que falha em dia de pressa, de calor e de cansaço.
+Descer direto para o EPI é o atalho mais comum e o mais caro. Ele transfere a proteção inteira para o comportamento humano, que falha em dia de pressa, de calor e de cansaço.
 
-Enquanto a medida definitiva nao fica pronta, adota se medida de controle provisoria, com prazo, e ela nao pode virar permanente por inercia.
+Enquanto a medida definitiva não fica pronta, adota-se medida de controle provisória, com prazo, e ela não pode virar permanente por inércia.
 
 ## Acidente e quase acidente alimentam o sistema
 
-Todo acidente e todo quase acidente devem ser analisados buscando causa, e nao culpado. Analise que termina em ato inseguro do trabalhador quase sempre parou cedo demais: falta perguntar por que aquele comportamento era possivel, por que era mais rapido, e por que ninguem barrou antes.
+Todo acidente e todo quase acidente devem ser analisados buscando causa, e não culpado. Análise que termina em ato inseguro do trabalhador quase sempre parou cedo demais: falta perguntar por que aquele comportamento era possível, por que era mais rápido, e por que ninguém barrou antes.
 
-O resultado da analise volta para o inventario e para o plano de acao. **Analise que nao gera acao no plano e apenas arquivo.**
+O resultado da análise volta para o inventário e para o plano de ação. **Análise que não gera ação no plano é apenas arquivo.**
 
-## Quem responde por que
+## Quem responde por quê
 
-A direcao responde pela seguranca e nao pode delegar essa responsabilidade. O SESMT assessora tecnicamente. A CIPA identifica riscos, acompanha e cobra. A lideranca direta executa e verifica no dia a dia. O trabalhador cumpre, colabora e comunica.
+A direção responde pela segurança e não pode delegar essa responsabilidade. O SESMT assessora tecnicamente. A CIPA identifica riscos, acompanha e cobra. A liderança direta executa e verifica no dia a dia. O trabalhador cumpre, colabora e comunica.
 
-Em contrato de terceiros, a contratante harmoniza os riscos, informa os perigos da sua area, e nao pode alegar desconhecimento do que acontece dentro dela. Contratada com PGR proprio nao dispensa a contratante de olhar.
+Em contrato de terceiros, a contratante harmoniza os riscos, informa os perigos da sua área, e não pode alegar desconhecimento do que acontece dentro dela. Contratada com PGR próprio não dispensa a contratante de olhar.
 
-## Documentacao e fiscalizacao
+## Documentação e fiscalização
 
-Os documentos precisam ficar disponiveis para os trabalhadores, para a CIPA e para a fiscalizacao, com historico. Ordens de servico, registros de treinamento com carga horaria e conteudo, fichas de EPI, analises de acidente e evidencias de cumprimento do plano de acao.
+Os documentos precisam ficar disponíveis para os trabalhadores, para a CIPA e para a fiscalização, com histórico. Ordens de serviço, registros de treinamento com carga horária e conteúdo, fichas de EPI, análises de acidente e evidências de cumprimento do plano de ação.
 
-Bons indicadores para acompanhar: percentual de acoes do plano concluidas no prazo, tempo medio de tratamento de desvio, quase acidentes reportados por periodo, e reincidencia de acidente por mesma causa.
+Bons indicadores para acompanhar: percentual de ações do plano concluídas no prazo, tempo médio de tratamento de desvio, quase acidentes reportados por período, e reincidência de acidente por mesma causa.
 
 ## Para lembrar
 
-- **GRO e ciclo, PGR e o registro dele.** Nenhum dos dois vive de arquivo.
-- O inventario tem de cobrir manutencao, partida, parada e servico eventual.
-- Plano de acao sem responsavel, prazo e verificacao nao e plano.
-- Classifique pelo **dano possivel**, e nao pela sorte que se teve ate agora.
-- **Respeite a hierarquia**: EPI e o ultimo recurso, nunca o primeiro.
-- Medida provisoria tem prazo e nao pode virar definitiva.
-- Analise de acidente busca causa, e o resultado volta para o plano.
-- Mudou processo, maquina ou produto: revise o inventario antes de operar.'
+- **GRO é ciclo, PGR é o registro dele.** Nenhum dos dois vive de arquivo.
+- O inventário tem de cobrir manutenção, partida, parada e serviço eventual.
+- Plano de ação sem responsável, prazo e verificação não é plano.
+- Classifique pelo **dano possível**, e não pela sorte que se teve até agora.
+- **Respeite a hierarquia**: EPI é o último recurso, nunca o primeiro.
+- Medida provisória tem prazo e não pode virar definitiva.
+- Análise de acidente busca causa, e o resultado volta para o plano.
+- Mudou processo, máquina ou produto: revise o inventário antes de operar.'
 where codigo = 'NR-01-INT8';
 
 
 -- =====================================================================
---  DD: direcao defensiva (8 horas)
---  Foco: conducao segura basica de quem dirige a servico.
+--  DD: direção defensiva (8 horas)
+--  Foco: condução segura básica de quem dirige a serviço.
 -- =====================================================================
 update public.trein_curso set
   conteudo_programatico =
-'Conceito de direcao defensiva e responsabilidade do condutor a servico.
-Condicoes adversas de via, de veiculo, de tempo, de luz e de transito.
-Inspecao diaria do veiculo antes da saida e itens de verificacao obrigatoria.
-Ajuste do posto de conducao, do cinto de seguranca e dos espelhos.
-Distancia de seguimento e calculo do tempo de reacao e de frenagem.
-Pontos cegos do veiculo e cuidados com veiculos longos.
-Ultrapassagem segura, mudanca de faixa e uso de indicadores de direcao.
-Cruzamentos, rotatorias e conversoes com travessia de pedestres.
-Convivencia com motociclistas, ciclistas e pedestres nas vias urbanas.
-Velocidade compativel, sinalizacao de transito e limites legais.
-Alcool, medicamentos e uso do celular ao volante.
-Documentacao do condutor e do veiculo e infracoes de transito.
-Estacionamento, manobra em re e uso de auxiliar de manobra.
-Conduta em caso de pane, parada em via e sinalizacao do veiculo.',
+'Conceito de direção defensiva e responsabilidade do condutor a serviço.
+Condições adversas de via, de veículo, de tempo, de luz e de trânsito.
+Inspeção diária do veículo antes da saída e itens de verificação obrigatória.
+Ajuste do posto de condução, do cinto de segurança e dos espelhos.
+Distância de seguimento e cálculo do tempo de reação e de frenagem.
+Pontos cegos do veículo e cuidados com veículos longos.
+Ultrapassagem segura, mudança de faixa e uso de indicadores de direção.
+Cruzamentos, rotatórias e conversões com travessia de pedestres.
+Convivência com motociclistas, ciclistas e pedestres nas vias urbanas.
+Velocidade compatível, sinalização de trânsito e limites legais.
+Álcool, medicamentos e uso do celular ao volante.
+Documentação do condutor e do veículo e infrações de trânsito.
+Estacionamento, manobra em ré e uso de auxiliar de manobra.
+Conduta em caso de pane, parada em via e sinalização do veículo.',
   apostila =
 '## Por que este treinamento existe
 
-Dirigir a servico e a atividade mais perigosa da maioria das empresas, e quase nunca e tratada como tal. A pessoa que passa o dia na rua com um veiculo da empresa esta exposta a mais risco do que boa parte do pessoal da producao, so que sem colega por perto e sem supervisao direta.
+Dirigir a serviço é a atividade mais perigosa da maioria das empresas, e quase nunca é tratada como tal. A pessoa que passa o dia na rua com um veículo da empresa está exposta a mais risco do que boa parte do pessoal da produção, só que sem colega por perto e sem supervisão direta.
 
-Direcao defensiva e simples de definir: **e dirigir contando com o erro dos outros**. Voce pode fazer tudo certo e ainda assim se envolver num acidente porque alguem furou o sinal. A conducao defensiva trabalha na margem que sobra: distancia, visibilidade, velocidade e atencao suficientes para que o erro alheio nao vire colisao.
+Direção defensiva é simples de definir: **é dirigir contando com o erro dos outros**. Você pode fazer tudo certo e ainda assim se envolver num acidente porque alguém furou o sinal. A condução defensiva trabalha na margem que sobra: distância, visibilidade, velocidade e atenção suficientes para que o erro alheio não vire colisão.
 
-> Ter razao no transito nao evita batida nenhuma. A preferencia protege voce no boletim, e nao no impacto.
+> Ter razão no trânsito não evita batida nenhuma. A preferência protege você no boletim, e não no impacto.
 
-## As condicoes adversas
+## As condições adversas
 
-Quase todo acidente e a soma de condicoes que ja estavam la:
+Quase todo acidente é a soma de condições que já estavam lá:
 
-- **Via**: buraco, curva fechada, pista estreita, obra, lombada sem sinalizacao, cascalho.
-- **Veiculo**: pneu careca, freio gasto, farol queimado, palheta ressecada, carga solta.
+- **Via**: buraco, curva fechada, pista estreita, obra, lombada sem sinalização, cascalho.
+- **Veículo**: pneu careca, freio gasto, farol queimado, palheta ressecada, carga solta.
 - **Tempo**: chuva, neblina, vento lateral, sol baixo no horizonte.
-- **Luz**: noite, tunel, entrada e saida de garagem, sombra sob viaduto.
-- **Transito**: congestionamento, moto entre faixas, caminhao lento, ônibus parando.
-- **Condutor**: sono, pressa, raiva, remedio, celular.
+- **Luz**: noite, túnel, entrada e saída de garagem, sombra sob viaduto.
+- **Trânsito**: congestionamento, moto entre faixas, caminhão lento, ônibus parando.
+- **Condutor**: sono, pressa, raiva, remédio, celular.
 
-Reconhecer a condicao adversa e o comeco. A resposta e quase sempre a mesma e vale para todas: **reduzir a velocidade e aumentar a distancia**.
+Reconhecer a condição adversa é o começo. A resposta é quase sempre a mesma e vale para todas: **reduzir a velocidade e aumentar a distância**.
 
 ## Antes de sair
 
-Inspecao rapida, todo dia, antes de ligar. Leva tres minutos:
+Inspeção rápida, todo dia, antes de ligar. Leva três minutos:
 
-- Pneus: calibragem, desenho e ausencia de corte na lateral. Nao esqueça o estepe.
-- Fluidos: oleo, agua, freio, limpador de para brisa.
-- Luzes: farol baixo e alto, lanterna, freio, seta, luz de re, pisca alerta.
+- Pneus: calibragem, desenho e ausência de corte na lateral. Não esqueça o estepe.
+- Fluidos: óleo, água, freio, limpador de para brisa.
+- Luzes: farol baixo e alto, lanterna, freio, seta, luz de ré, pisca alerta.
 - Freio: pedal firme, sem afundar, e freio de estacionamento segurando.
 - Palhetas e vidros limpos; espelhos ajustados e inteiros.
-- Cinto de todos os assentos, triangulo, macaco, chave de roda e extintor onde exigido.
-- Documento do veiculo e sua habilitacao dentro da validade e da categoria.
+- Cinto de todos os assentos, triângulo, macaco, chave de roda e extintor onde exigido.
+- Documento do veículo e sua habilitação dentro da validade e da categoria.
 
-Ajuste o banco antes de sair, e nao em movimento: encosto quase reto, pernas com folga para pisar fundo, maos na direcao, apoio de cabeca na altura das orelhas. **Cinto sempre, inclusive nos cem metros da portaria ate a rua.**
+Ajuste o banco antes de sair, e não em movimento: encosto quase reto, pernas com folga para pisar fundo, mãos na direção, apoio de cabeça na altura das orelhas. **Cinto sempre, inclusive nos cem metros da portaria até a rua.**
 
-Pane ou defeito encontrado na inspecao nao vira problema para depois. Veiculo com freio ou pneu ruim nao sai.
+Pane ou defeito encontrado na inspeção não vira problema para depois. Veículo com freio ou pneu ruim não sai.
 
 ## Durante a viagem
 
-**Distancia de seguimento.** Escolha um ponto fixo na via, um poste ou uma placa. Quando o veiculo da frente passar por ele, conte: se voce chegar la antes de dois segundos, esta perto demais. Em chuva, subida de serra ou com carga, use quatro segundos ou mais. Essa distancia e o unico espaco que voce tem para reagir, e reagir leva quase um segundo mesmo com o motorista atento.
+**Distância de seguimento.** Escolha um ponto fixo na via, um poste ou uma placa. Quando o veículo da frente passar por ele, conte: se você chegar lá antes de dois segundos, está perto demais. Em chuva, em serra ou com carga, use quatro segundos ou mais. Essa distância é o único espaço que você tem para reagir, e reagir leva quase um segundo mesmo com o motorista atento.
 
-**Olhe longe.** Motorista que olha so o para choque da frente freia em cima da hora. Olhando o segundo ou terceiro veiculo adiante voce ve o congestionamento se formar e freia suave.
+**Olhe longe.** Motorista que olha só o para choque da frente freia em cima da hora. Olhando o segundo ou o terceiro veículo adiante você vê o congestionamento se formar e freia suave.
 
-**Pontos cegos.** Todo veiculo tem, e o seu e maior do que voce imagina. Antes de mudar de faixa: espelho interno, espelho externo, seta, e um giro rapido de cabeça. Ao lado do caminhao, a regra que salva vida e a inversa: se voce nao ve o rosto do motorista no espelho dele, ele nao ve voce.
+**Pontos cegos.** Todo veículo tem, e o seu é maior do que você imagina. Antes de mudar de faixa: espelho interno, espelho externo, seta, e um giro rápido de cabeça. Ao lado do caminhão, a regra que salva vida é a inversa: se você não vê o rosto do motorista no espelho dele, ele não vê você.
 
-**Ultrapassagem.** So com visibilidade total, faixa que permite, espaco de sobra e sem inclinacao para se enfiar de volta a força. Na duvida, nao ultrapasse. Chegar cinco minutos depois nunca custou o emprego de ninguem.
+**Ultrapassagem.** Só com visibilidade total, faixa que permite, espaço de sobra e sem depender de se enfiar de volta à força. Na dúvida, não ultrapasse. Chegar cinco minutos depois nunca custou o emprego de ninguém.
 
-**Cruzamentos e rotatorias.** Sinal verde nao e garantia. Antes de entrar, olhe para os dois lados. Ao converter, procure o pedestre que atravessa a via para onde voce esta virando: e ali que ele e atropelado.
+**Cruzamentos e rotatórias.** Sinal verde não é garantia. Antes de entrar, olhe para os dois lados. Ao converter, procure o pedestre que atravessa a via para onde você está virando: é ali que ele é atropelado.
 
-**Moto.** Ela aparece do nada porque estava no seu ponto cego ou entre as faixas. Nunca abra a porta sem olhar o retrovisor, e nunca mude de faixa sem seta com antecedencia.
+**Moto.** Ela aparece do nada porque estava no seu ponto cego ou entre as faixas. Nunca abra a porta sem olhar o retrovisor, e nunca mude de faixa sem seta com antecedência.
 
-## Velocidade e as regras que nao se negocia
+## Velocidade e as regras que não se negociam
 
-Velocidade compativel nem sempre e a do limite da placa. Com pista molhada, escola no horario de saida ou fila parada adiante, o compativel e menos.
+Velocidade compatível nem sempre é a do limite da placa. Com pista molhada, escola no horário de saída ou fila parada adiante, o compatível é menos.
 
-Alcool e zero. Nao existe limite tolerado para quem dirige a servico. Medicamento para alergia, dor forte, ansiedade ou sono precisa ser conversado antes: muitos derrubam o tempo de reacao tanto quanto bebida.
+Álcool é zero. Não existe limite tolerado para quem dirige a serviço. Medicamento para alergia, dor forte, ansiedade ou sono precisa ser conversado antes: muitos derrubam o tempo de reação tanto quanto bebida.
 
-Celular na mao e infracao gravissima e, mais que isso, e a maior causa moderna de colisao traseira. Com o celular no colo, os olhos saem da pista por dois a tres segundos, o que a oitenta por hora significa atravessar quase um quarteirao no escuro. **Se precisa responder, encoste.**
+Celular na mão é infração gravíssima e, mais que isso, é a maior causa moderna de colisão traseira. Com o celular no colo, os olhos saem da pista por dois a três segundos, o que a oitenta por hora significa atravessar quase um quarteirão no escuro. **Se precisa responder, encoste.**
 
 ## Manobra, parada e pane
 
-A maioria dos sinistros de frota acontece em baixa velocidade: manobra em pátio, re em cliente, portao de garagem. Antes de dar re, contorne o veiculo a pe e olhe o que ha atras. Onde houver auxiliar de manobra, ele fica sempre visivel para voce, nunca atras do veiculo.
+A maioria dos sinistros de frota acontece em baixa velocidade: manobra em pátio, ré em cliente, portão de garagem. Antes de dar ré, contorne o veículo a pé e olhe o que há atrás. Onde houver auxiliar de manobra, ele fica sempre visível para você, nunca atrás do veículo.
 
-Em caso de pane, saia da pista se conseguir, ligue o pisca alerta, coloque o triangulo a uma distancia que de tempo de frear a quem vem atras, e espere **fora do veiculo e atras da defensa**, nunca sentado dentro do carro na faixa. Colidido por tras em acostamento e um dos acidentes mais fatais que existem.
+Em caso de pane, saia da pista se conseguir, ligue o pisca alerta, coloque o triângulo a uma distância que dê tempo de frear a quem vem atrás, e espere **fora do veículo e atrás da defensa**, nunca sentado dentro do carro na faixa. Ser colidido por trás no acostamento é um dos acidentes mais fatais que existem.
 
 ## Para lembrar
 
-- **Direcao defensiva e contar com o erro do outro.** Preferencia nao protege ninguem.
-- Inspecao antes de sair, todo dia. Veiculo com pneu ou freio ruim nao sai.
-- **Dois segundos de distancia; quatro na chuva ou com carga.**
-- Olhe alem do veiculo da frente e antecipe a frenagem.
-- Seta com antecedencia, espelho e giro de cabeca antes de mudar de faixa.
-- Se voce nao ve o motorista do caminhao no espelho dele, ele nao ve voce.
-- **Alcool zero. Celular so com o veiculo parado.** Remedio que da sono se comunica.
-- Em pane: pisca alerta, triangulo e espera fora do veiculo, atras da defensa.'
+- **Direção defensiva é contar com o erro do outro.** Preferência não protege ninguém.
+- Inspeção antes de sair, todo dia. Veículo com pneu ou freio ruim não sai.
+- **Dois segundos de distância; quatro na chuva ou com carga.**
+- Olhe além do veículo da frente e antecipe a frenagem.
+- Seta com antecedência, espelho e giro de cabeça antes de mudar de faixa.
+- Se você não vê o motorista do caminhão no espelho dele, ele não vê você.
+- **Álcool zero. Celular só com o veículo parado.** Remédio que dá sono se comunica.
+- Em pane: pisca alerta, triângulo e espera fora do veículo, atrás da defensa.'
 where codigo = 'DD';
 
 
 -- =====================================================================
---  DD-REC: direcao defensiva, reciclagem (8 horas)
+--  DD-REC: direção defensiva, reciclagem (8 horas)
 --  Foco: fadiga, noite, chuva, carga, comportamento de risco e os
---  primeiros minutos apos o acidente.
+--  primeiros minutos após o acidente.
 -- =====================================================================
 update public.trein_curso set
   conteudo_programatico =
-'Revisao critica dos habitos adquiridos apos anos de conducao a servico.
-Fadiga e privacao de sono: efeitos sobre o tempo de reacao e a atencao.
-Sinais de sonolencia ao volante e a unica medida realmente eficaz.
-Ritmo biologico, janelas de maior risco e planejamento da jornada.
-Conducao noturna: ofuscamento, alcance do farol e leitura da via.
-Chuva, aquaplanagem, neblina e pista com oleo no inicio da precipitacao.
-Frenagem em piso de baixa aderencia e recuperacao de derrapagem.
-Carga: distribuicao, amarracao, altura do centro de gravidade e excesso de peso.
-Efeito da carga sobre a distancia de frenagem e sobre a estabilidade em curva.
-Comportamento de risco: pressa, metas de entrega, disputa e distracao.
-Uso de telefone, aplicativos de rota e outras fontes de desatencao.
-Alcool, drogas e medicamentos de uso continuo na atividade profissional.
-Primeiros minutos apos o acidente: sinalizar, proteger, socorrer e acionar.
-Preservacao do local, comunicacao a empresa e registro do ocorrido.',
+'Revisão crítica dos hábitos adquiridos após anos de condução a serviço.
+Fadiga e privação de sono: efeitos sobre o tempo de reação e a atenção.
+Sinais de sonolência ao volante e a única medida realmente eficaz.
+Ritmo biológico, janelas de maior risco e planejamento da jornada.
+Condução noturna: ofuscamento, alcance do farol e leitura da via.
+Chuva, aquaplanagem, neblina e pista com óleo no início da precipitação.
+Frenagem em piso de baixa aderência e recuperação de derrapagem.
+Carga: distribuição, amarração, altura do centro de gravidade e excesso de peso.
+Efeito da carga sobre a distância de frenagem e sobre a estabilidade em curva.
+Comportamento de risco: pressa, metas de entrega, disputa e distração.
+Uso de telefone, aplicativos de rota e outras fontes de desatenção.
+Álcool, drogas e medicamentos de uso contínuo na atividade profissional.
+Primeiros minutos após o acidente: sinalizar, proteger, socorrer e acionar.
+Preservação do local, comunicação à empresa e registro do ocorrido.',
   apostila =
-'## Por que reciclar quem ja dirige ha anos
+'## Por que reciclar quem já dirige há anos
 
-Quem esta nesta reciclagem ja sabe dirigir. O problema nao e tecnica, e desgaste.
+Quem está nesta reciclagem já sabe dirigir. O problema não é técnica, é desgaste.
 
-Depois de alguns anos, tres coisas acontecem com todo motorista profissional. A primeira e que os procedimentos viram automatismo e comecam a ser cortados: a inspeção some, a distancia encolhe, o cinto atrasa. A segunda e que a experiencia vira confianca, e confianca vira tolerancia a risco que antes nao se aceitava. A terceira e que a rotina de estrada cobra do corpo, e o corpo cansado dirige pior do que o corpo inexperiente.
+Depois de alguns anos, três coisas acontecem com todo motorista profissional. A primeira é que os procedimentos viram automatismo e começam a ser cortados: a inspeção some, a distância encolhe, o cinto atrasa. A segunda é que a experiência vira confiança, e confiança vira tolerância a risco que antes não se aceitava. A terceira é que a rotina de estrada cobra do corpo, e o corpo cansado dirige pior do que o corpo inexperiente.
 
-Por isso esta reciclagem nao repete o basico. Ela trata do que derruba motorista bom: **cansaco, escuro, agua na pista, carga mal presa, pressa, e o que fazer nos primeiros minutos quando algo deu errado.**
+Por isso esta reciclagem não repete o básico. Ela trata do que derruba motorista bom: **cansaço, escuro, água na pista, carga mal presa, pressa, e o que fazer nos primeiros minutos quando algo deu errado.**
 
-> Ninguem bate porque esqueceu como se dirige. Bate porque estava cansado, com pressa, ou porque a pista mudou e a velocidade nao.
+> Ninguém bate porque esqueceu como se dirige. Bate porque estava cansado, com pressa, ou porque a pista mudou e a velocidade não.
 
-## Fadiga: o risco que ninguem sente chegar
+## Fadiga: o risco que ninguém sente chegar
 
-Fadiga nao avisa como a bebida avisa. Ela reduz o tempo de reacao, estreita o campo visual e prejudica a decisao antes que a pessoa perceba que esta ruim. Depois de muitas horas acordado, o desempenho ao volante se aproxima do de quem bebeu.
+Fadiga não avisa como a bebida avisa. Ela reduz o tempo de reação, estreita o campo visual e prejudica a decisão antes que a pessoa perceba que está ruim. Depois de muitas horas acordado, o desempenho ao volante se aproxima do de quem bebeu.
 
-Existe ainda a microssoneca: de dois a dez segundos de sono com os olhos as vezes abertos. Ela nao e escolha e nao pede licença. A cem por hora, cinco segundos sao quase cento e quarenta metros percorridos sem ninguem dirigindo.
+Existe ainda a microssoneca: de dois a dez segundos de sono, com os olhos às vezes abertos. Ela não é escolha e não pede licença. A cem por hora, cinco segundos são quase cento e quarenta metros percorridos sem ninguém dirigindo.
 
 Sinais que exigem parada imediata:
 
-- Piscar demorado, olhos ardendo, cabeca pesando para frente.
-- Bocejo em serie.
-- Nao lembrar dos ultimos quilometros percorridos.
+- Piscar demorado, olhos ardendo, cabeça pesando para frente.
+- Bocejo em série.
+- Não lembrar dos últimos quilômetros percorridos.
 - Sair da faixa, passar por cima da faixa sonora, corrigir de susto.
 - Ficar irritado, ou ficar lendo a mesma placa duas vezes.
 
-A unica coisa que resolve sono e **dormir**. Cafe, ar frio, radio alto, banho e conversa empurram o problema por poucos minutos e escondem os sinais, o que piora a situacao. Encoste em lugar seguro e durma. Um cochilo curto recupera bem mais do que uma hora de café.
+A única coisa que resolve sono é **dormir**. Café, ar frio, rádio alto, banho e conversa empurram o problema por poucos minutos e escondem os sinais, o que piora a situação. Encoste em lugar seguro e durma. Um cochilo curto recupera bem mais do que uma hora de café.
 
-As janelas mais perigosas do dia sao a madrugada, entre duas e seis da manha, e o inicio da tarde, depois do almoço. Planeje a jornada contando com isso: dormir mal na vespera e um item de risco tanto quanto pneu careca.
+As janelas mais perigosas do dia são a madrugada, entre duas e seis da manhã, e o início da tarde, depois do almoço. Planeje a jornada contando com isso: dormir mal na véspera é um item de risco tanto quanto pneu careca.
 
 ## Noite
 
-A noite concentra menos transito e mais mortes. O motivo e visual. O alcance do farol baixo e curto, e ha faixa de velocidade em que **voce dirige mais rapido do que enxerga**: quando o obstaculo aparece na luz, ja nao ha distancia para parar. Em estrada escura, a velocidade compativel e a que cabe dentro do farol.
+A noite concentra menos trânsito e mais mortes. O motivo é visual. O alcance do farol baixo é curto, e há faixa de velocidade em que **você dirige mais rápido do que enxerga**: quando o obstáculo aparece na luz, já não há distância para parar. Em estrada escura, a velocidade compatível é a que cabe dentro do farol.
 
-Ofuscamento pelo farol de quem vem em sentido contrario cega por segundos. A resposta e olhar para a borda direita da pista e usar a faixa como referencia, reduzindo, e nao revidar com farol alto. Para brisa riscado, vidro sujo e oculos velhos espalham a luz e multiplicam o efeito.
+Ofuscamento pelo farol de quem vem em sentido contrário cega por segundos. A resposta é olhar para a borda direita da pista e usar a faixa como referência, reduzindo, e não revidar com farol alto. Para brisa riscado, vidro sujo e óculos velhos espalham a luz e multiplicam o efeito.
 
-Pedestre, ciclista, animal e veiculo parado sem sinalizacao sao o que mais mata a noite. Olho na borda da pista, e nao so na faixa.
+Pedestre, ciclista, animal e veículo parado sem sinalização são o que mais mata à noite. Olho na borda da pista, e não só na faixa.
 
 ## Chuva e piso escorregadio
 
-O periodo mais perigoso e o **comeco da chuva**: a agua levanta o oleo acumulado no asfalto e a aderencia despenca antes de a pista lavar.
+O período mais perigoso é o **começo da chuva**: a água levanta o óleo acumulado no asfalto e a aderência despenca antes de a pista lavar.
 
-Aquaplanagem acontece quando o pneu deixa de escoar a agua e passa a flutuar. Ela depende de tres coisas: profundidade da agua, velocidade e sulco do pneu. Pneu no limite legal ja aquaplana muito mais cedo que pneu novo.
+Aquaplanagem acontece quando o pneu deixa de escoar a água e passa a flutuar. Ela depende de três coisas: profundidade da água, velocidade e sulco do pneu. Pneu no limite legal já aquaplana muito mais cedo que pneu novo.
 
-Se aquaplanou, o volante fica leve e o veiculo para de responder. A reacao correta e contra intuitiva:
+Se aquaplanou, o volante fica leve e o veículo para de responder. A reação correta é contra intuitiva:
 
-- **Tire o pe do acelerador.** Nao freie bruscamente.
-- Mantenha o volante firme na direcao em que voce quer ir, sem movimento brusco.
-- Espere o pneu tocar de novo, e so entao corrija com suavidade.
+- **Tire o pé do acelerador.** Não freie bruscamente.
+- Mantenha o volante firme na direção em que você quer ir, sem movimento brusco.
+- Espere o pneu tocar de novo, e só então corrija com suavidade.
 
-Em derrapagem de traseira, olhe para onde quer ir e corrija na direcao da derrapagem, com movimentos pequenos. Em pista molhada, tudo aumenta: distancia de seguimento para quatro segundos ou mais, frenagem antecipada, curva entrada mais devagar.
+Em derrapagem de traseira, olhe para onde quer ir e corrija na direção da derrapagem, com movimentos pequenos. Em pista molhada tudo aumenta: distância de seguimento para quatro segundos ou mais, frenagem antecipada, entrada de curva mais devagar.
 
-Neblina pede farol baixo, nunca alto, velocidade bem reduzida e, se ficar impossivel, saida completa da pista com sinalizacao.
+Neblina pede farol baixo, nunca alto, velocidade bem reduzida e, se ficar impossível, saída completa da pista com sinalização.
 
 ## Carga
 
-Carga muda o veiculo. Mesmo dentro do peso, ela altera distancia de frenagem, estabilidade em curva e comportamento em manobra brusca.
+Carga muda o veículo. Mesmo dentro do peso, ela altera distância de frenagem, estabilidade em curva e comportamento em manobra brusca.
 
-- **Peso alto sobe o centro de gravidade** e aproxima o veiculo do tombamento em curva e em desvio repentino.
-- Carga concentrada na traseira alivia a dianteira e tira direcao.
-- Carga solta vira projetil na frenagem e empurra o veiculo na descida.
-- Liquido em tanque parcialmente cheio se desloca e empurra na frenagem.
+- **Peso alto sobe o centro de gravidade** e aproxima o veículo do tombamento em curva e em desvio repentino.
+- Carga concentrada na traseira alivia a dianteira e tira direção.
+- Carga solta vira projétil na frenagem e empurra o veículo na descida.
+- Líquido em tanque parcialmente cheio se desloca e empurra na frenagem.
 
-Amarre com o dispositivo proprio, confira a tensao depois dos primeiros quilometros e de novo apos cada parada, e proteja bordas vivas para a cinta nao cortar. Excesso de peso e infracao, arruina freio e pneu, e transforma qualquer descida em problema.
+Amarre com o dispositivo próprio, confira a tensão depois dos primeiros quilômetros e de novo após cada parada, e proteja bordas vivas para a cinta não cortar. Excesso de peso é infração, arruína freio e pneu, e transforma qualquer descida em problema.
 
-Com carga, aumente a distancia, entre nas curvas mais devagar e use o freio motor nas descidas longas, poupando o freio de servico.
+Com carga, aumente a distância, entre nas curvas mais devagar e use o freio motor nas descidas longas, poupando o freio de serviço.
 
 ## Comportamento: o fator que sobra
 
-Depois de tecnica e equipamento, o que resta e decisao.
+Depois de técnica e equipamento, o que resta é decisão.
 
-Pressa por meta de entrega, disputa com outro motorista, ultrapassagem no limite, celular no colo, aplicativo de rota mexido em movimento, comer dirigindo. Nada disso e falta de conhecimento: e escolha feita sob pressao.
+Pressa por meta de entrega, disputa com outro motorista, ultrapassagem no limite, celular no colo, aplicativo de rota mexido em movimento, comer dirigindo. Nada disso é falta de conhecimento: é escolha feita sob pressão.
 
-Duas ideias ajudam. A primeira: **calcule o ganho real**. Numa viagem de cem quilometros, correr o trecho todo dez por cento mais rapido economiza poucos minutos e multiplica risco. A segunda: acordo antecipado. Decida antes de sair que o telefone toca sem ser atendido, que a rota se altera parado no acostamento, e que atraso se comunica em vez de se compensar no pedal.
+Duas ideias ajudam. A primeira: **calcule o ganho real**. Numa viagem de cem quilômetros, correr o trecho todo dez por cento mais rápido economiza poucos minutos e multiplica risco. A segunda: acordo antecipado. Decida antes de sair que o telefone toca sem ser atendido, que a rota se altera parado no acostamento, e que atraso se comunica em vez de se compensar no pedal.
 
-Se a meta da empresa so fecha correndo, isso e um problema de gestao e precisa ser reportado, e nao resolvido no volante.
+Se a meta da empresa só fecha correndo, isso é um problema de gestão e precisa ser reportado, e não resolvido no volante.
 
-## Os primeiros minutos apos o acidente
+## Os primeiros minutos após o acidente
 
-O que se faz nos primeiros minutos define se havera uma vitima ou tres. A ordem importa:
+O que se faz nos primeiros minutos define se haverá uma vítima ou três. A ordem importa:
 
-- **Proteja o local antes de socorrer.** Pisca alerta, triangulo bem atras, colete refletivo. Segundo acidente sobre o primeiro e comum e costuma ser pior.
-- **Nao movimente o ferido**, salvo risco de fogo ou de novo impacto. Lesao de coluna piora com transporte improvisado.
-- Chame o socorro e informe direito: rodovia e quilometro ou endereço com referencia, quantas vitimas, se ha gente presa, se ha carga perigosa e qual o numero do painel de risco.
-- Desligue o motor e, se souber e for seguro, desconecte a bateria. Nao fume nem deixe fumar perto.
-- Estanque hemorragia com compressao direta e panos limpos, e converse com a vitima consciente para mante la calma.
-- Acione a empresa e a seguradora, registre a ocorrencia com a autoridade e fotografe o local antes de liberar a via, quando houver essa possibilidade.
-- **Nao assuma culpa nem discuta no local.** Passe os dados, colabore com a autoridade e deixe a apuracao para depois.
+- **Proteja o local antes de socorrer.** Pisca alerta, triângulo bem atrás, colete refletivo. Segundo acidente sobre o primeiro é comum e costuma ser pior.
+- **Não movimente o ferido**, salvo risco de fogo ou de novo impacto. Lesão de coluna piora com transporte improvisado.
+- Chame o socorro e informe direito: rodovia e quilômetro ou endereço com referência, quantas vítimas, se há gente presa, se há carga perigosa e qual o número do painel de risco.
+- Desligue o motor e, se souber e for seguro, desconecte a bateria. Não fume nem deixe fumar perto.
+- Estanque hemorragia com compressão direta e panos limpos, e converse com a vítima consciente para mantê-la calma.
+- Acione a empresa e a seguradora, registre a ocorrência com a autoridade e fotografe o local antes de liberar a via, quando houver essa possibilidade.
+- **Não assuma culpa nem discuta no local.** Passe os dados, colabore com a autoridade e deixe a apuração para depois.
 
-Depois do episodio, ha o retorno. Motorista que se envolveu em acidente grave costuma voltar tenso, dormir mal e reagir de forma exagerada por semanas. Isso e esperado e merece acompanhamento, e nao vergonha.
+Depois do episódio, há o retorno. Motorista que se envolveu em acidente grave costuma voltar tenso, dormir mal e reagir de forma exagerada por semanas. Isso é esperado e merece acompanhamento, e não vergonha.
 
 ## Para lembrar
 
-- **Contra sono so existe dormir.** Cafe apenas apaga o aviso.
-- Madrugada e inicio de tarde sao as janelas de maior risco.
-- A noite, ande na velocidade que cabe dentro do farol.
-- **O comeco da chuva e o momento mais escorregadio.**
-- Aquaplanou: tira o pe, volante firme, sem freada brusca.
-- Carga alta tomba, carga solta empurra, carga liquida balança.
-- Combine antes: celular nao se atende, rota so se mexe parado.
-- No acidente: **sinalizar, nao mover o ferido, acionar socorro com local exato.**'
+- **Contra sono só existe dormir.** Café apenas apaga o aviso.
+- Madrugada e início de tarde são as janelas de maior risco.
+- À noite, ande na velocidade que cabe dentro do farol.
+- **O começo da chuva é o momento mais escorregadio.**
+- Aquaplanou: tira o pé, volante firme, sem freada brusca.
+- Carga alta tomba, carga solta empurra, carga líquida balança.
+- Combine antes: celular não se atende, rota só se mexe parado.
+- No acidente: **sinalizar, não mover o ferido, acionar socorro com local exato.**'
 where codigo = 'DD-REC';
 
 
 -- =====================================================================
---  CONFERENCIA
+--  CONFERÊNCIA
 --
---  Tem de voltar nove linhas, uma por curso, todas com conteudo e
+--  Tem de voltar nove linhas, uma por curso, todas com conteúdo e
 --  apostila preenchidos. Linha com itens = 0 ou palavras = 0 significa
---  que o update nao pegou, e quase sempre o codigo foi digitado errado
+--  que o update não pegou, e quase sempre o código foi digitado errado
 --  (repare no ponto de NR-34.5).
 -- =====================================================================
 select c.codigo,
@@ -972,9 +972,9 @@ select c.codigo,
                                     chr(10)), 1) as itens_conteudo,
        array_length(regexp_split_to_array(trim(c.apostila),
                                           '\s+'), 1)   as palavras_apostila,
-       case when c.conteudo_programatico like '%—%'
-                 or c.apostila like '%—%' then 'TEM TRAVESSAO'
-            else 'ok' end                              as travessao
+       case when c.conteudo_programatico like '%' || chr(8212) || '%'
+                 or c.apostila like '%' || chr(8212) || '%'
+            then 'TEM TRAVESSAO' else 'ok' end          as travessao
   from public.trein_curso c
  where c.codigo in ('NR-06', 'NR-17', 'NR-26', 'LOTO', 'NR-34.5',
                     'NR-01-INT4', 'NR-01-INT8', 'DD', 'DD-REC')
