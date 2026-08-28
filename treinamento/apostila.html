@@ -7,7 +7,7 @@
   <title>Apostila</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/interno.css?v=3" />
   <link rel="stylesheet" href="css/acessibilidade.css?v=1" />
   <link rel="icon" type="image/png" href="../assets/favicon.png?v=2" />
@@ -24,13 +24,17 @@
        vinte minutos seguidos, e texto longo em fundo preto cansa. A sala
        de aula é escura porque lá o que importa é o vídeo.
        ================================================================= */
-    /* A FONTE E DECLARADA AQUI.
-       Esta pagina usa class="apo", e nao "interno" — entao ela nao herda
-       nada do interno.css, e o corpo do texto caia na serifa padrao do
-       navegador. Num material de estudo lido no celular isso muda o
-       resultado: a Inter foi escolhida por ser legivel em tela pequena. */
-    body.apo{background:#f4f7fa;color:#1d2833;margin:0;
-      font:400 16px/1.7 'Inter',system-ui,-apple-system,Arial,sans-serif;
+    /* SERIFA NO CORPO, SANS NOS TITULOS.
+       É a divisão que material didático de faculdade usa, e não é gosto: a
+       serifa guia o olho na linha longa de texto corrido, e é ela que o
+       leitor reconhece como "livro" em vez de "site". Os títulos ficam em
+       sans para se separarem do texto de longe, quando a pessoa folheia
+       procurando um assunto.
+
+       A Source Serif foi feita para tela, ao contrário das serifas de
+       jornal: aguenta o celular sem fechar os traços. */
+    body.apo{background:#eceff3;color:#1d2226;margin:0;
+      font:400 17px/1.75 'Source Serif 4','Georgia',serif;
       -webkit-font-smoothing:antialiased}
     .apo-topo{position:sticky;top:0;z-index:60;background:var(--navy,#0a2e5c);
       color:#fff}
@@ -44,59 +48,134 @@
       border-radius:999px;white-space:nowrap}
     .apo-topo .destaque{background:#f5a800;border-color:#f5a800;color:#16202c}
 
-    .apo-folha{max-width:760px;margin:1.6rem auto 4rem;background:#fff;
-      border-radius:16px;padding:2.4rem 2.6rem 3rem;
-      box-shadow:0 10px 40px rgba(10,46,92,.09)}
-    .apo-cab{border-bottom:2px solid #f5a800;padding-bottom:1.1rem;
-      margin-bottom:1.6rem}
-    .apo-cab span{display:inline-block;background:#eef3f8;color:#0a2e5c;
-      font:700 .74rem 'Poppins',sans-serif;letter-spacing:.06em;
-      padding:.3rem .7rem;border-radius:999px;margin-bottom:.7rem}
-    .apo-cab h1{font:800 1.7rem/1.25 'Poppins',sans-serif;color:#0a2e5c;
-      margin:0}
-    .apo-cab p{color:#5b6b7a;font-size:.9rem;margin:.5rem 0 0}
+    /* A folha imita papel: canto quase reto, sombra discreta, e uma
+       LARGURA DE LINHA de leitura. 720px com letra de 17px dá algo em
+       torno de 68 caracteres por linha, que é a faixa em que o olho acha o
+       começo da linha seguinte sem se perder. Coluna larga demais cansa
+       tanto quanto letra pequena. */
+    .apo-folha{max-width:720px;margin:1.6rem auto 4rem;background:#fff;
+      border-radius:3px;padding:3.4rem 3.6rem 3.6rem;
+      box-shadow:0 2px 24px rgba(16,32,52,.10)}
 
-    /* o corpo do texto */
-    .apo h2{font:700 1.24rem/1.35 'Poppins',sans-serif;color:#0a2e5c;
-      margin:2.2rem 0 .2rem;padding-top:.2rem}
+    /* ---------------------------------------------------------- a capa */
+    .capa{text-align:center;padding-bottom:2.6rem;margin-bottom:0}
+    .capa__inst{font:600 .74rem 'Poppins',sans-serif;letter-spacing:.19em;
+      text-transform:uppercase;color:#5b6b7a}
+    .capa__risco{width:52px;height:2px;background:#c9962f;margin:1.1rem auto}
+    .capa__cod{font:700 .78rem 'Poppins',sans-serif;letter-spacing:.13em;
+      color:#0a2e5c}
+    .capa h1{font:700 1.92rem/1.28 'Source Serif 4','Georgia',serif;
+      color:#0a2e5c;margin:.5rem 0 0;letter-spacing:-.01em}
+    .capa__sub{font:400 italic 1rem 'Source Serif 4',serif;color:#5b6b7a;
+      margin:.7rem 0 0}
+    /* A ficha é um bloco de linhas curtas, cada dado na sua. Corrida, o
+       registro profissional partia no meio ("CREA-BA" numa linha e o
+       número na outra), e número de registro partido num material técnico
+       parece erro de digitação. */
+    .capa__ficha{margin:2.1rem auto 0;font:400 .85rem/1.75 'Inter',sans-serif;
+      color:#4a5866;max-width:520px}
+    .capa__ficha p{margin:.15rem 0}
+    .capa__ficha b{color:#1d2226;font-weight:600}
+
+    /* ==================================================================
+       UMA GRAMÁTICA SÓ
+
+       Estava com cinco ao mesmo tempo: bolinha âmbar na lista, número
+       dourado no título, tabela azul de site com listras e canto redondo,
+       filete cinza sobre cada seção, caixa cinza no sumário. Cada peça,
+       sozinha, se defendia; juntas, o material parecia remendo.
+
+       Aqui vale a regra do livro técnico: PRETO NO BRANCO, hierarquia
+       feita por espaço e peso, e cor só onde ela informa alguma coisa. O
+       ouro ficou na capa, e em nenhum outro lugar.
+       ================================================================== */
+
+    /* ------------------------------------------------------- o sumário */
+    /* Sem caixa e sem fundo: dois filetes bastam. Caixa cinza é recurso de
+       tela; em papel ela vira um retângulo sujo. */
+    .sumario{margin:0 0 3rem;padding:1.3rem 0 1.5rem;
+      border-top:1.5px solid #1d2226;border-bottom:1px solid #c8ced6}
+    .sumario h2{font:600 .72rem 'Poppins',sans-serif;letter-spacing:.2em;
+      text-transform:uppercase;color:#5b6b7a;margin:0 0 1rem}
+    .sumario ol{list-style:none;margin:0;padding:0;
+      font:400 .95rem/1.95 'Source Serif 4','Georgia',serif}
+    .sumario li{margin:0;padding-left:0}
+    .sumario li::before,.sumario li::marker{content:none;display:none}
+    .sumario li.n2{margin-left:2.6rem;font-size:.9rem;color:#3d4650}
+    /* Grade de duas colunas: os títulos alinham todos na mesma vertical,
+       do "1" ao "3.1" ao "11". Com flex, cada número empurrava o seu
+       título um pouco mais para o lado e a coluna saía serrilhada. */
+    .sumario a{color:#1d2226;text-decoration:none;display:grid;
+      grid-template-columns:2.6rem 1fr;align-items:baseline}
+    .sumario a:hover{text-decoration:underline}
+    .sumario .s-num{color:#5b6b7a;font-variant-numeric:tabular-nums;
+      font-weight:600}
+
+    /* --------------------------------------------------- o corpo do texto */
+    /* O número fica numa coluna própria, à esquerda do título. Os títulos
+       alinham na mesma vertical e dá para citar "veja 3.2". */
+    .apo h2{font:600 1.2rem/1.4 'Poppins',sans-serif;color:#10233a;
+      margin:2.9rem 0 .7rem;display:grid;
+      grid-template-columns:2.6rem 1fr;align-items:baseline}
     .apo h2:first-child{margin-top:0}
-    .apo h3{font:600 1.02rem/1.4 'Poppins',sans-serif;color:#12457f;
-      margin:1.5rem 0 .1rem}
-    .apo p{font-size:1.02rem;line-height:1.8;margin:.85rem 0;color:#26333f}
-    .apo strong{color:#0a2e5c;font-weight:600}
-    .apo ul{margin:.9rem 0;padding:0;list-style:none}
-    .apo li{position:relative;padding-left:1.4rem;font-size:1.02rem;
-      line-height:1.75;margin-bottom:.6rem;color:#26333f}
-    .apo li::before{content:"";position:absolute;left:.25rem;top:.72em;
-      width:6px;height:6px;border-radius:50%;background:#f5a800}
-    /* o destaque de atenção: é o que a pessoa lembra depois */
-    .apo blockquote{margin:1.4rem 0;padding:1rem 1.2rem;
-      background:#fff8e8;border-left:4px solid #f5a800;border-radius:0 10px 10px 0;
-      font-size:1rem;line-height:1.7;color:#4a3a12}
-    .apo blockquote strong{color:#7a5c00}
+    .apo h3{font:600 1rem/1.5 'Poppins',sans-serif;color:#10233a;
+      margin:1.9rem 0 .4rem;display:grid;
+      grid-template-columns:2.6rem 1fr;align-items:baseline}
+    .apo .num{color:#7c8894;font-variant-numeric:tabular-nums;
+      font-weight:500}
 
-    /* PASSO A PASSO. Número dentro de um disco, à esquerda, na mesma
-       coluna da bolinha da outra lista — as duas listas ficam alinhadas
-       uma sob a outra quando o texto alterna entre elas. */
-    .apo ol{margin:.9rem 0;padding:0;list-style:none;counter-reset:passo}
-    .apo ol>li{counter-increment:passo;padding-left:2.3rem;min-height:1.7rem}
-    .apo ol>li::before{content:counter(passo);left:0;top:.15em;
-      width:1.55rem;height:1.55rem;border-radius:50%;background:#0a2e5c;
-      color:#fff;font:700 .8rem/1.55rem 'Poppins',sans-serif;
-      text-align:center}
+    /* Justificado com separação silábica. Justificar sem hifenizar abre
+       buracos entre as palavras; com hífen, a coluna estreita fecha certo.
+       O `lang` do documento é quem diz ao navegador que as regras são as
+       do português. */
+    .apo p{font-size:1.055rem;line-height:1.78;margin:.95rem 0;color:#1a1f24;
+      text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+    .apo strong{color:#10233a;font-weight:600}
 
-    /* QUADRO. A rolagem lateral fica no invólucro: num celular estreito o
-       quadro rola sozinho e a página continua parada. */
-    .apo-tab{margin:1.3rem 0;overflow-x:auto;border:1px solid #dfe7ef;
-      border-radius:10px;-webkit-overflow-scrolling:touch}
-    .apo-tab table{border-collapse:collapse;width:100%;min-width:min(100%,420px)}
-    .apo-tab th,.apo-tab td{padding:.6rem .8rem;text-align:left;
-      font-size:.95rem;line-height:1.55;border-bottom:1px solid #eaf0f6;
-      vertical-align:top}
-    .apo-tab th{background:#0a2e5c;color:#fff;font:600 .85rem 'Poppins',sans-serif;
-      white-space:nowrap}
-    .apo-tab tbody tr:nth-child(even){background:#f7fafd}
-    .apo-tab tbody tr:last-child td{border-bottom:0}
+    /* LISTAS COM RECUO PENDENTE, que é como livro faz: o marcador fica na
+       margem e a segunda linha alinha com a primeira palavra, não com o
+       marcador. O marcador é um traço, e não um ponto colorido: ele
+       pertence ao texto, e não à interface. */
+    .apo ul{margin:1rem 0;padding:0;list-style:none}
+    .apo li{position:relative;padding-left:1.5rem;font-size:1.03rem;
+      line-height:1.75;margin-bottom:.5rem;color:#1a1f24}
+    .apo ul>li::before{content:"–";position:absolute;left:.15rem;top:0;
+      color:#7c8894;background:none;width:auto;height:auto;border-radius:0}
+
+    /* PASSO A PASSO. Numeral simples, alinhado à direita na sua coluna,
+       como em norma técnica. O disco azul virava enfeite e competia com o
+       número da seção. */
+    .apo ol{margin:1rem 0;padding:0;list-style:none;counter-reset:passo}
+    .apo ol>li{counter-increment:passo;padding-left:2.2rem}
+    .apo ol>li::before{content:counter(passo) ".";position:absolute;
+      left:0;top:0;width:1.7rem;text-align:right;color:#5b6b7a;
+      font-weight:600;font-variant-numeric:tabular-nums;
+      background:none;height:auto;border-radius:0}
+
+    /* O DESTAQUE: recuo e filete, como observação em livro. A caixa
+       amarela era recurso de site, e na impressão em preto e branco virava
+       um cinza sujo. */
+    .apo blockquote{margin:1.6rem 0 1.6rem 1.5rem;
+      padding:.15rem 0 .15rem 1.3rem;border-left:2px solid #b9c2cc;
+      font-size:1.005rem;line-height:1.72;color:#3d4650}
+    .apo blockquote strong{color:#10233a}
+
+    /* QUADROS NO ESTILO DE PUBLICAÇÃO ACADÊMICA: três filetes horizontais
+       e nada mais. Sem fundo colorido, sem listras, sem borda em volta,
+       sem canto arredondado. É o desenho que livro técnico e artigo usam
+       há décadas, e o motivo é prático: a grade inteira compete com os
+       números, e é dos números que o leitor precisa. */
+    .apo-tab{margin:1.7rem 0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .apo-tab table{border-collapse:collapse;width:100%;
+      min-width:min(100%,400px);
+      border-top:1.5px solid #1d2226;border-bottom:1.5px solid #1d2226}
+    .apo-tab th,.apo-tab td{padding:.62rem .9rem .62rem 0;text-align:left;
+      vertical-align:top;line-height:1.55}
+    .apo-tab th{font:600 .84rem 'Poppins',sans-serif;color:#10233a;
+      border-bottom:1px solid #1d2226;padding-top:.5rem;
+      padding-bottom:.5rem;white-space:nowrap}
+    .apo-tab td{font-size:.985rem;color:#1a1f24}
+    .apo-tab tbody tr+tr td{border-top:1px solid #eceff3}
 
     .apo-pe{max-width:760px;margin:0 auto 3rem;text-align:center;
       color:#5b6b7a;font-size:.85rem;padding:0 1.1rem}
@@ -104,30 +183,56 @@
       color:#5b6b7a;line-height:1.8}
 
     @media(max-width:640px){
-      .apo-folha{margin:.9rem .7rem 3rem;padding:1.5rem 1.3rem 2.2rem;
-        border-radius:12px}
-      .apo-cab h1{font-size:1.35rem}
-      .apo h2{font-size:1.14rem;margin-top:1.8rem}
-      /* a letra NÃO diminui no celular: é aqui que ela mais é lida */
-      .apo p,.apo li{font-size:1rem}
+      .apo-folha{margin:.9rem .7rem 3rem;padding:1.7rem 1.3rem 2.4rem;
+        border-radius:6px}
+      .capa h1{font-size:1.42rem}
+      .capa__ficha{text-align:left}
+      .apo h2{font-size:1.09rem;margin-top:2.1rem}
+      .apo h3{font-size:.97rem}
+
+      /* A COLUNA DO NÚMERO ENCOLHE. Em 360px de tela sobram cerca de 290px
+         de texto; 2,6rem só para o número comem 14% da linha, e o título
+         passa a quebrar em duas onde caberia numa. */
+      .apo h2,.apo h3,.sumario a{grid-template-columns:1.9rem 1fr}
+      .sumario li.n2{margin-left:1.3rem}
+      .sumario ol{font-size:.9rem;line-height:1.85}
+
+      /* A letra NÃO diminui no celular: é aqui que ela mais é lida.
+         E o texto deixa de ser justificado: numa coluna estreita, a
+         justificação abre buracos entre as palavras grandes do português
+         técnico ("desenergização", "equipotencialização") e a leitura
+         fica pior do que com a margem irregular. */
+      .apo p{font-size:1rem;text-align:left}
+      .apo li{font-size:1rem}
       .apo-topo b{flex:1 1 100%}
     }
 
+    /* ---------------------------------------------------------- no papel */
     @media print{
       .apo-topo,.a11y-fab{display:none}
       body.apo{background:#fff}
       .apo-folha{box-shadow:none;margin:0;max-width:none;padding:0}
-      .apo h2{break-after:avoid}
-      .apo blockquote{break-inside:avoid}
+
+      /* Nada de fundo chapado a imprimir: o desenho todo é feito de filete
+         e de espaço, e sai igual em qualquer impressora, inclusive na
+         preto e branco da obra. As regras que mandavam imprimir o azul do
+         cabeçalho da tabela e do disco do passo saíram junto com o azul. */
+
+      /* Título órfão no pé da página é o defeito mais comum de material
+         impresso: a pessoa vira a folha e o assunto começou do outro lado.
+         Duas linhas junto do título resolvem. */
+      .apo h2,.apo h3{break-after:avoid;break-inside:avoid}
+      .apo p{orphans:2;widows:2}
+      .apo blockquote,.apo li{break-inside:avoid}
+
       /* No papel não existe rolagem lateral: o que ficasse fora da faixa
          visível sairia cortado da folha. */
       .apo-tab{overflow:visible;break-inside:avoid}
       .apo-tab table{min-width:0}
-      .apo-tab th{background:#0a2e5c!important;color:#fff!important;
-        print-color-adjust:exact;-webkit-print-color-adjust:exact}
-      .apo ol>li::before{background:#0a2e5c!important;color:#fff!important;
-        print-color-adjust:exact;-webkit-print-color-adjust:exact}
-      .apo li{break-inside:avoid}
+
+      /* A capa e o sumário ficam na primeira folha, e o texto começa na
+         seguinte, como em apostila encadernada. */
+      .sumario{break-after:page}
     }
   </style>
 </head>
@@ -284,20 +389,73 @@
         return;
       }
 
+      // O TÍTULO DO DOCUMENTO SAI DO TEXTO E VAI PARA A CAPA.
+      // A apostila costuma começar com uma linha `# Título`, que vinha
+      // virando a primeira seção e aparecia duas vezes: uma no cabeçalho e
+      // outra logo abaixo, numerada como se fosse um capítulo.
+      var corpo = String(curso.apostila).replace(/^\s*#[^\r\n]*(\r?\n|$)/, '');
+
       $('conteudo').innerHTML =
         '<article class="apo-folha">' +
-          '<div class="apo-cab">' +
-            '<span>' + seguro(curso.codigo || '') + '</span>' +
+          '<header class="capa">' +
+            '<p class="capa__inst">Clínica Medicina Humana</p>' +
+            '<div class="capa__risco"></div>' +
+            '<p class="capa__cod">' + seguro(curso.codigo || '') + '</p>' +
             '<h1>' + seguro(curso.titulo || '') + '</h1>' +
-            '<p>Material de estudo' +
-              (curso.carga_horaria ? ' · ' + Number(curso.carga_horaria) +
-               ' horas' : '') +
-              ' · Clínica Medicina Humana</p>' +
-          '</div>' +
-          '<div class="apo">' + desenharMarkdown(curso.apostila) + '</div>' +
+            '<p class="capa__sub">Material didático de apoio</p>' +
+            '<div class="capa__ficha">' +
+              (curso.carga_horaria
+                ? '<p><b>Carga horária:</b> ' + Number(curso.carga_horaria) +
+                  ' horas</p>' : '') +
+              '<p><b>Responsável técnica:</b> Anandda Fortuna Ferreira ' +
+                'Lima</p>' +
+              '<p>Engenheira de Segurança do Trabalho · CREA-BA 0518911586</p>' +
+              '<p style="margin-top:.9rem">Camaçari, Bahia</p>' +
+            '</div>' +
+          '</header>' +
+          '<nav class="sumario" id="sumario" aria-label="Sumário"></nav>' +
+          '<div class="apo" id="corpoApo">' + desenharMarkdown(corpo) + '</div>' +
         '</article>' +
         '<p class="apo-pe">Este material é de apoio ao treinamento. Em caso ' +
         'de divergência, vale o texto da Norma Regulamentadora.</p>';
+
+      numerarEMontarSumario();
+    }
+
+    // NUMERAR AS SEÇÕES E MONTAR O SUMÁRIO.
+    //
+    // Feito aqui, no documento pronto, e não com `counter` do CSS: o número
+    // precisa aparecer TAMBÉM no sumário, e contador de CSS não sai da tela
+    // para virar texto de link. Uma passada só resolve os dois.
+    //
+    // Se a apostila não tiver seção nenhuma, o sumário some em vez de ficar
+    // uma caixa vazia com o título "Sumário".
+    function numerarEMontarSumario() {
+      var corpo = $('corpoApo'), caixa = $('sumario');
+      if (!corpo || !caixa) return;
+      var titulos = corpo.querySelectorAll('h2, h3');
+      var c1 = 0, c2 = 0, itens = '';
+
+      Array.prototype.forEach.call(titulos, function (h, i) {
+        var num;
+        if (h.tagName === 'H2') { c1 += 1; c2 = 0; num = String(c1); }
+        else {
+          // h3 antes de qualquer h2 não vira "0.1": fica sem número, que é
+          // menos errado do que inventar um capítulo que não existe.
+          if (!c1) return;
+          c2 += 1; num = c1 + '.' + c2;
+        }
+        var id = 'sec' + i;
+        h.id = id;
+        h.insertAdjacentHTML('afterbegin',
+          '<span class="num">' + num + '</span>');
+        itens += '<li class="' + (h.tagName === 'H2' ? 'n1' : 'n2') + '">' +
+          '<a href="#' + id + '"><span class="s-num">' + num + '</span>' +
+          '<span>' + seguro(h.textContent.slice(num.length)) + '</span></a></li>';
+      });
+
+      if (!itens) { caixa.style.display = 'none'; return; }
+      caixa.innerHTML = '<h2>Sumário</h2><ol>' + itens + '</ol>';
     }
 
     $('imprimir').addEventListener('click', function () { window.print(); });
