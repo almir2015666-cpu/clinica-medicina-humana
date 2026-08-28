@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -24,7 +24,14 @@
        vinte minutos seguidos, e texto longo em fundo preto cansa. A sala
        de aula é escura porque lá o que importa é o vídeo.
        ================================================================= */
-    body.apo{background:#f4f7fa;color:#1d2833}
+    /* A FONTE E DECLARADA AQUI.
+       Esta pagina usa class="apo", e nao "interno" — entao ela nao herda
+       nada do interno.css, e o corpo do texto caia na serifa padrao do
+       navegador. Num material de estudo lido no celular isso muda o
+       resultado: a Inter foi escolhida por ser legivel em tela pequena. */
+    body.apo{background:#f4f7fa;color:#1d2833;margin:0;
+      font:400 16px/1.7 'Inter',system-ui,-apple-system,Arial,sans-serif;
+      -webkit-font-smoothing:antialiased}
     .apo-topo{position:sticky;top:0;z-index:60;background:var(--navy,#0a2e5c);
       color:#fff}
     .apo-topo__in{max-width:940px;margin:0 auto;padding:.7rem 1.1rem;
@@ -214,18 +221,24 @@
     // ------------------------------------------------------------- início
     (async function () {
       // AMOSTRA: a equipe confere o material sem precisar de conta de aluno
+      // AMOSTRA — só a equipe. A apostila não é mais lida direto da
+      // tabela: a coluna foi fechada porque a política do catálogo é
+      // pública (a vitrine precisa dela), e o material de estudo saía
+      // junto para quem não tinha conta nenhuma.
       if (amostra) {
-        var q = sb.from('trein_curso')
-          .select('codigo,titulo,carga_horaria,apostila');
-        var r = cursoPedido ? await q.eq('id', cursoPedido).maybeSingle()
-                            : await q.eq('ativo', true).order('ordem')
-                                .limit(1).maybeSingle();
-        if (r.error || !r.data) {
-          $('conteudo').innerHTML = '<p class="apo-vazio">Não consegui ' +
-            'carregar a apostila agora.</p>';
+        if (!cursoPedido) {
+          $('conteudo').innerHTML = '<p class="apo-vazio">Abra a amostra ' +
+            'pelo admin, no curso que você quer ver.</p>';
           return;
         }
-        desenhar(r.data, 'admin.html');
+        var r = await sb.rpc('trein_apostila_curso', { p_curso: cursoPedido });
+        var linha = (r.data && r.data.length) ? r.data[0] : null;
+        if (r.error || !linha) {
+          $('conteudo').innerHTML = '<p class="apo-vazio">Não consegui ' +
+            'carregar a apostila. Entre no admin antes de abrir a amostra.</p>';
+          return;
+        }
+        desenhar(linha, 'admin.html');
         return;
       }
 
@@ -235,21 +248,23 @@
 
       // A matrícula é a chave: a apostila é material do curso que a pessoa
       // comprou, e a RLS já devolve só as matrículas dela.
-      var r2 = await sb.from('trein_matricula')
-        .select('id,cancelada,expira_em,' +
-                'trein_curso(id,codigo,titulo,carga_horaria,apostila)')
-        .eq('id', mat).maybeSingle();
-
+      // A função confere no servidor de quem é esta matrícula antes de
+      // devolver o texto — a tela não é a guarda, ela só desenha.
+      var r2 = await sb.rpc('trein_apostila', { p_matricula: mat });
       if (r2.error) {
+        var m = String(r2.error.message || '');
+        if (m.indexOf('MATRICULA_INVALIDA') >= 0
+            || m.indexOf('MATRICULA_CANCELADA') >= 0) {
+          location.replace('painel.html');
+          return;
+        }
         $('conteudo').innerHTML = '<p class="apo-vazio">Não consegui ' +
-          'carregar a apostila agora. Verifique a conexão.</p>';
+          'carregar a apostila agora. Verifique a conexão e recarregue.</p>';
         return;
       }
-      if (!r2.data || r2.data.cancelada || !r2.data.trein_curso) {
-        location.replace('painel.html');
-        return;
-      }
-      desenhar(r2.data.trein_curso, 'curso.html?m=' + mat);
+      var curso = (r2.data && r2.data.length) ? r2.data[0] : null;
+      if (!curso) { location.replace('painel.html'); return; }
+      desenhar(curso, 'curso.html?m=' + mat);
     })();
   })();
   </script>
