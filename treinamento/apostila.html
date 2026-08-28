@@ -58,7 +58,10 @@
       box-shadow:0 2px 24px rgba(16,32,52,.10)}
 
     /* ---------------------------------------------------------- a capa */
-    .capa{text-align:center;padding-bottom:2.6rem;margin-bottom:0}
+    /* A capa começa BAIXO na folha, e não colada no topo. Numa folha de
+       rosto o vazio de cima é o que dá o ar de documento: colada em cima,
+       ela lê como cabeçalho de página. */
+    .capa{text-align:center;padding:3.2rem 0 2.6rem;margin-bottom:0}
     .capa__inst{font:600 .74rem 'Poppins',sans-serif;letter-spacing:.19em;
       text-transform:uppercase;color:#5b6b7a}
     .capa__risco{width:52px;height:2px;background:#c9962f;margin:1.1rem auto}
@@ -208,10 +211,17 @@
     }
 
     /* ---------------------------------------------------------- no papel */
+    /* MARGEM DE LIVRO. A margem que o navegador usa sozinho é magra, e o
+       texto encostava no alto da folha. 2,2cm em cima e embaixo, 2cm nos
+       lados: é a faixa em que o polegar segura a folha sem tapar palavra,
+       e é onde o furo do fichário entra sem comer texto. */
+    @page{margin:2.2cm 2cm}
+
     @media print{
       .apo-topo,.a11y-fab{display:none}
       body.apo{background:#fff}
-      .apo-folha{box-shadow:none;margin:0;max-width:none;padding:0}
+      .apo-folha{box-shadow:none;margin:0;max-width:none;padding:0;
+        border-radius:0}
 
       /* Nada de fundo chapado a imprimir: o desenho todo é feito de filete
          e de espaço, e sai igual em qualquer impressora, inclusive na
@@ -230,9 +240,32 @@
       .apo-tab{overflow:visible;break-inside:avoid}
       .apo-tab table{min-width:0}
 
-      /* A capa e o sumário ficam na primeira folha, e o texto começa na
-         seguinte, como em apostila encadernada. */
-      .sumario{break-after:page}
+      /* CAPA NUMA FOLHA, SUMÁRIO NA SEGUINTE, TEXTO NA TERCEIRA.
+         Juntos na mesma folha, o sumário começava na metade da página e
+         partia no meio de um item: metade dos capítulos numa folha e
+         metade na outra, que é o defeito que mais estraga um sumário,
+         porque ele existe justamente para ser visto de uma vez.
+         Sozinho na folha, ele cabe inteiro com sobra.
+         `break-inside` é o cinto de segurança: se um dia a apostila tiver
+         seções demais para caber, ele ainda tenta manter o bloco unido. */
+      .capa{break-after:page;padding:0 0 0}
+      .sumario{break-inside:avoid;break-after:page;border-top:0;
+        border-bottom:0;padding-top:0}
+
+      /* SUMÁRIO EM DUAS COLUNAS NO PAPEL.
+         Em coluna única ele passava da folha por poucos milímetros e o
+         ÚLTIMO item ia sozinho para uma terceira página inteira. Tentei
+         apertar o entrelinha e não bastou: sobrava sempre uma linha.
+         Duas colunas resolvem por folga e não por ajuste fino, e é o que
+         apostila impressa faz de qualquer jeito. Se a apostila crescer e
+         ganhar mais dez seções, continua cabendo.
+         Na tela ele fica em coluna única: lá a rolagem é de graça, e
+         coluna estreita no celular quebraria os títulos longos. */
+      .sumario ol{column-count:2;column-gap:2.2rem;line-height:1.6;
+        font-size:.9rem}
+      .sumario li{break-inside:avoid}
+      .sumario li.n2{font-size:.85rem;margin-left:1.2rem}
+      .sumario a{grid-template-columns:2.1rem 1fr}
     }
   </style>
 </head>
