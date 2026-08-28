@@ -7,24 +7,42 @@
   <title>Certificado | Clínica Medicina Humana</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="../assets/favicon.png?v=2" />
   <style>
+
     /* =================================================================
-       O certificado, no formato do modelo da clínica: 960 x 540 pt,
-       paisagem — a mesma medida do PDF que já é entregue hoje.
+       O CERTIFICADO
+
+       Formato do modelo da clínica: 960 x 540 pt, paisagem — a mesma
+       medida do PDF que já é entregue hoje.
 
        É HTML e não PDF gerado no servidor de propósito: o navegador
        imprime em PDF com uma qualidade que nenhuma biblioteca alcança de
        graça, e o aluno salva de onde estiver. O botão Imprimir abre
        exatamente o diálogo de "Salvar como PDF".
+
+       POR QUE ELE PRECISA SER BONITO
+       Este papel é entregue ao RH de uma empreiteira, mostrado a um
+       auditor e guardado numa pasta por anos. Um documento que parece
+       formulário levanta dúvida antes de ser lido; um que parece diploma
+       é conferido pelo código, que é o que importa. A aparência aqui não
+       é enfeite — é o que faz alguém tratar o papel como documento.
+
+       O QUE DÁ A APARÊNCIA DE DOCUMENTO, e não de folha impressa:
+         - moldura dupla com cantos ornamentados, como em diploma
+         - fundo com trama fina (guilhochê), como em papel de segurança
+         - nome em serifa de display, que é o que o olho lê como "diploma"
+         - selo circular com o código da NR e a carga horária
+         - o código de conferência num quadro próprio, como um selo fiscal
        ================================================================= */
     :root{
-      --navy:#0a2e5c; --navy2:#12457f; --ambar:#f5a800;
+      --navy:#0a2e5c; --navy2:#12457f; --ambar:#f5a800; --ouro:#c9962f;
       --tinta:#16202c; --fraco:#6b7885; --linha:#dfe6ee;
+      --creme:#fbfaf6;
     }
     *{box-sizing:border-box}
-    body{margin:0;background:#e8edf3;color:var(--tinta);
+    body{margin:0;background:#e3e9f0;color:var(--tinta);
       font:400 15px/1.6 'Inter',system-ui,Arial,sans-serif}
 
     /* barra de ações — some na impressão */
@@ -39,84 +57,175 @@
     .voltar{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.45)}
     .aviso{padding:1.2rem;text-align:center;color:#a8302f}
 
-    /* a folha */
-    .folha{width:960px;height:540px;margin:26px auto;background:#fff;
+    /* ---------------------------------------------------------- a folha */
+    .folha{width:960px;height:540px;margin:26px auto;background:var(--creme);
       position:relative;overflow:hidden;
-      box-shadow:0 10px 40px rgba(10,46,92,.18)}
-    /* a moldura: duas faixas, marinho e âmbar, como na identidade */
-    .folha::before{content:"";position:absolute;inset:0;
-      border:14px solid var(--navy);pointer-events:none}
-    .folha::after{content:"";position:absolute;inset:14px;
-      border:2px solid var(--ambar);pointer-events:none}
+      box-shadow:0 14px 50px rgba(10,46,92,.22)}
+
+    /* A TRAMA DO FUNDO (guilhochê simplificado).
+       Duas famílias de linhas finas cruzadas em ângulos diferentes, muito
+       claras. É o que papel de segurança tem e papel de escritório não —
+       o olho não distingue o desenho, mas percebe que não é folha branca.
+       Fica DENTRO da moldura, senão vaza pela borda impressa. */
+    .folha::before{content:"";position:absolute;inset:0;z-index:0;
+      background:
+        repeating-linear-gradient(58deg,
+          rgba(10,46,92,.055) 0 1px, transparent 1px 9px),
+        repeating-linear-gradient(-58deg,
+          rgba(10,46,92,.045) 0 1px, transparent 1px 9px),
+        radial-gradient(ellipse at 50% 42%,
+          rgba(255,255,255,.9) 0 38%, rgba(255,255,255,0) 72%);
+      pointer-events:none}
+
+    /* A MOLDURA: faixa marinho por fora, fio ouro por dentro. */
+    .moldura{position:absolute;inset:0;z-index:2;pointer-events:none;
+      border:13px solid var(--navy)}
+    .moldura::after{content:"";position:absolute;inset:5px;
+      border:1.5px solid var(--ouro)}
+
+    /* OS CANTOS. Quatro cantoneiras em L, douradas, por dentro do fio.
+       É o detalhe que separa "borda" de "moldura": borda é uma linha,
+       moldura tem canto. */
+    .canto{position:absolute;width:34px;height:34px;z-index:3;
+      pointer-events:none;border:0 solid var(--ouro)}
+    .canto.ce{top:20px;left:20px;border-top-width:3px;border-left-width:3px}
+    .canto.cd{top:20px;right:20px;border-top-width:3px;border-right-width:3px}
+    .canto.be{bottom:20px;left:20px;border-bottom-width:3px;border-left-width:3px}
+    .canto.bd{bottom:20px;right:20px;border-bottom-width:3px;border-right-width:3px}
+
     /* A marca d'água: SÓ a cruz, sem as palavras do logo.
        Cheguei a usar o logo inteiro e ficou ruim — "MEDICINA HUMANA" e o
        slogan apareciam entre as linhas do texto e sujavam a leitura. Texto
        atrás de texto nunca fica limpo. Só o símbolo resolve, e ainda
        aguenta ser impresso em preto e branco sem virar mancha. */
     .marca-agua{position:absolute;inset:0;display:flex;align-items:center;
-      justify-content:center;pointer-events:none;z-index:0}
+      justify-content:center;pointer-events:none;z-index:1}
     /* Deslocada 30px para a esquerda e 6px para baixo, de propósito.
-   Centralizada pela caixa, a marca PARECIA torta: os dois cubos ficam no
-   alto à direita e as ondas correm embaixo, então o peso da tinta puxa
-   para aquele lado. Medido: o centro de massa caía 30px à direita do
-   centro da folha. Isto devolve o equilíbrio para o olho, que é o que
-   importa num documento. */
-.marca-agua img{height:64%;opacity:.1;filter:grayscale(1);
-  transform:translate(-30px,6px)}
-    .miolo{position:absolute;inset:34px 46px;display:flex;
-      flex-direction:column;z-index:1}
+       Centralizada pela caixa, a marca PARECIA torta: os dois cubos ficam
+       no alto à direita e as ondas correm embaixo, então o peso da tinta
+       puxa para aquele lado. Medido: o centro de massa caía 30px à direita
+       do centro da folha. Isto devolve o equilíbrio para o olho, que é o
+       que importa num documento. */
+    .marca-agua img{height:62%;opacity:.075;filter:grayscale(1);
+      transform:translate(-30px,6px)}
 
-    .topo{display:flex;align-items:flex-start;justify-content:space-between}
-    .topo img{height:52px}
-    .selo{text-align:right;font-size:.74rem;color:var(--fraco);line-height:1.4}
+    .miolo{position:absolute;inset:36px 52px;display:flex;
+      flex-direction:column;z-index:4}
 
-    h1{font:800 2.5rem/1 'Poppins',sans-serif;color:var(--navy);
-      letter-spacing:.16em;text-align:center;margin:.6rem 0 .2rem}
-    .risco{width:110px;height:3px;background:var(--ambar);margin:0 auto 1rem;
-      border-radius:2px}
+    /* ---------------------------------------------------------- topo */
+    .topo{display:flex;align-items:center;justify-content:space-between;
+      padding-bottom:.55rem;border-bottom:1px solid rgba(10,46,92,.14)}
+    .topo img{height:46px}
+    .selo{text-align:right;font:600 .7rem/1.45 'Poppins',sans-serif;
+      color:var(--navy);letter-spacing:.06em;text-transform:uppercase}
+    .selo em{display:block;font:400 .68rem 'Inter',sans-serif;
+      color:var(--fraco);letter-spacing:.02em;text-transform:none;
+      font-style:normal}
 
-    .nome{font:700 1.85rem/1.2 'Poppins',sans-serif;color:var(--navy);
-      text-align:center;margin:.2rem 0 .1rem}
-    .cpf{text-align:center;color:var(--fraco);font-size:.9rem;margin-bottom:.9rem}
-    .texto{text-align:center;font-size:.97rem;line-height:1.75;max-width:800px;
-      margin:0 auto;color:#2b3947}
-    .texto b{color:var(--navy)}
-    .cidade{text-align:center;color:var(--fraco);font-size:.9rem;
-      margin-top:.9rem}
+    /* ---------------------------------------------------------- título */
+    h1{font:700 2.15rem/1 'Playfair Display','Georgia',serif;
+      color:var(--navy);letter-spacing:.3em;text-align:center;
+      margin:.85rem 0 0;text-indent:.3em}
+    /* o risco com losangos nas pontas: o mesmo papel do fio da moldura,
+       em miniatura — é o que faz a peça parecer desenhada e não montada */
+    .risco{display:flex;align-items:center;justify-content:center;gap:.55rem;
+      margin:.5rem auto .7rem}
+    .risco i{display:block;width:74px;height:2px;background:var(--ouro)}
+    .risco u{display:block;width:6px;height:6px;background:var(--ouro);
+      transform:rotate(45deg);text-decoration:none}
 
-    /* O rodapé é absoluto, colado no pé da folha. As assinaturas são
-       empurradas para baixo pelo margin-top:auto — sem esta folga elas
-       caíam em cima do código de conferência. */
-    .assinaturas{margin-top:auto;display:flex;justify-content:space-around;
-      gap:2rem;padding-bottom:2.4rem}
-    .ass{text-align:center;min-width:270px}
-    .ass hr{border:0;border-top:1.4px solid var(--tinta);margin:0 0 .35rem}
-    .ass b{display:block;font:600 .92rem 'Poppins',sans-serif;color:var(--navy)}
-    .ass span{display:block;font-size:.78rem;color:var(--fraco);line-height:1.45}
+    /* ---------------------------------------------------------- nome */
+    .nome{font:600 2.1rem/1.15 'Playfair Display','Georgia',serif;
+      color:var(--navy);text-align:center;margin:.1rem 0 .15rem;
+      /* nome comprido não pode estourar a linha nem sair da folha */
+      overflow-wrap:anywhere}
+    .nome.longo{font-size:1.72rem}
+    .nome.muitolongo{font-size:1.42rem}
+    .cpf{text-align:center;color:var(--fraco);font-size:.86rem;
+      letter-spacing:.04em;margin-bottom:.75rem}
 
-    .rodape{position:absolute;left:46px;right:46px;bottom:20px;
-      display:flex;justify-content:space-between;align-items:flex-end;
-      font-size:.7rem;color:var(--fraco)}
-    .codigo{font:700 .82rem 'Consolas',monospace;color:var(--navy);
-      letter-spacing:.08em}
+    .texto{text-align:center;font-size:.95rem;line-height:1.72;
+      max-width:770px;margin:0 auto;color:#2b3947}
+    .texto b{color:var(--navy);font-weight:600}
+    .cidade{text-align:center;color:var(--fraco);font-size:.86rem;
+      margin-top:.75rem;font-style:italic}
 
-    /* verso: o conteúdo programático */
-    .verso h2{font:700 1.35rem 'Poppins',sans-serif;color:var(--navy);
-      text-align:center;letter-spacing:.1em;margin:.4rem 0 .2rem}
-    .verso ul{margin:1rem 0 0;padding:0 0 0 1.2rem;column-count:2;
-      column-gap:2.4rem}
-    .verso li{font-size:.85rem;line-height:1.6;margin-bottom:.5rem;
-      break-inside:avoid;color:#2b3947}
+    /* ------------------------------------------------- selo circular */
+    /* O medalhão com o código da NR e as horas. Fica no canto direito,
+       fora do caminho do texto. É o elemento que o olho procura para
+       saber "de que treinamento é este papel" sem ler o parágrafo. */
+    .medalha{position:absolute;right:52px;top:112px;width:96px;height:96px;
+      border-radius:50%;z-index:5;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;text-align:center;
+      background:radial-gradient(circle at 34% 30%,#fff 0 32%,#f6efdd 62%,#efe2c2 100%);
+      border:2px solid var(--ouro);
+      box-shadow:0 3px 10px rgba(10,46,92,.14), inset 0 0 0 4px rgba(255,255,255,.7),
+                 inset 0 0 0 5.5px rgba(201,150,47,.55)}
+    .medalha b{font:700 1.02rem/1 'Poppins',sans-serif;color:var(--navy);
+      letter-spacing:.02em;padding:0 .2rem;overflow-wrap:anywhere}
+    .medalha span{font:600 .64rem/1.3 'Poppins',sans-serif;color:var(--ouro);
+      letter-spacing:.14em;text-transform:uppercase;margin-top:.15rem}
+    .medalha em{font:700 .8rem/1 'Poppins',sans-serif;color:var(--navy);
+      font-style:normal;margin-top:.12rem}
+
+    /* ---------------------------------------------------- assinaturas */
+    .assinaturas{margin-top:auto;display:flex;justify-content:center;
+      gap:5.5rem;padding-bottom:2.6rem}
+    .ass{text-align:center;min-width:240px;max-width:300px}
+    .ass hr{border:0;border-top:1.2px solid rgba(22,32,44,.55);
+      margin:0 0 .35rem}
+    .ass b{display:block;font:600 .88rem 'Poppins',sans-serif;
+      color:var(--navy)}
+    .ass span{display:block;font-size:.74rem;color:var(--fraco);
+      line-height:1.45}
+
+    /* ------------------------------------------------------- rodapé */
+    .rodape{position:absolute;left:52px;right:52px;bottom:18px;
+      display:flex;justify-content:space-between;align-items:center;
+      font-size:.68rem;color:var(--fraco);z-index:4}
+    /* O código num quadro próprio, como selo fiscal: é o que o auditor
+       digita, e ele precisa saltar do resto do rodapé. */
+    .codigo{font:700 .8rem 'Consolas',monospace;color:var(--navy);
+      letter-spacing:.1em;border:1.2px solid var(--ouro);
+      padding:.24rem .6rem;background:rgba(255,255,255,.75);
+      border-radius:3px;white-space:nowrap}
+
+    /* ------------------------------------- verso: conteúdo programático */
+    .verso h2{font:700 1.28rem 'Playfair Display','Georgia',serif;
+      color:var(--navy);text-align:center;letter-spacing:.18em;
+      margin:.9rem 0 0}
+    .verso ul{margin:.9rem 0 0;padding:0;list-style:none;column-count:2;
+      column-gap:2.6rem}
+    .verso li{position:relative;padding-left:.95rem;font-size:.82rem;
+      line-height:1.58;margin-bottom:.44rem;break-inside:avoid;
+      color:#2b3947}
+    /* marcador losango dourado, o mesmo motivo do risco do título */
+    .verso li::before{content:"";position:absolute;left:0;top:.5em;
+      width:5px;height:5px;background:var(--ouro);transform:rotate(45deg)}
+    /* conteúdo longo encolhe em vez de transbordar a folha */
+    .verso ul.denso li{font-size:.75rem;line-height:1.48;margin-bottom:.3rem}
+    .verso ul.tresc{column-count:3;column-gap:1.9rem}
 
     @media print{
       /* 960x540pt e paisagem: a mesma folha do modelo atual */
       @page{size:960pt 540pt;margin:0}
       body{background:#fff}
-      /* sem isto o navegador descarta a marca d'agua ao imprimir */
-      .marca-agua img{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      /* SEM ISTO O NAVEGADOR DESCARTA TUDO QUE É FUNDO AO IMPRIMIR:
+         a moldura marinho, o fio dourado, a trama e a marca d'água. O
+         certificado sairia como texto solto numa folha branca — que é
+         exatamente o que este desenho existe para não ser. */
+      *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
       .barra{display:none}
       .folha{margin:0;box-shadow:none;page-break-after:always}
       .folha:last-child{page-break-after:auto}
+    }
+
+    /* Em tela estreita a folha não cabe: encolhe proporcionalmente em vez
+       de criar rolagem lateral. A impressão não é afetada. */
+    @media(max-width:1010px){
+      .folha{transform:scale(calc((100vw - 24px) / 960));
+        transform-origin:top center;
+        margin-bottom:calc(26px - 540px * (1 - (100vw - 24px) / 960))}
     }
   </style>
 </head>
@@ -165,12 +274,38 @@
       return n.length === 11
         ? n.slice(0,3)+'.'+n.slice(3,6)+'.'+n.slice(6,9)+'-'+n.slice(9) : n;
     }
+    // Escapa tambem aspas. Hoje tudo daqui vai para no de texto, onde aspa
+    // e inofensiva — mas o admin ja teve de aprender essa licao por bug
+    // real (um titulo com aspas truncava o campo e o proximo Salvar
+    // gravava o pedaco por cima), e este arquivo imprime os mesmos campos.
     function seguro(t) {
       return String(t == null ? '' : t)
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
     function erro(txt) {
       alvo.innerHTML = '<p class="aviso">' + txt + '</p>';
+    }
+
+    // O risco com losangos nas pontas. Repetido no titulo e no verso: e o
+    // mesmo motivo do canto da moldura, em miniatura — e o que faz a peca
+    // parecer desenhada por uma pessoa, e nao montada por um programa.
+    function risco() {
+      return '<div class="risco"><u></u><i></i><u></u><i></i><u></u></div>';
+    }
+
+    // O medalhao com o codigo da NR e a carga horaria. Fica no canto
+    // direito, fora do caminho do texto: e onde o olho procura para saber
+    // de que treinamento e o papel sem ler o paragrafo inteiro.
+    function medalha(d) {
+      var cod = d.curso.codigo || '';
+      var h = d.curso.carga_horaria;
+      if (!cod && !h) return '';
+      return '<div class="medalha">' +
+        (cod ? '<b>' + seguro(cod) + '</b>' : '') +
+        '<span>carga</span>' +
+        (h ? '<em>' + Number(h) + 'h</em>' : '<em>—</em>') +
+        '</div>';
     }
 
     function folhaFrente(d) {
@@ -181,17 +316,28 @@
       var deQuem = d.aluno.empresa
         ? ', da empresa <b>' + seguro(d.aluno.empresa) + '</b>' : '';
 
+      // Nome comprido não pode estourar a folha nem virar duas linhas
+      // gigantes. Três degraus, escolhidos pelo tamanho do nome — e
+      // "Wesley da Purificação Silva" não é um caso raro por aqui.
+      var nome = String(d.aluno.nome || '');
+      var classeNome = nome.length > 42 ? ' muitolongo'
+                     : nome.length > 30 ? ' longo' : '';
+
       return '' +
       '<div class="folha">' +
+        '<div class="moldura"></div>' +
+        '<span class="canto ce"></span><span class="canto cd"></span>' +
+        '<span class="canto be"></span><span class="canto bd"></span>' +
         '<div class="marca-agua"><img src="img/marca-agua.png" alt="" /></div>' +
+        medalha(d) +
         '<div class="miolo">' +
         '<div class="topo">' +
           '<img src="img/logo.png" alt="Clínica Medicina Humana" />' +
-          '<div class="selo">CLÍNICA MEDICINA HUMANA<br />' +
-            'Treinamentos em Normas Regulamentadoras</div>' +
+          '<div class="selo">Clínica Medicina Humana' +
+            '<em>Treinamentos em Normas Regulamentadoras</em></div>' +
         '</div>' +
-        '<h1>CERTIFICADO</h1><div class="risco"></div>' +
-        '<div class="nome">' + seguro(d.aluno.nome) + '</div>' +
+        '<h1>CERTIFICADO</h1>' + risco() +
+        '<div class="nome' + classeNome + '">' + seguro(d.aluno.nome) + '</div>' +
         '<div class="cpf">CPF ' + cpfBonito(d.aluno.cpf) + '</div>' +
         '<p class="texto">Certificamos para os devidos fins que ' +
           '<b>' + seguro(d.aluno.nome) + '</b>, portador do CPF ' +
@@ -228,17 +374,32 @@
                        .filter(Boolean)
                        .map(function (l) { return '<li>' + seguro(l) + '</li>'; })
                        .join('');
+      // Conteúdo longo não pode transbordar a folha: não existe "próxima
+      // página" num certificado de 960x540. Então ele se ajusta — mais
+      // colunas e letra menor — em vez de sumir pela borda de baixo.
+      var quantos = bruto.split('\n').filter(function (l) { return l.trim(); }).length;
+      var comprido = bruto.replace(/\s+/g, ' ').length;
+      var classe = '';
+      if (quantos > 16 || comprido > 1400) classe = 'denso';
+      if (quantos > 26 || comprido > 2200) classe = 'denso tresc';
+
       return '' +
       '<div class="folha">' +
+        '<div class="moldura"></div>' +
+        '<span class="canto ce"></span><span class="canto cd"></span>' +
+        '<span class="canto be"></span><span class="canto bd"></span>' +
         '<div class="marca-agua"><img src="img/marca-agua.png" alt="" /></div>' +
+        medalha(d) +
         '<div class="miolo verso">' +
         '<div class="topo">' +
           '<img src="img/logo.png" alt="Clínica Medicina Humana" />' +
-          '<div class="selo">' + seguro(d.curso.codigo) + '<br />' +
-            (d.curso.carga_horaria || '') + 'h</div>' +
+          '<div class="selo">' + seguro(d.curso.titulo || '') +
+            '<em>' + seguro(d.curso.codigo || '') +
+            (d.curso.carga_horaria ? ' · ' + d.curso.carga_horaria + ' horas' : '') +
+            '</em></div>' +
         '</div>' +
-        '<h2>CONTEÚDO PROGRAMÁTICO</h2><div class="risco"></div>' +
-        '<ul>' + itens + '</ul>' +
+        '<h2>CONTEÚDO PROGRAMÁTICO</h2>' + risco() +
+        '<ul class="' + classe + '">' + itens + '</ul>' +
         '<div class="rodape"><span>' + seguro(d.aluno.nome) + '</span>' +
           '<span class="codigo">' + seguro(d.cert.codigo) + '</span></div>' +
       '</div></div>';
@@ -358,7 +519,18 @@
         curso: {
           codigo: cursoVivo.codigo,
           titulo: congelado.curso_titulo || cursoVivo.titulo,
-          titulo_certificado: cursoVivo.titulo_certificado,
+          // NAO vem ao vivo. O 20-consertos-de-seguranca.sql congelou o
+          // titulo em trein_certificado justamente para o papel dizer o
+          // mesmo que a pagina publica de conferencia. Lido ao vivo, e com
+          // precedencia sobre o congelado, uma correcao de virgula no
+          // admin reescrevia TODO certificado ja emitido — e a validacao
+          // continuava mostrando o texto antigo. O auditor confere e nao
+          // bate.
+          //
+          // So vale para certificado emitido ANTES de o retrato existir,
+          // onde nao ha congelado nenhum.
+          titulo_certificado: congelado.curso_titulo
+                              ? null : cursoVivo.titulo_certificado,
           carga_horaria: (congelado.carga_horaria != null
                           ? congelado.carga_horaria : cursoVivo.carga_horaria),
           // o conteudo programatico e do CURSO, nao do aluno: ele descreve
@@ -378,3 +550,4 @@
   </script>
 </body>
 </html>
+
