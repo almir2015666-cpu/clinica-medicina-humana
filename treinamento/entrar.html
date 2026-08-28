@@ -176,6 +176,26 @@
 
     function erro(el, texto) { el.textContent = texto || ''; el.style.display = texto ? 'block' : 'none'; }
 
+    // AVISO de sucesso, na cor de sucesso. "Cursos liberados!" e "Senha
+    // trocada!" saíam na caixa VERMELHA de erro, no caminho em que o
+    // resgate deu certo mas o login automático falhou. O aluno lia como
+    // fracasso e tentava resgatar de novo, aí recebia "você já usou esse
+    // código" e desistia achando que tinha perdido a vaga.
+    function aviso(el, texto) {
+      el.textContent = texto || '';
+      el.style.display = texto ? 'block' : 'none';
+      el.style.background = 'rgba(30,122,69,.10)';
+      el.style.color = '#1e7a45';
+    }
+
+    // escapa o que vem do banco antes de virar HTML: esta pagina roda sem
+    // login, e o nome da empresa e o título do curso são texto livre
+    function seguro(t) {
+      return String(t == null ? '' : t)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
     // ---- trocar de aba -------------------------------------------------
     var ABAS = { entrar: 'formLogin', resgatar: 'formResgate', senha: 'formSenha' };
     function aba(qual) {
@@ -220,10 +240,10 @@
           return;
         }
         var lista = (d.cursos || []).map(function (c) {
-          return '<li>' + c.titulo + (c.carga_horaria ? ' · ' + c.carga_horaria + 'h' : '') + '</li>';
+          return '<li>' + seguro(c.titulo) + (c.carga_horaria ? ' · ' + Number(c.carga_horaria) + 'h' : '') + '</li>';
         }).join('');
         caixa.className = 'cupom bom';
-        caixa.innerHTML = '<strong>' + (d.empresa || 'Código válido') + '</strong>'
+        caixa.innerHTML = '<strong>' + seguro(d.empresa || 'Código válido') + '</strong>'
                         + '<ul>' + lista + '</ul>';
       }, 400);
     });
@@ -264,7 +284,7 @@
       var r = await sb.auth.signInWithPassword({
         email: cpf + '@' + window.SUPA.alunoEmailDomain, password: senha
       });
-      if (r.error) { aba('entrar'); return erro($('erroLogin'), 'Cursos liberados! Agora entre com o seu CPF e a senha que você criou.'); }
+      if (r.error) { aba('entrar'); return aviso($('erroLogin'), 'Cursos liberados! Agora entre com o seu CPF e a senha que você criou.'); }
       location.href = 'painel.html';
     });
 
@@ -324,7 +344,7 @@
       });
       if (r.error) {
         aba('entrar');
-        return erro($('erroLogin'), 'Senha trocada! Agora entre com o seu CPF e a senha nova.');
+        return aviso($('erroLogin'), 'Senha trocada! Agora entre com o seu CPF e a senha nova.');
       }
       location.href = 'painel.html';
     });

@@ -11,8 +11,23 @@
 //  buscasse as perguntas direto, a resposta viajaria junto — e bastaria
 //  abrir a aba de rede para gabaritar. Por isso a RLS proíbe qualquer
 //  leitura da tabela pelo navegador, e só esta função (com service role)
-//  enxerga o gabarito. O que sai daqui são as alternativas embaralhadas,
-//  sem dizer qual é a boa.
+//  enxerga o gabarito.
+//
+//  A PROVA É SORTEADA
+//  ------------------
+//  Cada curso tem um banco de ~40 questões e a prova pega 10. Antes eram
+//  10 questões e a prova entregava todas: dois colegas faziam a MESMA
+//  prova, e o primeiro a passar ditava as respostas para o turno inteiro.
+//
+//  O sorteio é GRAVADO na trein_sorteio antes de sair daqui, e a correção
+//  usa o que está gravado — nunca o que o navegador devolveu. Sem isso, o
+//  aluno pediria a prova várias vezes, juntaria as questões que sabe e
+//  mandaria só essas: dez acertos em dez, sem saber o resto.
+//
+//  E as alternativas também são embaralhadas, por sorteio, com a posição
+//  da resposta certa guardada junto. Duas pessoas que tirem a MESMA
+//  pergunta veem as alternativas em ordens diferentes — "é a letra C" para
+//  de ser uma resposta transmissível.
 //
 //  Deploy: Supabase > Edge Functions > nome: prova
 // =====================================================================
@@ -25,6 +40,18 @@ const cors = {
 };
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...cors, "Content-Type": "application/json" } });
+
+// Embaralhamento de Fisher-Yates, com o sorteio do Deno (crypto).
+// Math.random() daria conta aqui, mas é o mesmo gerador em toda a
+// instância e não custa nada usar o bom.
+function embaralhar<T>(lista: T[]): T[] {
+  const a = [...lista];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
@@ -52,7 +79,7 @@ Deno.serve(async (req) => {
   // que o site mandou: o id da matrícula vem do navegador.
   const { data: mat } = await admin
     .from("trein_matricula")
-    .select("id,aluno_id,curso_id,cancelada,expira_em,trein_curso(titulo,nota_minima)")
+    .select("id,aluno_id,curso_id,cancelada,expira_em,trein_curso(titulo,nota_minima,questoes_por_prova)")
     .eq("id", matricula).maybeSingle();
 
   if (!mat || mat.aluno_id !== ud.user.id) {
@@ -66,45 +93,117 @@ Deno.serve(async (req) => {
 
   const curso: any = mat.trein_curso ?? {};
   const notaMinima = Number(curso.nota_minima ?? 70);
+  const quantas = Math.max(1, Number(curso.questoes_por_prova ?? 10));
 
   // ---------------------------------------------------------------- pegar
   if (body?.acao === "pegar") {
-    const { data: qs } = await admin
-      .from("trein_questao")
-      .select("id,enunciado,alternativas,ordem")
-      .eq("curso_id", mat.curso_id).order("ordem");
+    // AS AULAS TÊM DE ESTAR TODAS CONCLUÍDAS.
+    // A tela já esconde a prova antes disso, mas a tela é o navegador —
+    // quem quisesse pular direto para a prova bastaria chamar esta função.
+    const { data: aulas } = await admin
+      .from("trein_aula").select("id").eq("curso_id", mat.curso_id);
+    const total_aulas = aulas?.length ?? 0;
+    if (total_aulas === 0) {
+      return json({ error: "As aulas deste curso ainda não foram publicadas." }, 404);
+    }
+    const { count: feitas } = await admin
+      .from("trein_progresso")
+      .select("aula_id", { count: "exact", head: true })
+      .eq("matricula_id", matricula).eq("concluida", true);
+    if ((feitas ?? 0) < total_aulas) {
+      return json({ error: "Termine todas as aulas antes de fazer a prova." }, 403);
+    }
 
-    if (!qs || !qs.length) {
+    const { data: banco } = await admin
+      .from("trein_questao")
+      .select("id,enunciado,alternativas,correta")
+      .eq("curso_id", mat.curso_id);
+
+    if (!banco || !banco.length) {
       return json({ error: "A prova deste curso ainda não foi cadastrada. " +
                            "Fale com a nossa equipe." }, 404);
     }
-    // as alternativas vão SEM o campo `correta` — ele nem é lido acima
+
+    // sorteia as questões, e dentro de cada uma sorteia as alternativas.
+    // A posição nova da resposta certa vai gravada no sorteio; a que está
+    // na tabela não serve mais depois de embaralhar.
+    const escolhidas = embaralhar(banco).slice(0, Math.min(quantas, banco.length));
+
+    const paraOAluno: any[] = [];
+    const gabarito: number[] = [];
+    for (const q of escolhidas) {
+      const originais: string[] = Array.isArray(q.alternativas) ? q.alternativas : [];
+      const posicoes = embaralhar(originais.map((_, i) => i));
+      paraOAluno.push({
+        id: q.id,
+        enunciado: q.enunciado,
+        alternativas: posicoes.map((p) => originais[p]),
+      });
+      // onde a resposta certa foi parar depois do embaralho
+      gabarito.push(posicoes.indexOf(Number(q.correta)));
+    }
+
+    // O sorteio anterior que não foi respondido morre aqui. Sem isso, o
+    // aluno abriria a prova várias vezes para mapear o banco e depois
+    // responderia o sorteio mais fácil.
+    await admin.from("trein_sorteio")
+      .delete().eq("matricula_id", matricula).eq("usado", false);
+
+    const { error: erroSorteio } = await admin.from("trein_sorteio").insert({
+      matricula_id: matricula,
+      questoes: escolhidas.map((q: any) => q.id),
+      gabarito,
+    });
+    if (erroSorteio) {
+      return json({ error: "Não consegui montar a prova. Tente de novo." }, 500);
+    }
+
     return json({
       curso: curso.titulo ?? "",
       nota_minima: notaMinima,
-      questoes: qs.map((q: any) => ({
-        id: q.id, enunciado: q.enunciado, alternativas: q.alternativas,
-      })),
+      questoes: paraOAluno,   // sem `correta`: ele nem entra no objeto
     });
   }
 
   // ------------------------------------------------------------- corrigir
   if (body?.acao === "corrigir") {
     const respostas: any[] = Array.isArray(body?.respostas) ? body.respostas : [];
-    const { data: qs } = await admin
-      .from("trein_questao")
-      .select("id,correta").eq("curso_id", mat.curso_id);
 
-    if (!qs || !qs.length) return json({ error: "Prova não cadastrada." }, 404);
+    // A PROVA É A QUE FOI SORTEADA, não a que o navegador devolveu.
+    const { data: sorteio } = await admin
+      .from("trein_sorteio")
+      .select("id,questoes,gabarito")
+      .eq("matricula_id", matricula).eq("usado", false)
+      .order("criado_em", { ascending: false })
+      .limit(1).maybeSingle();
 
-    const gabarito = new Map(qs.map((q: any) => [q.id, q.correta]));
+    if (!sorteio) {
+      return json({ error: "Essa prova já foi corrigida ou expirou. " +
+                           "Abra a prova de novo." }, 409);
+    }
+
+    // queima o sorteio ANTES de corrigir, e só segue se a queima pegou:
+    // dois envios ao mesmo tempo, um deles perde a corrida e para aqui,
+    // em vez de gravarem duas tentativas da mesma prova.
+    const { data: queimado } = await admin
+      .from("trein_sorteio")
+      .update({ usado: true })
+      .eq("id", sorteio.id).eq("usado", false)
+      .select("id").maybeSingle();
+    if (!queimado) {
+      return json({ error: "Essa prova já foi enviada." }, 409);
+    }
+
     const dadas = new Map(respostas.map((r: any) => [String(r.questao_id), r.escolha]));
 
     let acertos = 0;
-    for (const [id, certa] of gabarito) {
-      if (Number(dadas.get(String(id))) === Number(certa)) acertos++;
-    }
-    const total = gabarito.size;
+    (sorteio.questoes as string[]).forEach((qid, i) => {
+      // o denominador é o TAMANHO DO SORTEIO. Questão não respondida
+      // conta como erro — quem manda meia prova não tira nota cheia.
+      if (Number(dadas.get(String(qid))) === Number(sorteio.gabarito[i])) acertos++;
+    });
+
+    const total = (sorteio.questoes as string[]).length;
     const nota = Math.round((acertos / total) * 100);
     const aprovado = nota >= notaMinima;
 

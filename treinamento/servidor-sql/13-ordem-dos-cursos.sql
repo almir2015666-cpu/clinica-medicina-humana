@@ -1,4 +1,4 @@
--- =====================================================================
+﻿-- =====================================================================
 --  A ordem em que os cursos aparecem
 --
 --  Rode no SQL Editor. Pode rodar mais de uma vez.
@@ -43,7 +43,10 @@ update public.trein_curso c
     ('NR-26',      12),
     ('NR-33',      13),
     ('NR-34.5',    14),
-    ('NR-35',      15),
+    -- NR-35-REC, e não "NR-35": o 07-nr35-somente-reciclagem.sql renomeou
+    -- o curso quando a Portaria MTE 1.259/2026 tirou o treinamento INICIAL
+    -- da NR-35 do EaD. Só a reciclagem pode ser a distância.
+    ('NR-35-REC',  15),
     -- e o que não tem número, em ordem alfabética
     ('BRIG',       16),
     ('DD',         17),
@@ -59,12 +62,36 @@ update public.trein_curso
    set ordem = 90 + ordem
  where codigo not in ('NR-01-INT4','NR-01-INT8','NR-05','NR-06','NR-10',
                       'NR-10-SEP','NR-11','NR-12','NR-17','NR-18','NR-20',
-                      'NR-26','NR-33','NR-34.5','NR-35',
+                      'NR-26','NR-33','NR-34.5','NR-35-REC',
                       'BRIG','DD','DD-REC','LOTO')
    and ordem < 90;
 
--- Confira: tem de sair NR-01 em cima e LOTO embaixo, sem buraco nem
--- número repetido nos dezenove primeiros.
+-- =====================================================================
+--  A REDE DE PROTEÇÃO
+--
+--  Código escrito errado aqui não dá erro nenhum: o `where codigo = ...`
+--  simplesmente não casa, e o curso fica com a ordem antiga. Foi assim que
+--  o NR-35-REC — que este arquivo chamava de "NR-35" — foi parar na posição
+--  91 sem ninguém perceber. Erro calado é o pior tipo.
+--
+--  A consulta abaixo compara a lista escrita aqui com o que existe de
+--  verdade no banco, nos dois sentidos. TEM DE VIR VAZIA.
+-- =====================================================================
+with lista(codigo) as (values
+  ('NR-01-INT4'),('NR-01-INT8'),('NR-05'),('NR-06'),('NR-10'),('NR-10-SEP'),
+  ('NR-11'),('NR-12'),('NR-17'),('NR-18'),('NR-20'),('NR-26'),('NR-33'),
+  ('NR-34.5'),('NR-35-REC'),('BRIG'),('DD'),('DD-REC'),('LOTO')
+)
+select 'escrito aqui, mas NAO existe no banco' as problema, l.codigo
+  from lista l left join public.trein_curso c on c.codigo = l.codigo
+ where c.id is null
+union all
+select 'existe no banco, mas FICOU DE FORA da lista', c.codigo
+  from public.trein_curso c left join lista l on l.codigo = c.codigo
+ where l.codigo is null;
+
+-- Confira: tem de sair NR-01-INT4 em cima e LOTO embaixo, de 1 a 19, sem
+-- buraco nem número repetido.
 select ordem, codigo, titulo, ativo
   from public.trein_curso
  order by ordem, codigo;

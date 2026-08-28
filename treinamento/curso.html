@@ -132,7 +132,7 @@
           (pronta ? '' : 'travado') + '" data-i="-1">' +
           '<span class="item__n">★</span><span class="item__txt">' +
           '<b>Prova final</b><span>' +
-          (pronta ? '10 perguntas · 70% para passar'
+          (pronta ? 'Sorteada do banco de questões'
                   : 'Conclua todas as aulas para liberar') +
           '</span></span></div>';
       }
@@ -279,16 +279,26 @@
         return { acertos: acertos, total: total, nota: nota,
                  nota_minima: 70, aprovado: nota >= 70 };
       }
-      var s = await sb.auth.getSession();
-      var r = await fetch(window.SUPA.url + '/functions/v1/prova', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json', apikey: window.SUPA.key,
-          Authorization: 'Bearer ' + (s.data.session ? s.data.session.access_token : '')
-        },
-        body: JSON.stringify(Object.assign({ matricula_id: mat }, corpo))
-      });
-      return r.json();
+      // Sem try/catch, uma queda de rede aqui virava promessa rejeitada e a
+      // função morria no meio: a tela ficava em "Carregando a prova…" para
+      // sempre, ou o botão em "Corrigindo…" desabilitado, com as dez
+      // respostas presas e nenhum jeito de reenviar a não ser recarregar —
+      // perdendo tudo e sorteando uma prova nova.
+      try {
+        var s = await sb.auth.getSession();
+        var r = await fetch(window.SUPA.url + '/functions/v1/prova', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json', apikey: window.SUPA.key,
+            Authorization: 'Bearer ' + (s.data.session ? s.data.session.access_token : '')
+          },
+          body: JSON.stringify(Object.assign({ matricula_id: mat }, corpo))
+        });
+        return await r.json();
+      } catch (e) {
+        return { error: 'Não consegui falar com o servidor. Verifique a '
+                      + 'conexão e tente de novo.' };
+      }
     }
 
     async function abrirProva() {
@@ -366,7 +376,7 @@
           'é ' + r.nota_minima + '%.</p>' +
         (r.aprovado
           ? '<p>O seu certificado já está pronto, no seu nome.</p>' +
-            '<a class="i-botao" href="certificado.html?m=' + mat + '">Ver o meu certificado</a>'
+            '<a class="i-botao" href="certificado.html?' + (demo ? 'amostra=1' : 'm=' + mat) + '">Ver o meu certificado</a>'
           : '<p>Reveja as aulas e tente de novo. Não há limite de tentativas.</p>' +
             '<button class="i-botao i-botao--linha" id="denovo">Refazer a prova</button>') +
         '</div>';
@@ -394,11 +404,24 @@
         .eq('id', mat).maybeSingle();
       if (!r.data || r.data.cancelada) { location.replace('painel.html'); return; }
 
+      // Curso DESATIVADO não vem no embed (a política só devolve `ativo`),
+      // mas a matrícula vem. Sem esta conferência, o `.titulo` logo abaixo
+      // estourava e a sala ficava travada em "Carregando…", sem dizer nada.
+      if (!r.data.trein_curso) {
+        $('tituloCurso').textContent = 'Curso indisponível';
+        $('palco').innerHTML = '<div class="recado">Este treinamento está ' +
+          'temporariamente indisponível. Fale com a nossa equipe.</div>';
+        return;
+      }
+
       var hoje = new Date().toISOString().slice(0, 10);
       if (String(r.data.expira_em) < hoje) {
         $('tituloCurso').textContent = r.data.trein_curso.titulo;
         $('palco').innerHTML = '<div class="recado">O seu acesso a este curso ' +
-          'venceu. Procure o RH da sua empresa para renovar.</div>';
+          'venceu. Procure o RH da sua empresa para renovar.</div>' +
+          '<div class="recado">Se você já foi aprovado, o seu certificado ' +
+          'continua sendo seu: <a class="i-botao" href="certificado.html?m=' +
+          mat + '">ver o certificado</a></div>';
         return;
       }
 
@@ -407,9 +430,18 @@
       $('subCurso').textContent = (E.curso.carga_horaria
         ? E.curso.carga_horaria + ' horas' : '') ;
 
-      E.aulas = (await sb.from('trein_aula')
+      var ra = await sb.from('trein_aula')
         .select('id,titulo,descricao,video_url,duracao_seg,ordem')
-        .eq('curso_id', E.curso.id).order('ordem')).data || [];
+        .eq('curso_id', E.curso.id).order('ordem');
+      // Rede caindo NÃO é "curso sem aulas". O supabase-js devolve
+      // {data:null, error} sem levantar exceção; tratar isso como lista
+      // vazia fazia a tela afirmar que o módulo ainda não tem aula nenhuma.
+      if (ra.error) {
+        $('palco').innerHTML = '<div class="recado">Não consegui carregar as ' +
+          'aulas agora. Verifique a conexão e recarregue a página.</div>';
+        return;
+      }
+      E.aulas = ra.data || [];
 
       ((await sb.from('trein_progresso').select('aula_id,concluida')
         .eq('matricula_id', mat)).data || []).forEach(function (p) {
@@ -438,7 +470,7 @@
         $('palco').innerHTML = '<div class="i-resultado passou">' +
           '<h2>Curso concluído</h2><p class="nota">' + passou.nota + '%</p>' +
           '<p>Você foi aprovado. O certificado está no seu nome.</p>' +
-          '<a class="i-botao" href="certificado.html?m=' + mat + '">' +
+          '<a class="i-botao" href="certificado.html?' + (demo ? 'amostra=1' : 'm=' + mat) + '">' +
           'Ver o meu certificado</a></div>';
         return;
       }
