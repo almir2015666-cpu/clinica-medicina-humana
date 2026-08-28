@@ -398,15 +398,29 @@
       }
     }
 
-    // Se não houver imagem, o certificado sai com a linha em branco, para
-    // assinar à mão. Nunca sai quebrado nem com um ícone de imagem faltando.
+    // E a que vem publicada junto com o site, usada quando o bucket não
+    // tem nenhuma. Esta é uma caligrafia do nome, e não o traço da mão:
+    // uma rubrica manuscrita escaneada não deve ficar em endereço público
+    // e adivinhável, porque é o tipo de imagem que alguém recorta e cola
+    // em outro papel.
+    var ASSINATURA_DO_SITE = 'img/assinatura.png';
+
+    // O BUCKET TEM PREFERÊNCIA sobre a do site. Assim, no dia em que
+    // alguém enviar uma assinatura pelo admin, ela passa a valer sem
+    // precisar mexer em código nem republicar o site. Sem nenhuma das
+    // duas, o certificado sai com a linha em branco para assinar à mão,
+    // e nunca quebrado nem com ícone de imagem faltando.
     var urlAssinatura = null;
     async function buscarAssinatura() {
       try {
         var r = await sb.storage.from('treinamentos')
           .createSignedUrl(ASSINATURA, 60 * 10);
-        if (!r.error && r.data && r.data.signedUrl) urlAssinatura = r.data.signedUrl;
-      } catch (e) { urlAssinatura = null; }
+        if (!r.error && r.data && r.data.signedUrl) {
+          urlAssinatura = r.data.signedUrl;
+          return;
+        }
+      } catch (e) { /* sem bucket, cai na do site */ }
+      urlAssinatura = ASSINATURA_DO_SITE;
     }
 
     var sb = supabase.createClient(window.SUPA.url, window.SUPA.key);
