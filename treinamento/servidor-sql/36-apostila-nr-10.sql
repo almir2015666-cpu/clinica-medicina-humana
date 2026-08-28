@@ -95,7 +95,7 @@ O ponto prático: **autorizado é a condição para tocar na instalação**. Ter
 
 ### Sobre o treinamento
 
-O curso básico tem quarenta horas. Quem atua no sistema elétrico de potência, ou seja, na geração, transmissão e distribuição, precisa também do complementar, com mais quarenta horas.
+Quem atua no sistema elétrico de potência, ou seja, na geração, transmissão e distribuição, precisa também do treinamento complementar, além deste.
 
 A reciclagem é **bienal**, e além do prazo ela é obrigatória em três situações: quando o trabalhador muda de função ou de empresa, quando a instalação ou o método de trabalho mudam, e quando o resultado de uma avaliação mostra que o desempenho não está adequado.
 
