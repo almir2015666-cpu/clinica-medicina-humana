@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -375,23 +375,15 @@
         // painel do curso edita os dois. Fora da lista, a caixa abriria
         // vazia e o primeiro "Salvar certificado" apagaria o conteúdo
         // programático que já estava gravado.
-        .select('id,codigo,titulo,subtitulo,descricao,carga_horaria,validade_meses,nota_minima,questoes_por_prova,ativo,titulo_certificado,conteudo_programatico,apostila').order('ordem');
+        .select('id,codigo,titulo,subtitulo,descricao,carga_horaria,validade_meses,nota_minima,questoes_por_prova,ativo,titulo_certificado,conteudo_programatico').order('ordem');
 
-      // A COLUNA `apostila` PODE NÃO EXISTIR AINDA.
-      //
-      // O site é publicado antes de alguém rodar o SQL, e o PostgREST
-      // recusa a consulta INTEIRA quando uma coluna não existe. Sem esta
-      // segunda tentativa, o admin abriria com "não consegui ler os
-      // cursos" e a pessoa concluiria que a plataforma quebrou — quando o
-      // que falta é um arquivo de uma linha.
-      if (r.error && /apostila/.test(r.error.message || '')) {
-        r = await sb.from('trein_curso')
-          .select('id,codigo,titulo,subtitulo,descricao,carga_horaria,validade_meses,nota_minima,questoes_por_prova,ativo,titulo_certificado,conteudo_programatico')
-          .order('ordem');
-        semApostila = true;
-      }
+      // A apostila NAO vem nesta lista, de proposito. A coluna foi fechada
+      // (33-apostila-so-para-aluno.sql) porque a politica do catalogo e
+      // publica — a vitrine precisa dela — e o material de estudo saia
+      // junto para quem nao tinha conta nenhuma. Aqui ela e buscada curso
+      // a curso, pela funcao que confere a permissao.
       if (r.error) {
-        $('grade').innerHTML = '<p style="color:var(--vermelho)">Não consegui ' +
+        $('grade').innerHTML = '<p style="color:var(--vermelho)">Nao consegui ' +
           'ler os cursos: ' + seguro(r.error.message) + '</p>';
         return;
       }
@@ -626,13 +618,28 @@
       // técnico, e ele não escreve SQL. Uma frase errada numa apostila é
       // corrigida em segundos; num PDF no armazenamento, seria refazer o
       // arquivo e torcer para ninguém ter baixado a versão antiga.
-      var apo = String(atual.apostila || '');
+      // A apostila vem pela funcao, e nao pela coluna: ela foi fechada
+      // para nao sair de graca na vitrine publica. `semApostila` fica
+      // ligado quando a funcao ainda nao existe no banco — ai a caixa
+      // avisa em vez de abrir vazia e apagar o que estava gravado no
+      // primeiro Salvar.
+      var apo = '';
+      semApostila = false;
+      var rApo = await sb.rpc('trein_apostila_curso', { p_curso: atual.id });
+      if (rApo.error) {
+        semApostila = true;
+      } else if (rApo.data && rApo.data.length) {
+        apo = String(rApo.data[0].apostila || '');
+        atual.apostila = apo;
+      }
       if (semApostila) {
         html += '<div class="form-aula">' +
           '<h3>Apostila — o material de estudo</h3>' +
           '<p style="color:var(--vermelho);font-size:.9rem;margin:-.3rem 0 0">' +
-            'A coluna da apostila ainda nao existe no banco. Rode o ' +
-            '<b>29-apostila.sql</b> no Supabase e recarregue esta pagina — ' +
+            'Nao consegui abrir a apostila deste curso. Rode no Supabase ' +
+            'o <b>29-apostila.sql</b> e o ' +
+            '<b>33-apostila-so-para-aluno.sql</b>, e recarregue esta ' +
+            'pagina — ' +
             'ai o editor aparece aqui.</p>' +
           '</div>';
       } else {
