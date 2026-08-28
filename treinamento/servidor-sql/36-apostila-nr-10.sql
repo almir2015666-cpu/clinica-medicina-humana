@@ -32,7 +32,7 @@ Leia inteiro uma vez, sem pressa, antes da prova. Depois volte por partes.
 
 - Os **quadros** existem para consulta rápida. Guarde onde eles estão.
 - Os **passos numerados** são sequência obrigatória. A ordem não é estilo, é a proteção.
-- Os trechos em **destaque amarelo** são as coisas que mais matam. Se você lembrar só deles, já foi um ganho.
+- Os trechos **recuados, com filete ao lado**, são as coisas que mais matam. Se você lembrar só deles, já foi um ganho.
 - No fim há **exercícios com gabarito comentado**. Faça antes de olhar a resposta.
 
 ## O que você deve saber ao final
@@ -44,7 +44,7 @@ Leia inteiro uma vez, sem pressa, antes da prova. Depois volte por partes.
 - Identificar os documentos que precisam existir antes de o serviço começar.
 - Agir nos primeiros minutos de um acidente elétrico sem virar a segunda vítima.
 
-## Capítulo 1: o risco elétrico
+## O risco elétrico
 
 ### O choque elétrico
 
@@ -78,7 +78,7 @@ Isso explica por que a roupa importa tanto. A vestimenta contra arco elétrico �
 
 Um serviço elétrico quase nunca tem só risco elétrico. Vem com altura, com espaço confinado, com máquina que pode partir sozinha, com material inflamável ao lado. Os campos eletromagnéticos, presentes principalmente em alta tensão, também entram na avaliação. A análise de risco tem que enxergar o serviço inteiro, e não só a parte com fio.
 
-## Capítulo 2: o que a NR-10 exige
+## O que a NR-10 exige
 
 A NR-10 vale para todas as fases da instalação: projeto, construção, montagem, operação, manutenção e também a reforma e a ampliação. E vale para quem trabalha nas proximidades, não apenas para quem põe a mão.
 
@@ -99,7 +99,7 @@ O curso básico tem quarenta horas. Quem atua no sistema elétrico de potência,
 
 A reciclagem é **bienal**, e além do prazo ela é obrigatória em três situações: quando o trabalhador muda de função ou de empresa, quando a instalação ou o método de trabalho mudam, e quando o resultado de uma avaliação mostra que o desempenho não está adequado.
 
-## Capítulo 3: desenergizar, a única proteção que não depende de sorte
+## Desenergizar, a única proteção que não depende de sorte
 
 A regra de ouro da NR-10 é simples de enunciar e difícil de cumprir sob pressão: **serviço em instalação elétrica é feito desenergizado**. Trabalho energizado é exceção, precisa de justificativa técnica, procedimento específico e autorização, e não é assunto de curso básico.
 
@@ -128,7 +128,7 @@ Voltar não é desfazer de qualquer jeito. A sequência é esta, e ela existe pa
 
 Repare que o aterramento sai **depois** de as pessoas saírem, e a sinalização é a última coisa a ser retirada antes de religar. Inverter isso significa devolver energia a um circuito que ainda tem gente perto.
 
-## Capítulo 4: zona de risco, zona controlada, zona livre
+## Zona de risco, zona controlada, zona livre
 
 Perto de parte energizada, a distância é uma medida de segurança tanto quanto o EPI. A norma divide o espaço em três faixas, e o limite de cada uma depende da tensão: quanto maior a tensão, mais longe começa o perigo, porque o arco atravessa mais ar.
 
@@ -140,7 +140,7 @@ Perto de parte energizada, a distância é uma medida de segurança tanto quanto
 
 Duas confusões comuns valem correção. A primeira: a zona controlada não é um corredor de passagem, é área de trabalho, e entrar nela sem autorização é infração, mesmo que a pessoa não vá tocar em nada. A segunda: os limites saem das tabelas do anexo da norma conforme a tensão, e não do bom senso de quem está ali. Ninguém estima zona de risco a olho.
 
-## Capítulo 5: proteção coletiva e individual, nessa ordem
+## Proteção coletiva e individual, nessa ordem
 
 A NR-10 estabelece uma hierarquia que não é negociável: primeiro tenta-se eliminar o risco, depois protege-se o coletivo, e só então entra a proteção individual. EPI é a última barreira, não a primeira.
 
@@ -171,7 +171,7 @@ Antes de cada uso, faz-se o **teste de inflação**: enrola-se o punho para pren
 - **Calçado isolante**, sem componente metálico exposto.
 - Nada de metal no corpo: relógio, aliança, corrente, pulseira, piercing. Metal conduz e, no arco, esquenta e queima onde encosta.
 
-## Capítulo 6: o que precisa existir no papel
+## O que precisa existir no papel
 
 Antes de o serviço começar, alguns documentos precisam estar prontos. Eles não são burocracia: são a prova de que alguém pensou antes.
 
@@ -182,7 +182,7 @@ Antes de o serviço começar, alguns documentos precisam estar prontos. Eles nã
 
 Se o serviço mudar no meio do caminho, o papel muda junto. Análise de risco feita para trocar um disjuntor não cobre a decisão de aproveitar e mexer no barramento.
 
-## Capítulo 7: quando dá errado
+## Quando dá errado
 
 ### Vítima de choque
 
@@ -201,7 +201,7 @@ O primeiro instinto é o errado. Puxar a vítima com a mão é a forma mais comu
 
 Fogo em equipamento energizado é **classe C**, e o extintor é de CO2 ou pó químico. Água e espuma conduzem, e quem aplica leva o choque de volta pelo jato. A primeira providência, quando dá, é cortar a energia: desenergizado, o fogo passa a ser da classe do material que está queimando.
 
-## Capítulo 8: de quem é a responsabilidade
+## De quem é a responsabilidade
 
 **Do empregador:** garantir instalação segura, manter o prontuário, fornecer EPI adequado e em bom estado, treinar e reciclar, autorizar formalmente, custear tudo isso e fiscalizar o cumprimento.
 
