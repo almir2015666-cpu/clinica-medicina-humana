@@ -1,4 +1,4 @@
-﻿-- =====================================================================
+-- =====================================================================
 --  A prova do NR-20: 10 questoes, aprovacao com 70%
 --
 --  Rode no SQL Editor. Pode rodar mais de uma vez (apaga e recria).
