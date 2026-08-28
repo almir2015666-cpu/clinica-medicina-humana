@@ -1,4 +1,4 @@
-/* =====================================================================
+﻿/* =====================================================================
    Área interna — depois do login.
 
    Preta de propósito, e não pela estética: aqui a pessoa vai passar horas
@@ -7,6 +7,15 @@
 
    Arquivo próprio: nada aqui vaza para as páginas públicas.
    ===================================================================== */
+
+/* O QUE FALTAVA AQUI, E CUSTOU CARO NO CELULAR.
+   O style.css e o estilo.css declaram isto na primeira linha; este
+   arquivo nasceu sem. Sem `border-box`, a largura de 100% do
+   .i-container NAO conta os 22px de padding de cada lado — o cabecalho
+   ficava 44px mais largo que a tela, empurrava a pagina para o lado e
+   cortava o fim de cada titulo de aula. Uma linha, e a sala de aula
+   passa a caber no telefone. */
+*,*::before,*::after{box-sizing:border-box}
 
 :root{
   --preto:    #080d14;
@@ -133,7 +142,9 @@ body.a11y-noanim .entra,body.a11y-noanim .abertura img{animation:none;opacity:1;
   color:#06301b}
 .item.travado{opacity:.45;cursor:not-allowed}
 .item.travado:hover{background:none}
-.item__txt b{display:block;font:500 .92rem/1.4 'Inter',sans-serif;color:var(--claro)}
+.item__txt{flex:1;min-width:0}
+.item__txt b{display:block;font:500 .92rem/1.4 'Inter',sans-serif;
+  color:var(--claro);overflow-wrap:anywhere}
 .item__txt span{font-size:.78rem;color:var(--meio)}
 
 .palco{padding:2rem 2.4rem 3rem;max-width:1000px}
@@ -207,3 +218,96 @@ body.interno .a11y-fab:hover{transform:scale(1.07);border-color:var(--ambar)}
   .modulos{grid-template-columns:1fr}
   .painel{padding:2.6rem 0 3.4rem}
 }
+
+/* ===================================================================
+   SELETOR DE IDIOMA — versao escura
+   O estilo foi para o style.css e para o estilo.css, mas NAO para ca: na
+   sala de aula e no painel o menu saia como lista com marcador, solta em
+   cima do cabecalho. Aqui ele nasce escuro, para nao virar um retangulo
+   branco no meio do preto.
+   =================================================================== */
+.lang{position:relative;display:inline-block}
+.lang__abre{display:inline-flex;align-items:center;gap:.35rem;
+  background:transparent;border:1px solid var(--linha-i);color:var(--claro);
+  cursor:pointer;font:700 .78rem 'Poppins',sans-serif;padding:.42rem .7rem;
+  border-radius:999px;letter-spacing:.04em;transition:border-color .2s}
+.lang__abre:hover{border-color:var(--ambar);color:var(--ambar)}
+.lang__menu{position:absolute;right:0;top:calc(100% + 8px);z-index:120;
+  min-width:160px;list-style:none;margin:0;padding:.3rem;
+  background:var(--carvao2);border:1px solid var(--linha-i);
+  border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,.55);
+  opacity:0;visibility:hidden;transform:translateY(-6px);
+  transition:opacity .18s,transform .18s,visibility .18s}
+.lang.aberto .lang__menu{opacity:1;visibility:visible;transform:none}
+.lang__menu li{display:flex;align-items:center;justify-content:space-between;
+  padding:.55rem .8rem;border-radius:8px;cursor:pointer;
+  font:500 .9rem 'Inter',sans-serif;color:var(--claro)}
+.lang__menu li:hover{background:var(--carvao)}
+.lang__menu li.on{font-weight:700;background:var(--carvao)}
+.lang__menu li span{color:var(--ambar);font-weight:700}
+/* ===================================================================
+   CELULAR — e onde o curso vai ser feito de verdade
+
+   O trabalhador assiste no intervalo, no telefone dele, muitas vezes num
+   4G ruim. A tela larga era a que estava sendo testada, e o celular
+   acumulou tres defeitos que so aparecem la:
+
+   1. A PAGINA ROLAVA PARA O LADO. Item de flex nao encolhe abaixo do
+      tamanho do conteudo, a nao ser que se diga `min-width:0`. Sem isso,
+      um titulo longo de aula empurrava a pagina inteira, e o video, os
+      botoes e metade das frases ficavam fora da tela — com uma barra
+      horizontal embaixo que ninguem espera num site.
+   2. O cabecalho nao cabia: marca + "Meus modulos" + "Sair" + idioma numa
+      linha so de 390 px.
+   3. Na prova, a alternativa longa vazava do cartao.
+   =================================================================== */
+@media(max-width:640px){
+  /* a raiz do problema: deixar os itens de flex encolherem */
+  .i-topo__in,.item,.video__pe,.modulo__pe{flex-wrap:wrap}
+  /* `min-width:0` nao vale em elemento inline, e `.item__txt` e um <span>.
+     Sem virar bloco, ele continuava com a largura do conteudo e o titulo
+     saia cortado — antes empurrando a pagina, e agora escondido pelo
+     overflow. Texto cortado e pior que texto quebrado. */
+  .item__txt,.aulaadm__txt{display:block;flex:1;min-width:0}
+  .modulo__pe>div{min-width:0}
+  .item__txt b,.item__txt span,.palco h1,.palco__sub,.recado,
+  .i-pergunta b,.i-alt{overflow-wrap:anywhere}
+
+  /* cabecalho em duas linhas, com a marca inteira na primeira */
+  .i-topo__in{height:auto;padding-top:.6rem;padding-bottom:.6rem;
+    row-gap:.5rem}
+  .i-marca{flex:1 1 100%}
+  .i-marca img{height:30px}
+  .i-topo__dir{margin-left:0;flex:1 1 100%;justify-content:flex-start;
+    gap:.5rem;flex-wrap:wrap}
+  .i-sair{padding:.42rem .85rem;font-size:.8rem}
+
+  /* a lista de aulas nao rouba altura: ela rola, o video fica logo abaixo */
+  .lista{max-height:none;padding:1rem 0}
+  .lista h2,.lista__sub{padding-left:1rem;padding-right:1rem}
+  .item{padding:.75rem 1rem}
+  .palco{padding:1.2rem 1rem 2rem}
+  .palco h1{font-size:1.15rem}
+
+  /* o pe do video em duas linhas: o recado nao empurra mais o botao */
+  .video__pe{row-gap:.5rem;padding:.8rem}
+  .video__pe span:last-child{margin-left:0;flex:1 1 100%;font-size:.8rem}
+
+  /* prova: alternativa com area de toque grande e texto que quebra */
+  .i-prova h1{font-size:1.25rem}
+  .i-pergunta{padding:1.1rem 1rem}
+  .i-alt{padding:.85rem .8rem;font-size:.95rem}
+  .i-resultado{padding:2rem 1.2rem;margin:1.2rem 0}
+  .i-resultado .nota{font-size:2.8rem}
+  .i-botao{width:100%;text-align:center}
+
+  /* cartoes do painel */
+  .modulo{padding:1.3rem 1.1rem;min-height:0}
+  .modulo__pe{row-gap:.6rem}
+  .modulo__ir{margin-left:auto}
+}
+
+/* Rede de seguranca: se algum conteudo novo escapar da largura, ele fica
+   contido em vez de deslocar a pagina inteira. Nao substitui o conserto
+   acima — mas impede que um texto esquecido estrague a tela toda. */
+body.interno{overflow-x:hidden}

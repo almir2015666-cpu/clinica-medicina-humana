@@ -26,7 +26,13 @@
   'use strict';
 
   var CHAVE = 'cmh-idioma';
-  var IDIOMAS = { pt: 'Português', en: 'English' };
+  // Cada idioma tem o proprio arquivo de dicionario e a propria variavel
+  // global. Acrescentar um quarto e por uma linha aqui e gerar o arquivo.
+  var IDIOMAS = {
+    pt: { nome: 'Português', sigla: 'PT', dic: null },
+    en: { nome: 'English',   sigla: 'EN', dic: 'CMH_EN' },
+    zh: { nome: '中文（简体）', sigla: '中文', dic: 'CMH_ZH' }
+  };
 
   // localStorage falha em janela anônima de alguns navegadores, e uma
   // exceção aqui deixaria a página inteira sem JavaScript.
@@ -37,8 +43,9 @@
     try { localStorage.setItem(CHAVE, v); } catch (e) { /* paciência */ }
   }
 
-  var atual = lembrado() === 'en' ? 'en' : 'pt';
-  var DIC = window.CMH_EN || {};
+  var salvo = lembrado();
+  var atual = IDIOMAS[salvo] ? salvo : 'pt';
+  var DIC = {};
 
   // O DICIONÁRIO SÓ DESCE QUANDO ALGUÉM PEDE INGLÊS.
   // São 103 KB. Carregá-lo em toda página faria a esmagadora maioria dos
@@ -50,18 +57,24 @@
   // que assim funciona tanto na raiz quanto em /treinamento/.
   var EU = (document.currentScript && document.currentScript.src) || 'js/idioma.js';
 
-  var carregando = null;
-  function carregarDicionario() {
-    if (window.CMH_EN) { DIC = window.CMH_EN; return Promise.resolve(); }
-    if (carregando) return carregando;
-    carregando = new Promise(function (pronto) {
+  var carregando = {};
+  function carregarDicionario(idioma) {
+    var conf = IDIOMAS[idioma];
+    if (!conf || !conf.dic) { DIC = {}; return Promise.resolve(); }
+    if (window[conf.dic]) { DIC = window[conf.dic]; return Promise.resolve(); }
+    if (carregando[idioma]) return carregando[idioma];
+    carregando[idioma] = new Promise(function (pronto) {
       var s = document.createElement('script');
-      s.src = EU.replace(/idioma\.js.*$/, 'traducao-en.js');
-      s.onload = function () { DIC = window.CMH_EN || {}; pronto(); };
-      s.onerror = function () { pronto(); };   // sem dicionário, fica em pt
+      // A versao do proprio idioma.js vai junto para o dicionario. Sem
+      // isso, um dicionario corrigido nunca chegaria a quem ja tem o
+      // antigo guardado — e o navegador guarda por muito tempo.
+      var versao = (EU.match(/\?v=\d+/) || [''])[0];
+      s.src = EU.replace(/idioma\.js.*$/, 'traducao-' + idioma + '.js' + versao);
+      s.onload = function () { DIC = window[conf.dic] || {}; pronto(); };
+      s.onerror = function () { DIC = {}; pronto(); };  // sem dicionario, fica em pt
       document.head.appendChild(s);
     });
-    return carregando;
+    return carregando[idioma];
   }
 
   // Guarda o português original de cada nó na primeira troca. Sem isso,
@@ -72,18 +85,18 @@
 
   var PULA = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, CODE: 1, PRE: 1, TEXTAREA: 1 };
 
-  function trocarNo(no, paraIngles) {
+  function trocarNo(no, traduzir) {
     var texto = no.nodeValue;
     var limpo = texto.trim();
     if (limpo.length < 2) return;
 
-    if (paraIngles) {
-      var en = DIC[limpo];
-      if (!en) return;
+    if (traduzir) {
+      var novo = DIC[limpo];
+      if (!novo) return;
       if (!ORIGINAL.has(no)) ORIGINAL.set(no, texto);
       // preserva os espaços das pontas: eles separam a palavra do que vem
       // colado, e comê-los junta "Agende sua" com "consulta"
-      no.nodeValue = texto.replace(limpo, en);
+      no.nodeValue = texto.replace(limpo, novo);
     } else if (ORIGINAL.has(no)) {
       no.nodeValue = ORIGINAL.get(no);
     }
@@ -91,24 +104,24 @@
 
   var ATRIBUTOS = ['placeholder', 'title', 'alt', 'aria-label'];
 
-  function trocarAtributos(el, paraIngles) {
+  function trocarAtributos(el, traduzir) {
     for (var i = 0; i < ATRIBUTOS.length; i++) {
       var a = ATRIBUTOS[i];
       if (!el.hasAttribute(a)) continue;
       var v = el.getAttribute(a);
       var guarda = 'data-pt-' + a;
-      if (paraIngles) {
-        var en = DIC[v.trim()];
-        if (!en) continue;
+      if (traduzir) {
+        var novo = DIC[v.trim()];
+        if (!novo) continue;
         if (!el.hasAttribute(guarda)) el.setAttribute(guarda, v);
-        el.setAttribute(a, en);
+        el.setAttribute(a, novo);
       } else if (el.hasAttribute(guarda)) {
         el.setAttribute(a, el.getAttribute(guarda));
       }
     }
   }
 
-  function aplicar(raiz, paraIngles) {
+  function aplicar(raiz, traduzir) {
     var passeio = document.createTreeWalker(
       raiz, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {
         acceptNode: function (no) {
@@ -121,25 +134,26 @@
       });
     var no;
     while ((no = passeio.nextNode())) {
-      if (no.nodeType === 3) trocarNo(no, paraIngles);
-      else trocarAtributos(no, paraIngles);
+      if (no.nodeType === 3) trocarNo(no, traduzir);
+      else trocarAtributos(no, traduzir);
     }
   }
 
+  var CODIGO_HTML = { pt: 'pt-BR', en: 'en', zh: 'zh-Hans' };
+
   function trocar(idioma) {
-    atual = idioma === 'en' ? 'en' : 'pt';
+    atual = IDIOMAS[idioma] ? idioma : 'pt';
     lembrar(atual);
-    document.documentElement.lang = atual === 'en' ? 'en' : 'pt-BR';
+    document.documentElement.lang = CODIGO_HTML[atual] || 'pt-BR';
     desenharBotao();          // o rotulo muda na hora, sem esperar a rede
-    if (atual === 'en') { carregarDicionario().then(pintar); }
-    else { pintar(); }
+    carregarDicionario(atual).then(pintar);
   }
 
   function pintar() {
-    aplicar(document.body, atual === 'en');
+    aplicar(document.body, atual !== 'pt');
 
     // o <title> não está no body e não é nó de texto comum
-    if (atual === 'en' && DIC[document.title.trim()]) {
+    if (atual !== 'pt' && DIC[document.title.trim()]) {
       if (!document.body.dataset.ptTitle) {
         document.body.dataset.ptTitle = document.title;
       }
@@ -161,13 +175,13 @@
           'stroke="currentColor" stroke-width="2" aria-hidden="true">' +
           '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/>' +
           '<path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"/></svg>' +
-        '<span>' + (atual === 'en' ? 'EN' : 'PT') + '</span>' +
+        '<span>' + IDIOMAS[atual].sigla + '</span>' +
       '</button>' +
       '<ul class="lang__menu" role="listbox">' +
         Object.keys(IDIOMAS).map(function (k) {
           return '<li role="option" data-idioma="' + k + '"' +
             (k === atual ? ' aria-selected="true" class="on"' : '') + '>' +
-            IDIOMAS[k] + (k === atual ? ' <span>✓</span>' : '') + '</li>';
+            IDIOMAS[k].nome + (k === atual ? ' <span>✓</span>' : '') + '</li>';
         }).join('') +
       '</ul>';
 
@@ -205,7 +219,7 @@
     if (!window.MutationObserver) return;
     var pendente = null;
     new MutationObserver(function (mudancas) {
-      if (atual !== 'en' || !window.CMH_EN) return;
+      if (atual === 'pt') return;
       clearTimeout(pendente);
       pendente = setTimeout(function () {
         for (var i = 0; i < mudancas.length; i++) {
@@ -222,7 +236,7 @@
 
   function comecar() {
     desenharBotao();
-    if (atual === 'en') trocar('en');   // busca o dicionario e repinta
+    if (atual !== 'pt') trocar(atual);  // busca o dicionario e repinta
     observar();
   }
 
