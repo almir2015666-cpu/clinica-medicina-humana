@@ -563,6 +563,13 @@
       var t = document.createElement('canvas');
       t.width = c.w; t.height = c.h;
       var g = t.getContext('2d', { willReadFrequently: true });
+      // FUNDO BRANCO ANTES DA IMAGEM. Canvas nasce transparente, e um PNG
+      // que ja venha com transparencia deixaria essas areas com preto por
+      // baixo: o fundo viraria a coisa mais escura da imagem e o resultado
+      // seria um retangulo solido. Sobre branco, o transparente vira papel,
+      // que e o que ele representa.
+      g.fillStyle = '#fff';
+      g.fillRect(0, 0, c.w, c.h);
       g.drawImage(assFoto, c.x, c.y, c.w, c.h, 0, 0, c.w, c.h);
       var d = g.getImageData(0, 0, c.w, c.h).data;
 
