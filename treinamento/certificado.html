@@ -245,9 +245,15 @@
     /* marcador losango dourado, o mesmo motivo do risco do título */
     .verso li::before{content:"";position:absolute;left:0;top:.5em;
       width:5px;height:5px;background:var(--ouro);transform:rotate(45deg)}
-    /* conteúdo longo encolhe em vez de transbordar a folha */
+    /* CONTEÚDO LONGO ENCOLHE EM VEZ DE TRANSBORDAR A FOLHA.
+       Não existe "próxima página" num certificado de 960x540: o que não
+       couber sai pela borda de baixo, por cima do rodapé. Os degraus
+       abaixo são aplicados um a um, e quem decide qual usar é a medição
+       lá embaixo, e não uma contagem de caracteres. */
     .verso ul.denso li{font-size:.75rem;line-height:1.48;margin-bottom:.3rem}
     .verso ul.tresc{column-count:3;column-gap:1.9rem}
+    .verso ul.micro li{font-size:.68rem;line-height:1.4;margin-bottom:.22rem}
+    .verso ul.micro li::before{width:4px;height:4px;top:.45em}
 
     /* NO MODELO, some tudo que muda de aluno para aluno e de curso para
        curso. O que fica é o papel: moldura, trama, logo, cabeçalho, o
@@ -526,13 +532,19 @@
                        .map(function (l) { return '<li>' + seguro(l) + '</li>'; })
                        .join('');
       // Conteúdo longo não pode transbordar a folha: não existe "próxima
-      // página" num certificado de 960x540. Então ele se ajusta — mais
-      // colunas e letra menor — em vez de sumir pela borda de baixo.
-      var quantos = bruto.split('\n').filter(function (l) { return l.trim(); }).length;
-      var comprido = bruto.replace(/\s+/g, ' ').length;
+      // página" num certificado de 960x540.
+      //
+      // A densidade é escolhida DEPOIS, medindo (veja `ajustarVerso`). Aqui
+      // a folha nasce no tamanho confortável e, se não couber, encolhe.
+      //
+      // Antes a decisão saía de uma contagem: mais de 16 itens ou mais de
+      // 1.400 caracteres virava "denso". Medido, o NR-10-SEP tem 14 itens e
+      // 1.137 caracteres, passava longe dos dois limites, e mesmo assim os
+      // dois últimos itens saíam por cima do rodapé. É que o que ocupa
+      // espaço não é a contagem, é quantas LINHAS cada item ocupa depois de
+      // quebrar, e isso depende da largura da coluna e do tamanho das
+      // palavras. Contar caractere para adivinhar altura nunca ia funcionar.
       var classe = '';
-      if (quantos > 16 || comprido > 1400) classe = 'denso';
-      if (quantos > 26 || comprido > 2200) classe = 'denso tresc';
 
       return '' +
       '<div class="folha">' +
@@ -541,7 +553,17 @@
         '<span class="canto ce"></span><span class="canto cd"></span>' +
         '<span class="canto be"></span><span class="canto bd"></span>' +
         '<div class="marca-agua"><img src="img/marca-agua.png" alt="" /></div>' +
-        medalha(d) +
+        // O MEDALHÃO NÃO VAI NO VERSO.
+        //
+        // Ele é posicionado pelo canto da folha, fora do fluxo, e a lista
+        // do conteúdo programático corria POR BAIXO dele: no NR-20 tapava
+        // "sobre trabalhos que gerem chamas, calor ou centelhas", bem no
+        // meio de um item. Num papel que a fiscalização lê para saber o
+        // que foi ensinado, texto tapado não é defeito de estilo.
+        //
+        // E ele nem faz falta aqui: o cabeçalho desta folha já traz o
+        // código da NR e a carga horária, a dois centímetros de distância.
+        // Na frente ele fica, porque lá é o selo do documento.
         '<div class="miolo verso">' +
         '<div class="topo">' +
           '<img src="img/logo.png" alt="Clínica Medicina Humana" />' +
@@ -555,6 +577,43 @@
         '<div class="rodape"><span>' + seguro(d.aluno.nome) + '</span>' +
           '<span class="codigo">' + seguro(d.cert.codigo) + '</span></div>' +
       '</div></div>';
+    }
+
+    // ENCOLHER O VERSO ATÉ CABER, MEDINDO.
+    //
+    // O que ocupa espaço não é o número de itens nem o de caracteres: é
+    // quantas LINHAS cada item ocupa depois de quebrar, e isso só se sabe
+    // depois de o navegador desenhar. Então desenha-se no tamanho
+    // confortável e, se a lista passar do rodapé, aplica-se o degrau
+    // seguinte e mede-se de novo.
+    //
+    // Quatro degraus, do mais legível ao mais apertado. Se nem o último
+    // couber, fica o último: melhor um item raspando o rodapé do que um
+    // item invisível fora da folha, porque este papel é o que a
+    // fiscalização lê para saber o que foi ensinado.
+    var DEGRAUS = ['', 'denso', 'denso tresc', 'denso tresc micro'];
+
+    function ajustarVerso() {
+      document.querySelectorAll('.miolo.verso').forEach(function (verso) {
+        var lista = verso.querySelector('ul');
+        var rodape = verso.querySelector('.rodape');
+        if (!lista || !rodape) return;
+        for (var i = 0; i < DEGRAUS.length; i++) {
+          lista.className = DEGRAUS[i];
+          // 8px de respiro: encostar no rodapé já lê como transbordo.
+          if (lista.getBoundingClientRect().bottom <=
+              rodape.getBoundingClientRect().top - 8) return;
+        }
+      });
+    }
+
+    // As fontes chegam depois do desenho, e o texto muda de tamanho quando
+    // elas chegam: medir antes disso daria a medida da fonte de reserva.
+    function ajustarVersoQuandoDerCerto() {
+      ajustarVerso();
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(ajustarVerso);
+      }
     }
 
     // Amostra: ?amostra=1 desenha o certificado com dados de exemplo, sem
@@ -608,6 +667,7 @@
         document.body.classList.add('modelo');
         await buscarAssinatura();
         alvo.innerHTML = folhaFrente(AMOSTRA) + folhaVerso(AMOSTRA);
+        ajustarVersoQuandoDerCerto();
         document.title = 'Modelo do certificado';
         return;
       }
@@ -631,6 +691,7 @@
         }
         await buscarAssinatura();
         alvo.innerHTML = folhaFrente(amostra) + folhaVerso(amostra);
+        ajustarVersoQuandoDerCerto();
         document.title = 'Certificado (amostra)';
         document.querySelectorAll('.rodape span:nth-child(2)').forEach(
           function (s) { s.textContent = 'AMOSTRA: não é documento válido'; });
@@ -720,6 +781,7 @@
       };
       await buscarAssinatura();
       alvo.innerHTML = folhaFrente(d) + folhaVerso(d);
+      ajustarVersoQuandoDerCerto();
       document.title = 'Certificado de ' + d.aluno.nome;
     })();
   })();
