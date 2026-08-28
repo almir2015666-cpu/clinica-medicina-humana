@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    Clínica Medicina Humana — estilos
    Paleta (azul claro) — troque aqui para reajustar tudo:
    ============================================================ */
@@ -1245,3 +1245,119 @@ body.aviso-aberto{overflow:hidden}
   .aviso__caixa::before{transform:scaleX(1)}
   .aviso__som::after,.aviso__carregando span{animation:none}
 }
+
+/* ===================================================================
+   TREINAMENTO EM NRs  (topo, carrossel e o 5o card da home)
+   =================================================================== */
+
+/* Slide 8: a imagem ja vem com o degrade azul a esquerda, onde entra o
+   texto — igual aos slides 6 e 7. Por isso dispensa o scrim e o decor,
+   que so serviriam para escurecer de novo o que ja esta tratado. */
+.slide__bg--8{background:#0a2e5c url('../assets/treinamentos-hero.png') center/cover no-repeat!important;background-image:url('../assets/treinamentos-hero.png')!important;background-position:center!important;transform:none!important}
+.slide.is-active .slide__bg--8,.slide__bg--8{transform:none!important}
+.hero__track .slide:has(.slide__bg--8) .slide__scrim{background:none!important}
+.hero__track .slide:has(.slide__bg--8) .slide__decor{display:none}
+/* Na tela estreita o corte e bem maior: puxa para a direita para a turma e
+   o quadro de EPIs entrarem, e devolve o scrim para o texto ter contraste. */
+@media(max-width:760px){
+  .slide__bg--8{background-position:72% center!important}
+  .hero__track .slide:has(.slide__bg--8) .slide__scrim{
+    background:linear-gradient(180deg,rgba(10,46,92,.78) 0%,rgba(10,46,92,.52) 52%,rgba(10,46,92,.34) 100%)!important;
+  }
+}
+
+/* O 5o card da home. */
+.card__img--nr{background:#0a2e5c url('../assets/treinamentos-card.png') center/cover no-repeat}
+
+/* Com 5 cards, 4 colunas deixariam um orfao sozinho na segunda linha.
+   Entao: 5 lado a lado na tela larga e 3+2 na intermediaria, que parece
+   proposital. Abaixo disso continuam valendo as regras de 2 e 1 coluna. */
+@media(min-width:1280px){
+  .cards .container{max-width:1460px}
+  .cards__grid{grid-template-columns:repeat(5,1fr);max-width:1460px}
+}
+@media(min-width:1025px) and (max-width:1279px){
+  .cards__grid{grid-template-columns:repeat(3,1fr)}
+}
+
+/* Sao quatro botoes no topo agora. Aperta o espaco entre eles para nao
+   empurrar o menu, sem mexer no tamanho da letra. */
+@media(min-width:1025px){
+  .header__cta .btn-agendar{margin-left:.5rem}
+  .header__cta .btn-agendar:first-child{margin-left:1rem}
+}
+@media(min-width:1025px) and (max-width:1460px){
+  .header__cta .btn-agendar{font-size:.8rem;padding:.5rem .85rem;gap:.35rem}
+}
+
+/* ---------- Pagina de Treinamento em NRs ---------- */
+.nrs{padding:4.5rem 0}
+.nrs__intro{max-width:900px;color:var(--muted);font-size:1.02rem;line-height:1.75;margin:0 auto 3rem}
+.nrs__titulo{font-size:1.5rem;color:var(--navy);text-align:center;margin:0 0 1.8rem}
+.nrs__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem;max-width:1120px;margin:0 auto 3.5rem}
+.nr-item{position:relative;background:#fff;border:1px solid var(--line);border-radius:14px;padding:1.5rem 1.4rem 1.3rem;transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s}
+.nr-item:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg);border-color:#b9d4ec}
+.nr-item__tag{display:inline-block;background:var(--navy);color:#fff;font-size:.74rem;font-weight:700;letter-spacing:.04em;padding:.28rem .6rem;border-radius:999px;margin-bottom:.7rem}
+.nr-item h3{font-size:1.06rem;color:var(--navy);margin:0 0 .45rem;line-height:1.35}
+.nr-item p{color:var(--muted);font-size:.92rem;line-height:1.6;margin:0}
+
+.nrs__passos{display:grid;grid-template-columns:repeat(4,1fr);gap:1.3rem;max-width:1120px;margin:0 auto 3.5rem}
+.nr-passo{text-align:center;padding:1.4rem 1rem}
+.nr-passo__n{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:var(--grad);color:#fff;font-weight:800;font-size:1.1rem;margin-bottom:.8rem}
+.nr-passo h3{font-size:1.02rem;color:var(--navy);margin:0 0 .4rem}
+.nr-passo p{color:var(--muted);font-size:.9rem;line-height:1.6;margin:0}
+
+@media(max-width:1024px){
+  .nrs__grid{grid-template-columns:repeat(2,1fr)}
+  .nrs__passos{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:640px){
+  .nrs{padding:3rem 0}
+  .nrs__grid,.nrs__passos{grid-template-columns:1fr}
+}
+
+/* ---------- Área do Aluno (treinamentos em NR) ---------- */
+.page-hero--curta{min-height:auto}
+.alu{padding:3.5rem 0 5rem}
+.alu__caixa{max-width:520px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-lg);overflow:hidden}
+.alu__abas{display:grid;grid-template-columns:1fr 1fr}
+.alu__aba{border:0;background:#eef4f9;color:var(--muted);font:600 .92rem/1 'Poppins',system-ui,sans-serif;padding:1rem .6rem;cursor:pointer;transition:background .2s,color .2s}
+.alu__aba.is-on{background:#fff;color:var(--navy)}
+.alu__aba:not(.is-on):hover{background:#e4eef7}
+.alu__form{padding:1.8rem 1.9rem 2rem}
+.alu__form h2{font-size:1.24rem;color:var(--navy);margin:0 0 1.2rem}
+.alu__form label{display:block;font-size:.85rem;font-weight:600;color:var(--navy);margin:.9rem 0 .35rem}
+.alu__opc{font-weight:400;color:var(--muted)}
+.alu__form input{width:100%;padding:.75rem .9rem;border:1px solid var(--line);border-radius:9px;font:400 .95rem/1.3 'Poppins',system-ui,sans-serif;color:var(--navy);background:#fbfdff}
+.alu__form input:focus{outline:none;border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(18,144,224,.13)}
+.alu__botao{width:100%;margin-top:1.4rem;justify-content:center}
+.alu__dica{font-size:.83rem;color:var(--muted);margin:1rem 0 0;line-height:1.55}
+.alu__erro{display:none;margin:1rem 0 0;padding:.7rem .85rem;border-radius:8px;background:#fdecec;color:#a8302f;font-size:.87rem;line-height:1.5}
+
+/* o que o cupom dá, mostrado enquanto se digita o código */
+.alu__cupom{margin-top:.6rem;font-size:.86rem;line-height:1.5}
+.alu__cupom.is-bom{padding:.75rem .9rem;border-radius:9px;background:#eaf6ee;color:#1e7a45}
+.alu__cupom.is-ruim{padding:.75rem .9rem;border-radius:9px;background:#fdecec;color:#a8302f}
+.alu__cupom ul{margin:.4rem 0 0;padding-left:1.1rem}
+
+/* lista dos cursos liberados */
+.alu__topo{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:2rem}
+.alu__ola{font-size:1.5rem;color:var(--navy);margin:0}
+.alu__sub{color:var(--muted);margin:.2rem 0 0;font-size:.95rem}
+.alu__grade{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem}
+.alu__curso{position:relative;background:#fff;border:1px solid var(--line);border-radius:14px;padding:1.5rem 1.4rem 1.4rem;transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.alu__curso:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
+.alu__tag{display:inline-block;background:var(--navy);color:#fff;font-size:.74rem;font-weight:700;letter-spacing:.04em;padding:.28rem .6rem;border-radius:999px;margin-bottom:.7rem}
+.alu__curso h3{font-size:1.05rem;color:var(--navy);margin:0 0 .35rem;line-height:1.35}
+.alu__ch{color:var(--muted);font-size:.88rem;margin:0 0 .2rem}
+.alu__prazo{color:var(--muted);font-size:.85rem;margin:0 0 .9rem}
+/* vencido continua na lista, e não some: some seria pior — a pessoa
+   pensaria que perdeu o curso, em vez de entender que precisa renovar */
+.alu__curso.is-vencido{background:#f7f9fb;border-style:dashed}
+.alu__curso.is-vencido .alu__tag{background:#8a99a6}
+.alu__curso.is-vencido h3,.alu__curso.is-vencido .alu__prazo{color:#77828c}
+.alu__bloqueado{display:inline-block;font-size:.83rem;font-weight:600;color:#a8302f}
+.alu__vazio{text-align:center;color:var(--muted);max-width:520px;margin:2rem auto;line-height:1.7}
+
+@media(max-width:1024px){ .alu__grade{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:640px){ .alu__grade{grid-template-columns:1fr} .alu__form{padding:1.5rem 1.3rem 1.7rem} }

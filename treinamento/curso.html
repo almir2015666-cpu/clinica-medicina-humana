@@ -1,0 +1,451 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Sala de aula</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/interno.css?v=1" />
+  <link rel="stylesheet" href="css/acessibilidade.css?v=1" />
+  <link rel="icon" type="image/png" href="../assets/favicon.png?v=2" />
+</head>
+<body class="interno">
+
+  <header class="i-topo">
+    <div class="i-container i-topo__in">
+      <a class="i-marca" href="painel.html">
+        <img src="img/logo.png" alt="Clínica Medicina Humana" />
+        <span><b>Medicina Humana</b><span>Treinamentos</span></span>
+      </a>
+      <div class="i-topo__dir">
+        <a class="i-sair" href="painel.html">Meus módulos</a>
+        <button class="i-sair" id="sair">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="aula">
+    <aside class="lista" id="lista">
+      <h2 id="tituloCurso">Carregando…</h2>
+      <p class="lista__sub" id="subCurso"></p>
+      <div id="itens"></div>
+    </aside>
+    <main class="palco" id="palco"></main>
+  </div>
+
+  <script src="js/acessibilidade.js?v=1"></script>
+  <script src="../js/supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  (function () {
+    var sb = supabase.createClient(window.SUPA.url, window.SUPA.key);
+    var $ = function (id) { return document.getElementById(id); };
+    var busca = new URLSearchParams(location.search);
+    var mat = busca.get('m');
+
+    // MODO AMOSTRA (?amostra=1)
+    // Serve para a equipe ver a sala de aula sem precisar de conta de aluno
+    // nem de vídeo publicado. Nada aqui toca no banco: o progresso mora só
+    // na memória da aba, e some quando ela fecha. É o mesmo recurso que o
+    // certificado já tinha.
+    var demo = busca.get('amostra') ? {
+      curso: { id: 'demo', codigo: 'NR-20', carga_horaria: 8,
+               titulo: 'Inflamáveis e combustíveis' },
+      aulas: [
+        { id: 'a1', ordem: 1, duracao_seg: 20,
+          titulo: 'Aula 1 — o que a norma exige',
+          descricao: 'Quando a NR-20 se aplica e quem precisa ser capacitado.' },
+        { id: 'a2', ordem: 2, duracao_seg: 20,
+          titulo: 'Aula 2 — trabalho a quente e permissão de trabalho' },
+        { id: 'a3', ordem: 3, duracao_seg: 20,
+          titulo: 'Aula 3 — emergência: o que fazer e o que não fazer' }
+      ],
+      questoes: [
+        { id: 'q1', correta: 0,
+          enunciado: 'O que caracteriza um líquido como inflamável?',
+          alternativas: ['Ponto de fulgor igual ou inferior a 60 °C',
+                         'Ser armazenado em tambor metálico',
+                         'Ter cor escura e cheiro forte'] },
+        { id: 'q2', correta: 1,
+          enunciado: 'Antes do trabalho a quente, o que é indispensável?',
+          alternativas: ['Avisar o colega ao lado',
+                         'Emitir a Permissão de Trabalho e eliminar fontes de ignição',
+                         'Esperar o fim do expediente'] },
+        { id: 'q3', correta: 2,
+          enunciado: 'Qual a ordem correta na hierarquia de controle?',
+          alternativas: ['EPI, engenharia, eliminação',
+                         'Administrativa, EPI, eliminação',
+                         'Eliminação, engenharia, administrativa, EPI'] }
+      ]
+    } : null;
+
+    var E = {           // o estado da sala
+      curso: null, aulas: [], feitas: {}, atual: 0,
+      maxVisto: 0,      // até onde ele JÁ assistiu nesta sessão, em segundos
+      notaMinima: 70, questoes: [], respostas: {}
+    };
+
+    function seguro(t) {
+      return String(t == null ? '' : t)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function relogio(s) {
+      s = Math.max(0, Math.floor(s || 0));
+      var m = Math.floor(s / 60);
+      return m + ':' + String(s % 60).padStart(2, '0');
+    }
+
+    $('sair').addEventListener('click', async function () {
+      await sb.auth.signOut(); location.href = 'entrar.html';
+    });
+
+    // A aula i está liberada? A primeira sempre; as outras só depois da
+    // anterior concluída. É esta função que faz a sequência valer.
+    function liberada(i) {
+      if (i === 0) return true;
+      return !!E.feitas[E.aulas[i - 1].id];
+    }
+    function todasFeitas() {
+      return E.aulas.length > 0 &&
+             E.aulas.every(function (a) { return !!E.feitas[a.id]; });
+    }
+
+    function desenharLista() {
+      var html = '';
+      E.aulas.forEach(function (a, i) {
+        var feita = !!E.feitas[a.id];
+        var trava = !liberada(i);
+        html += '<div class="item ' + (i === E.atual ? 'atual ' : '') +
+          (feita ? 'feito ' : '') + (trava ? 'travado' : '') + '" data-i="' + i + '">' +
+          '<span class="item__n">' + (feita ? '✓' : (i + 1)) + '</span>' +
+          '<span class="item__txt"><b>' + seguro(a.titulo) + '</b>' +
+          '<span>' + (trava ? 'Assista a anterior para liberar'
+                     : (a.duracao_seg ? relogio(a.duracao_seg) : 'Aula em vídeo')) +
+          '</span></span></div>';
+      });
+      if (E.aulas.length) {
+        var pronta = todasFeitas();
+        html += '<div class="item ' + (E.atual === -1 ? 'atual ' : '') +
+          (pronta ? '' : 'travado') + '" data-i="-1">' +
+          '<span class="item__n">★</span><span class="item__txt">' +
+          '<b>Prova final</b><span>' +
+          (pronta ? '10 perguntas · 70% para passar'
+                  : 'Conclua todas as aulas para liberar') +
+          '</span></span></div>';
+      }
+      $('itens').innerHTML = html;
+      $('itens').querySelectorAll('.item').forEach(function (el) {
+        el.addEventListener('click', function () {
+          var i = Number(el.dataset.i);
+          if (i === -1) { if (todasFeitas()) abrirProva(); return; }
+          if (!liberada(i)) return;
+          E.atual = i; desenharLista(); abrirAula();
+        });
+      });
+    }
+
+    // ---------------------------------------------------------------- aula
+    async function abrirAula() {
+      var a = E.aulas[E.atual];
+      E.maxVisto = 0;   // recomeça do zero: sair do site reinicia a aula
+
+      var fonte = '';
+      if (demo) {
+        fonte = 'img/amostra.mp4';   // 20 segundos, só para ver a trava agir
+      } else if (a.video_url) {
+        // arquivo no Storage privado: precisa de link assinado, que vence
+        // sozinho. Link direto não abriria — o bucket não é público.
+        var caminho = a.video_url.replace(/^\/+/, '');
+        var ass = await sb.storage.from('treinamentos')
+          .createSignedUrl(caminho, 60 * 60 * 4);
+        fonte = (ass.data && ass.data.signedUrl) || '';
+      }
+
+      if (!fonte) {
+        $('palco').innerHTML = '<h1>' + seguro(a.titulo) + '</h1>' +
+          '<p class="palco__sub">' + seguro(E.curso.titulo) + '</p>' +
+          '<div class="recado">O vídeo desta aula ainda não foi publicado. ' +
+          'Fale com a nossa equipe.</div>';
+        return;
+      }
+
+      $('palco').innerHTML =
+        '<h1>' + seguro(a.titulo) + '</h1>' +
+        '<p class="palco__sub">Aula ' + (E.atual + 1) + ' de ' + E.aulas.length +
+          ' · ' + seguro(E.curso.titulo) + '</p>' +
+        '<div class="video">' +
+          '<video id="v" playsinline preload="auto" controlslist="nodownload" ' +
+            'disablepictureinpicture src="' + fonte + '"></video>' +
+          '<div class="tempo"><i id="barra"></i></div>' +
+          '<div class="video__pe">' +
+            '<button id="play">Assistir</button>' +
+            '<span id="marcador">0:00</span>' +
+            '<span style="margin-left:auto" id="estado">' +
+              (E.feitas[a.id] ? 'Aula concluída' : 'Assista até o fim para liberar a próxima') +
+            '</span>' +
+          '</div>' +
+        '</div>' +
+        (a.descricao ? '<div class="recado">' + seguro(a.descricao) + '</div>' : '') +
+        '<div class="recado"><b>Sobre esta aula:</b> não é possível adiantar o ' +
+        'vídeo, e sair da página faz a aula recomeçar. É assim que a carga ' +
+        'horária do seu certificado tem valor.</div>';
+
+      var v = $('v'), barra = $('barra'), marcador = $('marcador');
+
+      $('play').addEventListener('click', function () {
+        if (v.paused) { v.play(); this.textContent = 'Pausar'; }
+        else { v.pause(); this.textContent = 'Assistir'; }
+      });
+
+      // O CONTROLE DO AVANÇO
+      // A barra do navegador está escondida (não usamos `controls`), mas dá
+      // para pular pelo teclado ou pelo console. Então a trava é aqui: se o
+      // tempo saltar além do que já foi assistido, volta.
+      v.addEventListener('timeupdate', function () {
+        if (v.currentTime > E.maxVisto + 1.5) {
+          v.currentTime = E.maxVisto;      // tentou adiantar: volta
+          return;
+        }
+        if (v.currentTime > E.maxVisto) E.maxVisto = v.currentTime;
+        if (v.duration) {
+          barra.style.width = (E.maxVisto / v.duration * 100) + '%';
+          marcador.textContent = relogio(E.maxVisto) + ' / ' + relogio(v.duration);
+        }
+      });
+      v.addEventListener('seeking', function () {
+        if (v.currentTime > E.maxVisto + 1.5) v.currentTime = E.maxVisto;
+      });
+      v.addEventListener('ratechange', function () {
+        if (v.playbackRate > 1) v.playbackRate = 1;   // nem acelerar
+      });
+      v.addEventListener('ended', concluirAula);
+    }
+
+    async function concluirAula() {
+      var a = E.aulas[E.atual];
+      if (E.feitas[a.id]) return;
+      var r = demo ? { error: null } : await sb.from('trein_progresso').upsert({
+        matricula_id: mat, aula_id: a.id,
+        segundos_vistos: Math.round(E.maxVisto), concluida: true,
+        atualizado_em: new Date().toISOString()
+      }, { onConflict: 'matricula_id,aula_id' });
+      if (r.error) {
+        $('estado').textContent = 'Não consegui guardar o progresso. Recarregue.';
+        return;
+      }
+      E.feitas[a.id] = true;
+      $('estado').textContent = 'Aula concluída';
+      desenharLista();
+
+      var proxima = E.atual + 1;
+      if (proxima < E.aulas.length) {
+        $('palco').insertAdjacentHTML('beforeend',
+          '<div class="recado"><b>Aula concluída.</b> A próxima já está ' +
+          'liberada no menu ao lado. ' +
+          '<button class="i-botao" id="irProx">Ir para a próxima</button></div>');
+        $('irProx').addEventListener('click', function () {
+          E.atual = proxima; desenharLista(); abrirAula();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      } else {
+        $('palco').insertAdjacentHTML('beforeend',
+          '<div class="recado"><b>Você terminou todas as aulas.</b> ' +
+          'A prova final está liberada. ' +
+          '<button class="i-botao" id="irProva">Fazer a prova</button></div>');
+        $('irProva').addEventListener('click', abrirProva);
+      }
+    }
+
+    // ---------------------------------------------------------------- prova
+    async function chamarProva(corpo) {
+      if (demo) {
+        // na amostra a correção é local. Na plataforma de verdade ela é
+        // feita no servidor, e o gabarito nunca chega ao navegador.
+        if (corpo.acao === 'pegar') {
+          return { nota_minima: 70, questoes: demo.questoes.map(function (q) {
+            return { id: q.id, enunciado: q.enunciado,
+                     alternativas: q.alternativas };
+          }) };
+        }
+        var acertos = corpo.respostas.filter(function (r) {
+          var q = demo.questoes.find(function (x) { return x.id === r.questao_id; });
+          return q && q.correta === r.escolha;
+        }).length;
+        var total = demo.questoes.length;
+        var nota = Math.round(acertos / total * 100);
+        return { acertos: acertos, total: total, nota: nota,
+                 nota_minima: 70, aprovado: nota >= 70 };
+      }
+      var s = await sb.auth.getSession();
+      var r = await fetch(window.SUPA.url + '/functions/v1/prova', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json', apikey: window.SUPA.key,
+          Authorization: 'Bearer ' + (s.data.session ? s.data.session.access_token : '')
+        },
+        body: JSON.stringify(Object.assign({ matricula_id: mat }, corpo))
+      });
+      return r.json();
+    }
+
+    async function abrirProva() {
+      E.atual = -1; desenharLista();
+      $('palco').innerHTML = '<p class="palco__sub">Carregando a prova…</p>';
+      var p = await chamarProva({ acao: 'pegar' });
+      if (p.error) {
+        $('palco').innerHTML = '<div class="recado">' + seguro(p.error) + '</div>';
+        return;
+      }
+      E.questoes = p.questoes || [];
+      E.notaMinima = p.nota_minima || 70;
+      E.respostas = {};
+
+      var html = '<div class="i-prova"><h1>Prova final</h1>' +
+        '<p class="palco__sub">' + E.questoes.length + ' perguntas · você ' +
+        'precisa de ' + E.notaMinima + '% para ser aprovado. Errou? Pode ' +
+        'refazer quantas vezes precisar.</p>';
+      E.questoes.forEach(function (q, i) {
+        html += '<div class="i-pergunta" id="p' + i + '"><b>' + (i + 1) + '. ' +
+          seguro(q.enunciado) + '</b>';
+        (q.alternativas || []).forEach(function (alt, j) {
+          html += '<label class="i-alt"><input type="radio" name="q' + i + '" ' +
+            'value="' + j + '" data-q="' + q.id + '" /> ' + seguro(alt) + '</label>';
+        });
+        html += '</div>';
+      });
+      html += '<p class="i-erro" id="erroProva"></p>' +
+        '<button class="i-botao" id="enviar">Enviar respostas</button></div>';
+      $('palco').innerHTML = html;
+      window.scrollTo({ top: 0 });
+
+      $('palco').addEventListener('change', function (ev) {
+        if (ev.target.type === 'radio') {
+          E.respostas[ev.target.dataset.q] = Number(ev.target.value);
+        }
+      });
+      $('enviar').addEventListener('click', enviarProva);
+    }
+
+    async function enviarProva() {
+      var erro = $('erroProva');
+      var faltam = E.questoes.filter(function (q) {
+        return E.respostas[q.id] === undefined;
+      });
+      if (faltam.length) {
+        erro.style.display = 'block';
+        erro.textContent = 'Faltou responder ' + faltam.length +
+          (faltam.length === 1 ? ' pergunta.' : ' perguntas.');
+        // leva até a primeira em branco, em vez de só reclamar
+        var alvo = $('p' + E.questoes.indexOf(faltam[0]));
+        if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      erro.style.display = 'none';
+      var b = $('enviar');
+      b.disabled = true; b.textContent = 'Corrigindo…';
+
+      var r = await chamarProva({
+        acao: 'corrigir',
+        respostas: Object.keys(E.respostas).map(function (id) {
+          return { questao_id: id, escolha: E.respostas[id] };
+        })
+      });
+      if (r.error) {
+        b.disabled = false; b.textContent = 'Enviar respostas';
+        erro.style.display = 'block'; erro.textContent = r.error; return;
+      }
+
+      $('palco').innerHTML =
+        '<div class="i-resultado ' + (r.aprovado ? 'passou' : 'reprovou') + '">' +
+        '<h2>' + (r.aprovado ? 'Aprovado!' : 'Ainda não foi dessa vez') + '</h2>' +
+        '<p class="nota">' + r.nota + '%</p>' +
+        '<p>Você acertou ' + r.acertos + ' de ' + r.total + '. A nota mínima ' +
+          'é ' + r.nota_minima + '%.</p>' +
+        (r.aprovado
+          ? '<p>O seu certificado já está pronto, no seu nome.</p>' +
+            '<a class="i-botao" href="certificado.html?m=' + mat + '">Ver o meu certificado</a>'
+          : '<p>Reveja as aulas e tente de novo. Não há limite de tentativas.</p>' +
+            '<button class="i-botao i-botao--linha" id="denovo">Refazer a prova</button>') +
+        '</div>';
+      if (!r.aprovado) $('denovo').addEventListener('click', abrirProva);
+    }
+
+    // ---------------------------------------------------------------- início
+    (async function () {
+      if (demo) {
+        E.curso = demo.curso;
+        E.aulas = demo.aulas;
+        $('tituloCurso').textContent = E.curso.titulo;
+        $('subCurso').textContent = E.curso.carga_horaria + ' horas · amostra';
+        E.atual = 0;
+        desenharLista();
+        abrirAula();
+        return;
+      }
+      if (!mat) { location.replace('painel.html'); return; }
+      var s = await sb.auth.getSession();
+      if (!s.data.session) { location.replace('entrar.html'); return; }
+
+      var r = await sb.from('trein_matricula')
+        .select('id,expira_em,cancelada,trein_curso(id,codigo,titulo,carga_horaria)')
+        .eq('id', mat).maybeSingle();
+      if (!r.data || r.data.cancelada) { location.replace('painel.html'); return; }
+
+      var hoje = new Date().toISOString().slice(0, 10);
+      if (String(r.data.expira_em) < hoje) {
+        $('tituloCurso').textContent = r.data.trein_curso.titulo;
+        $('palco').innerHTML = '<div class="recado">O seu acesso a este curso ' +
+          'venceu. Procure o RH da sua empresa para renovar.</div>';
+        return;
+      }
+
+      E.curso = r.data.trein_curso;
+      $('tituloCurso').textContent = E.curso.titulo;
+      $('subCurso').textContent = (E.curso.carga_horaria
+        ? E.curso.carga_horaria + ' horas' : '') ;
+
+      E.aulas = (await sb.from('trein_aula')
+        .select('id,titulo,descricao,video_url,duracao_seg,ordem')
+        .eq('curso_id', E.curso.id).order('ordem')).data || [];
+
+      ((await sb.from('trein_progresso').select('aula_id,concluida')
+        .eq('matricula_id', mat)).data || []).forEach(function (p) {
+        if (p.concluida) E.feitas[p.aula_id] = true;
+      });
+
+      if (!E.aulas.length) {
+        $('itens').innerHTML = '';
+        $('palco').innerHTML = '<h1>' + seguro(E.curso.titulo) + '</h1>' +
+          '<div class="recado">As aulas deste módulo ainda não foram ' +
+          'publicadas. Assim que entrarem, elas aparecem aqui.</div>';
+        return;
+      }
+
+      // já aprovado? o caminho é o certificado, não refazer tudo
+      var t = (await sb.from('trein_tentativa').select('nota,aprovado,feita_em')
+        .eq('matricula_id', mat).order('feita_em', { ascending: false })).data || [];
+      var passou = t.find(function (x) { return x.aprovado; });
+
+      // começa na primeira aula que ainda falta
+      E.atual = E.aulas.findIndex(function (a) { return !E.feitas[a.id]; });
+      if (E.atual === -1) E.atual = E.aulas.length - 1;
+      desenharLista();
+
+      if (passou) {
+        $('palco').innerHTML = '<div class="i-resultado passou">' +
+          '<h2>Curso concluído</h2><p class="nota">' + passou.nota + '%</p>' +
+          '<p>Você foi aprovado. O certificado está no seu nome.</p>' +
+          '<a class="i-botao" href="certificado.html?m=' + mat + '">' +
+          'Ver o meu certificado</a></div>';
+        return;
+      }
+      if (todasFeitas()) { abrirProva(); return; }
+      abrirAula();
+    })();
+  })();
+  </script>
+</body>
+</html>

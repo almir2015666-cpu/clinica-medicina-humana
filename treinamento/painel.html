@@ -1,0 +1,176 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Meus treinamentos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/interno.css?v=1" />
+  <link rel="stylesheet" href="css/acessibilidade.css?v=1" />
+  <link rel="icon" type="image/png" href="../assets/favicon.png?v=2" />
+</head>
+<body class="interno">
+
+  <!-- a abertura: a tela nasce preta e o conteúdo entra depois -->
+  <div class="abertura" id="abertura">
+    <img src="img/logo-claro.png" alt="Clínica Medicina Humana"
+         onerror="this.src='img/logo.png';this.style.background='#fff';this.style.padding='10px';this.style.borderRadius='12px'" />
+    <span class="abertura__risco"></span>
+  </div>
+
+  <header class="i-topo">
+    <div class="i-container i-topo__in">
+      <a class="i-marca" href="painel.html">
+        <img src="img/logo.png" alt="Clínica Medicina Humana" />
+        <span><b>Medicina Humana</b><span>Treinamentos</span></span>
+      </a>
+      <div class="i-topo__dir">
+        <span class="i-quem" id="quem"></span>
+        <button class="i-sair" id="sair">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="painel">
+    <div class="i-container">
+      <div class="painel__cab entra">
+        <h1 id="ola">Meus treinamentos</h1>
+        <p id="sub">Escolha um módulo para começar.</p>
+      </div>
+      <div class="modulos" id="modulos"></div>
+      <p class="i-vazio" id="vazio" style="display:none"></p>
+    </div>
+  </main>
+
+  <script src="js/acessibilidade.js?v=1"></script>
+  <script src="../js/supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  (function () {
+    var sb = supabase.createClient(window.SUPA.url, window.SUPA.key);
+    var $ = function (id) { return document.getElementById(id); };
+
+    // a abertura sai sozinha, tenha o que tiver acontecido: uma tela preta
+    // travada é pior do que qualquer erro que ela esteja escondendo
+    setTimeout(function () { $('abertura').classList.add('sumiu'); }, 1400);
+
+    function seguro(t) {
+      return String(t == null ? '' : t)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function dataBr(iso) {
+      var p = String(iso || '').slice(0, 10).split('-');
+      return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : '';
+    }
+
+    $('sair').addEventListener('click', async function () {
+      await sb.auth.signOut();
+      location.href = 'entrar.html';
+    });
+
+    // MODO AMOSTRA (?amostra=1): a equipe vê o painel do aluno sem conta.
+    var demo = new URLSearchParams(location.search).get('amostra');
+
+    (async function () {
+      if (demo) {
+        $('quem').textContent = 'Maria';
+        $('ola').textContent = 'Olá, Maria';
+        $('sub').textContent = 'Construtora Exemplo · escolha um módulo para começar';
+        $('modulos').innerHTML = [
+          ['NR-20', 'Inflamáveis e combustíveis', 8, 33, 'Continuar', '1 de 3 aula(s) concluída(s)', ''],
+          ['NR-06', 'Uso de EPI', 4, 100, 'Certificado', 'Aprovado na prova', 'feito'],
+          ['NR-35', 'Trabalho em altura', 8, 0, 'Começar', '0 de 4 aula(s) concluída(s)', '']
+        ].map(function (m, i) {
+          return '<a class="modulo entra ' + m[6] + '" href="curso.html?amostra=1"' +
+            ' style="animation-delay:' + (i * 0.06) + 's">' +
+            '<span class="modulo__tag">' + (m[6] ? 'Concluído' : m[0]) + '</span>' +
+            '<h3>' + m[1] + '</h3><p>' + m[2] + ' horas · acesso até 31/12/2026</p>' +
+            '<div class="modulo__pe"><div style="flex:1">' +
+            '<div class="barra"><i style="width:' + m[3] + '%"></i></div>' +
+            '<span class="modulo__quanto">' + m[5] + '</span></div>' +
+            '<span class="modulo__ir">' + m[4] + ' →</span></div></a>';
+        }).join('');
+        return;
+      }
+      var s = await sb.auth.getSession();
+      if (!s.data.session) { location.replace('entrar.html'); return; }
+
+      var perfil = (await sb.from('trein_aluno').select('nome,empresa')
+        .eq('id', s.data.session.user.id).maybeSingle()).data;
+      if (perfil) {
+        $('quem').textContent = perfil.nome ? perfil.nome.split(' ')[0] : '';
+        $('ola').textContent = 'Olá, ' +
+          (perfil.nome ? perfil.nome.split(' ')[0] : '') ;
+        $('sub').textContent = perfil.empresa
+          ? perfil.empresa + ' · escolha um módulo para começar'
+          : 'Escolha um módulo para começar.';
+      }
+
+      var r = await sb.from('trein_matricula')
+        .select('id,expira_em,cancelada,trein_curso(id,codigo,titulo,carga_horaria)')
+        .order('expira_em', { ascending: true });
+      var mats = (r.data || []).filter(function (m) { return !m.cancelada; });
+
+      if (!mats.length) {
+        $('vazio').style.display = 'block';
+        $('vazio').innerHTML = 'Você ainda não tem nenhum treinamento liberado.' +
+          '<br />Se a sua empresa enviou um código, ' +
+          '<a href="entrar.html#codigo" style="color:var(--ambar)">use-o aqui</a>.';
+        return;
+      }
+
+      // quantas aulas cada curso tem e quantas já foram concluídas — em dois
+      // pedidos, e não um por módulo: com dez módulos seriam vinte idas ao
+      // servidor para desenhar uma tela
+      var cursos = mats.map(function (m) { return m.trein_curso.id; });
+      var aulas = (await sb.from('trein_aula').select('id,curso_id')
+        .in('curso_id', cursos)).data || [];
+      var feitas = (await sb.from('trein_progresso')
+        .select('matricula_id,aula_id,concluida')
+        .in('matricula_id', mats.map(function (m) { return m.id; }))).data || [];
+      var aprovadas = (await sb.from('trein_tentativa')
+        .select('matricula_id,aprovado')
+        .in('matricula_id', mats.map(function (m) { return m.id; }))).data || [];
+
+      var hoje = new Date().toISOString().slice(0, 10);
+      var html = '';
+      mats.forEach(function (m, i) {
+        var c = m.trein_curso || {};
+        var total = aulas.filter(function (a) { return a.curso_id === c.id; }).length;
+        var ok = feitas.filter(function (p) {
+          return p.matricula_id === m.id && p.concluida; }).length;
+        var passou = aprovadas.some(function (t) {
+          return t.matricula_id === m.id && t.aprovado; });
+        var venceu = String(m.expira_em) < hoje;
+        var pct = total ? Math.round((ok / total) * 100) : 0;
+
+        var estado = venceu ? 'venceu' : (passou ? 'feito' : '');
+        var etiqueta = venceu ? 'Vencido' : (passou ? 'Concluído' : seguro(c.codigo));
+        var quanto = !total ? 'Aulas ainda não publicadas'
+                    : (passou ? 'Aprovado na prova'
+                    : ok + ' de ' + total + ' aula(s) concluída(s)');
+
+        html += '<' + (venceu ? 'div' : 'a') + ' class="modulo entra ' + estado + '"' +
+          (venceu ? '' : ' href="curso.html?m=' + m.id + '"') +
+          ' style="animation-delay:' + (i * 0.06) + 's">' +
+          '<span class="modulo__tag">' + etiqueta + '</span>' +
+          '<h3>' + seguro(c.titulo) + '</h3>' +
+          '<p>' + (c.carga_horaria ? c.carga_horaria + ' horas · ' : '') +
+            (venceu ? 'venceu em ' : 'acesso até ') + dataBr(m.expira_em) + '</p>' +
+          '<div class="modulo__pe"><div style="flex:1">' +
+            '<div class="barra"><i style="width:' + (passou ? 100 : pct) + '%"></i></div>' +
+            '<span class="modulo__quanto">' + quanto + '</span></div>' +
+            (venceu ? '' : '<span class="modulo__ir">' +
+              (passou ? 'Certificado' : (ok ? 'Continuar' : 'Começar')) + ' →</span>') +
+          '</div>' +
+          '</' + (venceu ? 'div' : 'a') + '>';
+      });
+      $('modulos').innerHTML = html;
+    })();
+  })();
+  </script>
+</body>
+</html>

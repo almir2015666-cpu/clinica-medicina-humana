@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Confira a autenticidade de um certificado de treinamento em NR emitido pela Clínica Medicina Humana. Digite o código impresso no documento." />
+  <title>Validar certificado | Clínica Medicina Humana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/estilo.css?v=2" />
+  <link rel="stylesheet" href="css/acessibilidade.css?v=1" />
+  <link rel="icon" type="image/png" href="../assets/favicon.png?v=2" />
+</head>
+<body>
+
+  <div class="faixa">
+    <div class="container faixa__in">
+      <span>(71) 3493-7205</span>
+      <a href="https://wa.me/5571993010103?text=Ol%C3%A1%21%20Gostaria%20de%20falar%20sobre%20treinamentos%20em%20NRs." target="_blank" rel="noopener">Comercial: (71) 99301-0103</a>
+      <div class="faixa__dir">
+        <a href="../index.html">Site da clínica</a>
+        <a href="../contatos.html">Contatos</a>
+      </div>
+    </div>
+  </div>
+
+  <header class="topo" id="topo">
+    <div class="container topo__in">
+      <a class="marca" href="index.html">
+        <span class="marca__chip"><img src="img/logo.png" alt="Clínica Medicina Humana" /></span>
+        <span class="marca__txt"><b>Medicina Humana</b><span>Treinamentos em NRs</span></span>
+      </a>
+      <nav class="topo__nav">
+        <a href="index.html#cursos">Cursos</a>
+        <a href="index.html#como">Como funciona</a>
+        <a href="validar.html" class="aqui">Validar certificado</a>
+        <a class="btn btn--zap" target="_blank" rel="noopener" href="https://wa.me/5571993010103?text=Ol%C3%A1%21%20Gostaria%20de%20solicitar%20um%20or%C3%A7amento%20de%20treinamento%20em%20NRs."><svg viewBox="0 0 32 32" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.2 1.6 6L4 27l6.2-1.6c1.7.9 3.7 1.4 5.8 1.4 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 21.8c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.7 1 1-3.6-.2-.4c-1-1.6-1.5-3.4-1.5-5.2 0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 9.8-10 9.8zm5.5-7.3c-.3-.2-1.8-.9-2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.4.5-.6.1-.2.2-.3.3-.5.1-.2 0-.4 0-.6-.1-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.2-.5-.4z"/></svg><span class="btn__longo">Solicitar orçamento</span><span class="btn__curto">Orçamento</span></a>
+        <a class="btn btn--ambar" href="entrar.html">Entrar</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="secao">
+    <div class="container val">
+      <div class="val__texto">
+        <span class="risco"></span>
+        <h1>Certificado autêntico, conferido na hora</h1>
+        <p class="val__intro">Recebeu um certificado da nossa equipe e quer ter
+           certeza de que é verdadeiro? Digite o código impresso no documento.
+           A conferência é direta na nossa base. <strong>Não precisa de
+           cadastro nem de login</strong>.</p>
+
+        <ul class="val__lista">
+          <li><b>Emitido no nome de quem fez</b>
+            Cada certificado sai com o nome e o CPF do trabalhador, como a
+            Norma exige. Certificado sem dono não vale numa fiscalização.</li>
+          <li><b>Com carga horária e validade</b>
+            O documento traz as horas do treinamento e até quando ele vale.
+            É por essa data que se sabe quando reciclar.</li>
+          <li><b>Conferência sem cadastro</b>
+            Quem recebe o certificado (auditor, contratante, cliente) confere
+            aqui mesmo, sem precisar de conta.</li>
+          <li><b>O CPF sai protegido</b>
+            Mostramos só o miolo do número, o bastante para bater com o papel
+            na mão sem expor o documento de quem não pediu nada.</li>
+        </ul>
+      </div>
+
+      <div class="val__caixa">
+        <h2>Validação de certificado</h2>
+        <form id="formVal" autocomplete="off">
+          <label for="codigo">Código do certificado</label>
+          <input id="codigo" type="text" placeholder="digite o código do certificado"
+                 autocomplete="off" spellcheck="false" />
+          <button class="btn btn--ambar" id="btnVal" type="submit">Validar</button>
+        </form>
+        <div id="resultado" class="val__res" role="status" aria-live="polite"></div>
+        <p class="dica">O código fica no rodapé do certificado, junto da data
+           de emissão.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="rodape">
+    <div class="container">
+      <div class="rodape__grade">
+        <div>
+          <h4>Clínica Medicina Humana</h4>
+          <p>Treinamentos em Normas Regulamentadoras para empresas.<br />
+             R. do Alecrim, 76, Centro, Camaçari/BA</p>
+          <p>(71) 3493-7205 · Comercial (71) 99301-0103</p>
+        </div>
+        <div>
+          <h4>Treinamentos</h4>
+          <a href="index.html#cursos">Todos os cursos</a>
+          <a href="index.html#como">Como funciona</a>
+          <a href="entrar.html">Área do aluno</a>
+          <a href="validar.html">Validar certificado</a>
+        </div>
+        <div>
+          <h4>A clínica</h4>
+          <a href="../index.html">Site principal</a>
+          <a href="../medicina-ocupacional.html">Medicina Ocupacional</a>
+          <a href="../contatos.html">Contatos</a>
+        </div>
+      </div>
+      <div class="rodape__fim">© 2026 Clínica Medicina Humana. Todos os direitos reservados.</div>
+    </div>
+  </footer>
+
+  <script src="js/acessibilidade.js?v=1"></script>
+  <script src="../js/supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  (function () {
+    var sb = supabase.createClient(window.SUPA.url, window.SUPA.key);
+    var $ = function (id) { return document.getElementById(id); };
+    var caixa = $('resultado');
+
+    function dataBr(iso) {
+      if (!iso) return '';
+      var p = String(iso).slice(0, 10).split('-');
+      return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso;
+    }
+
+    $('formVal').addEventListener('submit', async function (ev) {
+      ev.preventDefault();
+      var codigo = $('codigo').value.trim();
+      if (!codigo) return;
+
+      var b = $('btnVal');
+      b.disabled = true; b.textContent = 'Conferindo…';
+      caixa.className = 'val__res';
+      caixa.innerHTML = '';
+
+      var r = await sb.rpc('trein_conferir_certificado', { p_codigo: codigo });
+      b.disabled = false; b.textContent = 'Validar';
+
+      // a função devolve uma tabela: sem linha nenhuma, o código não existe
+      var d = (r && r.data && r.data.length) ? r.data[0] : null;
+      if (!d) {
+        caixa.className = 'val__res ruim';
+        caixa.innerHTML = '<b>Não encontramos esse código.</b>' +
+          '<p>Confira se digitou certo. Se o certificado veio impresso, o ' +
+          'código está no rodapé. Persistindo, fale com a nossa equipe.</p>';
+        return;
+      }
+
+      // vencido continua sendo autêntico: o que mudou é que está na hora de
+      // reciclar. Dizer "inválido" faria o contratante recusar um documento
+      // verdadeiro.
+      var hoje = new Date().toISOString().slice(0, 10);
+      var vencido = d.valido_ate && d.valido_ate < hoje;
+
+      caixa.className = 'val__res ' + (vencido ? 'atencao' : 'bom');
+      caixa.innerHTML =
+        '<b>' + (vencido ? 'Certificado autêntico, mas vencido'
+                         : 'Certificado autêntico') + '</b>' +
+        '<dl>' +
+          '<dt>Nome</dt><dd>' + (d.nome || '') + '</dd>' +
+          '<dt>CPF</dt><dd>' + (d.cpf_masc || '') + '</dd>' +
+          (d.empresa ? '<dt>Empresa</dt><dd>' + d.empresa + '</dd>' : '') +
+          '<dt>Treinamento</dt><dd>' + (d.curso || '') +
+            (d.carga_horaria ? ', ' + d.carga_horaria + ' horas' : '') + '</dd>' +
+          '<dt>Emitido em</dt><dd>' + dataBr(d.emitido_em) + '</dd>' +
+          (d.valido_ate ? '<dt>Válido até</dt><dd>' + dataBr(d.valido_ate) + '</dd>' : '') +
+        '</dl>' +
+        (vencido ? '<p>O treinamento é verdadeiro, mas o prazo de reciclagem ' +
+                   'já passou. Procure a empresa para renovar.</p>' : '');
+    });
+  })();
+  </script>
+</body>
+</html>

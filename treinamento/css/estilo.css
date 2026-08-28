@@ -1,0 +1,381 @@
+﻿/* =====================================================================
+   Treinamentos em NRs — Clínica Medicina Humana
+   Identidade PRÓPRIA, de propósito.
+
+   O site institucional é azul e branco, de consultório. Este aqui vende
+   segurança do trabalho: mantém o marinho da clínica (senão parece outra
+   empresa) e troca o ciano médico pelo âmbar de EPI. Quem chega entende em
+   um segundo que mudou de assunto sem achar que mudou de empresa.
+
+   Arquivo único de propósito: o site é pequeno e vai ser mexido por quem
+   não é do ramo. Um CSS só é mais fácil de achar do que sete.
+   ===================================================================== */
+
+:root{
+  --navy:      #0a2e5c;
+  --navy-esc:  #071f3f;
+  --navy-2:    #12457f;
+  --ambar:     #f5a800;   /* o acento: capacete, faixa, sinalização */
+  --ambar-esc: #d99400;
+  --tinta:     #16202c;
+  --texto:     #35424f;
+  --fraco:     #6b7885;
+  --linha:     #dfe6ee;
+  --fundo:     #f4f7fa;
+  --branco:    #fff;
+  --verde:     #1e7a45;
+  --vermelho:  #a8302f;
+  --raio:      14px;
+  --sombra:    0 10px 34px rgba(10,46,92,.10);
+  --sombra-f:  0 18px 48px rgba(10,46,92,.18);
+  --suave:     cubic-bezier(.22,.61,.36,1);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--fundo);color:var(--texto);
+  font:400 16px/1.65 'Inter',system-ui,-apple-system,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:'Poppins',system-ui,Arial,sans-serif;color:var(--navy);
+  line-height:1.22;margin:0}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+.container{width:100%;max-width:1220px;margin:0 auto;padding:0 22px}
+
+/* ---------- barra do topo ---------- */
+/* ---------- barra do topo ----------
+   O logo da clinica e marinho sobre transparente. Numa barra marinha ele
+   praticamente sumia: por isso vai dentro de uma pastilha branca, que e o
+   mesmo tratamento que a marca ja recebe em papel timbrado.
+   A faixa fina de utilidades em cima tira o telefone e o link do site
+   institucional do meio da navegacao, que fica so com o que e daqui. */
+.faixa{background:var(--navy-esc);border-bottom:1px solid rgba(255,255,255,.08)}
+.faixa__in{display:flex;align-items:center;gap:1.4rem;height:38px;
+  font-size:.82rem;color:rgba(255,255,255,.66)}
+.faixa a{color:rgba(255,255,255,.66);transition:color .2s}
+.faixa a:hover{color:var(--ambar)}
+.faixa__dir{margin-left:auto;display:flex;align-items:center;gap:1.3rem}
+.faixa svg{vertical-align:-2px;margin-right:.32rem}
+
+.topo{position:sticky;top:0;z-index:60;background:var(--navy);
+  border-bottom:3px solid var(--ambar);
+  box-shadow:0 2px 18px rgba(7,31,63,.28);transition:box-shadow .25s}
+.topo.rolou{box-shadow:0 6px 26px rgba(7,31,63,.45)}
+.topo__in{display:flex;align-items:center;gap:1.2rem;height:80px}
+
+.marca{display:flex;align-items:center;gap:.85rem;color:#fff}
+/* a pastilha: e ela que devolve o contraste do logo */
+.marca__chip{background:#fff;border-radius:12px;padding:.5rem .7rem;
+  display:flex;align-items:center;box-shadow:0 3px 12px rgba(0,0,0,.22)}
+.marca__chip img{height:34px;width:auto;display:block}
+.marca__txt{display:flex;flex-direction:column;line-height:1.2}
+.marca__txt b{font:700 1.06rem/1.2 'Poppins',sans-serif;letter-spacing:.005em}
+.marca__txt span{font-size:.68rem;color:var(--ambar);letter-spacing:.16em;
+  text-transform:uppercase;font-weight:700;margin-top:.1rem}
+
+.topo__nav{margin-left:auto;display:flex;align-items:center;gap:.4rem}
+.topo__nav a:not(.btn){position:relative;color:rgba(255,255,255,.84);
+  font:500 .92rem 'Inter',sans-serif;padding:.55rem .9rem;border-radius:8px;
+  transition:color .2s,background .2s}
+.topo__nav a:not(.btn):hover{color:#fff;background:rgba(255,255,255,.08)}
+/* o traco ambar marca onde a pessoa esta */
+.topo__nav a.aqui{color:#fff}
+.topo__nav a.aqui::after{content:"";position:absolute;left:.9rem;right:.9rem;
+  bottom:.15rem;height:2px;border-radius:2px;background:var(--ambar)}
+.topo__nav .btn{margin-left:.55rem}
+.btn__curto{display:none}
+
+/* ---------- botões ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+  padding:.78rem 1.5rem;border-radius:999px;border:0;cursor:pointer;
+  font:600 .92rem/1 'Poppins',sans-serif;transition:transform .18s var(--suave),
+  box-shadow .18s var(--suave),background .18s}
+.btn--ambar{background:var(--ambar);color:var(--tinta);
+  box-shadow:0 6px 18px rgba(245,168,0,.34)}
+.btn--ambar:hover{background:var(--ambar-esc);transform:translateY(-2px);
+  box-shadow:0 10px 26px rgba(245,168,0,.42)}
+.btn--branco{background:#fff;color:var(--navy)}
+.btn--branco:hover{transform:translateY(-2px);box-shadow:var(--sombra)}
+.btn--linha{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.45)}
+.btn--linha:hover{border-color:#fff;background:rgba(255,255,255,.08)}
+.btn--navy{background:var(--navy);color:#fff}
+/* Cheguei a usar o verde do WhatsApp aqui. Ficou brigando com o ambar do
+   botao ao lado: duas cores fortes lado a lado disputam a atencao e nenhuma
+   ganha. Agora e um acento so — o ambar da marca fica na acao principal
+   (pedir orcamento) e o Entrar vira contorno. O icone do WhatsApp continua,
+   que e o que diz para onde o clique leva. */
+.btn--zap{background:var(--ambar);color:var(--tinta);
+  box-shadow:0 6px 18px rgba(245,168,0,.34)}
+.btn--zap:hover{background:var(--ambar-esc);transform:translateY(-2px);
+  box-shadow:0 10px 26px rgba(245,168,0,.42)}
+.btn--contorno{background:transparent;color:#fff;
+  border:1.5px solid rgba(255,255,255,.5)}
+.btn--contorno:hover{border-color:#fff;background:rgba(255,255,255,.1);
+  transform:translateY(-2px)}
+.btn--navy:hover{background:var(--navy-2);transform:translateY(-2px)}
+.btn[disabled]{opacity:.6;cursor:default;transform:none}
+
+/* ---------- capa ---------- */
+.capa{position:relative;background:var(--navy-esc);overflow:hidden}
+.capa__img{position:absolute;inset:0;background:url('../img/capa.png') center/cover no-repeat}
+/* A imagem ja vem com um degrade azul, mas ele cobre so o primeiro terco —
+   e o bloco de texto e mais largo que isso, entao o titulo caia em cima da
+   turma. Este segundo degrade garante o contraste em qualquer largura de
+   tela, sem depender de onde a foto for cortada. */
+.capa__img::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,
+    rgba(7,31,63,.95) 0%, rgba(7,31,63,.9) 32%,
+    rgba(7,31,63,.55) 52%, rgba(7,31,63,.12) 72%, rgba(7,31,63,0) 88%)}
+/* na tela estreita a foto some quase toda: ai o degrade vira de cima para
+   baixo, senao sobra so o azul liso e a imagem nao conta mais nada */
+@media(max-width:760px){
+  .capa__img{background-position:72% center}
+  .capa__img::after{background:linear-gradient(180deg,
+    rgba(7,31,63,.9) 0%, rgba(7,31,63,.72) 55%, rgba(7,31,63,.55) 100%)}
+}
+/* NAO por max-width aqui: esta tag tambem tem a classe .container, que ja
+   define max-width e margin auto. Duas larguras na mesma tag centralizavam
+   o texto em vez de encostar na esquerda, e sobrava um vazio enorme. */
+.capa__in{position:relative;z-index:2;padding:5.5rem 0 6rem}
+.capa__texto{max-width:640px}
+.capa__selo{display:inline-flex;align-items:center;gap:.5rem;background:rgba(245,168,0,.16);
+  border:1px solid rgba(245,168,0,.4);color:var(--ambar);font-size:.76rem;
+  font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+  padding:.42rem .9rem;border-radius:999px;margin-bottom:1.3rem}
+.capa h1{color:#fff;font-size:clamp(2.1rem,4.6vw,3.35rem);letter-spacing:-.015em}
+.capa h1 em{font-style:normal;color:var(--ambar)}
+.capa p{color:rgba(255,255,255,.88);font-size:1.06rem;margin:1.1rem 0 2rem;max-width:540px}
+.capa__acoes{display:flex;gap:.9rem;flex-wrap:wrap}
+.capa__nums{display:flex;gap:2.4rem;margin-top:3rem;flex-wrap:wrap}
+.capa__num b{display:block;font:700 1.7rem/1 'Poppins',sans-serif;color:var(--ambar)}
+.capa__num span{font-size:.84rem;color:rgba(255,255,255,.72)}
+
+/* ---------- seções ---------- */
+.secao{padding:5rem 0}
+.secao--claro{background:#fff}
+.secao__cab{text-align:center;max-width:660px;margin:0 auto 3rem}
+.secao__cab h2{font-size:clamp(1.6rem,3vw,2.1rem)}
+.secao__cab p{color:var(--fraco);margin:.8rem 0 0}
+.risco{display:block;width:54px;height:4px;border-radius:2px;
+  background:var(--ambar);margin:0 auto 1.1rem}
+
+/* ---------- cartões de curso ---------- */
+.busca{display:flex;gap:.7rem;max-width:520px;margin:0 auto 2.5rem}
+.busca input{flex:1;padding:.85rem 1.1rem;border:1px solid var(--linha);
+  border-radius:999px;font:400 .95rem 'Inter',sans-serif;background:#fff}
+.busca input:focus{outline:none;border-color:var(--navy-2);
+  box-shadow:0 0 0 3px rgba(18,69,127,.12)}
+
+.cursos{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6rem}
+.curso{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);
+  overflow:hidden;display:flex;flex-direction:column;
+  transition:transform .3s var(--suave),box-shadow .3s var(--suave)}
+.curso:hover{transform:translateY(-6px);box-shadow:var(--sombra-f)}
+.curso__capa{position:relative;height:172px;background:var(--navy);
+  display:flex;align-items:center;justify-content:center;overflow:hidden}
+/* a faixa diagonal de sinalização, que é o que dá a cara de segurança */
+.curso__capa::before{content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(135deg,rgba(245,168,0,.16) 0 14px,
+  transparent 14px 28px)}
+.curso__cod{position:relative;z-index:2;font:800 1.9rem/1 'Poppins',sans-serif;
+  color:#fff;letter-spacing:-.02em;text-shadow:0 3px 14px rgba(0,0,0,.3)}
+.curso__ch{position:absolute;right:.8rem;top:.8rem;z-index:2;background:var(--ambar);
+  color:var(--tinta);font:700 .72rem/1 'Poppins',sans-serif;padding:.38rem .6rem;
+  border-radius:6px}
+.curso__corpo{padding:1.3rem 1.35rem 1.4rem;display:flex;flex-direction:column;flex:1}
+.curso__corpo h3{font-size:1.04rem;margin-bottom:.4rem}
+.curso__corpo p{font-size:.9rem;color:var(--fraco);margin:0}
+
+
+/* ---------- passos ---------- */
+.passos{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem}
+.passo{text-align:center;padding:1.4rem 1rem}
+.passo b{display:inline-flex;align-items:center;justify-content:center;
+  width:46px;height:46px;border-radius:50%;background:var(--navy);color:var(--ambar);
+  font:800 1.1rem 'Poppins',sans-serif;margin-bottom:.9rem}
+.passo h3{font-size:1rem;margin-bottom:.35rem}
+.passo p{font-size:.9rem;color:var(--fraco);margin:0}
+
+/* ---------- chamada final ---------- */
+.chamada{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-2) 100%);
+  border-radius:var(--raio);padding:2.6rem 2.4rem;display:flex;gap:1.6rem;
+  align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chamada h2{color:#fff;font-size:1.5rem}
+.chamada p{color:rgba(255,255,255,.85);margin:.5rem 0 0;max-width:520px}
+
+/* ---------- rodapé ---------- */
+.rodape{background:var(--navy-esc);color:rgba(255,255,255,.72);padding:3rem 0 1.6rem;
+  font-size:.9rem;margin-top:4rem}
+.rodape__grade{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:2rem}
+.rodape h4{color:#fff;font:600 .95rem 'Poppins',sans-serif;margin:0 0 .8rem}
+.rodape a{display:block;color:rgba(255,255,255,.72);padding:.2rem 0}
+.rodape a:hover{color:var(--ambar)}
+.rodape__fim{border-top:1px solid rgba(255,255,255,.14);margin-top:2.2rem;
+  padding-top:1.2rem;font-size:.82rem;color:rgba(255,255,255,.5)}
+
+/* =====================================================================
+   Entrar / resgatar cupom / painel do aluno
+   ===================================================================== */
+.entrar{padding:3.5rem 0 5rem;min-height:60vh}
+.caixa{max-width:520px;margin:0 auto;background:#fff;border:1px solid var(--linha);
+  border-radius:var(--raio);box-shadow:var(--sombra);overflow:hidden}
+/* auto-flow em coluna, e nao "1fr 1fr": as abas eram duas, viraram tres
+   quando entrou a recuperacao de senha, e a terceira caia numa segunda
+   linha. Contando sozinho, entra uma quarta um dia sem ninguem lembrar
+   de mexer aqui. */
+.abas{display:grid;grid-auto-flow:column;grid-auto-columns:1fr}
+.aba{border:0;background:#eef3f8;color:var(--fraco);cursor:pointer;
+  font:600 .92rem 'Poppins',sans-serif;padding:1.05rem .6rem;
+  transition:background .2s,color .2s;border-bottom:3px solid transparent}
+.aba.on{background:#fff;color:var(--navy);border-bottom-color:var(--ambar)}
+.aba:not(.on):hover{background:#e5edf5}
+.form{padding:1.9rem 1.9rem 2rem}
+.form h2{font-size:1.24rem;margin-bottom:1.2rem}
+.form label{display:block;font-size:.85rem;font-weight:600;color:var(--navy);
+  margin:.95rem 0 .35rem}
+.form label span{font-weight:400;color:var(--fraco)}
+.form input{width:100%;padding:.78rem .95rem;border:1px solid var(--linha);
+  border-radius:10px;font:400 .95rem 'Inter',sans-serif;color:var(--tinta);background:#fbfdff}
+.form input:focus{outline:none;border-color:var(--navy-2);
+  box-shadow:0 0 0 3px rgba(18,69,127,.12)}
+.form .btn{width:100%;margin-top:1.5rem}
+.dica{font-size:.84rem;color:var(--fraco);margin:1rem 0 0;line-height:1.55}
+/* link dentro da dica tem de PARECER link. Sem isto o "Esqueceu a senha?"
+   saia na mesma cor do texto ao redor e ninguem descobria que dava para
+   clicar — era um botao invisivel. */
+.dica a{color:var(--navy);font-weight:600;text-decoration:underline;
+  text-underline-offset:2px;cursor:pointer}
+.dica a:hover{color:var(--ambar)}
+.erro{display:none;margin:1rem 0 0;padding:.72rem .9rem;border-radius:9px;
+  background:#fdecec;color:var(--vermelho);font-size:.88rem;line-height:1.5}
+
+/* o que o cupom dá, enquanto se digita */
+.cupom{margin-top:.6rem;font-size:.87rem;line-height:1.5}
+.cupom.bom{padding:.78rem .9rem;border-radius:10px;background:#eaf6ee;color:var(--verde)}
+.cupom.ruim{padding:.78rem .9rem;border-radius:10px;background:#fdecec;color:var(--vermelho)}
+.cupom ul{margin:.4rem 0 0;padding-left:1.1rem}
+
+/* painel */
+.painel__topo{display:flex;align-items:center;justify-content:space-between;
+  gap:1rem;flex-wrap:wrap;margin-bottom:2.2rem}
+.painel__topo h2{font-size:1.55rem}
+.painel__topo p{color:var(--fraco);margin:.2rem 0 0}
+.meus{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem}
+.meu{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);
+  padding:1.5rem 1.4rem;transition:transform .3s var(--suave),box-shadow .3s var(--suave)}
+.meu:hover{transform:translateY(-5px);box-shadow:var(--sombra-f)}
+.meu__tag{display:inline-block;background:var(--navy);color:var(--ambar);
+  font:700 .74rem 'Poppins',sans-serif;letter-spacing:.04em;padding:.3rem .62rem;
+  border-radius:999px;margin-bottom:.7rem}
+.meu h3{font-size:1.04rem;margin-bottom:.3rem}
+.meu p{font-size:.87rem;color:var(--fraco);margin:0 0 .25rem}
+.meu__prazo{font-size:.85rem;margin-bottom:.9rem!important}
+/* vencido continua na lista, e não some: sumir faria a pessoa achar que
+   perdeu o curso, em vez de entender que precisa renovar */
+.meu.venceu{background:#f7f9fb;border-style:dashed}
+.meu.venceu .meu__tag{background:#8a99a6;color:#fff}
+.meu.venceu h3,.meu.venceu p{color:#77828c}
+.bloqueado{font:600 .85rem 'Poppins',sans-serif;color:var(--vermelho)}
+.vazio{text-align:center;color:var(--fraco);max-width:540px;margin:2.5rem auto;
+  line-height:1.75}
+
+/* ---------- telas estreitas ---------- */
+@media(max-width:1024px){
+  .cursos,.meus{grid-template-columns:repeat(2,1fr)}
+  .passos{grid-template-columns:repeat(2,1fr)}
+  .rodape__grade{grid-template-columns:1fr 1fr}
+  .topo__nav a:not(.btn){display:none}
+  .topo__nav .btn{padding:.7rem 1rem;font-size:.86rem}
+  .btn__longo{display:none}
+  .btn__curto{display:inline}
+}
+@media(max-width:640px){
+  .cursos,.meus,.passos{grid-template-columns:1fr}
+  .rodape__grade{grid-template-columns:1fr}
+  .capa__in{padding:3.6rem 0 4rem}
+  .secao{padding:3.4rem 0}
+  .marca__txt span{display:none}
+  .chamada{padding:2rem 1.5rem}
+  .form{padding:1.5rem 1.3rem 1.7rem}
+}
+
+/* ---------- Validar certificado ---------- */
+.val{display:grid;grid-template-columns:1.1fr .9fr;gap:3.5rem;align-items:start}
+.val__texto h1{font-size:clamp(1.6rem,3vw,2.15rem);margin-bottom:1rem}
+.val__intro{color:var(--fraco);font-size:1.02rem;margin:0 0 2rem}
+.val__lista{list-style:none;margin:0;padding:0}
+.val__lista li{position:relative;padding:0 0 1.35rem 2rem;color:var(--fraco);
+  font-size:.94rem;line-height:1.6}
+.val__lista li b{display:block;color:var(--navy);font:600 1rem 'Poppins',sans-serif;
+  margin-bottom:.2rem}
+/* o tique verde, e nao um marcador redondo: a lista aqui e de garantias */
+.val__lista li::before{content:"";position:absolute;left:0;top:.32rem;
+  width:11px;height:6px;border-left:2.5px solid var(--verde);
+  border-bottom:2.5px solid var(--verde);transform:rotate(-45deg)}
+
+.val__caixa{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);
+  box-shadow:var(--sombra);padding:2rem 1.9rem;position:sticky;top:110px}
+.val__caixa h2{font-size:1.3rem;margin-bottom:1.3rem}
+.val__caixa label{display:block;font-size:.85rem;font-weight:600;color:var(--navy);
+  margin-bottom:.4rem}
+.val__caixa input{width:100%;padding:.85rem 1rem;border:1px solid var(--linha);
+  border-radius:10px;font:600 1.02rem 'Consolas','Courier New',monospace;
+  letter-spacing:.06em;color:var(--tinta);background:#fbfdff;text-transform:uppercase}
+.val__caixa input:focus{outline:none;border-color:var(--navy-2);
+  box-shadow:0 0 0 3px rgba(18,69,127,.12)}
+.val__caixa .btn{width:100%;margin-top:1.1rem}
+
+.val__res{margin-top:1.4rem;font-size:.92rem;line-height:1.6}
+.val__res:empty{margin:0}
+.val__res b{display:block;font:700 1.05rem 'Poppins',sans-serif;margin-bottom:.7rem}
+.val__res p{margin:.7rem 0 0}
+.val__res.bom{padding:1.1rem 1.2rem;border-radius:11px;background:#eaf6ee;
+  color:var(--verde);border:1px solid #bfe3cc}
+.val__res.atencao{padding:1.1rem 1.2rem;border-radius:11px;background:#fff6e0;
+  color:#8a6d00;border:1px solid #f0dca8}
+.val__res.ruim{padding:1.1rem 1.2rem;border-radius:11px;background:#fdecec;
+  color:var(--vermelho);border:1px solid #f2c9c9}
+/* os dados do certificado, em duas colunas para bater o olho e conferir */
+.val__res dl{display:grid;grid-template-columns:auto 1fr;gap:.35rem .9rem;
+  margin:0;color:var(--tinta)}
+.val__res dt{font-weight:600;color:var(--fraco);font-size:.86rem}
+.val__res dd{margin:0;font-weight:600}
+
+@media(max-width:900px){
+  .val{grid-template-columns:1fr;gap:2.2rem}
+  .val__caixa{position:static;order:-1}
+}
+
+/* ---------- Página do curso e prova ---------- */
+.curso-topo{margin-bottom:2rem}
+.curso-topo h1{font-size:clamp(1.5rem,3vw,2.05rem);margin:.5rem 0 .3rem}
+.curso-topo p{color:var(--fraco);margin:0}
+
+.prova{max-width:780px;margin:0 auto}
+.prova h2{font-size:1.5rem;margin-bottom:.6rem}
+.prova__intro{color:var(--fraco);margin:0 0 2rem}
+.pergunta{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);
+  padding:1.4rem 1.5rem;margin-bottom:1.1rem}
+.pergunta b{display:block;font:600 1rem/1.5 'Poppins',sans-serif;color:var(--navy);
+  margin-bottom:1rem}
+/* a alternativa inteira é clicável, e não só a bolinha: quem responde no
+   celular erra o alvo o tempo todo */
+.alt{display:flex;align-items:flex-start;gap:.7rem;padding:.7rem .85rem;
+  border:1px solid var(--linha);border-radius:10px;margin-bottom:.55rem;
+  cursor:pointer;font-size:.94rem;line-height:1.5;transition:border-color .2s,
+  background .2s}
+.alt:hover{border-color:var(--navy-2);background:#f7fafd}
+.alt input{margin-top:.25rem;accent-color:var(--navy-2);flex-shrink:0}
+.alt:has(input:checked){border-color:var(--ambar);background:#fffaf0}
+
+.resultado{max-width:560px;margin:0 auto;text-align:center;background:#fff;
+  border:1px solid var(--linha);border-radius:var(--raio);padding:2.6rem 2rem;
+  box-shadow:var(--sombra)}
+.resultado h2{font-size:1.6rem;margin-bottom:.4rem}
+.resultado .nota{font:800 3.2rem/1 'Poppins',sans-serif;margin:.6rem 0 1rem}
+.resultado p{color:var(--fraco);margin:0 0 1rem}
+.resultado .btn{margin-top:.6rem}
+.resultado.passou h2,.resultado.passou .nota{color:var(--verde)}
+.resultado.reprovou h2,.resultado.reprovou .nota{color:var(--vermelho)}

@@ -1,0 +1,324 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Certificado | Clínica Medicina Humana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="../assets/favicon.png?v=2" />
+  <style>
+    /* =================================================================
+       O certificado, no formato do modelo da clínica: 960 x 540 pt,
+       paisagem — a mesma medida do PDF que já é entregue hoje.
+
+       É HTML e não PDF gerado no servidor de propósito: o navegador
+       imprime em PDF com uma qualidade que nenhuma biblioteca alcança de
+       graça, e o aluno salva de onde estiver. O botão Imprimir abre
+       exatamente o diálogo de "Salvar como PDF".
+       ================================================================= */
+    :root{
+      --navy:#0a2e5c; --navy2:#12457f; --ambar:#f5a800;
+      --tinta:#16202c; --fraco:#6b7885; --linha:#dfe6ee;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:#e8edf3;color:var(--tinta);
+      font:400 15px/1.6 'Inter',system-ui,Arial,sans-serif}
+
+    /* barra de ações — some na impressão */
+    .barra{position:sticky;top:0;z-index:10;background:var(--navy);
+      color:#fff;padding:.9rem 1.2rem;display:flex;align-items:center;
+      gap:.8rem;flex-wrap:wrap}
+    .barra b{font:600 .98rem 'Poppins',sans-serif;margin-right:auto}
+    .barra button,.barra a{border:0;cursor:pointer;text-decoration:none;
+      font:600 .88rem 'Poppins',sans-serif;padding:.6rem 1.2rem;
+      border-radius:999px}
+    .imprimir{background:var(--ambar);color:#16202c}
+    .voltar{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.45)}
+    .aviso{padding:1.2rem;text-align:center;color:#a8302f}
+
+    /* a folha */
+    .folha{width:960px;height:540px;margin:26px auto;background:#fff;
+      position:relative;overflow:hidden;
+      box-shadow:0 10px 40px rgba(10,46,92,.18)}
+    /* a moldura: duas faixas, marinho e âmbar, como na identidade */
+    .folha::before{content:"";position:absolute;inset:0;
+      border:14px solid var(--navy);pointer-events:none}
+    .folha::after{content:"";position:absolute;inset:14px;
+      border:2px solid var(--ambar);pointer-events:none}
+    /* A marca d'água: SÓ a cruz, sem as palavras do logo.
+       Cheguei a usar o logo inteiro e ficou ruim — "MEDICINA HUMANA" e o
+       slogan apareciam entre as linhas do texto e sujavam a leitura. Texto
+       atrás de texto nunca fica limpo. Só o símbolo resolve, e ainda
+       aguenta ser impresso em preto e branco sem virar mancha. */
+    .marca-agua{position:absolute;inset:0;display:flex;align-items:center;
+      justify-content:center;pointer-events:none;z-index:0}
+    /* Deslocada 30px para a esquerda e 6px para baixo, de propósito.
+   Centralizada pela caixa, a marca PARECIA torta: os dois cubos ficam no
+   alto à direita e as ondas correm embaixo, então o peso da tinta puxa
+   para aquele lado. Medido: o centro de massa caía 30px à direita do
+   centro da folha. Isto devolve o equilíbrio para o olho, que é o que
+   importa num documento. */
+.marca-agua img{height:64%;opacity:.1;filter:grayscale(1);
+  transform:translate(-30px,6px)}
+    .miolo{position:absolute;inset:34px 46px;display:flex;
+      flex-direction:column;z-index:1}
+
+    .topo{display:flex;align-items:flex-start;justify-content:space-between}
+    .topo img{height:52px}
+    .selo{text-align:right;font-size:.74rem;color:var(--fraco);line-height:1.4}
+
+    h1{font:800 2.5rem/1 'Poppins',sans-serif;color:var(--navy);
+      letter-spacing:.16em;text-align:center;margin:.6rem 0 .2rem}
+    .risco{width:110px;height:3px;background:var(--ambar);margin:0 auto 1rem;
+      border-radius:2px}
+
+    .nome{font:700 1.85rem/1.2 'Poppins',sans-serif;color:var(--navy);
+      text-align:center;margin:.2rem 0 .1rem}
+    .cpf{text-align:center;color:var(--fraco);font-size:.9rem;margin-bottom:.9rem}
+    .texto{text-align:center;font-size:.97rem;line-height:1.75;max-width:800px;
+      margin:0 auto;color:#2b3947}
+    .texto b{color:var(--navy)}
+    .cidade{text-align:center;color:var(--fraco);font-size:.9rem;
+      margin-top:.9rem}
+
+    /* O rodapé é absoluto, colado no pé da folha. As assinaturas são
+       empurradas para baixo pelo margin-top:auto — sem esta folga elas
+       caíam em cima do código de conferência. */
+    .assinaturas{margin-top:auto;display:flex;justify-content:space-around;
+      gap:2rem;padding-bottom:2.4rem}
+    .ass{text-align:center;min-width:270px}
+    .ass hr{border:0;border-top:1.4px solid var(--tinta);margin:0 0 .35rem}
+    .ass b{display:block;font:600 .92rem 'Poppins',sans-serif;color:var(--navy)}
+    .ass span{display:block;font-size:.78rem;color:var(--fraco);line-height:1.45}
+
+    .rodape{position:absolute;left:46px;right:46px;bottom:20px;
+      display:flex;justify-content:space-between;align-items:flex-end;
+      font-size:.7rem;color:var(--fraco)}
+    .codigo{font:700 .82rem 'Consolas',monospace;color:var(--navy);
+      letter-spacing:.08em}
+
+    /* verso: o conteúdo programático */
+    .verso h2{font:700 1.35rem 'Poppins',sans-serif;color:var(--navy);
+      text-align:center;letter-spacing:.1em;margin:.4rem 0 .2rem}
+    .verso ul{margin:1rem 0 0;padding:0 0 0 1.2rem;column-count:2;
+      column-gap:2.4rem}
+    .verso li{font-size:.85rem;line-height:1.6;margin-bottom:.5rem;
+      break-inside:avoid;color:#2b3947}
+
+    @media print{
+      /* 960x540pt e paisagem: a mesma folha do modelo atual */
+      @page{size:960pt 540pt;margin:0}
+      body{background:#fff}
+      /* sem isto o navegador descarta a marca d'agua ao imprimir */
+      .marca-agua img{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .barra{display:none}
+      .folha{margin:0;box-shadow:none;page-break-after:always}
+      .folha:last-child{page-break-after:auto}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="barra">
+    <b>Certificado</b>
+    <button class="imprimir" onclick="window.print()">Imprimir / Salvar em PDF</button>
+    <a class="voltar" href="entrar.html">Voltar</a>
+  </div>
+
+  <div id="conteudo"><p class="aviso" id="msg">Carregando…</p></div>
+
+  <script src="../js/supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  (function () {
+    // =================================================================
+    // Quem assina. Uma pessoa só, como a clínica pratica hoje.
+    // Se mudar o responsável técnico, é aqui — uma linha.
+    // =================================================================
+    var INSTRUTORA = {
+      nome: 'Anandda Fortuna Ferreira Lima',
+      cargo: 'Engenheira de Segurança do Trabalho',
+      registro: 'CREA-BA: 0518911586'
+    };
+    var CIDADE = 'Camaçari';
+
+    var sb = supabase.createClient(window.SUPA.url, window.SUPA.key);
+    var alvo = document.getElementById('conteudo');
+
+    var MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+                 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+
+    function porExtenso(iso) {
+      var p = String(iso).slice(0, 10).split('-');
+      if (p.length !== 3) return '';
+      return Number(p[2]) + ' de ' + MESES[Number(p[1]) - 1] + ' de ' + p[0];
+    }
+    function dataBr(iso) {
+      var p = String(iso || '').slice(0, 10).split('-');
+      return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : '';
+    }
+    function cpfBonito(n) {
+      n = String(n || '').replace(/\D/g, '');
+      return n.length === 11
+        ? n.slice(0,3)+'.'+n.slice(3,6)+'.'+n.slice(6,9)+'-'+n.slice(9) : n;
+    }
+    function seguro(t) {
+      return String(t == null ? '' : t)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function erro(txt) {
+      alvo.innerHTML = '<p class="aviso">' + txt + '</p>';
+    }
+
+    function folhaFrente(d) {
+      var horas = d.curso.carga_horaria
+        ? d.curso.carga_horaria + (d.curso.carga_horaria === 1 ? ' hora' : ' horas')
+        : '';
+      var titulo = d.curso.titulo_certificado || d.curso.titulo;
+      var deQuem = d.aluno.empresa
+        ? ', da empresa <b>' + seguro(d.aluno.empresa) + '</b>' : '';
+
+      return '' +
+      '<div class="folha">' +
+        '<div class="marca-agua"><img src="img/marca-agua.png" alt="" /></div>' +
+        '<div class="miolo">' +
+        '<div class="topo">' +
+          '<img src="img/logo.png" alt="Clínica Medicina Humana" />' +
+          '<div class="selo">CLÍNICA MEDICINA HUMANA<br />' +
+            'Treinamentos em Normas Regulamentadoras</div>' +
+        '</div>' +
+        '<h1>CERTIFICADO</h1><div class="risco"></div>' +
+        '<div class="nome">' + seguro(d.aluno.nome) + '</div>' +
+        '<div class="cpf">CPF ' + cpfBonito(d.aluno.cpf) + '</div>' +
+        '<p class="texto">Certificamos para os devidos fins que ' +
+          '<b>' + seguro(d.aluno.nome) + '</b>, portador do CPF ' +
+          cpfBonito(d.aluno.cpf) + ', participou do treinamento de ' +
+          '<b>' + seguro(titulo) + '</b>' +
+          (horas ? ', com carga horária de <b>' + horas + '</b>' : '') +
+          deQuem + '.' +
+          (d.cert.valido_ate
+            ? ' Válido até <b>' + dataBr(d.cert.valido_ate) + '</b>.' : '') +
+        '</p>' +
+        '<p class="cidade">' + CIDADE + ', ' + porExtenso(d.cert.emitido_em) + '.</p>' +
+        '<div class="assinaturas">' +
+          '<div class="ass"><hr /><b>' + INSTRUTORA.nome + '</b>' +
+            '<span>' + INSTRUTORA.cargo + '</span>' +
+            '<span>' + INSTRUTORA.registro + '</span></div>' +
+          '<div class="ass"><hr /><b>' + seguro(d.aluno.nome) + '</b>' +
+            '<span>Colaborador</span>' +
+            '<span>CPF: ' + cpfBonito(d.aluno.cpf) + '</span></div>' +
+        '</div>' +
+        '<div class="rodape">' +
+          '<span>Confira a autenticidade em ' +
+            'clinicamedicinahumana.com.br/treinamento/validar.html</span>' +
+          '<span class="codigo">' + seguro(d.cert.codigo) + '</span>' +
+        '</div>' +
+      '</div></div>';
+    }
+
+    function folhaVerso(d) {
+      // curso sem conteúdo cadastrado sai com uma página só: melhor uma
+      // frente correta do que um verso inventado
+      var bruto = d.curso.conteudo_programatico;
+      if (!bruto || !bruto.trim()) return '';
+      var itens = bruto.split('\n').map(function (l) { return l.trim(); })
+                       .filter(Boolean)
+                       .map(function (l) { return '<li>' + seguro(l) + '</li>'; })
+                       .join('');
+      return '' +
+      '<div class="folha">' +
+        '<div class="marca-agua"><img src="img/marca-agua.png" alt="" /></div>' +
+        '<div class="miolo verso">' +
+        '<div class="topo">' +
+          '<img src="img/logo.png" alt="Clínica Medicina Humana" />' +
+          '<div class="selo">' + seguro(d.curso.codigo) + '<br />' +
+            (d.curso.carga_horaria || '') + 'h</div>' +
+        '</div>' +
+        '<h2>CONTEÚDO PROGRAMÁTICO</h2><div class="risco"></div>' +
+        '<ul>' + itens + '</ul>' +
+        '<div class="rodape"><span>' + seguro(d.aluno.nome) + '</span>' +
+          '<span class="codigo">' + seguro(d.cert.codigo) + '</span></div>' +
+      '</div></div>';
+    }
+
+    // Amostra: ?amostra=1 desenha o certificado com dados de exemplo, sem
+    // tocar no banco. Serve para conferir o desenho e para ajustar o texto
+    // antes de existir aluno aprovado. Não emite nada nem vale como
+    // documento — sai marcado como AMOSTRA no rodapé.
+    var AMOSTRA = {
+      cert: { codigo: 'AMOSTRA-0000', emitido_em: new Date().toISOString(),
+              valido_ate: null },
+      aluno: { nome: 'Wesley da Purificação Silva', cpf: '07442195580',
+               empresa: 'CONSTRUTORA EXEMPLO LTDA' },
+      curso: { codigo: 'NR-20', carga_horaria: 8,
+               titulo: 'Inflamáveis e combustíveis',
+               titulo_certificado: 'NR-20: Segurança e Saúde no Trabalho com '
+                 + 'Inflamáveis e Combustíveis, Módulo Intermediário',
+               conteudo_programatico:
+'Inflamáveis: características, propriedades, perigos e risco.\n' +
+'Controle coletivo e individual para trabalhos com inflamáveis. EPI e EPC.\n' +
+'Fontes de ignição e seu controle.\n' +
+'Proteção contra incêndio com inflamáveis.\n' +
+'Procedimento em situações de emergência com inflamáveis.\n' +
+'Estudo detalhado da NR-20 e sua interação com outras normas, incluindo a ' +
+'revisão do item 20.8.8, sobre trabalhos que gerem chamas, calor ou ' +
+'centelhas; em ' +
+'espaços confinados conforme a NR-33; em locais com risco de queda conforme ' +
+'a NR-35; e com equipamentos elétricos de acordo com a NR-10.\n' +
+'Análise preliminar de riscos e perigos, e permissões de trabalho.\n' +
+'Práticas de prevenção e combate a incêndio.\n' +
+'Práticas de APR, RCP, desmaio, convulsões, fraturas, imobilização, ' +
+'queimaduras, hemorragias, resgate e transporte.\n' +
+'Equipamentos de proteção respiratória.' }
+    };
+
+    (async function () {
+      var busca = new URLSearchParams(location.search);
+      if (busca.get('amostra')) {
+        alvo.innerHTML = folhaFrente(AMOSTRA) + folhaVerso(AMOSTRA);
+        document.title = 'Certificado (amostra)';
+        document.querySelectorAll('.rodape span:first-child').forEach(
+          function (s) { s.textContent = 'AMOSTRA: não é documento válido'; });
+        return;
+      }
+
+      var mat = busca.get('m');
+      if (!mat) return erro('Falta dizer qual curso. Volte e escolha na sua lista.');
+
+      var sessao = await sb.auth.getSession();
+      if (!sessao.data.session) {
+        return erro('Entre com o seu CPF para ver o certificado. ' +
+                    '<a href="entrar.html">Ir para o login</a>.');
+      }
+
+      // emite (ou devolve o que já existe). É o banco que confere se passou.
+      var em = await sb.rpc('trein_emitir_certificado', { p_matricula: mat });
+      if (em.error) {
+        var m = em.error.message || '';
+        if (m.indexOf('NAO_APROVADO') !== -1) {
+          return erro('O certificado sai depois de você ser aprovado na prova.');
+        }
+        return erro('Não consegui emitir o certificado. Tente de novo mais tarde.');
+      }
+
+      var r = await sb.from('trein_matricula')
+        .select('id,trein_curso(codigo,titulo,titulo_certificado,' +
+                'carga_horaria,conteudo_programatico)')
+        .eq('id', mat).maybeSingle();
+      var perfil = await sb.from('trein_aluno')
+        .select('nome,cpf,empresa').eq('id', sessao.data.session.user.id)
+        .maybeSingle();
+
+      if (!r.data || !perfil.data) return erro('Não encontrei esse certificado.');
+
+      var d = { cert: em.data, curso: r.data.trein_curso, aluno: perfil.data };
+      alvo.innerHTML = folhaFrente(d) + folhaVerso(d);
+      document.title = 'Certificado de ' + d.aluno.nome;
+    })();
+  })();
+  </script>
+</body>
+</html>
