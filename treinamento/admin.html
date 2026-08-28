@@ -165,6 +165,40 @@
           <p>Clique num curso para ver as aulas dele e subir os vídeos.</p>
         </div>
         <div class="modulos" id="grade"></div>
+
+        <!-- A ASSINATURA DA RESPONSAVEL TECNICA.
+             Fica aqui, e nao dentro de um curso, porque e uma so para
+             todos: trocar aqui muda todo certificado emitido daqui em
+             diante. -->
+        <div class="form-aula" id="caixaAss" style="margin-top:2.4rem">
+          <h3>Assinatura da responsável técnica</h3>
+          <p style="color:var(--meio);font-size:.86rem;margin:-.5rem 0 .9rem">
+            A imagem entra <b>acima da linha</b> em todo certificado emitido,
+            para ninguém precisar assinar um por um. Mande um
+            <b>PNG com fundo transparente</b>, a assinatura em traço escuro.
+            Foto do papel também serve: o fundo branco é descartado no
+            desenho. Sem imagem, o certificado sai com a linha em branco,
+            para assinar à mão.
+          </p>
+          <div id="assPre" style="display:none;margin:0 0 1rem;padding:1rem;
+            background:#fff;border:1px solid var(--linha);border-radius:10px;
+            text-align:center">
+            <img id="assImg" alt="Assinatura gravada"
+                 style="max-height:90px;max-width:280px;mix-blend-mode:multiply" />
+            <div style="border-top:1.2px solid #16202c;max-width:280px;
+              margin:.2rem auto 0"></div>
+            <p style="color:var(--meio);font-size:.78rem;margin:.45rem 0 0">
+              É assim que ela aparece no certificado.</p>
+          </div>
+          <input id="assArq" type="file" accept="image/png,image/jpeg,image/webp" />
+          <div class="msg" id="msgAss"></div>
+          <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;
+            margin-top:1rem">
+            <button class="i-botao" id="salvarAss">Enviar assinatura</button>
+            <button class="mini" id="tirarAss" style="display:none">Tirar a
+              assinatura</button>
+          </div>
+        </div>
       </div>
 
       <div id="painelAulas" style="display:none">
@@ -366,7 +400,78 @@
       $('viewAdm').style.display = 'block';
       anotar('trein_admin_entrou');
       carregarCursos();
+      montarAssinatura();
     }
+
+    // ------------------------------------- a assinatura da responsável
+    // Caminho fixo: existe UMA assinatura, e enviar outra substitui a que
+    // estava. Não há histórico de propósito — o certificado emitido ontem
+    // e o de amanhã têm de sair com a mesma rubrica, senão o RH que
+    // receber dois papéis da mesma clínica vai achar que um é falso.
+    var CAMINHO_ASS = 'responsavel/assinatura.png';
+
+    async function montarAssinatura() {
+      var r = await sb.storage.from('treinamentos')
+        .createSignedUrl(CAMINHO_ASS, 60 * 10);
+      // Sem imagem o Storage responde erro, e isso NÃO é falha: é o estado
+      // normal antes do primeiro envio. Some a prévia e o botão de tirar.
+      var tem = !r.error && r.data && r.data.signedUrl;
+      $('assPre').style.display = tem ? 'block' : 'none';
+      $('tirarAss').style.display = tem ? 'inline-block' : 'none';
+      if (tem) $('assImg').src = r.data.signedUrl;
+    }
+
+    async function enviarAssinatura() {
+      var msg = $('msgAss'), b = $('salvarAss');
+      var arquivo = ($('assArq').files || [])[0];
+      if (!arquivo) {
+        return recado(msg, 'Escolha o arquivo da assinatura primeiro.');
+      }
+      // 2 MB é muito para uma rubrica e pouco para qualquer outra coisa. O
+      // limite existe porque esta imagem entra em TODO certificado: um
+      // arquivo de 8 MB faria o aluno esperar por uma linha de tinta.
+      if (arquivo.size > 2 * 1024 * 1024) {
+        return recado(msg, 'A imagem tem ' +
+          (arquivo.size / 1024 / 1024).toFixed(1) + ' MB. O limite é 2 MB — ' +
+          'uma assinatura não precisa de mais que isso.');
+      }
+      b.disabled = true; b.textContent = 'Enviando…';
+      recado(msg, '');
+
+      // `upsert: true`: o caminho é fixo, então enviar de novo tem de
+      // substituir. Sem isto o segundo envio falharia dizendo que o
+      // arquivo já existe, e a assinatura ficaria impossível de trocar.
+      var envio = await sb.storage.from('treinamentos')
+        .upload(CAMINHO_ASS, arquivo,
+                { upsert: true, contentType: arquivo.type });
+      b.disabled = false; b.textContent = 'Enviar assinatura';
+      if (envio.error) {
+        return recado(msg, 'Não consegui enviar: ' + seguro(envio.error.message) +
+          '<br />Se disser que a permissão foi negada, falta rodar o ' +
+          '<b>37-assinatura-do-responsavel.sql</b>.');
+      }
+      await anotar('trein_assinatura_trocada',
+                   arquivo.name + ' · ' + Math.round(arquivo.size / 1024) + ' KB');
+      $('assArq').value = '';
+      await montarAssinatura();
+      recado(msg, 'Assinatura gravada. Todo certificado emitido daqui em ' +
+        'diante já sai com ela.', true);
+    }
+
+    async function tirarAssinatura() {
+      if (!confirm('Tirar a assinatura? Os certificados voltam a sair ' +
+                   'com a linha em branco, para assinar à mão.')) return;
+      var msg = $('msgAss');
+      var r = await sb.storage.from('treinamentos').remove([CAMINHO_ASS]);
+      if (r.error) return recado(msg, 'Não consegui tirar: ' +
+                                 seguro(r.error.message));
+      await anotar('trein_assinatura_removida');
+      await montarAssinatura();
+      recado(msg, 'Assinatura removida.', true);
+    }
+
+    $('salvarAss').addEventListener('click', enviarAssinatura);
+    $('tirarAss').addEventListener('click', tirarAssinatura);
 
     // -------------------------------------------------- os cursos no meio
     async function carregarCursos() {
