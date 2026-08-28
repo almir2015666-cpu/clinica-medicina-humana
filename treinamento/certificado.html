@@ -147,14 +147,14 @@
       overflow-wrap:anywhere}
     .nome.longo{font-size:1.72rem}
     .nome.muitolongo{font-size:1.42rem}
-    .cpf{text-align:center;color:var(--fraco);font-size:.86rem;
-      letter-spacing:.04em;margin-bottom:.55rem}
+    .cpf{text-align:center;color:var(--fraco);font-size:.85rem;
+      letter-spacing:.04em;margin-bottom:.42rem}
 
-    .texto{text-align:center;font-size:.95rem;line-height:1.72;
-      max-width:770px;margin:0 auto;color:#2b3947}
+    .texto{text-align:center;font-size:.94rem;line-height:1.64;
+      max-width:790px;margin:0 auto;color:#2b3947}
     .texto b{color:var(--navy);font-weight:600}
-    .cidade{text-align:center;color:var(--fraco);font-size:.86rem;
-      margin-top:.75rem;font-style:italic}
+    .cidade{text-align:center;color:var(--fraco);font-size:.83rem;
+      margin-top:.45rem;font-style:italic}
 
     /* ------------------------------------------------- selo circular */
     /* O medalhão com o código da NR e as horas. Fica no canto direito,
@@ -198,10 +198,23 @@
        o miolo e ia parar por cima do rodapé, que é posicionado pelo pé da
        folha. Fora do fluxo, o desenho volta a ser o mesmo com ou sem
        assinatura carregada. */
-    .ass__rubrica{position:absolute;left:0;right:0;bottom:100%;height:52px;
+    /* Medido: entre a linha da cidade e o filete da assinatura havia 22px
+       de vão, e a rubrica pedia 52px. Ela subia por cima de "Camaçari, 28
+       de agosto de 2026". Agora são 40px de rubrica num vão de 44px, com o
+       espaço tirado de onde sobrava folga. */
+    /* A rubrica CRUZA A LINHA por alguns pixels, de propósito. Gente
+       assina por cima do filete, e não flutuando acima dele: parada em
+       cima da linha, a assinatura lê como imagem colada. E cruzando ela
+       precisa de menos vão livre, que aqui é o que não sobra. */
+    .ass__rubrica{position:absolute;left:0;right:0;height:38px;
+      /* `100%` alinha o pé da rubrica com o TOPO da coluna, que é o
+         filete. Os 5px de desconto a fazem cruzar a linha. Sem o
+         `calc`, `bottom:-5px` ancoraria no fim da coluna inteira e a
+         assinatura ia parar por cima do CREA. */
+      bottom:calc(100% - 5px);
       display:flex;align-items:flex-end;justify-content:center;
       pointer-events:none}
-    .ass__rubrica img{max-height:52px;max-width:220px;object-fit:contain;
+    .ass__rubrica img{max-height:38px;max-width:235px;object-fit:contain;
       /* multiply apaga o fundo branco de um escaneado comum: quem mandar
          PNG com fundo transparente ganha o mesmo resultado, e quem mandar
          JPG do papel não fica com um retângulo branco sobre a linha */

@@ -191,6 +191,57 @@
               É assim que ela aparece no certificado.</p>
           </div>
           <input id="assArq" type="file" accept="image/png,image/jpeg,image/webp" />
+
+          <!-- A FOTO E LIMPA AQUI, NO NAVEGADOR.
+               Assinatura escaneada ou fotografada vem com papel cinzento,
+               sombra da mao, borda da folha e, quase sempre, mais de uma
+               assinatura na mesma folha. Colada crua no certificado, ela
+               sai como um retangulo sujo por cima da linha. Aqui o papel
+               vira transparente, a tinta ganha contraste e a margem e
+               cortada, sem ninguem precisar abrir editor de imagem. -->
+          <div id="assEditor" style="display:none;margin-top:1.2rem">
+            <p style="color:var(--meio);font-size:.86rem;margin:0 0 .7rem">
+              <b>Arraste sobre a assinatura</b> que você quer usar. Se a foto
+              tiver mais de uma, escolha só a que vai no certificado. Sem
+              arrastar, ela usa a foto inteira.
+            </p>
+            <div style="display:grid;gap:1rem;
+              grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+              <div>
+                <p style="font:600 .78rem 'Poppins',sans-serif;color:var(--meio);
+                  letter-spacing:.06em;text-transform:uppercase;margin:0 0 .4rem">
+                  A foto</p>
+                <canvas id="assFoto" style="max-width:100%;border:1px solid
+                  var(--linha);border-radius:8px;cursor:crosshair;
+                  touch-action:none;background:#fff"></canvas>
+              </div>
+              <div>
+                <p style="font:600 .78rem 'Poppins',sans-serif;color:var(--meio);
+                  letter-spacing:.06em;text-transform:uppercase;margin:0 0 .4rem">
+                  Como vai sair</p>
+                <div style="border:1px solid var(--linha);border-radius:8px;
+                  background:#fff;padding:1.1rem .9rem .5rem;text-align:center">
+                  <canvas id="assLimpa" style="max-width:100%"></canvas>
+                  <div style="border-top:1.2px solid #16202c;max-width:260px;
+                    margin:.15rem auto 0"></div>
+                  <p style="font:600 .8rem 'Poppins',sans-serif;color:#0a2e5c;
+                    margin:.35rem 0 0">Anandda Fortuna Ferreira Lima</p>
+                  <p style="font-size:.7rem;color:#6b7885;margin:.1rem 0 .3rem">
+                    Engenheira de Segurança do Trabalho</p>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:1.2rem;align-items:center;
+              flex-wrap:wrap;margin-top:.9rem">
+              <label style="font-size:.86rem;color:var(--meio)">
+                Força do traço
+                <input id="assForca" type="range" min="0" max="100" value="50"
+                  style="vertical-align:middle;width:150px" />
+              </label>
+              <button class="mini" id="assTudo">Usar a foto inteira</button>
+            </div>
+          </div>
+
           <div class="msg" id="msgAss"></div>
           <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;
             margin-top:1rem">
@@ -438,12 +489,25 @@
       b.disabled = true; b.textContent = 'Enviando…';
       recado(msg, '');
 
+      // SOBE A IMAGEM LIMPA, e não a foto. O que o certificado precisa é
+      // da rubrica com fundo transparente; a foto do papel serve para
+      // olhar, não para imprimir. Se a limpeza não produziu nada (imagem
+      // sem tinta reconhecível), o envio para em vez de gravar a foto
+      // crua e estragar todo certificado emitido depois.
+      var conteudo = assBlob || (arquivo.type === 'image/png' ? arquivo : null);
+      if (!conteudo) {
+        b.disabled = false; b.textContent = 'Enviar assinatura';
+        return recado(msg, 'Não consegui separar a assinatura do fundo. ' +
+          'Tente uma foto mais iluminada, ou arraste sobre a assinatura ' +
+          'para recortar só ela.');
+      }
+
       // `upsert: true`: o caminho é fixo, então enviar de novo tem de
       // substituir. Sem isto o segundo envio falharia dizendo que o
       // arquivo já existe, e a assinatura ficaria impossível de trocar.
       var envio = await sb.storage.from('treinamentos')
-        .upload(CAMINHO_ASS, arquivo,
-                { upsert: true, contentType: arquivo.type });
+        .upload(CAMINHO_ASS, conteudo,
+                { upsert: true, contentType: 'image/png' });
       b.disabled = false; b.textContent = 'Enviar assinatura';
       if (envio.error) {
         return recado(msg, 'Não consegui enviar: ' + seguro(envio.error.message) +
@@ -469,6 +533,202 @@
       await montarAssinatura();
       recado(msg, 'Assinatura removida.', true);
     }
+
+    // =================================================================
+    // O LIMPADOR DE ASSINATURA
+    //
+    // Foto de assinatura vem com papel acinzentado, luz desigual, sombra
+    // da mao, borda da folha e, quase sempre, mais de uma assinatura na
+    // mesma folha. Colada crua no certificado, ela sai como um retangulo
+    // sujo por cima da linha.
+    //
+    // Isto resolve no navegador, sem editor de imagem: o que sobe para o
+    // servidor ja e a rubrica limpa, e a foto original nao sai daqui.
+    // =================================================================
+    var assFoto = null;        // a imagem escolhida
+    var assCaixa = null;       // recorte, em pixels da imagem
+    var assBlob = null;        // o PNG limpo, pronto para subir
+
+    // CANAL VERMELHO, e nao cinza. Tinta azul absorve o vermelho: no canal
+    // vermelho ela fica bem escura e o papel bem claro. E a separacao mais
+    // forte que a foto oferece de graca, e caneta preta tambem funciona.
+    function limparAssinatura() {
+      if (!assFoto) return;
+      var c = assCaixa ||
+        { x: 0, y: 0, w: assFoto.naturalWidth, h: assFoto.naturalHeight };
+      c = { x: Math.round(c.x), y: Math.round(c.y),
+            w: Math.round(c.w), h: Math.round(c.h) };
+      if (c.w < 8 || c.h < 8) return;
+
+      var t = document.createElement('canvas');
+      t.width = c.w; t.height = c.h;
+      var g = t.getContext('2d', { willReadFrequently: true });
+      g.drawImage(assFoto, c.x, c.y, c.w, c.h, 0, 0, c.w, c.h);
+      var d = g.getImageData(0, 0, c.w, c.h).data;
+
+      // O PAPEL, estimado LOCALMENTE. A luz da foto cai de um lado para o
+      // outro; um limiar unico comeria o traco no lado escuro ou deixaria
+      // mancha no claro. Desenhar a foto bem pequena e consultar por
+      // posicao e um desfoque forte e barato: da a foto "sem a caneta".
+      var pw = Math.max(4, Math.round(c.w / 24));
+      var ph = Math.max(4, Math.round(c.h / 24));
+      var mini = document.createElement('canvas');
+      mini.width = pw; mini.height = ph;
+      var mg = mini.getContext('2d', { willReadFrequently: true });
+      mg.drawImage(t, 0, 0, pw, ph);
+      var pequeno = mg.getImageData(0, 0, pw, ph).data;
+
+      var dif = new Float32Array(c.w * c.h), maior = 0, x, y, i;
+      for (y = 0; y < c.h; y++) {
+        var py = Math.min(ph - 1, Math.floor(y * ph / c.h));
+        for (x = 0; x < c.w; x++) {
+          var px = Math.min(pw - 1, Math.floor(x * pw / c.w));
+          i = y * c.w + x;
+          var v = pequeno[(py * pw + px) * 4] - d[i * 4];
+          dif[i] = v > 0 ? v : 0;
+          if (dif[i] > maior) maior = dif[i];
+        }
+      }
+      if (maior < 10) { assBlob = null; return; }   // foto sem tinta nenhuma
+
+      // TRANSPARENCIA PROPORCIONAL, e nao preto no branco: o traco de
+      // caneta tem borda macia, e jogar tudo para opaco deixa serrilhado.
+      var forca = Number($('assForca').value) / 50;      // 0..2, 1 = normal
+      var escala = maior * 0.55 / Math.max(forca, 0.25);
+      var alfa = new Float32Array(c.w * c.h);
+      for (i = 0; i < alfa.length; i++) {
+        var a = dif[i] / escala;
+        if (a > 1) a = 1;
+        alfa[i] = a < 0.12 ? 0 : a;   // abaixo de 12% e papel, sombra ou grao
+      }
+
+      // CORTAR NA TINTA. Uma linha so conta se tiver tinta de verdade, e
+      // tinta de verdade ocupa largura: olhar o pixel mais escuro de cada
+      // linha faria um unico grao sobrevivente segurar a borda, e a
+      // assinatura sairia nadando num mar de vazio.
+      var minL = Math.max(2, Math.round(c.w * 0.004));
+      var minC = Math.max(2, Math.round(c.h * 0.010));
+      var y0 = -1, y1 = -1, x0 = -1, x1 = -1, q;
+      for (y = 0; y < c.h; y++) {
+        q = 0;
+        for (x = 0; x < c.w; x++) if (alfa[y * c.w + x] > 0.30) q++;
+        if (q >= minL) { if (y0 < 0) y0 = y; y1 = y; }
+      }
+      for (x = 0; x < c.w; x++) {
+        q = 0;
+        for (y = 0; y < c.h; y++) if (alfa[y * c.w + x] > 0.30) q++;
+        if (q >= minC) { if (x0 < 0) x0 = x; x1 = x; }
+      }
+      if (y0 < 0 || x0 < 0) { assBlob = null; return; }
+      var folga = Math.round(Math.max(c.w, c.h) * 0.012);
+      y0 = Math.max(0, y0 - folga); y1 = Math.min(c.h - 1, y1 + folga);
+      x0 = Math.max(0, x0 - folga); x1 = Math.min(c.w - 1, x1 + folga);
+
+      var lw = x1 - x0 + 1, lh = y1 - y0 + 1;
+      var saida = document.createElement('canvas');
+      saida.width = lw; saida.height = lh;
+      var sg = saida.getContext('2d');
+      var novo = sg.createImageData(lw, lh);
+      for (y = 0; y < lh; y++) {
+        for (x = 0; x < lw; x++) {
+          var de = (y + y0) * c.w + (x + x0);
+          var pa = (y * lw + x) * 4;
+          novo.data[pa] = 20; novo.data[pa + 1] = 33; novo.data[pa + 2] = 63;
+          novo.data[pa + 3] = Math.round(alfa[de] * 255);
+        }
+      }
+      sg.putImageData(novo, 0, 0);
+
+      // 320px de altura sobra: o certificado usa 38. Maior que isso e peso
+      // de arquivo em troca de nada.
+      var fim = saida;
+      if (lh > 320) {
+        fim = document.createElement('canvas');
+        fim.width = Math.round(lw * 320 / lh); fim.height = 320;
+        fim.getContext('2d').drawImage(saida, 0, 0, fim.width, fim.height);
+      }
+
+      var previa = $('assLimpa');
+      previa.width = fim.width; previa.height = fim.height;
+      previa.style.maxHeight = '90px';
+      previa.getContext('2d').drawImage(fim, 0, 0);
+      fim.toBlob(function (b) { assBlob = b; }, 'image/png');
+    }
+
+    function desenharFoto() {
+      var cv = $('assFoto');
+      var largura = Math.min(520, assFoto.naturalWidth);
+      var escala = largura / assFoto.naturalWidth;
+      cv.width = largura;
+      cv.height = Math.round(assFoto.naturalHeight * escala);
+      var g = cv.getContext('2d');
+      g.drawImage(assFoto, 0, 0, cv.width, cv.height);
+      if (assCaixa) {
+        g.strokeStyle = '#f5a800'; g.lineWidth = 2;
+        g.strokeRect(assCaixa.x * escala, assCaixa.y * escala,
+                     assCaixa.w * escala, assCaixa.h * escala);
+      }
+      cv.dataset.escala = escala;
+    }
+
+    (function ligarRecorte() {
+      var cv = $('assFoto'), inicio = null;
+      function ponto(ev) {
+        var r = cv.getBoundingClientRect();
+        // O canvas e mostrado com `max-width`, entao o que se ve pode ser
+        // menor que ele. Sem esta conta, o retangulo sai deslocado do dedo.
+        var k = cv.width / r.width;
+        return { x: (ev.clientX - r.left) * k, y: (ev.clientY - r.top) * k };
+      }
+      cv.addEventListener('pointerdown', function (ev) {
+        if (!assFoto) return;
+        cv.setPointerCapture(ev.pointerId);
+        inicio = ponto(ev);
+      });
+      cv.addEventListener('pointermove', function (ev) {
+        if (!inicio) return;
+        var p = ponto(ev), e = Number(cv.dataset.escala) || 1;
+        assCaixa = {
+          x: Math.min(inicio.x, p.x) / e, y: Math.min(inicio.y, p.y) / e,
+          w: Math.abs(p.x - inicio.x) / e, h: Math.abs(p.y - inicio.y) / e
+        };
+        desenharFoto();
+      });
+      cv.addEventListener('pointerup', function () {
+        inicio = null;
+        // Clique sem arrastar nao e recorte: e clique. Sem isto, um toque
+        // sem querer zeraria a selecao para uma caixa de dois pixels.
+        if (assCaixa && (assCaixa.w < 10 || assCaixa.h < 10)) assCaixa = null;
+        desenharFoto(); limparAssinatura();
+      });
+    })();
+
+    $('assArq').addEventListener('change', function () {
+      var arq = (this.files || [])[0];
+      recado($('msgAss'), '');
+      assBlob = null; assCaixa = null;
+      if (!arq) { $('assEditor').style.display = 'none'; return; }
+      var leitor = new FileReader();
+      leitor.onload = function () {
+        var im = new Image();
+        im.onload = function () {
+          assFoto = im;
+          $('assEditor').style.display = 'block';
+          desenharFoto();
+          limparAssinatura();
+        };
+        im.onerror = function () {
+          recado($('msgAss'), 'Nao consegui abrir essa imagem.');
+        };
+        im.src = leitor.result;
+      };
+      leitor.readAsDataURL(arq);
+    });
+
+    $('assForca').addEventListener('input', limparAssinatura);
+    $('assTudo').addEventListener('click', function () {
+      assCaixa = null; desenharFoto(); limparAssinatura();
+    });
 
     $('salvarAss').addEventListener('click', enviarAssinatura);
     $('tirarAss').addEventListener('click', tirarAssinatura);
