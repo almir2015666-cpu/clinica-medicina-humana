@@ -13,7 +13,12 @@
 --  avisa com todas as letras em vez de deixar o aluno num curso que não
 --  termina.
 --
---  A COLUNA `correta` É O ÍNDICE, COMEÇANDO EM ZERO
+--  O DELETE SÓ APAGA A FAIXA 1-10, que é a que este arquivo escreve.
+--  Antes ele apagava TODAS as questões do curso. Como os arquivos 15 a 18
+--  acrescentam a faixa 11-40, rodar este depois deles varreria as 570
+--  questões novas sem avisar — e a prova voltaria a ser sempre a mesma.
+--  Com a faixa, a ordem em que se roda deixa de importar.
+----  A COLUNA `correta` É O ÍNDICE, COMEÇANDO EM ZERO
 --  Se a resposta certa é a primeira alternativa, `correta` é 0.
 --  Esta tabela nunca é lida pelo navegador: a RLS proíbe, e só a Edge
 --  Function (com service role) enxerga o gabarito.
@@ -24,7 +29,8 @@
 -- =====================================================================
 
 delete from public.trein_questao
- where curso_id = (select id from public.trein_curso where codigo = 'NR-20');
+ where curso_id = (select id from public.trein_curso where codigo = 'NR-20')
+   and ordem between 1 and 10;
 
 insert into public.trein_questao (curso_id, enunciado, alternativas, correta, ordem)
 select c.id, q.enunciado, q.alternativas::jsonb, q.correta, q.ordem

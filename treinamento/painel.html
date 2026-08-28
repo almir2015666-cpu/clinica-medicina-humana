@@ -112,6 +112,16 @@
       var r = await sb.from('trein_matricula')
         .select('id,expira_em,cancelada,trein_curso(id,codigo,titulo,carga_horaria)')
         .order('expira_em', { ascending: true });
+      // Rede caindo NÃO é "você não tem curso". O supabase-js devolve
+      // {data:null, error} sem levantar exceção; ignorar o `error` fazia a
+      // tela afirmar que o aluno não tem treinamento nenhum — para alguém
+      // que tem três.
+      if (r.error) {
+        $('vazio').style.display = 'block';
+        $('vazio').textContent = 'Não consegui carregar os seus treinamentos '
+          + 'agora. Verifique a conexão e recarregue a página.';
+        return;
+      }
       var mats = (r.data || []).filter(function (m) { return !m.cancelada; });
 
       if (!mats.length) {
@@ -125,6 +135,18 @@
       // quantas aulas cada curso tem e quantas já foram concluídas — em dois
       // pedidos, e não um por módulo: com dez módulos seriam vinte idas ao
       // servidor para desenhar uma tela
+      // Curso DESATIVADO some do embed (a política só devolve `ativo`), e a
+      // matrícula continua vindo. Sem esta peneira, um `.trein_curso.id`
+      // num curso desativado derrubava a tela inteira com TypeError: o
+      // aluno via "Olá, Fulano" e mais nada — nem os outros cursos dele,
+      // que estavam bem.
+      mats = mats.filter(function (m) { return m.trein_curso; });
+      if (!mats.length) {
+        $('vazio').style.display = 'block';
+        $('vazio').textContent = 'Os seus treinamentos estão temporariamente '
+          + 'indisponíveis. Fale com a nossa equipe.';
+        return;
+      }
       var cursos = mats.map(function (m) { return m.trein_curso.id; });
       var aulas = (await sb.from('trein_aula').select('id,curso_id')
         .in('curso_id', cursos)).data || [];
@@ -147,14 +169,28 @@
         var venceu = String(m.expira_em) < hoje;
         var pct = total ? Math.round((ok / total) * 100) : 0;
 
-        var estado = venceu ? 'venceu' : (passou ? 'feito' : '');
-        var etiqueta = venceu ? 'Vencido' : (passou ? 'Concluído' : seguro(c.codigo));
+        // QUEM PASSOU NÃO PERDE O CERTIFICADO AO VENCER.
+        // Antes o "venceu" ganhava do "passou", e o cartão virava uma div
+        // sem link: o trabalhador aprovado ficava sem NENHUM caminho na
+        // tela para reimprimir o próprio certificado. E certificado de NR
+        // é justamente o papel que alguém pede meses depois.
+        //
+        // Vencer encerra o acesso às AULAS, não o direito ao documento que
+        // já foi conquistado. Por isso o aprovado continua clicável, indo
+        // direto ao certificado.
+        var trancado = venceu && !passou;
+
+        var estado = trancado ? 'venceu' : (passou ? 'feito' : '');
+        var etiqueta = passou ? 'Concluído'
+                     : (venceu ? 'Vencido' : seguro(c.codigo));
         var quanto = !total ? 'Aulas ainda não publicadas'
                     : (passou ? 'Aprovado na prova'
                     : ok + ' de ' + total + ' aula(s) concluída(s)');
+        var destino = passou ? 'certificado.html?m=' + m.id
+                             : 'curso.html?m=' + m.id;
 
-        html += '<' + (venceu ? 'div' : 'a') + ' class="modulo entra ' + estado + '"' +
-          (venceu ? '' : ' href="curso.html?m=' + m.id + '"') +
+        html += '<' + (trancado ? 'div' : 'a') + ' class="modulo entra ' + estado + '"' +
+          (trancado ? '' : ' href="' + destino + '"') +
           ' style="animation-delay:' + (i * 0.06) + 's">' +
           '<span class="modulo__tag">' + etiqueta + '</span>' +
           '<h3>' + seguro(c.titulo) + '</h3>' +
@@ -163,10 +199,10 @@
           '<div class="modulo__pe"><div style="flex:1">' +
             '<div class="barra"><i style="width:' + (passou ? 100 : pct) + '%"></i></div>' +
             '<span class="modulo__quanto">' + quanto + '</span></div>' +
-            (venceu ? '' : '<span class="modulo__ir">' +
+            (trancado ? '' : '<span class="modulo__ir">' +
               (passou ? 'Certificado' : (ok ? 'Continuar' : 'Começar')) + ' →</span>') +
           '</div>' +
-          '</' + (venceu ? 'div' : 'a') + '>';
+          '</' + (trancado ? 'div' : 'a') + '>';
       });
       $('modulos').innerHTML = html;
     })();

@@ -124,6 +124,19 @@
       return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso;
     }
 
+    // ESCAPA O QUE VEM DO BANCO ANTES DE VIRAR HTML.
+    // Esta página é pública, sem login, e mostrava `nome` cru dentro de
+    // innerHTML. O nome é digitado pelo próprio aluno no resgate: bastava
+    // se cadastrar como <img src=x onerror=...> e o script rodava no
+    // navegador de todo auditor que conferisse aquele certificado, no
+    // domínio da clínica. As outras páginas já tinham esta função; esta,
+    // que é a mais exposta, era a única sem.
+    function seguro(t) {
+      return String(t == null ? '' : t)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
     $('formVal').addEventListener('submit', async function (ev) {
       ev.preventDefault();
       var codigo = $('codigo').value.trim();
@@ -136,6 +149,21 @@
 
       var r = await sb.rpc('trein_conferir_certificado', { p_codigo: codigo });
       b.disabled = false; b.textContent = 'Validar';
+
+      // FALHA DE REDE NÃO É "CÓDIGO INEXISTENTE".
+      // O supabase-js não levanta exceção quando a rede cai: devolve
+      // {data: null, error: {...}}. Como o `error` não era lido, um soluço
+      // de internet dizia "Não encontramos esse código" para um
+      // certificado verdadeiro — e o contratante recusaria um documento
+      // autêntico por causa disso. Numa página de validação, essa mentira
+      // custa caro.
+      if (r && r.error) {
+        caixa.className = 'val__res atencao';
+        caixa.innerHTML = '<b>Não consegui conferir agora.</b>' +
+          '<p>A consulta não chegou ao servidor. Isso não diz nada sobre o ' +
+          'certificado — tente de novo em instantes.</p>';
+        return;
+      }
 
       // a função devolve uma tabela: sem linha nenhuma, o código não existe
       var d = (r && r.data && r.data.length) ? r.data[0] : null;
@@ -158,11 +186,11 @@
         '<b>' + (vencido ? 'Certificado autêntico, mas vencido'
                          : 'Certificado autêntico') + '</b>' +
         '<dl>' +
-          '<dt>Nome</dt><dd>' + (d.nome || '') + '</dd>' +
-          '<dt>CPF</dt><dd>' + (d.cpf_masc || '') + '</dd>' +
-          (d.empresa ? '<dt>Empresa</dt><dd>' + d.empresa + '</dd>' : '') +
-          '<dt>Treinamento</dt><dd>' + (d.curso || '') +
-            (d.carga_horaria ? ', ' + d.carga_horaria + ' horas' : '') + '</dd>' +
+          '<dt>Nome</dt><dd>' + seguro(d.nome) + '</dd>' +
+          '<dt>CPF</dt><dd>' + seguro(d.cpf_masc) + '</dd>' +
+          (d.empresa ? '<dt>Empresa</dt><dd>' + seguro(d.empresa) + '</dd>' : '') +
+          '<dt>Treinamento</dt><dd>' + seguro(d.curso) +
+            (d.carga_horaria ? ', ' + Number(d.carga_horaria) + ' horas' : '') + '</dd>' +
           '<dt>Emitido em</dt><dd>' + dataBr(d.emitido_em) + '</dd>' +
           (d.valido_ate ? '<dt>Válido até</dt><dd>' + dataBr(d.valido_ate) + '</dd>' : '') +
         '</dl>' +
