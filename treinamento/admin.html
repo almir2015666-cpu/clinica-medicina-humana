@@ -814,6 +814,10 @@
         }
       }
       b.disabled = true; b.textContent = 'Salvando...';
+      // `.select('id')` e nao `.select()`: o segundo vira `select=*`, e
+      // com a apostila fora do alcance (35-fechar-a-apostila-de-verdade)
+      // pedir todas as colunas passa a dar erro de permissao. Aqui so
+      // precisamos saber se a linha foi mesmo gravada.
       var r = await sb.from('trein_curso').update({
         titulo: titulo,
         subtitulo: $('cSub').value.trim() || null,
@@ -823,7 +827,7 @@
         nota_minima: nota,
         questoes_por_prova: qtd,
         ativo: $('cAtivo').checked
-      }).eq('id', atual.id).select().maybeSingle();
+      }).eq('id', atual.id).select('id').maybeSingle();
       b.disabled = false; b.textContent = 'Salvar dados do curso';
 
       if (r.error) return recado(msg, 'Nao consegui salvar: ' + seguro(r.error.message));
@@ -869,7 +873,7 @@
       b.disabled = true; b.textContent = 'Salvando...';
       var r = await sb.from('trein_curso')
         .update({ apostila: texto.trim() || null })
-        .eq('id', atual.id).select().maybeSingle();
+        .eq('id', atual.id).select('id').maybeSingle();
       b.disabled = false; b.textContent = 'Salvar apostila';
 
       if (r.error) return recado(msg, 'Nao consegui salvar: ' + seguro(r.error.message));
@@ -911,7 +915,7 @@
       var r = await sb.from('trein_curso').update({
         titulo_certificado: $('cTitCert').value.trim() || null,
         conteudo_programatico: conteudo || null
-      }).eq('id', atual.id).select().maybeSingle();
+      }).eq('id', atual.id).select('id').maybeSingle();
       b.disabled = false; b.textContent = 'Salvar certificado';
 
       if (r.error) return recado(msg, 'Nao consegui salvar: ' + seguro(r.error.message));
