@@ -341,7 +341,7 @@
       var html = '<div class="i-prova"><h1>Prova final</h1>' +
         '<p class="palco__sub">' + E.questoes.length + ' perguntas · você ' +
         'precisa de ' + E.notaMinima + '% para ser aprovado. Errou? Pode ' +
-        'refazer quantas vezes precisar.</p>';
+        'refazer, esperando 30 minutos, até 3 vezes por dia.</p>';
       E.questoes.forEach(function (q, i) {
         html += '<div class="i-pergunta" id="p' + i + '"><b>' + (i + 1) + '. ' +
           seguro(q.enunciado) + '</b>';
@@ -402,7 +402,9 @@
         (r.aprovado
           ? '<p>O seu certificado já está pronto, no seu nome.</p>' +
             '<a class="i-botao" href="certificado.html?' + (demo ? 'amostra=1' : 'm=' + mat) + '">Ver o meu certificado</a>'
-          : '<p>Reveja as aulas e tente de novo. Não há limite de tentativas.</p>' +
+          : '<p>Reveja as aulas com calma. Você pode tentar de novo daqui a ' +
+              '<b>30 minutos</b>, até 3 vezes por dia. A espera existe para ' +
+              'a prova medir o que você aprendeu, e não a insistência.</p>' +
             '<button class="i-botao i-botao--linha" id="denovo">Refazer a prova</button>') +
         '</div>';
       if (!r.aprovado) $('denovo').addEventListener('click', abrirProva);
