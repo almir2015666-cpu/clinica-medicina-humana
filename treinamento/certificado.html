@@ -67,14 +67,20 @@
        claras. É o que papel de segurança tem e papel de escritório não —
        o olho não distingue o desenho, mas percebe que não é folha branca.
        Fica DENTRO da moldura, senão vaza pela borda impressa. */
+    /* O clarão do meio, que deixa o texto legível sobre a trama. */
     .folha::before{content:"";position:absolute;inset:0;z-index:0;
-      background:
-        repeating-linear-gradient(58deg,
-          rgba(10,46,92,.055) 0 1px, transparent 1px 9px),
-        repeating-linear-gradient(-58deg,
-          rgba(10,46,92,.045) 0 1px, transparent 1px 9px),
-        radial-gradient(ellipse at 50% 42%,
-          rgba(255,255,255,.9) 0 38%, rgba(255,255,255,0) 72%);
+      background:radial-gradient(ellipse at 50% 42%,
+        rgba(255,255,255,.9) 0 38%, rgba(255,255,255,0) 72%);
+      pointer-events:none}
+
+    /* A TRAMA É SVG NO DOCUMENTO, e não `repeating-linear-gradient` no CSS.
+       Medido: impresso em PDF, o gradiente virava faixa larga de uns 100px,
+       nada parecido com a textura fina que aparece na tela. O Chrome
+       reamostra padrão de gradiente ao exportar, e o desenho se perde. Um
+       <svg> no documento sai do PDF como vetor de verdade, e fica igual na
+       tela, no papel e ampliado. Era defeito antigo: o certificado que o
+       aluno imprime hoje já sai com essa mancha. */
+    .trama{position:absolute;inset:0;z-index:0;width:100%;height:100%;
       pointer-events:none}
 
     /* A MOLDURA: faixa marinho por fora, fio ouro por dentro. */
@@ -243,6 +249,21 @@
     .verso ul.denso li{font-size:.75rem;line-height:1.48;margin-bottom:.3rem}
     .verso ul.tresc{column-count:3;column-gap:1.9rem}
 
+    /* NO MODELO, some tudo que muda de aluno para aluno e de curso para
+       curso. O que fica é o papel: moldura, trama, logo, cabeçalho, o
+       título CERTIFICADO, o ornamento, as linhas de assinatura, o bloco da
+       responsável técnica (que é igual em todos) e as frases fixas do
+       rodapé. `visibility` e não `display`: o espaço tem de continuar
+       ocupado, senão o resto sobe e o modelo deixa de bater com o
+       certificado de verdade. */
+    body.modelo .nome, body.modelo .cpf, body.modelo .texto,
+    body.modelo .cidade, body.modelo .medalha b, body.modelo .medalha em,
+    body.modelo .ass:nth-child(2) b, body.modelo .ass:nth-child(2) span,
+    body.modelo .confere, body.modelo .verso h2, body.modelo .verso ul,
+    body.modelo .verso .vcab, body.modelo .rodape span:nth-child(3){
+      visibility:hidden}
+    body.modelo .barra{display:none}
+
     @media print{
       /* 960x540pt e paisagem: a mesma folha do modelo atual */
       @page{size:960pt 540pt;margin:0}
@@ -293,6 +314,29 @@
       registro: 'CREA-BA: 0518911586'
     };
     var CIDADE = 'Camaçari';
+
+    // Duas famílias de linhas finas cruzadas, como em papel de segurança.
+    // `vector-effect` mantém a linha com a mesma espessura em qualquer
+    // ampliação, e `patternUnits` em unidades do usuário faz o desenho
+    // acompanhar a folha sem esticar.
+    var TRAMA =
+      '<svg class="trama" viewBox="0 0 960 540" preserveAspectRatio="none" ' +
+           'xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+        '<defs>' +
+          '<pattern id="gui" width="9" height="9" patternUnits="userSpaceOnUse" ' +
+                   'patternTransform="rotate(58)">' +
+            '<line x1="0" y1="0" x2="0" y2="9" stroke="#0a2e5c" ' +
+                  'stroke-width=".85" stroke-opacity=".075" />' +
+          '</pattern>' +
+          '<pattern id="gui2" width="9" height="9" patternUnits="userSpaceOnUse" ' +
+                   'patternTransform="rotate(-58)">' +
+            '<line x1="0" y1="0" x2="0" y2="9" stroke="#0a2e5c" ' +
+                  'stroke-width=".85" stroke-opacity=".06" />' +
+          '</pattern>' +
+        '</defs>' +
+        '<rect width="960" height="540" fill="url(#gui)" />' +
+        '<rect width="960" height="540" fill="url(#gui2)" />' +
+      '</svg>';
     var SITE = 'clinicamedicinahumana.com.br';
 
     // A imagem da assinatura, no bucket PRIVADO. Caminho fixo: o admin
@@ -417,6 +461,7 @@
 
       return '' +
       '<div class="folha">' +
+        TRAMA +
         '<div class="moldura"></div>' +
         '<span class="canto ce"></span><span class="canto cd"></span>' +
         '<span class="canto be"></span><span class="canto bd"></span>' +
@@ -491,6 +536,7 @@
 
       return '' +
       '<div class="folha">' +
+        TRAMA +
         '<div class="moldura"></div>' +
         '<span class="canto ce"></span><span class="canto cd"></span>' +
         '<span class="canto be"></span><span class="canto bd"></span>' +
@@ -544,6 +590,28 @@
 
     (async function () {
       var busca = new URLSearchParams(location.search);
+
+      // O PAPEL EM BRANCO (?modelo=1)
+      //
+      // A Edge Function que assina o certificado roda no servidor, e
+      // servidor não tem navegador: ela não consegue desenhar a moldura, a
+      // trama do fundo, as cantoneiras e o logo. Então faz-se com o
+      // certificado o que se faz com certificado de papel de verdade: o
+      // formulário já vem impresso, e só o que muda é preenchido.
+      //
+      // Este modo desenha TUDO o que é igual em todos os certificados e
+      // esconde o que muda. O resultado é impresso em PDF uma única vez e
+      // guardado como modelo; a função abre esse arquivo e escreve por
+      // cima. O desenho fica idêntico ao aprovado porque é o mesmo
+      // arquivo, e não uma tentativa de imitá-lo em código.
+      if (busca.get('modelo')) {
+        document.body.classList.add('modelo');
+        await buscarAssinatura();
+        alvo.innerHTML = folhaFrente(AMOSTRA) + folhaVerso(AMOSTRA);
+        document.title = 'Modelo do certificado';
+        return;
+      }
+
       if (busca.get('amostra')) {
         // `?amostra=1&curso=<id>` desenha a amostra com o TEXTO DAQUELE
         // curso — título do certificado, carga horária e conteúdo
