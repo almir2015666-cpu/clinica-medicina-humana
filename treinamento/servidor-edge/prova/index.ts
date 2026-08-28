@@ -53,6 +53,13 @@ function embaralhar<T>(lista: T[]): T[] {
   return a;
 }
 
+// Quanto tempo esperar depois de reprovar, e quantas provas por dia.
+// São números de regra da clínica, e não de técnica: ficam aqui em cima,
+// nomeados, para quem for mudar não precisar procurar dentro da função.
+const ESPERA_MS = 30 * 60 * 1000;
+const MAX_POR_DIA = 3;
+const FUSO = "America/Bahia";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "Método não permitido" }, 405);
@@ -112,6 +119,64 @@ Deno.serve(async (req) => {
       .eq("matricula_id", matricula).eq("concluida", true);
     if ((feitas ?? 0) < total_aulas) {
       return json({ error: "Termine todas as aulas antes de fazer a prova." }, 403);
+    }
+
+    // ESPERA DEPOIS DE REPROVAR, E LIMITE POR DIA.
+    //
+    // Sem isto, quem reprova tenta de novo no segundo seguinte, quantas
+    // vezes quiser. O problema nao e a insistencia: e que, tentando sem
+    // parar, as questoes COMECAM A REPETIR (sao 10 sorteadas de 150) e a
+    // pessoa converge na resposta por eliminacao, sem ter aprendido nada.
+    // O certificado sairia valido para quem nao sabe, que e exatamente o
+    // que a fiscalizacao procura.
+    //
+    // A conferencia e AQUI, no servidor, e nao na tela: a tela e o
+    // navegador do aluno, e quem quisesse burlar bastaria chamar esta
+    // funcao direto.
+    const { data: recentes } = await admin
+      .from("trein_tentativa")
+      .select("feita_em,aprovado")
+      .eq("matricula_id", matricula)
+      .order("feita_em", { ascending: false })
+      .limit(30);
+
+    if (recentes && recentes.length) {
+      const agora = Date.now();
+
+      // 1. A espera de 30 minutos, contada da ULTIMA tentativa reprovada.
+      const ultima = recentes[0];
+      if (!ultima.aprovado) {
+        const passou = agora - new Date(ultima.feita_em).getTime();
+        const faltam = ESPERA_MS - passou;
+        if (faltam > 0) {
+          const min = Math.ceil(faltam / 60000);
+          return json({
+            error: "Reveja as aulas com calma. Você poderá tentar de novo em "
+                 + (min === 1 ? "1 minuto." : min + " minutos."),
+            espere_segundos: Math.ceil(faltam / 1000),
+          }, 429);
+        }
+      }
+
+      // 2. Tres por dia, contadas no fuso da clinica.
+      //
+      // Dia do CALENDARIO, e nao "ultimas 24 horas": "voce ja fez tres
+      // hoje, tente amanha" e uma frase que qualquer pessoa entende, e
+      // "espere ate as 14h37 de amanha" nao e. E o fuso e o da Bahia, e
+      // nao o do servidor, senao a virada do dia aconteceria as 21h para
+      // quem esta aqui.
+      const dia = (d: string) =>
+        new Intl.DateTimeFormat("en-CA", { timeZone: FUSO }).format(new Date(d));
+      const hoje = new Intl.DateTimeFormat("en-CA", { timeZone: FUSO })
+        .format(new Date());
+      const feitasHoje = recentes.filter((t) => dia(t.feita_em) === hoje).length;
+      if (feitasHoje >= MAX_POR_DIA) {
+        return json({
+          error: "Você já fez " + MAX_POR_DIA + " provas hoje. Reveja as "
+               + "aulas e tente de novo amanhã.",
+          espere_ate_amanha: true,
+        }, 429);
+      }
     }
 
     const { data: banco } = await admin

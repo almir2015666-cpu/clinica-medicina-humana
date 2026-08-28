@@ -208,7 +208,7 @@
 
     async function entrarNoPainel() {
       if (await aindaPodeEntrar()) {
-        await entrarNoPainel();
+        location.href = 'painel.html';
         return;
       }
       await sb.auth.signOut();
