@@ -78,8 +78,8 @@ select c.id, q.enunciado, q.alternativas::jsonb, q.correta, q.ordem
     ('Sobre o trabalho realizado no cesto aéreo do caminhão:',
      '["O trabalhador pode passar do cesto para o poste, se for mais rápido assim", "O cinto pode ser preso na estrutura do poste ou no cabo mensageiro", "O equipamento deve estar inspecionado e ensaiado, o veículo posicionado e sinalizado, e o trabalhador permanece no cesto com o cinto preso ao ponto previsto", "Basta calçar as rodas do caminhão antes de subir"]', 2, 18),
 
-    ('Sobre a vara de manobra e as demais ferramentas isolantes:',
-     '["Podem ser usadas na chuva fina, já que são isolantes", "Devem estar limpas, secas, sem trincas e dentro da validade do ensaio, e o trabalhador segura somente abaixo do limitador", "Podem ser reparadas com fita isolante quando trincam", "Servem também de alavanca para soltar peças presas"]', 1, 19),
+    ('Antes de a equipe começar o serviço, já no local, o que deve ser feito?',
+     '["Basta conferir se todo mundo trouxe o EPI", "A análise de risco da tarefa no próprio local, avaliando a rede, o poste, o tempo e o trânsito, com a participação de toda a equipe", "Basta o encarregado explicar o serviço no caminho", "Basta preencher a ordem de serviço no fim do dia"]', 1, 19),
 
     ('Antes de iniciar o serviço na rede em via pública, é preciso:',
      '["Apenas ligar o pisca-alerta do veículo", "Apenas avisar o morador da casa em frente", "Isolar e sinalizar a área com cones e cavaletes, protegendo a equipe do trânsito de veículos e de pedestres", "Apenas trabalhar depressa para atrapalhar menos o trânsito"]', 2, 20),
@@ -132,8 +132,8 @@ select c.id, q.enunciado, q.alternativas::jsonb, q.correta, q.ordem
     ('No mesmo poste passam rede primária, rede secundária e cabos de telecomunicação. O que fazer?',
      '["Considerar que os cabos mais baixos estão sempre desligados", "Identificar os circuitos pela cor da capa dos cabos", "Perguntar ao morador qual cabo é de qual serviço", "Não presumir nada: identificar os circuitos conforme o procedimento e confirmar com o centro de operação antes de qualquer intervenção"]', 3, 36),
 
-    ('A ferramenta isolante ficou molhada pela chuva durante o serviço. O que fazer?',
-     '["Continuar, porque a borracha não perde a proteção com água", "Secar na roupa e seguir o serviço", "Interromper a atividade: material isolante molhado ou sujo perde a proteção e só volta ao uso limpo, seco e inspecionado", "Usar somente para tocar pontos de baixa tensão"]', 2, 37),
+    ('A equipe encontrou vazamento de óleo em um transformador. O que fazer?',
+     '["Recolher o óleo com estopa e seguir o serviço", "Continuar o serviço, porque o óleo do transformador é isolante e não oferece risco", "Isolar a área, comunicar e não intervir sem procedimento: há risco de incêndio, de escorregão e de contato com produto perigoso", "Lavar o piso com água para tirar o óleo"]', 2, 37),
 
     ('Diante de uma situação de emergência com risco de vida na instalação:',
      '["Qualquer pessoa pode acionar o desligamento de emergência, mesmo sem ser da equipe", "Somente o encarregado da equipe pode desligar", "Somente o centro de operação pode desligar, sem exceção", "É preciso preencher a autorização antes de desligar"]', 0, 38),
@@ -208,8 +208,8 @@ select c.id, q.enunciado, q.alternativas::jsonb, q.correta, q.ordem
     ('Há vazamento no sistema hidráulico. Como localizar o ponto?',
      '["Passando a mão ao longo da mangueira para sentir o óleo", "Com o equipamento desligado e despressurizado, por inspeção visual ou com um pedaço de papelão: o jato de óleo sob pressão perfura a pele", "Aproximando o rosto da mangueira para enxergar melhor", "Apertando a mangueira com a mão para ver onde escapa"]', 1, 25),
 
-    ('Ao descer da empilhadeira para resolver outra tarefa, o operador deve:',
-     '["Deixar ligada, se for voltar em poucos minutos", "Deixar a chave na ignição para outro colega usar", "Deixar em ponto morto com o motor ligado", "Baixar os garfos, acionar o freio de estacionamento, desligar e levar a chave consigo, para ninguém não autorizado usar"]', 3, 26),
+    ('Pode-se usar a empilhadeira para rebocar outro equipamento ou arrastar uma carga pelo chão?',
+     '["Pode, desde que a distância seja curta", "Pode, se a corrente usada for resistente", "Pode, se um colega for acompanhando o percurso", "Não: o equipamento foi feito para elevar e transportar sobre os garfos, e o reboque improvisado compromete freio, direção e estabilidade"]', 3, 26),
 
     ('Uso de celular durante a operação da empilhadeira:',
      '["Permitido em ligações rápidas", "Proibido: mesmo com fone, a atenção cai e o operador deixa de perceber pedestres e obstáculos", "Permitido com o equipamento em movimento lento", "Permitido para conferir a lista de separação de pedidos"]', 1, 27),
@@ -293,8 +293,8 @@ select c.id, q.enunciado, q.alternativas::jsonb, q.correta, q.ordem
     ('Qual é a diferença entre proteção fixa e proteção móvel?',
      '["Não há diferença: as duas são presas com parafuso", "A fixa é de acrílico e a móvel é de chapa", "A fixa só sai com ferramenta e permanece no lugar durante a operação; a móvel abre e por isso precisa de intertravamento", "A móvel só é usada em máquinas antigas"]', 2, 17),
 
-    ('Por que roupa larga, cordão de crachá, corrente e cabelo solto são proibidos perto de partes rotativas?',
-     '["Porque descaracterizam o uniforme da empresa", "Porque podem ser agarrados pela parte em movimento e arrastar o trabalhador para dentro da máquina", "Porque sujam a peça que está sendo produzida", "Porque atrapalham a identificação do trabalhador no setor"]', 1, 18),
+    ('Um aprendiz de 17 anos pode operar a máquina se estiver acompanhado por um colega experiente?',
+     '["Pode, desde que o acompanhamento seja o tempo todo", "Não pode: menores de 18 anos não operam, nem fazem manutenção, em máquinas com risco de acidente", "Pode, se o serviço for apenas de alimentação da máquina", "Pode, se houver autorização por escrito dos pais"]', 1, 18),
 
     ('Como deve ser o dispositivo que dá a partida na máquina?',
      '["Um botão grande e livre, para ser encontrado rápido", "Protegido contra acionamento acidental, para a máquina não partir com uma esbarrada", "Uma alavanca que pode ficar travada na posição ligada", "Um pedal solto no chão, sem proteção em volta"]', 1, 19),
@@ -365,4 +365,235 @@ select c.id, q.enunciado, q.alternativas::jsonb, q.correta, q.ordem
  where c.codigo = 'NR-12';
 
 
--- MARCADOR-FIM-PARCIAL
+-- =====================================================================
+--  NR-17 — Ergonomia
+--  As 10 primeiras cobriram postura, peso e o básico do posto. Estas 30
+--  entram nos anexos e na organização do trabalho: teleatendimento,
+--  operador de caixa, turno, meta, vibração, pausa fisiológica e o posto
+--  que precisa ser regulável porque nem todo mundo tem o mesmo corpo.
+-- =====================================================================
+
+delete from public.trein_questao
+ where curso_id = (select id from public.trein_curso where codigo = 'NR-17')
+   and ordem between 11 and 40;
+
+insert into public.trein_questao (curso_id, enunciado, alternativas, correta, ordem)
+select c.id, q.enunciado, q.alternativas::jsonb, q.correta, q.ordem
+  from public.trein_curso c,
+       (values
+    ('Qual deve ser a altura da superfície de trabalho?',
+     '["Sempre a mesma em todos os postos, por padronização da empresa", "Sempre na altura do peito, para enxergar bem a tarefa", "Sempre a mais baixa possível, para poupar os ombros", "Compatível com a tarefa e com a estatura do trabalhador: mais alta no trabalho de precisão e mais baixa quando exige força"]', 3, 11),
+
+    ('Como devem ficar dispostos os materiais e as ferramentas mais usados no posto?',
+     '["Guardados no armário, para manter a bancada limpa", "Dentro da área de alcance das mãos, sem exigir torção do tronco nem braço esticado", "Sempre do lado esquerdo, por padrão", "Empilhados atrás do trabalhador, para liberar a frente"]', 1, 12),
+
+    ('Qual é a posição adequada para o uso do teclado e do mouse?',
+     '["Punhos retos, cotovelos junto ao corpo formando cerca de 90 graus e antebraços apoiados", "Punhos dobrados para cima, apoiados na borda da mesa", "Teclado bem afastado, com os braços esticados", "Mouse do outro lado da mesa, longe do teclado"]', 0, 13),
+
+    ('Quando o apoio para os pés é necessário?',
+     '["Sempre, em qualquer posto de trabalho sentado", "Nunca, porque atrapalha a circulação embaixo da mesa", "Quando, com a cadeira na altura correta para a bancada, os pés do trabalhador não alcançam o chão", "Somente para trabalhador com problema de coluna"]', 2, 14),
+
+    ('Sobre o conforto térmico em atividades sedentárias:',
+     '["Quanto mais frio o ambiente, maior a produtividade", "Deve-se evitar corrente de ar direcionada ao trabalhador e manter temperatura e umidade em faixas de conforto", "O ar-condicionado deve ficar sempre na menor temperatura possível", "Conforto térmico não é assunto de ergonomia"]', 1, 15),
+
+    ('Sobre o ruído em atividades que exigem concentração e comunicação:',
+     '["Só importa quando passa do limite de insalubridade", "Só importa nos setores de produção", "Mesmo abaixo do limite de insalubridade o ruído atrapalha a concentração e a conversa, e deve ser reduzido ao nível de conforto", "Resolve-se distribuindo protetor auricular no escritório"]', 2, 16),
+
+    ('No trabalho de teleatendimento, a norma prevê:',
+     '["Somente cadeira giratória com regulagem de altura", "Somente monitor de tela plana", "Somente o controle do tempo médio de atendimento", "Pausas específicas durante a jornada, conjunto de fone individual e mobiliário adequado, além de metas que não estimulem ritmo excessivo"]', 3, 17),
+
+    ('No trabalho em caixa de supermercado, a norma exige:',
+     '["Assento adequado, posto que permita alternar a postura e limite para o levantamento de volumes pesados", "Que o operador fique sempre em pé, para agilizar o atendimento", "Que o operador levante qualquer volume do carrinho do cliente", "Que o assento seja retirado nos horários de pico"]', 0, 18),
+
+    ('Sobre a ginástica laboral e as pausas durante a jornada:',
+     '["Ajudam, mas não substituem a correção do posto de trabalho e da organização da tarefa", "Substituem a avaliação ergonômica quando feitas todos os dias", "Servem apenas para descontrair a equipe", "Devem ser feitas fora do horário de trabalho"]', 0, 19),
+
+    ('Ao movimentar um carrinho carregado, é preferível:',
+     '["Puxar, porque assim o trabalhador enxerga o caminho", "Puxar com uma das mãos, girando o tronco", "Empurrar com os braços esticados e o corpo inclinado para trás", "Empurrar, usando a força das pernas e o peso do corpo, com os braços próximos ao tronco"]', 3, 20),
+
+    ('Carrinho com rodas emperradas rodando em piso irregular:',
+     '["Não interfere no esforço, porque o peso continua o mesmo", "Só atrapalha a velocidade do serviço", "Aumenta muito a força necessária e o risco de lesão: rodas e piso fazem parte da avaliação ergonômica", "Resolve-se colocando mais um trabalhador para empurrar"]', 2, 21),
+
+    ('Por que a postura estática prolongada faz mal, mesmo sem esforço aparente?',
+     '["Porque cansa principalmente a visão", "Porque o músculo fica contraído sem descanso, a circulação piora e aparecem fadiga e dor", "Porque o trabalhador perde o ritmo de produção", "Porque aumenta o gasto de energia do corpo"]', 1, 22),
+
+    ('Sobre o trabalho noturno e em turnos:',
+     '["Não tem relação com a ergonomia", "Basta pagar o adicional noturno previsto", "Afeta o sono e aumenta a fadiga e o erro: exige cuidado nas escalas, nas pausas e na organização do trabalho", "Resolve-se com café à disposição no setor"]', 2, 23),
+
+    ('Sobre metas e premiação por produção:',
+     '["Não devem existir mecanismos que estimulem ritmo excessivo de trabalho, porque adoecem o trabalhador", "São livres, desde que o trabalhador concorde", "São permitidas quando o valor pago é pequeno", "São obrigatórias para medir o desempenho da equipe"]', 0, 24),
+
+    ('Sobre a ida ao banheiro e a hidratação durante a jornada:',
+     '["Só podem acontecer nas pausas programadas", "O trabalhador deve poder atender às necessidades fisiológicas e se hidratar, sem depender de autorização a cada vez", "Devem ser controladas por senha, para não atrapalhar a produção", "Não são assunto da ergonomia"]', 1, 25),
+
+    ('Há reflexo forte na tela do computador. Como corrigir?',
+     '["Aumentando o brilho da tela ao máximo", "Trocando o monitor por um modelo maior", "Desligando metade das lâmpadas do setor", "Reposicionando a tela em relação à janela e às luminárias, usando persiana e evitando fontes de luz atrás ou à frente do monitor"]', 3, 26),
+
+    ('Para reduzir a fadiga visual de quem passa o dia na tela:',
+     '["Basta usar óculos de descanso", "Basta reduzir o tamanho da fonte na tela", "Basta trabalhar com a luz do teto apagada", "Fazer pausas curtas olhando para longe ao longo do dia, além de ajustar iluminação, brilho e distância da tela"]', 3, 27),
+
+    ('Quando o trabalho é feito em casa, a ergonomia:',
+     '["Deixa de ser responsabilidade da empresa", "Passa a ser problema apenas do trabalhador", "Continua valendo: a empresa deve orientar sobre a organização do posto e os cuidados com postura, pausas e iluminação", "Só vale quando a empresa fornece os móveis"]', 2, 28),
+
+    ('Trabalho com os braços acima da altura dos ombros por longos períodos:',
+     '["É seguro, desde que o objeto seja leve", "Sobrecarrega ombros e pescoço e deve ser reduzido com plataforma, ferramenta apropriada ou mudança da altura da tarefa", "Só é problema para quem tem mais de 50 anos", "Melhora com o uso de munhequeira"]', 1, 29),
+
+    ('Duas pessoas vão levantar juntas uma carga pesada. O correto é:',
+     '["Combinar antes quem dá o comando, levantar ao mesmo tempo e manter o passo sincronizado", "Cada um levantar assim que estiver pronto", "O mais forte levantar primeiro e o outro acompanhar", "Levantar bem rápido, para reduzir o tempo de esforço"]', 0, 30),
+
+    ('Existe um peso máximo fixo que sirva para qualquer trabalhador e qualquer tarefa?',
+     '["Não: o limite depende da avaliação, que considera frequência, distância, altura, postura e quem executa a tarefa", "Sim, 60 quilos para homens e 30 para mulheres", "Sim, 25 quilos para qualquer situação", "Sim, o peso que o próprio trabalhador disser que aguenta"]', 0, 31),
+
+    ('O espaço embaixo da mesa está ocupado por caixas e pelo gabinete. Qual é o problema?',
+     '["Nenhum, desde que o trabalhador caiba na cadeira", "O trabalhador não consegue aproximar as pernas nem mudar de posição, o que força a coluna e os braços", "Apenas dificulta a limpeza do setor", "Apenas prejudica a aparência do escritório"]', 1, 32),
+
+    ('Trabalhadora gestante ou trabalhador com restrição médica no setor. O que a empresa faz?',
+     '["Mantém a tarefa como está, porque a restrição é temporária", "Afasta do trabalho até o fim da restrição, sempre", "Adapta o posto e a tarefa conforme a orientação médica, mudando o que for necessário no mobiliário, no ritmo e nas pausas", "Transfere para outro setor sem avaliar a nova tarefa"]', 2, 33),
+
+    ('Qual é o papel dos trabalhadores na avaliação ergonômica?',
+     '["Nenhum: quem avalia é o profissional técnico", "Apenas responder a um questionário no fim do processo", "Apenas assinar o relatório final", "Participar informando as dificuldades reais da tarefa e ajudando a testar e validar as soluções propostas"]', 3, 34),
+
+    ('Quais são sinais de alerta para lesões relacionadas ao trabalho?',
+     '["Somente inchaço visível na articulação", "Somente dor que já impede o movimento", "Dor, formigamento, dormência, perda de força e cansaço que não passa com o descanso", "Somente cãibra durante a jornada"]', 2, 35),
+
+    ('Sobre as ferramentas manuais usadas o dia inteiro:',
+     '["Quanto mais pesada a ferramenta, menos esforço o trabalhador faz", "O formato do cabo não influencia no esforço", "O que importa é apenas que a ferramenta corte bem", "O cabo, o peso e o formato devem permitir pegada firme com a mão inteira, sem forçar o punho nem apertar com a ponta dos dedos"]', 3, 36),
+
+    ('O uso prolongado de martelete, lixadeira ou furadeira de impacto exige:',
+     '["Revezamento e pausas, manutenção do equipamento e luva antivibração, porque a vibração lesiona nervos e vasos da mão", "Somente protetor auricular", "Somente apertar com mais força para segurar melhor a ferramenta", "Somente trocar a ferramenta a cada cinco anos"]', 0, 37),
+
+    ('Em que altura da prateleira devem ficar os itens mais pesados e mais usados?',
+     '["Nos níveis mais altos, para liberar espaço embaixo", "Entre o quadril e os ombros, evitando agachar e levantar acima da cabeça", "No chão, porque a queda seria menor", "Tanto faz, desde que estejam organizados"]', 1, 38),
+
+    ('O que a empresa deve fazer com as queixas de desconforto e dor relatadas pelos trabalhadores?',
+     '["Registrar, analisar e usar como informação na avaliação ergonômica e no plano de melhorias", "Arquivar no prontuário e aguardar o afastamento", "Considerar somente quando houver atestado médico", "Encaminhar apenas ao setor de pessoal"]', 0, 39),
+
+    ('O mesmo posto é usado por pessoas de estaturas diferentes e por canhotos. O que fazer?',
+     '["Padronizar tudo pela média das pessoas do setor", "Deixar que cada um se vire e se adapte como puder", "Escolher os móveis pelo trabalhador mais alto da equipe", "Prever regulagens no mobiliário e nos equipamentos, para que cada trabalhador ajuste o posto ao próprio corpo"]', 3, 40)
+       ) as q(enunciado, alternativas, correta, ordem)
+ where c.codigo = 'NR-17';
+
+
+-- =====================================================================
+--  NR-18 — Construção civil
+--  As 10 primeiras trataram de guarda-corpo, andaime, escada, escavação e
+--  carga suspensa. Estas 30 seguem para o resto do canteiro: bandeja,
+--  tela de fachada, balancim, elevador de obra, betoneira, poeira de
+--  sílica, telhado frágil, demolição e o que se faz com o entulho.
+-- =====================================================================
+
+delete from public.trein_questao
+ where curso_id = (select id from public.trein_curso where codigo = 'NR-18')
+   and ordem between 11 and 40;
+
+insert into public.trein_questao (curso_id, enunciado, alternativas, correta, ordem)
+select c.id, q.enunciado, q.alternativas::jsonb, q.correta, q.ordem
+  from public.trein_curso c,
+       (values
+    ('O trabalhador acabou de ser contratado para a obra. O que precisa acontecer antes de ele começar?',
+     '["Basta receber os EPI e o crachá", "Basta assinar a ficha de registro", "Receber o treinamento de admissão, com informação sobre os riscos da obra e as medidas de proteção, antes de iniciar as atividades", "Receber o treinamento no primeiro sábado depois da admissão"]', 2, 11),
+
+    ('Para que serve o programa de gerenciamento de riscos da obra?',
+     '["Para calcular o custo da mão de obra por etapa", "Para identificar os riscos de cada etapa da obra e definir as medidas de prevenção, com prazos e responsáveis", "Para registrar a produtividade das equipes", "Para atender apenas a uma exigência do cliente"]', 1, 12),
+
+    ('Para que serve a plataforma de proteção, conhecida como bandeja, instalada na fachada?',
+     '["Para apoiar o material que sobe para as lajes", "Para servir de piso de trabalho dos pedreiros", "Para sustentar o andaime fachadeiro", "Para reter materiais e pessoas que caiam da periferia do edifício"]', 3, 13),
+
+    ('A tela de proteção na fachada serve para:',
+     '["Impedir a projeção e a queda de materiais para fora da obra, protegendo quem está embaixo e na rua", "Proteger a obra do sol e da chuva", "Esconder a obra da vizinhança", "Sustentar o guarda-corpo da periferia da laje"]', 0, 14),
+
+    ('Vergalhões de espera apontando para cima na laje. O que fazer?',
+     '["Proteger as pontas com dispositivo apropriado, para evitar perfuração em caso de queda ou esbarrão", "Pintar as pontas de amarelo e seguir o serviço", "Dobrar as pontas com marreta, se houver tempo", "Sinalizar a área com fita e liberar a circulação"]', 0, 15),
+
+    ('No andaime suspenso, o balancim, o trabalhador se protege da queda:',
+     '["Com o guarda-corpo do próprio balancim, que já basta", "Prendendo o talabarte na estrutura do balancim", "Prendendo o talabarte no cabo de sustentação da plataforma", "Com cinto tipo paraquedista ligado por trava-quedas a um cabo de segurança independente da estrutura do balancim"]', 3, 16),
+
+    ('Sobre a cadeira suspensa usada em serviço de fachada:',
+     '["Pode ser montada com corda comum, desde que de boa qualidade", "Pode ser usada por qualquer trabalhador da obra", "Exige trabalhador capacitado e autorizado, sistema de sustentação adequado e um cabo de segurança independente para o trava-quedas", "Dispensa o cinto, porque o trabalhador fica sentado"]', 2, 17),
+
+    ('Sobre o elevador de obra de cremalheira:',
+     '["Pode transportar carga e trabalhadores ao mesmo tempo, se houver espaço", "Deve ser operado por trabalhador qualificado, com a capacidade indicada e as portas e travas funcionando", "Pode ser operado por qualquer um que já tenha visto como funciona", "Pode ultrapassar a capacidade em viagens curtas"]', 1, 18),
+
+    ('Sobre a operação da grua no canteiro:',
+     '["A carga pode passar sobre a área de vivência, se for rápido", "A operação é feita por profissional qualificado, com sinaleiro e comunicação definida, e é interrompida com vento forte ou visibilidade ruim", "O operador decide sozinho quando parar por causa do vento", "Qualquer trabalhador pode dar os sinais para o operador"]', 1, 19),
+
+    ('Sobre a betoneira do canteiro:',
+     '["Deve ter as engrenagens e a correia protegidas e estar aterrada, e a limpeza só é feita com o equipamento desligado e bloqueado", "Pode operar sem a proteção da coroa, porque a rotação é lenta", "Pode ser limpa com a pá enquanto gira devagar", "Dispensa aterramento por ficar em área aberta"]', 0, 20),
+
+    ('Sobre as ferramentas elétricas portáteis usadas na obra:',
+     '["Emenda com fita isolante é aceitável, desde que bem enrolada", "Podem ser ligadas direto nos fios do quadro, quando não há tomada", "Podem ficar no chão molhado, se estiverem desligadas", "Devem ter cabo e plugue íntegros, aterramento ou duplo isolamento, e circuito protegido por dispositivo diferencial residual"]', 3, 21),
+
+    ('No corte de blocos, pisos e concreto com serra, o principal risco à saúde é:',
+     '["O ruído da máquina, apenas", "O peso da máquina nos braços do trabalhador", "A poeira de sílica, que causa doença pulmonar grave, e por isso se usa corte úmido, aspiração e respirador adequado", "O aquecimento do disco de corte"]', 2, 22),
+
+    ('Serviço sobre telhado de material frágil, como telha de fibrocimento:',
+     '["Pode ser feito pisando somente sobre os apoios da estrutura", "Pode ser feito por dois trabalhadores, para dividir o peso", "Pode ser feito com calçado de solado macio", "Exige tábuas ou passarelas apoiadas na estrutura e cinto ligado a cabo de segurança, porque a telha não sustenta o peso de uma pessoa"]', 3, 23),
+
+    ('Sobre a proteção de quem passa na calçada em frente à obra:',
+     '["Basta uma placa avisando que ali é obra", "Basta fita zebrada no limite do terreno", "O canteiro deve ser fechado com tapume e a passagem de pedestres protegida e sinalizada", "A responsabilidade é da prefeitura, não da obra"]', 2, 24),
+
+    ('Como se retira o entulho dos pavimentos altos?',
+     '["Por calha fechada até o recipiente de coleta, ou por equipamento de transporte, nunca jogando de cima", "Jogando pela janela no horário de menor movimento", "Jogando na área isolada com fita zebrada", "Descendo em baldes pelo poço do elevador"]', 0, 25),
+
+    ('Sobre as escadas e rampas provisórias de circulação da obra:',
+     '["Podem ser feitas com tábuas soltas apoiadas nos degraus de concreto", "Precisam ser fixas, com degraus regulares, largura suficiente e corrimão ou guarda-corpo onde há risco de queda", "Podem dispensar corrimão quando são largas", "Podem ter qualquer inclinação, desde que o trabalhador desça devagar"]', 1, 26),
+
+    ('O poço do elevador e os vãos internos do prédio em construção devem:',
+     '["Ficar abertos, para facilitar a passagem de materiais", "Ser fechados com proteção resistente ou receber guarda-corpo e sinalização, em todos os pavimentos", "Receber apenas uma corda esticada na entrada", "Ser fechados somente no pavimento onde há serviço em andamento"]', 1, 27),
+
+    ('Antes de iniciar uma escavação, o que precisa ser verificado?',
+     '["Somente o tipo de solo do terreno", "Somente a previsão do tempo para os próximos dias", "Somente a profundidade prevista em projeto", "A existência de redes subterrâneas de energia, gás, água, esgoto e telecomunicação, com levantamento junto às concessionárias"]', 3, 28),
+
+    ('A obra fica embaixo de uma rede elétrica aérea. O correto é:',
+     '["Manter a distância de segurança e solicitar à concessionária o desligamento ou a proteção isolante da rede antes dos serviços próximos", "Trabalhar com cuidado, evitando encostar as ferramentas nos fios", "Cobrir os fios com lona plástica", "Trabalhar somente em dias secos"]', 0, 29),
+
+    ('Sobre o escoramento das fôrmas e a retirada delas:',
+     '["A desforma pode começar assim que o concreto pega", "O escoramento pode ser reduzido para liberar a circulação", "O escoramento é feito conforme projeto, e a desforma segue a sequência e os prazos definidos pelo responsável técnico", "A retirada pode ser feita por qualquer equipe que estiver livre"]', 2, 30),
+
+    ('Sobre um serviço de demolição:',
+     '["Começa pelas paredes de baixo, para a estrutura ceder sozinha", "Pode ser feito pela equipe da obra, sem planejamento específico", "Exige planejamento e supervisão de profissional habilitado, isolamento da área e desligamento prévio das instalações de energia, água e gás", "Basta isolar a área com fita zebrada e começar"]', 2, 31),
+
+    ('Como devem ficar os materiais estocados no canteiro?',
+     '["Em pilhas estáveis, com altura e afastamento adequados, sem obstruir a circulação, os equipamentos de combate a incêndio e as saídas", "Encostados nas paredes recém-levantadas, que servem de apoio", "No corredor de circulação, para ficar perto da frente de serviço", "Empilhados o mais alto possível, para ocupar menos área"]', 0, 32),
+
+    ('Sobre a circulação de caminhões e máquinas dentro do canteiro:',
+     '["Basta o motorista buzinar ao entrar na obra", "Exige vias definidas, sinalização, alarme de ré e sinaleiro nas manobras, com a área de manobra isolada", "Basta os trabalhadores desviarem quando ouvirem o motor", "Só é preciso cuidado na entrada e na saída do canteiro"]', 1, 33),
+
+    ('Trabalho prolongado com martelete e rompedor exige:',
+     '["Apenas óculos de proteção", "Apenas luva de raspa", "Apenas máscara contra poeira", "Protetor auricular, revezamento entre trabalhadores e proteção contra a poeira, por causa do ruído, da vibração e do pó"]', 3, 34),
+
+    ('O que é o diálogo diário de segurança, o DDS?',
+     '["Uma conversa curta antes do serviço para tratar dos riscos do dia e das medidas de proteção", "A reunião mensal da comissão de segurança da obra", "O treinamento admissional dos trabalhadores novos", "A leitura do procedimento, assinada uma vez por mês"]', 0, 35),
+
+    ('Trabalho ao sol em dias de calor forte. O que a obra precisa oferecer?',
+     '["Apenas boné e camiseta de manga curta", "Água potável fresca em quantidade suficiente, locais de descanso à sombra, pausas e proteção contra as intempéries", "Apenas hidratação no horário do almoço", "Apenas a liberação do serviço quando alguém passar mal"]', 1, 36),
+
+    ('Sobre o guincho de coluna usado para subir material:',
+     '["Pode levar o trabalhador quando o elevador está ocupado", "Pode ser operado por qualquer ajudante disponível", "É destinado somente a materiais, é operado por trabalhador qualificado e a área de descarga precisa de proteção e sinalização", "Pode funcionar sem trava, se o operador segurar o cabo"]', 2, 37),
+
+    ('Sobre o atendimento de primeiros socorros no canteiro:',
+     '["Basta ter anotado o telefone do hospital mais próximo", "Basta o encarregado levar o acidentado no carro da obra", "Basta uma caixa com esparadrapo e algodão", "É preciso material de primeiros socorros disponível e pessoa treinada para o atendimento inicial e para acionar o socorro"]', 3, 38),
+
+    ('Por que o contato prolongado com cimento e argamassa exige cuidado?',
+     '["Porque mancha a roupa e a pele", "Porque o cimento é alcalino e pode causar irritação, dermatite e queimadura química, exigindo luva, bota e lavagem da pele", "Porque resseca somente a palma da mão", "Porque a argamassa esquenta ao endurecer e queima pelo calor"]', 1, 39),
+
+    ('Solda ou corte com maçarico no canteiro exige:',
+     '["Apenas máscara de solda e luva de raspa", "Apenas isolar o local com fita zebrada", "Afastar os materiais combustíveis, proteger o que não puder ser removido, manter extintor ao alcance e observar a área durante e depois do serviço", "Apenas avisar o encarregado do pavimento"]', 2, 40)
+       ) as q(enunciado, alternativas, correta, ordem)
+ where c.codigo = 'NR-18';
+
+
+-- a aprovação continua em 70% para todo mundo
+update public.trein_curso set nota_minima = 70;
+
+-- Confira o tamanho do banco de cada um dos cinco cursos:
+select c.codigo, count(q.id) as perguntas, min(q.ordem) as primeira, max(q.ordem) as ultima
+  from public.trein_curso c
+  left join public.trein_questao q on q.curso_id = c.id
+ where c.codigo in ('NR-10-SEP', 'NR-11', 'NR-12', 'NR-17', 'NR-18')
+ group by c.id, c.codigo order by c.codigo;
+
+-- Nenhuma linha deve aparecer aqui (ordem repetida dentro do mesmo curso):
+select c.codigo, q.ordem, count(*)
+  from public.trein_questao q join public.trein_curso c on c.id = q.curso_id
+ group by c.codigo, q.ordem having count(*) > 1;
