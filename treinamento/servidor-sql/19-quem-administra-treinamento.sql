@@ -47,7 +47,7 @@ select u.usuario,
        case
          when not u.ativo                              then 'NAO (inativo)'
          when u.admin                                  then 'SIM (administrador)'
-         when u.modulos ? 'treinamento'                then 'SIM (modulo marcado)'
+         when 'treinamento' = any(u.modulos)                then 'SIM (modulo marcado)'
          else                                               'NAO — marque Treinamentos em Usuarios'
        end as depois_desta_mudanca
   from public.orc_usuarios u
@@ -69,16 +69,20 @@ language sql stable security definer set search_path = public as $$
     select 1 from public.orc_usuarios u
      where u.id = auth.uid()
        and u.ativo
-       and (u.admin or u.modulos ? 'treinamento')
+       and (u.admin or 'treinamento' = any(u.modulos))
   );
 $$;
 
--- `?` é o operador "esta chave está no jsonb". A coluna `modulos` é
--- gravada pelo SistemaCMH como uma lista JSON, tipo ["pgr","treinamento"].
--- Se no seu banco ela for text[] em vez de jsonb, troque a linha por:
---     and (u.admin or 'treinamento' = any(u.modulos))
--- A consulta de conferência abaixo acusa se o tipo não bater: ela dá erro
--- em vez de devolver falso calado.
+-- A COLUNA `modulos` É text[], NÃO jsonb.
+--
+-- A primeira versão deste arquivo usava `u.modulos ? 'treinamento'`, que é
+-- o operador do jsonb, e o Postgres recusou com "operator does not exist:
+-- text[] ? unknown". Em array de texto quem responde "está na lista?" é o
+-- `= any(...)`.
+--
+-- Foi bom ter dado erro: se o operador existisse para os dois tipos e
+-- devolvesse falso, ninguém teria acesso ao treinamento e a causa levaria
+-- horas para ser achada. Erro barulhento é melhor que erro calado.
 
 -- =====================================================================
 --  Confira DEPOIS de rodar
@@ -89,5 +93,5 @@ select u.usuario, u.nome, u.cargo,
        case when u.admin then 'administrador' else 'modulo marcado' end as porque
   from public.orc_usuarios u
  where u.ativo
-   and (u.admin or u.modulos ? 'treinamento')
+   and (u.admin or 'treinamento' = any(u.modulos))
  order by u.admin desc, u.usuario;

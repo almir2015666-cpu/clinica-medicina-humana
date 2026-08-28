@@ -1,4 +1,4 @@
-﻿-- =====================================================================
+-- =====================================================================
 --  As provas dos outros 18 cursos: 10 questoes cada, aprovacao com 70%
 --
 --  Rode no SQL Editor. Pode rodar mais de uma vez (cada bloco apaga as
