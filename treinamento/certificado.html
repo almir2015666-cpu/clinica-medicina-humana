@@ -278,10 +278,30 @@
     (async function () {
       var busca = new URLSearchParams(location.search);
       if (busca.get('amostra')) {
-        alvo.innerHTML = folhaFrente(AMOSTRA) + folhaVerso(AMOSTRA);
+        // `?amostra=1&curso=<id>` desenha a amostra com o TEXTO DAQUELE
+        // curso — título do certificado, carga horária e conteúdo
+        // programático como estão gravados agora. É assim que a
+        // administração confere o que escreveu antes de existir aluno
+        // aprovado; sem o curso, cai no exemplo de NR-20.
+        var qual = busca.get('curso');
+        var amostra = AMOSTRA;
+        if (qual) {
+          var c = (await sb.from('trein_curso')
+            .select('codigo,titulo,titulo_certificado,carga_horaria,' +
+                    'conteudo_programatico')
+            .eq('id', qual).maybeSingle()).data;
+          if (c) {
+            amostra = { cert: AMOSTRA.cert, aluno: AMOSTRA.aluno, curso: c };
+          }
+        }
+        alvo.innerHTML = folhaFrente(amostra) + folhaVerso(amostra);
         document.title = 'Certificado (amostra)';
         document.querySelectorAll('.rodape span:first-child').forEach(
           function (s) { s.textContent = 'AMOSTRA: não é documento válido'; });
+        if (qual && amostra === AMOSTRA) {
+          alvo.insertAdjacentHTML('afterbegin', '<p class="aviso">Não achei ' +
+            'esse curso — o desenho abaixo é o exemplo de NR-20.</p>');
+        }
         return;
       }
 

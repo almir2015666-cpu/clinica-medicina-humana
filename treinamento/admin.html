@@ -70,6 +70,21 @@
     .mini:hover{border-color:var(--ambar);color:var(--ambar)}
     .mini.perigo:hover{border-color:var(--vermelho);color:var(--vermelho)}
 
+    /* uma questão da prova: enunciado em cima, alternativas embaixo, e a
+       certa marcada em verde. Ver o gabarito de olho é o ponto — é assim
+       que o responsável técnico confere a prova sem abrir o Supabase. */
+    .qadm{background:var(--preto);border:1px solid var(--linha-i);
+      border-radius:12px;padding:1rem 1.1rem;margin-bottom:.7rem}
+    .qadm__cab{display:flex;align-items:flex-start;gap:1rem}
+    .qadm__en{flex:1;min-width:0;color:var(--claro);font-size:.94rem;
+      line-height:1.55}
+    .qadm ol{list-style:none;margin:.7rem 0 0 2.5rem;padding:0}
+    .qadm li{font-size:.85rem;color:var(--meio);padding:.16rem 0;
+      line-height:1.5}
+    .qadm li.certa{color:var(--verde);font-weight:600}
+    .qadm li b{color:var(--claro);font-weight:700}
+    .qadm li.certa b{color:var(--verde)}
+
     .form-aula{background:var(--carvao);border:1px solid var(--linha-i);
       border-radius:12px;padding:1.5rem;margin-top:1.6rem}
     .form-aula h3{font-size:1.02rem;margin-bottom:1rem}
@@ -156,6 +171,7 @@
     var sb = supabase.createClient(window.SUPA.url, window.SUPA.key);
     var $ = function (id) { return document.getElementById(id); };
     var cursos = [], porCurso = {}, atual = null;
+    var questoes = [], provaAberta = false;   // o banco de questões do curso
     var alvoDoAviso = null;   // em qual caixa a proxima mensagem aparece
     var quemSou = null;       // a linha de orc_usuarios de quem entrou
 
@@ -317,7 +333,11 @@
     // -------------------------------------------------- os cursos no meio
     async function carregarCursos() {
       var r = await sb.from('trein_curso')
-        .select('id,codigo,titulo,subtitulo,descricao,carga_horaria,validade_meses,nota_minima,questoes_por_prova,ativo').order('ordem');
+        // `titulo_certificado` e `conteudo_programatico` vêm junto porque o
+        // painel do curso edita os dois. Fora da lista, a caixa abriria
+        // vazia e o primeiro "Salvar certificado" apagaria o conteúdo
+        // programático que já estava gravado.
+        .select('id,codigo,titulo,subtitulo,descricao,carga_horaria,validade_meses,nota_minima,questoes_por_prova,ativo,titulo_certificado,conteudo_programatico').order('ordem');
       if (r.error) {
         $('grade').innerHTML = '<p style="color:var(--vermelho)">Não consegui ' +
           'ler os cursos: ' + seguro(r.error.message) + '</p>';
@@ -384,6 +404,8 @@
       var aulas = (await sb.from('trein_aula')
         .select('id,titulo,descricao,video_url,duracao_seg,ordem')
         .eq('curso_id', atual.id).order('ordem')).data || [];
+      await recarregarQuestoes();
+      provaAberta = false;
 
       var html = '<div class="adm__cab"><h1>' + seguro(atual.titulo) + '</h1>' +
         '<p>' + seguro(atual.codigo) + ' · ' + aulas.length + ' aula(s). ' +
@@ -471,6 +493,75 @@
         'Publicar</button>' +
         '</div>';
 
+      // ---- a prova ---------------------------------------------------------
+      // As questões estavam só no SQL. Trocar uma palavra numa pergunta
+      // exigia abrir o painel do Supabase e escrever um update — e quem
+      // responde pela prova é o responsável técnico, que não escreve SQL.
+      // Prova errada reprova quem sabe e aprova quem não sabe, e é o
+      // certificado dele que está em jogo.
+      var sorteia = Number(atual.questoes_por_prova) || 10;
+      var faltando = questoes.length < sorteia;
+      html += '<div class="form-aula">' +
+        '<h3>Prova — banco de questões</h3>' +
+        '<p style="color:var(--meio);font-size:.86rem;margin:-.5rem 0 .2rem">' +
+          'A prova <b>sorteia ' + sorteia + '</b> questões das <b>' +
+          questoes.length + '</b> que estão aqui, e embaralha as ' +
+          'alternativas a cada tentativa — por isso ninguém dita "é a letra ' +
+          'C" para o colega. Quanto maior o banco, menos duas provas saem ' +
+          'iguais.</p>' +
+        (faltando
+          ? '<p style="color:var(--vermelho);font-size:.86rem;margin:.6rem 0 0">'
+            + 'São menos questões do que a prova sorteia: com ' +
+            questoes.length + ' no banco, <b>todo aluno faz a mesma prova</b>. '
+            + 'Acrescente questões, ou baixe "Questões por prova" lá em cima.'
+            + '</p>'
+          : '') +
+        '<div class="msg" id="msgProva"></div>' +
+        '<button class="i-botao" id="verProva" style="margin-top:1.1rem">' +
+        'Ver as questões</button>' +
+        '<div id="listaQ"></div>' +
+        '</div>';
+
+      // ---- o certificado ---------------------------------------------------
+      html += '<div class="form-aula">' +
+        '<h3>Certificado</h3>' +
+        '<p style="color:var(--meio);font-size:.86rem;margin:-.5rem 0 .2rem">' +
+          'O certificado sai com o <b>título</b> abaixo (e não com o título ' +
+          'curto do curso), a carga horária dos dados lá em cima, e uma ' +
+          'segunda folha com o <b>conteúdo programático</b>. É o que a ' +
+          'fiscalização lê para saber o que foi ensinado.</p>' +
+        '<label for="cTitCert">Título no certificado ' +
+          '<span style="font-weight:400;color:var(--meio)">(vazio = usa o ' +
+          'título do curso)</span></label>' +
+        '<input id="cTitCert" type="text" value="' +
+          seguro(atual.titulo_certificado || '') + '" placeholder="' +
+          seguro(atual.titulo) + '" />' +
+        '<label for="cConteudo">Conteúdo programático ' +
+          '<span style="font-weight:400;color:var(--meio)">(um item por ' +
+          'linha; linha vazia é ignorada)</span></label>' +
+        '<textarea id="cConteudo" style="min-height:190px">' +
+          seguro(atual.conteudo_programatico || '') + '</textarea>' +
+        (atual.conteudo_programatico && atual.conteudo_programatico.trim()
+          ? ''
+          : '<p style="color:var(--vermelho);font-size:.86rem;margin:.6rem 0 0">'
+            + 'Sem conteúdo programático o certificado sai <b>com uma folha '
+            + 'só</b> — a frente. Melhor uma frente correta do que um verso '
+            + 'inventado, mas a segunda folha é o que prova o que foi dado '
+            + 'em aula.</p>') +
+        '<div class="msg" id="msgCert"></div>' +
+        '<div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;' +
+          'margin-top:1.1rem">' +
+          '<button class="i-botao" id="salvarCert">Salvar certificado</button>' +
+          '<button class="mini" id="verCert">Ver o modelo deste curso</button>' +
+        '</div>' +
+        '<p style="color:var(--meio);font-size:.8rem;margin:.7rem 0 0">' +
+          '"Ver o modelo" abre o certificado com <b>este</b> texto e um aluno ' +
+          'de exemplo. Não emite nada e não vale como documento — serve para ' +
+          'conferir o desenho antes de existir aluno aprovado. Salve antes, ' +
+          'senão a amostra mostra o que está gravado, e não o que você acabou ' +
+          'de escrever.</p>' +
+        '</div>';
+
       $('corpo').innerHTML = html;
       $('salvar').addEventListener('click', function () { salvarAula(aulas); });
       $('corpo').querySelectorAll('[data-apaga]').forEach(function (b) {
@@ -488,6 +579,16 @@
         });
       });
       $('salvarCurso').addEventListener('click', salvarCurso);
+      $('salvarCert').addEventListener('click', salvarCertificado);
+      $('verCert').addEventListener('click', function () {
+        window.open('certificado.html?amostra=1&curso=' +
+                    encodeURIComponent(atual.id), '_blank');
+      });
+      $('verProva').addEventListener('click', function () {
+        provaAberta = !provaAberta;
+        pintarProva();
+      });
+      pintarProva();
       // a mensagem vai para a caixa que existir: "Dados do curso salvos"
       // pertence ao formulario do topo, nao ao de upload la embaixo
       if (aviso) recado($(alvoDoAviso || 'msgAula'), aviso, bom);
@@ -571,6 +672,308 @@
         ' · ' + ($('cAtivo').checked ? 'a venda' : 'FORA DA VITRINE'));
       alvoDoAviso = 'msgCurso';
       verCurso('Dados do curso salvos.', true);
+    }
+
+    // Grava só o que sai impresso no certificado. Botão separado do "Salvar
+    // dados do curso" de propósito: mexer no conteúdo programático é mexer
+    // no documento que a fiscalização lê, e não na vitrine.
+    async function salvarCertificado() {
+      var msg = $('msgCert'), b = $('salvarCert');
+      var conteudo = $('cConteudo').value.replace(/\r/g, '').trim();
+      b.disabled = true; b.textContent = 'Salvando...';
+      var r = await sb.from('trein_curso').update({
+        titulo_certificado: $('cTitCert').value.trim() || null,
+        conteudo_programatico: conteudo || null
+      }).eq('id', atual.id).select().maybeSingle();
+      b.disabled = false; b.textContent = 'Salvar certificado';
+
+      if (r.error) return recado(msg, 'Nao consegui salvar: ' + seguro(r.error.message));
+      if (!r.data) {
+        return recado(msg, 'O servidor aceitou o pedido mas nao gravou nada. '
+          + 'Isso costuma ser permissao: confira se o seu usuario tem o '
+          + 'modulo Treinamentos marcado no SistemaCMH.');
+      }
+      atual = r.data;
+      var i = cursos.findIndex(function (c) { return c.id === atual.id; });
+      if (i >= 0) cursos[i] = atual;
+      var itens = conteudo ? conteudo.split('\n').filter(function (l) {
+        return l.trim();
+      }).length : 0;
+      anotar('trein_certificado_alterado',
+        atual.codigo + ': ' + itens + ' item(ns) de conteudo programatico');
+      alvoDoAviso = 'msgCert';
+      verCurso('Certificado salvo. ' + (itens
+        ? itens + ' item(ns) no conteúdo programático.'
+        : 'Sem conteúdo programático: sai com uma folha só.'), true);
+    }
+
+    // ------------------------------------------------------- a prova
+    //
+    // O `correta` é o ÍNDICE da alternativa certa dentro do array, contando
+    // do zero. Guardar a letra não serviria: a Edge Function embaralha as
+    // alternativas a cada prova, justamente para "é a letra C" não virar
+    // resposta transmissível entre colegas.
+    async function recarregarQuestoes() {
+      var r = await sb.from('trein_questao')
+        .select('id,enunciado,alternativas,correta,ordem')
+        .eq('curso_id', atual.id).order('ordem');
+      questoes = r.data || [];
+      return r.error ? r.error.message : '';
+    }
+
+    // O jsonb chega pronto como array, mas um banco antigo pode ter
+    // guardado o array como TEXTO. Sem isto, a tela mostraria a questão sem
+    // nenhuma alternativa e daria a impressão de que ela se perdeu.
+    function alternativasDe(q) {
+      var a = q && q.alternativas;
+      if (typeof a === 'string') {
+        try { a = JSON.parse(a); } catch (e) { a = []; }
+      }
+      if (!Array.isArray(a)) return [];
+      return a.map(function (t) { return String(t == null ? '' : t); });
+    }
+
+    var LETRAS = 'ABCDEFGH';
+
+    function pintarProva() {
+      var botao = $('verProva'), lista = $('listaQ');
+      if (!botao || !lista) return;
+      botao.textContent = provaAberta ? 'Fechar as questões'
+        : (questoes.length ? 'Ver as ' + questoes.length + ' questões'
+                           : 'Escrever a primeira questão');
+      if (!provaAberta) { lista.innerHTML = ''; return; }
+
+      lista.innerHTML = '<div style="margin-top:1.2rem">' +
+        questoes.map(function (q, i) {
+          var alts = alternativasDe(q).map(function (t, j) {
+            return '<li class="' + (j === q.correta ? 'certa' : '') + '">' +
+              '<b>' + LETRAS[j] + ')</b> ' + seguro(t) +
+              (j === q.correta ? ' &nbsp;✓ certa' : '') + '</li>';
+          }).join('');
+          return '<div class="qadm"><div class="qadm__cab">' +
+            '<span class="aulaadm__n">' + (i + 1) + '</span>' +
+            '<span class="qadm__en">' + seguro(q.enunciado) + '</span>' +
+            '<span class="aulaadm__acoes">' +
+              '<button class="mini" data-qedita="' + q.id + '">Editar</button>' +
+              (i > 0 ? '<button class="mini" data-qsobe="' + q.id + '">↑</button>' : '') +
+              (i < questoes.length - 1
+                ? '<button class="mini" data-qdesce="' + q.id + '">↓</button>' : '') +
+              '<button class="mini perigo" data-qapaga="' + q.id + '">Tirar</button>' +
+            '</span></div>' +
+            '<ol>' + alts + '</ol>' +
+            '<div id="q' + q.id + '"></div></div>';
+        }).join('') +
+        (questoes.length ? '' : '<p style="color:var(--meio)">Nenhuma questão ' +
+          'ainda. Sem questões o aluno não consegue fazer a prova, e sem ' +
+          'prova não existe certificado.</p>') +
+        '<div id="novaQ"></div>' +
+        '<button class="mini" id="btnNovaQ" style="margin-top:.4rem">' +
+        '+ Acrescentar questão</button></div>';
+
+      lista.querySelectorAll('[data-qedita]').forEach(function (b) {
+        b.addEventListener('click', function () { editarQuestao(b.dataset.qedita); });
+      });
+      lista.querySelectorAll('[data-qapaga]').forEach(function (b) {
+        b.addEventListener('click', function () { apagarQuestao(b.dataset.qapaga); });
+      });
+      lista.querySelectorAll('[data-qsobe]').forEach(function (b) {
+        b.addEventListener('click', function () { moverQuestao(b.dataset.qsobe, -1); });
+      });
+      lista.querySelectorAll('[data-qdesce]').forEach(function (b) {
+        b.addEventListener('click', function () { moverQuestao(b.dataset.qdesce, 1); });
+      });
+      $('btnNovaQ').addEventListener('click', function () { editarQuestao(null); });
+    }
+
+    // Um editor por vez. Dois abertos disputariam os mesmos ids (`qEnun`,
+    // `msgQ`) e o botão Gravar do segundo escreveria o texto do primeiro.
+    function fecharEditores() {
+      var lista = $('listaQ');
+      if (!lista) return;
+      lista.querySelectorAll('.editorQ').forEach(function (e) { e.remove(); });
+    }
+
+    function editarQuestao(id) {
+      var q = id ? questoes.find(function (x) { return x.id === id; }) : null;
+      if (id && !q) return;
+      var caixa = id ? $('q' + id) : $('novaQ');
+      if (!caixa) return;
+      var jaAberto = !!caixa.querySelector('.editorQ');
+      fecharEditores();
+      if (jaAberto) return;               // clicar de novo fecha
+
+      var alts = q ? alternativasDe(q) : [];
+      while (alts.length < 5) alts.push('');
+      var linhas = alts.map(function (t, j) {
+        return '<div style="display:flex;align-items:center;gap:.6rem;' +
+            'margin:.4rem 0">' +
+          '<input type="radio" name="qcerta" value="' + j + '"' +
+            (q && q.correta === j ? ' checked' : '') +
+            ' style="width:auto;flex:none;accent-color:#35c47a" />' +
+          '<span style="flex:none;width:1.2rem;color:var(--meio);' +
+            'font-weight:700;font-size:.85rem">' + LETRAS[j] + ')</span>' +
+          '<input type="text" class="qalt" style="flex:1" value="' +
+            seguro(t) + '" placeholder="alternativa ' + LETRAS[j] +
+            (j > 1 ? ' — pode ficar vazia' : '') + '" />' +
+        '</div>';
+      }).join('');
+
+      caixa.innerHTML = '<div class="editorQ" style="border-top:1px solid ' +
+          'var(--linha-i);margin-top:.9rem;padding-top:.4rem">' +
+        '<label for="qEnun">Enunciado</label>' +
+        '<textarea id="qEnun">' + seguro(q ? q.enunciado : '') + '</textarea>' +
+        '<label style="margin-bottom:.1rem">Alternativas ' +
+          '<span style="font-weight:400;color:var(--meio)">(marque a certa ' +
+          'na bolinha; as vazias são ignoradas)</span></label>' +
+        linhas +
+        '<div class="msg" id="msgQ"></div>' +
+        '<div style="display:flex;gap:.6rem;align-items:center;' +
+          'margin-top:.9rem">' +
+          '<button class="i-botao" id="gravarQ">' +
+            (q ? 'Gravar alteração' : 'Acrescentar') + '</button>' +
+          '<button class="mini" id="cancelarQ">Cancelar</button>' +
+        '</div></div>';
+      $('gravarQ').addEventListener('click', function () { gravarQuestao(id); });
+      $('cancelarQ').addEventListener('click', fecharEditores);
+      $('qEnun').focus();
+    }
+
+    async function gravarQuestao(id) {
+      var msg = $('msgQ'), b = $('gravarQ');
+      var enun = $('qEnun').value.replace(/\s+/g, ' ').trim();
+      var campos = Array.prototype.slice.call(
+        document.querySelectorAll('.editorQ .qalt'));
+      var marcada = document.querySelector('.editorQ input[name=qcerta]:checked');
+      if (!enun) return recado(msg, 'Escreva o enunciado.');
+      if (!marcada) return recado(msg, 'Marque qual alternativa é a certa.');
+
+      // As vazias somem, e o índice da certa acompanha o que SOBROU.
+      // Gravar a posição do campo em tela deixaria o gabarito apontando
+      // para uma alternativa que não existe — a prova reprovaria quem
+      // acertou, e ninguém desconfiaria do motivo.
+      var certaEm = Number(marcada.value), correta = -1, alts = [];
+      campos.forEach(function (c, j) {
+        var t = c.value.replace(/\s+/g, ' ').trim();
+        if (!t) return;
+        if (j === certaEm) correta = alts.length;
+        alts.push(t);
+      });
+      if (alts.length < 2) {
+        return recado(msg, 'A questão precisa de pelo menos duas alternativas.');
+      }
+      if (correta < 0) {
+        return recado(msg, 'A alternativa marcada como certa está vazia. '
+          + 'Escreva o texto dela, ou marque outra.');
+      }
+      var repetida = alts.some(function (t, i) {
+        return alts.indexOf(t) !== i;
+      });
+      if (repetida) {
+        return recado(msg, 'Duas alternativas estão com o mesmo texto — '
+          + 'uma delas seria certa e errada ao mesmo tempo.');
+      }
+
+      b.disabled = true; b.textContent = 'Gravando...';
+      var dados = { enunciado: enun, alternativas: alts, correta: correta };
+      var r;
+      if (id) {
+        r = await sb.from('trein_questao').update(dados).eq('id', id).select('id');
+      } else {
+        // o MAIOR `ordem` existente, e não a contagem: com uma questão
+        // tirada no meio, a contagem repetiria um número que já existe
+        dados.curso_id = atual.id;
+        dados.ordem = questoes.reduce(function (m, q) {
+          return Math.max(m, Number(q.ordem) || 0);
+        }, 0) + 1;
+        r = await sb.from('trein_questao').insert(dados).select('id');
+      }
+      b.disabled = false; b.textContent = id ? 'Gravar alteração' : 'Acrescentar';
+
+      if (r.error) return recado(msg, 'Nao consegui gravar: ' + seguro(r.error.message));
+      if (!r.data || !r.data.length) {
+        return recado(msg, 'O servidor aceitou o pedido mas nao gravou nada. '
+          + 'Isso costuma ser permissao: confira se o seu usuario tem o '
+          + 'modulo Treinamentos marcado no SistemaCMH.');
+      }
+      anotar('trein_questao_' + (id ? 'alterada' : 'nova'),
+             atual.codigo + ': ' + enun.slice(0, 140));
+      var erro = await recarregarQuestoes();
+      pintarProva();
+      recado($('msgProva'), erro
+        ? 'Gravei, mas nao consegui reler a lista: ' + seguro(erro)
+        : (id ? 'Questão alterada.' : 'Questão acrescentada. Agora são ' +
+           questoes.length + ' no banco.'), !erro);
+    }
+
+    async function apagarQuestao(id) {
+      var q = questoes.find(function (x) { return x.id === id; });
+      if (!q) return;
+      var sorteia = Number(atual.questoes_por_prova) || 10;
+      var sobram = questoes.length - 1;
+      var aviso = sobram < sorteia
+        ? '\n\nATENÇÃO: sobram ' + sobram + ' questões e a prova sorteia ' +
+          sorteia + '. Com menos questões do que o sorteio, todo aluno passa ' +
+          'a fazer a mesma prova.'
+        : '';
+      if (!confirm('Tirar esta questão?\n\n' + q.enunciado + aviso +
+                   '\n\nNão tem volta.')) return;
+      // `.select()` para saber se APAGOU MESMO: delete barrado pela RLS não
+      // devolve erro, volta 204 com zero linhas
+      var r = await sb.from('trein_questao').delete().eq('id', id).select('id');
+      if (r.error) {
+        return recado($('msgProva'), 'Nao consegui remover: ' + seguro(r.error.message));
+      }
+      if (!r.data || !r.data.length) {
+        return recado($('msgProva'), 'Nada foi removido. Isso costuma ser '
+          + 'permissao: confira se o seu usuario tem o modulo Treinamentos '
+          + 'marcado no SistemaCMH.');
+      }
+      anotar('trein_questao_removida', atual.codigo + ': ' + q.enunciado.slice(0, 140));
+      await recarregarQuestoes();
+      pintarProva();
+      recado($('msgProva'), 'Questão removida. Sobram ' + questoes.length +
+             ' no banco.', true);
+    }
+
+    async function moverQuestao(id, passo) {
+      var i = questoes.findIndex(function (q) { return q.id === id; });
+      var j = i + passo;
+      if (i < 0 || j < 0 || j >= questoes.length) return;
+      // troca a ordem das duas. Falhando a segunda gravação, a primeira é
+      // desfeita: duas questões com o mesmo número deixam a lista da tela
+      // trocar de posição sozinha entre uma visita e outra
+      var a = questoes[i], b = questoes[j];
+      // Duas questões com o MESMO número não têm o que trocar: o botão
+      // pareceria quebrado. Acontece com banco importado de SQL antigo,
+      // onde tudo entrou com ordem 0. Numera 1..N antes e segue.
+      if (Number(a.ordem) === Number(b.ordem)) {
+        for (var k = 0; k < questoes.length; k++) {
+          if (Number(questoes[k].ordem) === k + 1) continue;
+          var u = await sb.from('trein_questao')
+            .update({ ordem: k + 1 }).eq('id', questoes[k].id).select('id');
+          if (u.error || !u.data || !u.data.length) {
+            return recado($('msgProva'), 'Nao consegui numerar as questões. '
+              + 'Recarregue e tente de novo.');
+          }
+          questoes[k].ordem = k + 1;
+        }
+        a = questoes[i]; b = questoes[j];
+      }
+      var p = await sb.from('trein_questao')
+        .update({ ordem: b.ordem }).eq('id', a.id).select('id');
+      if (p.error || !p.data || !p.data.length) {
+        return recado($('msgProva'), 'Nao consegui reordenar. Recarregue e '
+          + 'tente de novo.');
+      }
+      var s = await sb.from('trein_questao')
+        .update({ ordem: a.ordem }).eq('id', b.id).select('id');
+      if (s.error || !s.data || !s.data.length) {
+        await sb.from('trein_questao').update({ ordem: a.ordem }).eq('id', a.id);
+        return recado($('msgProva'), 'Nao consegui reordenar. Recarregue e '
+          + 'tente de novo.');
+      }
+      await recarregarQuestoes();
+      pintarProva();
     }
 
     // Mostra o vídeo da aula ali mesmo. Com dez arquivos parecidos no mesmo
