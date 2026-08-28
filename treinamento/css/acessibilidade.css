@@ -48,3 +48,24 @@ body.a11y-readguide .a11y-readbar{display:block}
 body.a11y-noanim .aviso__l{color:inherit}
 body.a11y-noanim .aviso__l.is-caret::after,
 body.a11y-noanim .aviso__l.is-caret-ini::before{display:none}
+
+/* =====================================================================
+   CELULAR — o widget de acessibilidade nao aparece
+   =====================================================================
+   Ele e um botao fixo grudado na lateral esquerda, no meio da altura. No
+   computador ele nao atrapalha; no celular ele fica POR CIMA do conteudo,
+   e a tela ja e estreita demais para carregar um botao flutuante que
+   ninguem pediu.
+
+   O recurso nao some do site: no computador continua igual. Aqui ele
+   apenas nao e desenhado, e junto vao o painel, a sobreposicao e a barra
+   de leitura — que nao teriam como abrir sem o botao.
+
+   Fica NESTE arquivo, e nao no estilo.css, porque as paginas do aluno
+   (curso e painel) carregam o interno.css e nao o estilo.css: a regra
+   posta la valeria so para a home, o entrar e o validar.
+   ===================================================================== */
+@media(max-width:900px){
+  .a11y-fab, .a11y-overlay, .a11y-panel2, .a11y-readbar, .a11y-fx{
+    display:none !important}
+}

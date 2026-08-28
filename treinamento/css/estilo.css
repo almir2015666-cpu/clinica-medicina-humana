@@ -407,3 +407,60 @@ a{color:inherit;text-decoration:none}
 .lang__menu li span{color:#2f6df6;font-weight:700}
 @media(max-width:900px){.lang{margin-left:.3rem}
   .lang__abre{padding:.38rem .6rem}}
+/* =====================================================================
+   CELULAR — o cabeçalho e a faixa de contato
+   =====================================================================
+   O cabeçalho era uma linha só de flex com altura fixa de 80px: logo,
+   três links, dois botões e o seletor de idioma. Numa tela de 360 px isso
+   não cabe, e o que acontecia era o pior dos dois mundos — a página
+   ganhava rolagem lateral E a logo encolhia até sumir, porque ela era o
+   único item flexível da linha.
+
+   A correção tem três partes, e cada uma resolve um sintoma:
+
+     · a logo deixa de encolher (flex:none), e volta a aparecer;
+     · o menu QUEBRA para a linha de baixo em vez de estourar a largura;
+     · nada mais pode passar da largura da tela, o que mata a rolagem
+       lateral que fazia a página parecer "bugada".
+   ===================================================================== */
+
+/* A rolagem lateral: nada passa da largura do aparelho.
+
+   `clip` e NAO `hidden`, de proposito. `overflow-x:hidden` no html ou no
+   body cria um contexto de rolagem, e isso QUEBRA o position:sticky do
+   cabecalho — ele deixaria de acompanhar a rolagem. `clip` corta igual sem
+   criar o contexto. Em navegador antigo demais para entender `clip` a regra
+   simplesmente nao vale, e nao faz falta: quem tira a rolagem lateral de
+   verdade e a quebra do menu ali embaixo. */
+body{max-width:100%;overflow-x:clip}
+img, video, iframe{max-width:100%;height:auto}
+
+@media(max-width:900px){
+  /* a logo nunca encolhe — era ela que sumia */
+  .marca{flex:none}
+  .marca__chip{flex:none}
+  .marca__chip img{height:30px}
+
+  /* o cabeçalho vira duas linhas: marca em cima, menu embaixo */
+  .topo__in{height:auto;flex-wrap:wrap;gap:.6rem;padding-top:.7rem;
+    padding-bottom:.7rem}
+  .topo__nav{margin-left:0;width:100%;justify-content:center;
+    flex-wrap:wrap;gap:.35rem}
+  .topo__nav .btn{margin-left:0}
+
+  /* a faixa de contato também quebra, em vez de cortar o telefone */
+  .faixa__in{height:auto;flex-wrap:wrap;gap:.5rem 1.1rem;
+    padding-top:.5rem;padding-bottom:.5rem;justify-content:center;
+    text-align:center}
+  .faixa__dir{margin-left:0;gap:1.1rem}
+}
+
+@media(max-width:600px){
+  /* Em tela pequena, os links de seção saem do menu: eles apontam para
+     trechos DESTA mesma página, e a pessoa chega neles rolando. O que não
+     pode faltar é Entrar e o contato — esses ficam. */
+  .topo__nav a[href^="#"]{display:none}
+  .topo__in{padding-top:.6rem;padding-bottom:.6rem}
+  .topo__nav .btn{padding:.6rem 1rem;font-size:.85rem}
+  .marca__txt b{font-size:.98rem}
+}
