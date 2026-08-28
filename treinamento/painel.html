@@ -133,6 +133,20 @@
         return;
       }
 
+      // PRAZO VENCIDO ENCERRA O ACESSO. A entrar.html já barra o login, mas
+      // a sessão do Supabase dura dias: quem entrou ontem e voltou hoje chega
+      // aqui direto, sem passar por lá. E o prazo pode vencer com a pessoa
+      // logada. A trava tem de estar nos dois lugares.
+      var hojeAg = new Date().toISOString().slice(0, 10);
+      var valeAlguma = mats.some(function (m) {
+        return String(m.expira_em) >= hojeAg;
+      });
+      if (!valeAlguma) {
+        await sb.auth.signOut();
+        location.replace('entrar.html#venceu');
+        return;
+      }
+
       // quantas aulas cada curso tem e quantas já foram concluídas — em dois
       // pedidos, e não um por módulo: com dez módulos seriam vinte idas ao
       // servidor para desenhar uma tela
