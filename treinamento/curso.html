@@ -22,6 +22,7 @@
       </a>
       <div class="i-topo__dir">
         <div class="lang" id="cmh-idioma"></div>
+        <a class="i-sair" id="linkApostila" href="painel.html">Apostila</a>
         <a class="i-sair" href="painel.html">Meus módulos</a>
 <button class="i-sair" id="sair">Sair</button>
       </div>
@@ -448,6 +449,12 @@
           mat + '">ver o certificado</a></div>';
         return;
       }
+
+      // a apostila e material do curso: o link so faz sentido com a
+      // matricula em maos, que e o que a pagina de la usa para saber o que
+      // pode mostrar
+      var la = $('linkApostila');
+      if (la) la.href = 'apostila.html?m=' + mat;
 
       E.curso = r.data.trein_curso;
       $('tituloCurso').textContent = E.curso.titulo;

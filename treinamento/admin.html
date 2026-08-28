@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -98,6 +98,16 @@
     .form-aula input[type=file]{width:100%;color:var(--meio);font-size:.88rem;
       padding:.7rem 0}
     .linha2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .linha-aula{border:1px solid var(--linha-i);border-radius:10px;
+      padding:.9rem 1rem 1.1rem;margin-bottom:.8rem;background:var(--preto)}
+    .linha-aula__cab{display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:.2rem}
+    .linha-aula__cab b{font:700 .9rem 'Poppins',sans-serif;color:var(--ambar)}
+    .linha-aula label:first-of-type{margin-top:.5rem}
+    .qadm--ruim{border-color:var(--vermelho)}
+    .qadm__alerta{background:rgba(239,106,104,.12);color:var(--vermelho);
+      font:600 .8rem/1.45 'Poppins',sans-serif;padding:.5rem .7rem;
+      border-radius:8px;margin:-.2rem 0 .7rem}
     .prog{height:6px;border-radius:3px;background:var(--carvao2);
       overflow:hidden;margin-top:.7rem;display:none}
     .prog i{display:block;height:100%;background:var(--ambar);width:0;
@@ -172,6 +182,9 @@
     var $ = function (id) { return document.getElementById(id); };
     var cursos = [], porCurso = {}, atual = null;
     var questoes = [], provaAberta = false;   // o banco de questões do curso
+    var semApostila = false;   // a coluna ainda nao existe no banco
+    var linhasAula = 0;         // quantas linhas de aula estao na tela
+    var questoesBaseAula = 0;  // quantas aulas o curso ja tem
     var alvoDoAviso = null;   // em qual caixa a proxima mensagem aparece
     var quemSou = null;       // a linha de orc_usuarios de quem entrou
 
@@ -245,16 +258,33 @@
     //
     // Entao a cada abertura de curso a pergunta e refeita. Custa um pedido
     // pequeno e evita a pessoa trabalhar num painel que nao grava nada.
+    // Devolve a pessoa quando ela pode; `false` quando NÃO pode; e a
+    // string 'erro' quando NÃO FOI POSSÍVEL PERGUNTAR.
+    //
+    // Os três são estados diferentes, e tratá-los como dois causava o pior
+    // efeito possível: um soluço de rede fazia o supabase-js devolver
+    // {data:null, error}, isso virava "não pode", e a tela DESLOGAVA o
+    // administrador dizendo que o acesso dele tinha sido retirado — logo
+    // depois de a gravação ter dado certo. Ele acreditava que perdera a
+    // permissão e que o trabalho se perdera; as duas coisas falsas.
     async function podeAdministrar() {
       var s = await sb.auth.getSession();
       if (!s.data.session) return false;
-      var eu = (await sb.from('orc_usuarios').select('usuario,nome,ativo,admin,modulos')
-        .eq('id', s.data.session.user.id).maybeSingle()).data;
+      var r = await sb.from('orc_usuarios')
+        .select('usuario,nome,ativo,admin,modulos')
+        .eq('id', s.data.session.user.id).maybeSingle();
+      if (r.error) return 'erro';
+      var eu = r.data;
       if (!eu || !eu.ativo) return false;
       if (eu.admin) return eu;
+      // igualdade exata, como o `= any(u.modulos)` do banco. Com
+      // `indexOf` numa string, um módulo chamado "treinamentos" passaria
+      // aqui e seria recusado lá — o desencontro que este código existe
+      // justamente para evitar.
       var m = eu.modulos;
-      var tem = Array.isArray(m) ? m.indexOf('treinamento') >= 0
-                                 : String(m || '').indexOf('treinamento') >= 0;
+      var lista = Array.isArray(m) ? m
+                : String(m || '').replace(/[{}"]/g, '').split(',');
+      var tem = lista.some(function (x) { return String(x).trim() === 'treinamento'; });
       return tem ? eu : false;
     }
 
@@ -307,6 +337,14 @@
       // quem entrou é mesmo da equipe? A RLS já barraria a gravação, mas
       // deixar a tela abrir para quem não pode salvar é enganar a pessoa.
       var eu = await podeAdministrar();
+      // rede caindo não é falta de permissão: não acuse a pessoa de ter
+      // perdido o acesso quando o que faltou foi a resposta do servidor
+      if (eu === 'erro') {
+        $('viewLogin').style.display = 'block';
+        return recado($('erroLogin'),
+          'Não consegui falar com o servidor para conferir o seu acesso. '
+          + 'Verifique a conexão e tente de novo.');
+      }
       quemSou = eu || null;
       // A MESMA REGRA DO trein_is_equipe() NO BANCO.
       // Antes bastava estar ativo. Mas o banco passou a exigir tambem o
@@ -337,7 +375,21 @@
         // painel do curso edita os dois. Fora da lista, a caixa abriria
         // vazia e o primeiro "Salvar certificado" apagaria o conteúdo
         // programático que já estava gravado.
-        .select('id,codigo,titulo,subtitulo,descricao,carga_horaria,validade_meses,nota_minima,questoes_por_prova,ativo,titulo_certificado,conteudo_programatico').order('ordem');
+        .select('id,codigo,titulo,subtitulo,descricao,carga_horaria,validade_meses,nota_minima,questoes_por_prova,ativo,titulo_certificado,conteudo_programatico,apostila').order('ordem');
+
+      // A COLUNA `apostila` PODE NÃO EXISTIR AINDA.
+      //
+      // O site é publicado antes de alguém rodar o SQL, e o PostgREST
+      // recusa a consulta INTEIRA quando uma coluna não existe. Sem esta
+      // segunda tentativa, o admin abriria com "não consegui ler os
+      // cursos" e a pessoa concluiria que a plataforma quebrou — quando o
+      // que falta é um arquivo de uma linha.
+      if (r.error && /apostila/.test(r.error.message || '')) {
+        r = await sb.from('trein_curso')
+          .select('id,codigo,titulo,subtitulo,descricao,carga_horaria,validade_meses,nota_minima,questoes_por_prova,ativo,titulo_certificado,conteudo_programatico')
+          .order('ordem');
+        semApostila = true;
+      }
       if (r.error) {
         $('grade').innerHTML = '<p style="color:var(--vermelho)">Não consegui ' +
           'ler os cursos: ' + seguro(r.error.message) + '</p>';
@@ -400,7 +452,15 @@
     // ter acontecido.
     async function verCurso(aviso, bom) {
       $('corpo').innerHTML = '<p style="color:var(--meio)">Carregando…</p>';
-      if (!(await podeAdministrar())) return perdeuOAcesso();
+      var quem = await podeAdministrar();
+      if (quem === 'erro') {
+        // nao desloga por causa de rede: so avisa e deixa a tela como esta
+        return recado($('msgAula') || $('corpo'),
+          'Nao consegui conferir a sua permissao agora (rede). O que voce '
+          + 'acabou de fazer pode ter sido gravado — recarregue a pagina '
+          + 'para ver o estado real.');
+      }
+      if (!quem) return perdeuOAcesso();
       var aulas = (await sb.from('trein_aula')
         .select('id,titulo,descricao,video_url,duracao_seg,ordem')
         .eq('curso_id', atual.id).order('ordem')).data || [];
@@ -472,21 +532,25 @@
       }).join('') || '<p style="color:var(--meio)">Nenhuma aula ainda. ' +
         'Suba a primeira aqui embaixo.</p>';
 
-      var proxima = aulas.length + 1;
+      // UMA LINHA POR AULA, cada uma com o SEU titulo.
+      //
+      // Antes o formulario era um so: com varios arquivos de uma vez, o
+      // titulo saia do nome do arquivo. Isso serve para quem nomeia os
+      // arquivos com capricho, e nao serve para quem quer escrever
+      // "Aula 2 — trabalho a quente" num video chamado "final_v3.mp4".
+      //
+      // Agora da para acrescentar quantas linhas quiser antes de publicar,
+      // e elas entram na ordem em que estao na tela.
       html += '<div class="form-aula">' +
-        '<h3>Acrescentar aula ' + proxima + '</h3>' +
-        '<p style="color:var(--meio);font-size:.86rem;margin:-.5rem 0 .2rem">' +
-          'Um módulo tem quantas aulas você quiser. Escolha <b>vários ' +
-          'arquivos de uma vez</b> e eles entram em sequência, na ordem do ' +
-          'nome — o título de cada um sai do nome do arquivo.</p>' +
-        '<label for="t">Título <span style="font-weight:400;color:var(--meio)">' +
-          '(só para arquivo único; com vários, vem do nome de cada um)</span></label>' +
-        '<input id="t" type="text" placeholder="ex.: Aula ' + proxima +
-          ' — o que a norma exige" />' +
-        '<label for="d">Descrição <span style="font-weight:400;color:var(--meio)">(opcional)</span></label>' +
-        '<textarea id="d" placeholder="aparece embaixo do vídeo"></textarea>' +
-        '<label for="arq">Vídeo — pode escolher mais de um</label>' +
-        '<input id="arq" type="file" accept="video/*" multiple />' +
+        '<h3>Acrescentar aulas</h3>' +
+        '<p style="color:var(--meio);font-size:.86rem;margin:-.5rem 0 .6rem">' +
+          'Um modulo tem quantas aulas voce quiser. Preencha uma linha por ' +
+          'aula e clique em <b>+ Outra aula</b> para acrescentar mais — elas ' +
+          'entram na ordem em que estao aqui. Deixando o titulo em branco, ' +
+          'ele sai do nome do arquivo.</p>' +
+        '<div id="linhasAula"></div>' +
+        '<button class="mini" id="maisAula" style="margin-top:.2rem">' +
+        '+ Outra aula</button>' +
         '<div class="prog" id="prog"><i id="progI"></i></div>' +
         '<div class="msg" id="msgAula"></div>' +
         '<button class="i-botao" id="salvar" style="margin-top:1.2rem">' +
@@ -499,23 +563,16 @@
       // responde pela prova é o responsável técnico, que não escreve SQL.
       // Prova errada reprova quem sabe e aprova quem não sabe, e é o
       // certificado dele que está em jogo.
-      var sorteia = Number(atual.questoes_por_prova) || 10;
-      var faltando = questoes.length < sorteia;
+      // O RESUMO FICA NUM ELEMENTO PRÓPRIO, e é redesenhado junto com a
+      // lista. Antes ele era escrito uma vez, aqui, e o `pintarProva()`
+      // só reescrevia a lista embaixo: acrescentar a décima questão
+      // deixava o aviso vermelho "todo aluno faz a mesma prova" na tela
+      // depois de resolvido — e, pior, apagar questões até ficar abaixo do
+      // sorteio NÃO acendia o aviso. O estado mais perigoso ficava
+      // invisível até alguém sair do curso e entrar de novo.
       html += '<div class="form-aula">' +
         '<h3>Prova — banco de questões</h3>' +
-        '<p style="color:var(--meio);font-size:.86rem;margin:-.5rem 0 .2rem">' +
-          'A prova <b>sorteia ' + sorteia + '</b> questões das <b>' +
-          questoes.length + '</b> que estão aqui, e embaralha as ' +
-          'alternativas a cada tentativa — por isso ninguém dita "é a letra ' +
-          'C" para o colega. Quanto maior o banco, menos duas provas saem ' +
-          'iguais.</p>' +
-        (faltando
-          ? '<p style="color:var(--vermelho);font-size:.86rem;margin:.6rem 0 0">'
-            + 'São menos questões do que a prova sorteia: com ' +
-            questoes.length + ' no banco, <b>todo aluno faz a mesma prova</b>. '
-            + 'Acrescente questões, ou baixe "Questões por prova" lá em cima.'
-            + '</p>'
-          : '') +
+        '<div id="resumoProva"></div>' +
         '<div class="msg" id="msgProva"></div>' +
         '<button class="i-botao" id="verProva" style="margin-top:1.1rem">' +
         'Ver as questões</button>' +
@@ -562,7 +619,62 @@
           'de escrever.</p>' +
         '</div>';
 
+      // ---- a apostila ------------------------------------------------------
+      //
+      // O material de estudo do aluno, editável aqui pelo mesmo motivo da
+      // prova e do certificado: quem responde pelo conteúdo é o responsável
+      // técnico, e ele não escreve SQL. Uma frase errada numa apostila é
+      // corrigida em segundos; num PDF no armazenamento, seria refazer o
+      // arquivo e torcer para ninguém ter baixado a versão antiga.
+      var apo = String(atual.apostila || '');
+      if (semApostila) {
+        html += '<div class="form-aula">' +
+          '<h3>Apostila — o material de estudo</h3>' +
+          '<p style="color:var(--vermelho);font-size:.9rem;margin:-.3rem 0 0">' +
+            'A coluna da apostila ainda nao existe no banco. Rode o ' +
+            '<b>29-apostila.sql</b> no Supabase e recarregue esta pagina — ' +
+            'ai o editor aparece aqui.</p>' +
+          '</div>';
+      } else {
+      var palavras = apo.trim() ? apo.trim().split(/\s+/).length : 0;
+      html += '<div class="form-aula">' +
+        '<h3>Apostila — o material de estudo</h3>' +
+        '<p style="color:var(--meio);font-size:.86rem;margin:-.5rem 0 .2rem">' +
+          'É o que o aluno abre no celular no meio do turno e consulta antes ' +
+          'da prova. O vídeo ensina, mas ninguém revê 40 minutos de aula ' +
+          'para tirar uma dúvida no serviço.</p>' +
+        '<p style="color:var(--meio);font-size:.82rem;margin:.5rem 0 0">' +
+          'Escreva assim: <b>## título</b> começa um capítulo, ' +
+          '<b>### subtítulo</b> divide dentro dele, <b>- item</b> vira lista, ' +
+          '<b>**negrito**</b> destaca, e uma linha começando com <b>&gt;</b> ' +
+          'vira um aviso amarelo. O resto é parágrafo normal.</p>' +
+        '<label for="cApostila">Texto da apostila ' +
+          '<span style="font-weight:400;color:var(--meio)">(' +
+          (palavras ? palavras + ' palavras hoje' : 'vazia') + ')</span></label>' +
+        '<textarea id="cApostila" style="min-height:320px;' +
+          'font-family:Consolas,monospace;font-size:.86rem;line-height:1.6">' +
+          seguro(apo) + '</textarea>' +
+        (palavras
+          ? ''
+          : '<p style="color:var(--vermelho);font-size:.86rem;margin:.6rem 0 0">'
+            + 'Sem apostila, o aluno fica só com o vídeo: no meio do turno, '
+            + 'com uma dúvida, ele não tem onde conferir.</p>') +
+        '<div class="msg" id="msgApo"></div>' +
+        '<div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;' +
+          'margin-top:1.1rem">' +
+          '<button class="i-botao" id="salvarApo">Salvar apostila</button>' +
+          '<button class="mini" id="verApo">Ver como o aluno vê</button>' +
+        '</div>' +
+        '</div>';
+      }
+
       $('corpo').innerHTML = html;
+      if (!semApostila) {
+        $('salvarApo').addEventListener('click', salvarApostila);
+        $('verApo').addEventListener('click', function () {
+          window.open('apostila.html?amostra=1&curso=' + atual.id, '_blank');
+        });
+      }
       $('salvar').addEventListener('click', function () { salvarAula(aulas); });
       $('corpo').querySelectorAll('[data-apaga]').forEach(function (b) {
         b.addEventListener('click', function () { apagar(b.dataset.apaga); });
@@ -577,6 +689,13 @@
         b.addEventListener('click', function () {
           espiar(aulas.find(function (a) { return a.id === b.dataset.ver; }));
         });
+      });
+      pintarResumoProva();
+      linhasAula = 0;
+      questoesBaseAula = aulas.length;
+      novaLinhaAula(aulas.length + 1);
+      $('maisAula').addEventListener('click', function () {
+        novaLinhaAula(aulas.length + linhasAula + 1);
       });
       $('salvarCurso').addEventListener('click', salvarCurso);
       $('salvarCert').addEventListener('click', salvarCertificado);
@@ -593,6 +712,54 @@
       // pertence ao formulario do topo, nao ao de upload la embaixo
       if (aviso) recado($(alvoDoAviso || 'msgAula'), aviso, bom);
       alvoDoAviso = null;
+    }
+
+    // Cada linha e uma aula: titulo proprio, descricao e o arquivo. O
+    // numero mostrado e o que ela VAI ter no curso, para a pessoa ver a
+    // sequencia enquanto preenche.
+    function novaLinhaAula(numero) {
+      var caixa = $('linhasAula');
+      if (!caixa) return;
+      linhasAula += 1;
+      var id = 'la' + linhasAula;
+      var bloco = document.createElement('div');
+      bloco.className = 'linha-aula';
+      bloco.id = id;
+      bloco.innerHTML =
+        '<div class="linha-aula__cab">' +
+          '<b>Aula ' + numero + '</b>' +
+          (linhasAula > 1
+            ? '<button class="mini perigo" data-tira="' + id + '">Tirar</button>'
+            : '') +
+        '</div>' +
+        '<label>Titulo <span style="font-weight:400;color:var(--meio)">' +
+          '(em branco, sai do nome do arquivo)</span></label>' +
+        '<input type="text" data-papel="titulo" placeholder="ex.: Aula ' +
+          numero + ' — o que a norma exige" />' +
+        '<label>Descricao <span style="font-weight:400;color:var(--meio)">' +
+          '(opcional)</span></label>' +
+        '<textarea data-papel="desc" placeholder="aparece embaixo do video"></textarea>' +
+        '<label>Video</label>' +
+        '<input type="file" accept="video/*" multiple data-papel="arq" />';
+      caixa.appendChild(bloco);
+      var tirar = bloco.querySelector('[data-tira]');
+      if (tirar) {
+        tirar.addEventListener('click', function () {
+          bloco.remove();
+          renumerarLinhas();
+        });
+      }
+    }
+
+    // Depois de tirar uma linha do meio, as de baixo mudam de numero.
+    // Sem isto a tela mostraria "Aula 2, Aula 4" e a pessoa acharia que
+    // perdeu uma.
+    function renumerarLinhas() {
+      var base = questoesBaseAula;
+      $('linhasAula').querySelectorAll('.linha-aula').forEach(function (b, i) {
+        var t = b.querySelector('.linha-aula__cab b');
+        if (t) t.textContent = 'Aula ' + (base + i + 1);
+      });
     }
 
     // Grava os dados do curso. Numero vazio vira null de proposito: "sem
@@ -677,7 +844,60 @@
     // Grava só o que sai impresso no certificado. Botão separado do "Salvar
     // dados do curso" de propósito: mexer no conteúdo programático é mexer
     // no documento que a fiscalização lê, e não na vitrine.
+    async function salvarApostila() {
+      var msg = $('msgApo'), b = $('salvarApo');
+      var texto = String($('cApostila').value || '');
+
+      // apagar o material inteiro pede confirmacao, como o conteudo
+      // programatico: o aluno perde a unica coisa que ele consulta fora do
+      // video, e nao ha desfazer
+      var tinha = String((atual && atual.apostila) || '').trim();
+      if (tinha && !texto.trim() && !confirm(
+            'Isto vai APAGAR a apostila deste curso.\n\nO aluno fica so com '
+            + 'o video: no meio do turno, com uma duvida, sem onde conferir.'
+            + '\n\nTem certeza?')) {
+        return;
+      }
+
+      b.disabled = true; b.textContent = 'Salvando...';
+      var r = await sb.from('trein_curso')
+        .update({ apostila: texto.trim() || null })
+        .eq('id', atual.id).select().maybeSingle();
+      b.disabled = false; b.textContent = 'Salvar apostila';
+
+      if (r.error) return recado(msg, 'Nao consegui salvar: ' + seguro(r.error.message));
+      if (!r.data) {
+        return recado(msg, 'O servidor aceitou o pedido mas nao gravou nada. '
+          + 'Isso costuma ser permissao: confira se o seu usuario tem o '
+          + 'modulo Treinamentos marcado no SistemaCMH.');
+      }
+      atual = r.data;
+      var i = cursos.findIndex(function (c) { return c.id === atual.id; });
+      if (i >= 0) cursos[i] = atual;
+      var quantas = texto.trim() ? texto.trim().split(/\s+/).length : 0;
+      anotar('trein_apostila_alterada',
+        atual.codigo + ': ' + quantas + ' palavras');
+      alvoDoAviso = 'msgApo';
+      verCurso(quantas
+        ? 'Apostila salva — ' + quantas + ' palavras.'
+        : 'Apostila apagada.', true);
+    }
+
     async function salvarCertificado() {
+      // APAGAR O CONTEUDO INTEIRO PEDE CONFIRMACAO.
+      // Ir de doze itens para zero e um Ctrl+A e um Delete, e a resposta
+      // saia em VERDE — "sai com uma folha so" — como se fosse escolha.
+      // O verso e o que prova o que foi ensinado, e todo certificado
+      // emitido dali em diante sai sem ele. O resto deste arquivo confirma
+      // antes de apagar aula, questao e curso; isto ficou de fora.
+      var tinha = String((atual && atual.conteudo_programatico) || '').trim();
+      var vai = String($('cConteudo').value || '').trim();
+      if (tinha && !vai && !confirm(
+            'Isto vai APAGAR o conteudo programatico deste curso.\n\n'
+            + 'Todo certificado emitido a partir de agora sai com uma folha '
+            + 'so, sem o verso que mostra o que foi ensinado.\n\nTem certeza?')) {
+        return;
+      }
       var msg = $('msgCert'), b = $('salvarCert');
       var conteudo = $('cConteudo').value.replace(/\r/g, '').trim();
       b.disabled = true; b.textContent = 'Salvando...';
@@ -713,12 +933,44 @@
     // do zero. Guardar a letra não serviria: a Edge Function embaralha as
     // alternativas a cada prova, justamente para "é a letra C" não virar
     // resposta transmissível entre colegas.
+    // O resumo do banco de questoes. Desenhado sempre que a lista muda,
+    // e nao uma vez so: e ele que diz se todo aluno esta fazendo a mesma
+    // prova, e essa frase nao pode ficar velha na tela.
+    function pintarResumoProva() {
+      var caixa = $('resumoProva');
+      if (!caixa) return;
+      var sorteia = Number(atual.questoes_por_prova) || 10;
+      var quantas = questoes.length;
+      var faltando = quantas < sorteia;
+      caixa.innerHTML =
+        '<p style="color:var(--meio);font-size:.86rem;margin:-.5rem 0 .2rem">' +
+          'A prova <b>sorteia ' + sorteia + '</b> questoes das <b>' + quantas +
+          '</b> que estao aqui, e embaralha as alternativas a cada tentativa ' +
+          '— por isso ninguem dita "e a letra C" para o colega. Quanto maior ' +
+          'o banco, menos duas provas saem iguais.</p>' +
+        (faltando
+          ? '<p style="color:var(--vermelho);font-size:.86rem;margin:.6rem 0 0">'
+            + 'Sao menos questoes do que a prova sorteia: com ' + quantas +
+            ' no banco, <b>todo aluno faz a mesma prova</b>. Acrescente '
+            + 'questoes, ou baixe "Questoes por prova" la em cima.</p>'
+          : '');
+    }
+
+    // Devolve '' quando deu certo, e a mensagem quando falhou.
+    //
+    // EM CASO DE ERRO A LISTA EM MEMÓRIA NÃO É TOCADA. Antes fazia
+    // `questoes = r.data || []`, e uma queda de rede zerava o array: a tela
+    // anunciava, em verde, "Questão removida. Sobram 0 no banco" e mostrava
+    // "Nenhuma questão ainda" para um curso com 150. Pânico falso — e o
+    // próximo "Acrescentar" nasceria com ordem 1, colidindo com a que
+    // existe.
     async function recarregarQuestoes() {
       var r = await sb.from('trein_questao')
         .select('id,enunciado,alternativas,correta,ordem')
         .eq('curso_id', atual.id).order('ordem');
+      if (r.error) return r.error.message;
       questoes = r.data || [];
-      return r.error ? r.error.message : '';
+      return '';
     }
 
     // O jsonb chega pronto como array, mas um banco antigo pode ter
@@ -736,6 +988,7 @@
     var LETRAS = 'ABCDEFGH';
 
     function pintarProva() {
+      pintarResumoProva();
       var botao = $('verProva'), lista = $('listaQ');
       if (!botao || !lista) return;
       botao.textContent = provaAberta ? 'Fechar as questões'
@@ -745,12 +998,41 @@
 
       lista.innerHTML = '<div style="margin-top:1.2rem">' +
         questoes.map(function (q, i) {
-          var alts = alternativasDe(q).map(function (t, j) {
+          var lista_alts = alternativasDe(q);
+          var alts = lista_alts.map(function (t, j) {
             return '<li class="' + (j === q.correta ? 'certa' : '') + '">' +
-              '<b>' + LETRAS[j] + ')</b> ' + seguro(t) +
+              '<b>' + (LETRAS[j] || (j + 1)) + ')</b> ' + seguro(t) +
               (j === q.correta ? ' &nbsp;✓ certa' : '') + '</li>';
           }).join('');
-          return '<div class="qadm"><div class="qadm__cab">' +
+
+          // O PAINEL TEM DE GRITAR O QUE ATINGE O ALUNO.
+          //
+          // Uma questão cujo `correta` aponte para fora das alternativas
+          // era desenhada SEM linha verde e sem aviso nenhum — e na prova
+          // ela é erro automático para todo mundo. Numa lista de 150,
+          // ninguém repara na falta de um "✓ certa".
+          //
+          // O mesmo vale para alternativas gravadas como TEXTO em vez de
+          // array: o `alternativasDe()` conserta para a tela, e aí o
+          // painel mostra a questão perfeita enquanto a Edge Function
+          // entrega ao aluno uma questão SEM alternativa nenhuma — porque
+          // lá o fallback não existe. O conserto defensivo escondia
+          // justamente o defeito.
+          var doente = '';
+          if (!(q.correta >= 0 && q.correta < lista_alts.length)) {
+            doente = 'gabarito aponta para uma alternativa que não existe: '
+                   + 'esta questão é erro automático para todo aluno';
+          } else if (typeof q.alternativas === 'string') {
+            doente = 'as alternativas estão gravadas como texto, e não como '
+                   + 'lista: o aluno recebe esta questão SEM alternativas';
+          } else if (lista_alts.length < 2) {
+            doente = 'menos de duas alternativas';
+          }
+
+          return '<div class="qadm' + (doente ? ' qadm--ruim' : '') + '">' +
+            (doente ? '<div class="qadm__alerta">⚠ ' + doente +
+                      '. Abra em Editar e grave de novo para consertar.</div>' : '') +
+            '<div class="qadm__cab">' +
             '<span class="aulaadm__n">' + (i + 1) + '</span>' +
             '<span class="qadm__en">' + seguro(q.enunciado) + '</span>' +
             '<span class="aulaadm__acoes">' +
@@ -929,8 +1211,13 @@
           + 'marcado no SistemaCMH.');
       }
       anotar('trein_questao_removida', atual.codigo + ': ' + q.enunciado.slice(0, 140));
-      await recarregarQuestoes();
+      var falhou = await recarregarQuestoes();
       pintarProva();
+      if (falhou) {
+        return recado($('msgProva'), 'A questao foi removida, mas nao ' +
+          'consegui reler a lista: ' + seguro(falhou) +
+          ' — recarregue a pagina para ver o estado real.');
+      }
       recado($('msgProva'), 'Questão removida. Sobram ' + questoes.length +
              ' no banco.', true);
     }
@@ -972,8 +1259,12 @@
         return recado($('msgProva'), 'Nao consegui reordenar. Recarregue e '
           + 'tente de novo.');
       }
-      await recarregarQuestoes();
+      var erroMover = await recarregarQuestoes();
       pintarProva();
+      if (erroMover) {
+        recado($('msgProva'), 'Reordenei, mas nao consegui reler a lista: ' +
+          seguro(erroMover) + ' — recarregue a pagina.');
+      }
     }
 
     // Mostra o vídeo da aula ali mesmo. Com dez arquivos parecidos no mesmo
@@ -1018,24 +1309,41 @@
     // disparar dez uploads juntos costuma derrubar a conexão e deixar
     // metade pela metade. Em fila, o que falhou é só o último.
     async function salvarAula(aulas) {
-      var titulo = $('t').value.trim();
-      var arquivos = Array.from($('arq').files);
       var msg = $('msgAula'), botao = $('salvar');
 
-      if (!arquivos.length) return recado(msg, 'Escolha o arquivo de vídeo.');
-      if (arquivos.length === 1 && !titulo) {
-        titulo = tituloDoArquivo(arquivos[0].name);
+      // Monta a fila a partir das LINHAS da tela, na ordem em que estao.
+      // Cada linha leva o titulo que a pessoa escreveu; em branco, ou com
+      // varios arquivos na mesma linha, o titulo sai do nome do arquivo.
+      var fila = [];
+      var blocos = $('linhasAula').querySelectorAll('.linha-aula');
+      for (var b = 0; b < blocos.length; b++) {
+        var linha = blocos[b];
+        var tit = linha.querySelector('[data-papel="titulo"]').value.trim();
+        var desc = linha.querySelector('[data-papel="desc"]').value.trim();
+        var esc = Array.from(linha.querySelector('[data-papel="arq"]').files);
+        if (!esc.length) continue;
+        esc.sort(function (x, y) {
+          return x.name.localeCompare(y.name, 'pt-BR', { numeric: true });
+        });
+        (function (tit, desc, esc) {
+          esc.forEach(function (arq, k) {
+            fila.push({
+              arquivo: arq,
+              titulo: (esc.length === 1 && tit) ? tit : tituloDoArquivo(arq.name),
+              descricao: (esc.length === 1 ? desc : (k === 0 ? desc : '')) || null
+            });
+          });
+        })(tit, desc, esc);
       }
-      var grandes = arquivos.filter(function (a) { return a.size > LIMITE; });
+
+      if (!fila.length) return recado(msg, 'Escolha o arquivo de video.');
+      var grandes = fila.filter(function (x) { return x.arquivo.size > LIMITE; });
       if (grandes.length) {
         return recado(msg, 'Estes passam do limite de 2 GB: ' +
-          grandes.map(function (a) { return seguro(a.name); }).join(', ') +
+          grandes.map(function (x) { return seguro(x.arquivo.name); }).join(', ') +
           '. Comprima antes de subir.');
       }
-      // ordem do nome, e não a ordem em que o Windows entregou a seleção
-      arquivos.sort(function (a, b) {
-        return a.name.localeCompare(b.name, 'pt-BR', { numeric: true });
-      });
+      var arquivos = fila;
 
       botao.disabled = true;
       $('prog').style.display = 'block';
@@ -1053,7 +1361,8 @@
       var prontas = 0;
 
       for (var i = 0; i < arquivos.length; i++) {
-        var arquivo = arquivos[i];
+        var item = arquivos[i];
+        var arquivo = item.arquivo;
         botao.textContent = arquivos.length > 1
           ? 'Enviando ' + (i + 1) + ' de ' + arquivos.length + '…'
           : 'Enviando…';
@@ -1091,14 +1400,14 @@
           // o aviso vai DENTRO do verCurso: escrito antes, o redesenho o
           // apaga; escrito depois, cai num elemento que já saiu da página
           return verCurso((prontas ? prontas + ' aula(s) entraram. ' : '') +
-            'Parei em "' + seguro(arquivo.name) + '": ' + envio.error.message);
+            'Parei em "' + seguro(arquivo.name) + '": ' + seguro(envio.error.message));
         }
 
         ordem += 1;
         var r = await sb.from('trein_aula').insert({
           curso_id: atual.id,
-          titulo: arquivos.length > 1 ? tituloDoArquivo(arquivo.name) : titulo,
-          descricao: arquivos.length > 1 ? null : ($('d').value.trim() || null),
+          titulo: item.titulo,
+          descricao: item.descricao,
           video_url: caminho, duracao_seg: duracao,
           ordem: ordem
         });
@@ -1109,11 +1418,10 @@
           botao.disabled = false; botao.textContent = 'Publicar';
           $('prog').style.display = 'none';
           return verCurso((prontas ? prontas + ' aula(s) entraram. ' : '') +
-            'Não consegui salvar "' + seguro(arquivo.name) + '": ' + r.error.message);
+            'Não consegui salvar "' + seguro(arquivo.name) + '": ' + seguro(r.error.message));
         }
         anotar('trein_aula_publicada',
-          atual.codigo + ': ' + (arquivos.length > 1
-            ? tituloDoArquivo(arquivo.name) : titulo) +
+          atual.codigo + ': ' + item.titulo +
           ' (' + (duracao ? Math.round(duracao / 60) + ' min' : 'sem duracao') +
           ', ' + Math.round(arquivo.size / 1048576) + ' MB)');
         prontas += 1;

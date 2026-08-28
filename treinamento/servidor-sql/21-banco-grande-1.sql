@@ -1,4 +1,28 @@
 -- =====================================================================
+--  ATENÇÃO — LEIA ANTES DE RODAR
+--
+--  ESTE ARQUIVO APAGA E REESCREVE QUESTÕES.
+--
+--  Desde que o admin do site ganhou o editor de prova
+--  (treinamento/admin.html), as questões passaram a ter DUAS fontes: estes
+--  arquivos e a tela que o responsável técnico usa.
+--
+--  Rodar isto aqui joga fora toda correção de enunciado, de alternativa ou
+--  de GABARITO feita pela tela naquela faixa de `ordem`. A perda é
+--  silenciosa: ninguém é avisado, e o erro só reaparece quando um aluno
+--  for reprovado por uma resposta que já tinha sido consertada.
+--
+--  Rode apenas quando o banco daquele curso estiver vazio, ou quando você
+--  souber que quer descartar as edições feitas pela tela.
+--
+--  Para conferir o que existe hoje antes de decidir:
+--      select c.codigo, count(q.id) as questoes
+--        from public.trein_curso c
+--        left join public.trein_questao q on q.curso_id = c.id
+--       where c.ativo group by c.id order by c.ordem;
+-- =====================================================================
+
+-- =====================================================================
 --  Banco grande — parte 1
 --  NR-10, NR-33, NR-35-REC, NR-12 e NR-18
 --  110 questões novas por curso, ordem 41 a 150. São 550 questões.
