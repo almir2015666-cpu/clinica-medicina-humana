@@ -1389,3 +1389,43 @@ body.aviso-aberto{overflow:hidden}
 .lang__menu li span{color:#2f6df6;font-weight:700}
 @media(max-width:900px){.lang{margin-left:.3rem}
   .lang__abre{padding:.38rem .6rem}}
+/* =====================================================================
+   A LOGO NAO PODE SER ESPREMIDA
+   =====================================================================
+   No cabecalho de 1025 px para cima cabem, na mesma linha: a marca, o menu
+   inteiro, o seletor de idioma e QUATRO botoes. Num monitor de 1280 ou
+   1366 px isso nao cabe — e quem cedia era a marca, porque ela era o unico
+   item da linha sem trava de encolhimento.
+
+   O resultado nao era a logo sumir: era ela ENCOLHER NA LARGURA com a
+   altura fixa em 72 px, ou seja, sair achatada. Marca distorcida e a
+   primeira coisa que um cliente nota, e a ultima que alguem imagina ser
+   "culpa do tamanho do monitor".
+
+   Agora a marca e a imagem nao encolhem nunca. Quem cede e o menu, que tem
+   `min-width:0` e pode apertar o proprio espacamento — e, se ainda faltar
+   espaco, a faixa de 1025 a 1400 px abaixo diminui a letra do menu e a
+   altura da logo DE PROPOSITO, que e diferente de deixar espremer.
+   ===================================================================== */
+.brand{flex:none}
+.brand__logo{flex-shrink:0;max-width:none}
+.header__inner > .nav{min-width:0}
+
+@media(min-width:1025px) and (max-width:1400px){
+  /* a logo diminui por decisao, mantendo a proporcao */
+  .brand__logo{height:60px}
+  .header.scrolled .brand__logo{height:48px}
+  /* o menu e quem cede o espaco */
+  .nav__link{padding:.5rem .4rem;font-size:.82rem}
+  .nav{margin-left:1rem}
+  .header__cta{margin-left:1rem;gap:.35rem}
+}
+
+@media(min-width:1025px) and (max-width:1180px){
+  /* mais apertado ainda: o rotulo do idioma sai, o simbolo fica */
+  .brand__logo{height:54px}
+  .header.scrolled .brand__logo{height:44px}
+  .nav__link{padding:.45rem .3rem;font-size:.78rem}
+  .header__cta .btn-agendar{font-size:.75rem;padding:.45rem .7rem;gap:.3rem}
+  .header__cta .btn-agendar svg{width:14px;height:14px}
+}
