@@ -1,4 +1,4 @@
--- =====================================================================
+﻿-- =====================================================================
 --  CONSERTOS DE SEGURANÇA E INTEGRIDADE
 --
 --  Rode no SQL Editor. Pode rodar mais de uma vez.
@@ -47,7 +47,10 @@ update public.trein_certificado ce
   join public.trein_aluno a on a.id = m.aluno_id
   join public.trein_curso c on c.id = m.curso_id
  where m.id = ce.matricula_id
-   and ce.nome is null;
+   -- a guarda olha TODAS as colunas do retrato, e nao so o nome: uma
+   -- execucao interrompida no meio poderia ter gravado o nome e nao o
+   -- resto, e "ce.nome is null" nunca mais consertaria isso
+   and (ce.nome is null or ce.cpf is null or ce.curso_titulo is null);
 
 
 -- =====================================================================
@@ -110,6 +113,13 @@ begin
     return jsonb_build_object('codigo', v_cert.codigo,
                               'emitido_em', v_cert.emitido_em,
                               'valido_ate', v_cert.valido_ate,
+                              -- o retrato vai junto: e com ele que a folha
+                              -- e impressa, para o papel dizer o mesmo que
+                              -- a pagina publica de conferencia
+                              'nome', v_cert.nome, 'cpf', v_cert.cpf,
+                              'empresa', v_cert.empresa,
+                              'curso_titulo', v_cert.curso_titulo,
+                              'carga_horaria', v_cert.carga_horaria,
                               'novo', false);
   end if;
 
@@ -156,6 +166,10 @@ begin
   return jsonb_build_object('codigo', v_cert.codigo,
                             'emitido_em', v_cert.emitido_em,
                             'valido_ate', v_cert.valido_ate,
+                            'nome', v_cert.nome, 'cpf', v_cert.cpf,
+                            'empresa', v_cert.empresa,
+                            'curso_titulo', v_cert.curso_titulo,
+                            'carga_horaria', v_cert.carga_horaria,
                             'novo', true);
 end;
 $$;
@@ -215,6 +229,25 @@ $$;
 --  melhor deixar concluir do que prender o aluno num curso que não
 --  termina por falha nossa.
 -- =====================================================================
+-- O RELÓGIO É O DO SERVIDOR, NÃO O NÚMERO QUE O NAVEGADOR MANDA.
+--
+-- A primeira versão deste gatilho comparava `segundos_vistos` com 90% da
+-- duração — e não travava nada. O aluno lê `duracao_seg` na própria tela
+-- (a lista de aulas mostra o tempo) e bastava mandar esse número:
+--
+--     upsert({ segundos_vistos: a.duracao_seg, concluida: true })
+--
+-- Passava pelos 90% e liberava a prova. Trocar um `true` por um número
+-- não é uma trava, é um pedágio.
+--
+-- O que não se falsifica é o tempo do servidor. A coluna abaixo guarda
+-- QUANDO aquela pessoa abriu aquela aula pela primeira vez; concluir exige
+-- que tenha passado, no relógio da parede, pelo menos 90% da duração.
+-- Quem manda tudo num segundo é recusado, tenha escrito o número que
+-- tiver.
+alter table public.trein_progresso
+  add column if not exists iniciado_em timestamptz;
+
 create or replace function public.trein_progresso_confere()
 returns trigger
 language plpgsql security definer set search_path = public as $$
@@ -223,6 +256,7 @@ declare
   v_curso_da_aula      uuid;
   v_duracao            int;
   v_antes              int;
+  v_inicio             timestamptz;
 begin
   select m.curso_id into v_curso_da_matricula
     from public.trein_matricula m where m.id = new.matricula_id;
@@ -234,18 +268,28 @@ begin
     raise exception 'AULA_DE_OUTRO_CURSO';
   end if;
 
-  -- o relógio não volta
-  select p.segundos_vistos into v_antes
+  select p.segundos_vistos, p.iniciado_em into v_antes, v_inicio
     from public.trein_progresso p
    where p.matricula_id = new.matricula_id and p.aula_id = new.aula_id;
+
+  -- o relógio do aluno não volta
   if v_antes is not null and new.segundos_vistos < v_antes then
     new.segundos_vistos := v_antes;
   end if;
 
-  if new.concluida
-     and v_duracao is not null and v_duracao > 0
-     and new.segundos_vistos < (v_duracao * 0.9) then
-    raise exception 'AULA_NAO_ASSISTIDA';
+  -- a hora de início é do servidor e nunca é reescrita pelo cliente
+  new.iniciado_em := coalesce(v_inicio, now());
+
+  if new.concluida and v_duracao is not null and v_duracao > 0 then
+    -- 90%, e não 100%: o `timeupdate` do navegador não bate no último
+    -- segundo exato, e vídeo recodificado tem duração com casa decimal.
+    if new.segundos_vistos < (v_duracao * 0.9) then
+      raise exception 'AULA_NAO_ASSISTIDA';
+    end if;
+    -- e o tempo REAL desde que ele abriu a aula
+    if now() - new.iniciado_em < make_interval(secs => v_duracao * 0.9) then
+      raise exception 'AULA_RAPIDA_DEMAIS';
+    end if;
   end if;
 
   return new;
@@ -269,22 +313,32 @@ create trigger trein_progresso_confere_tg
 --  O revoke certo é `from public`. Depois dele, concede-se de novo, um a
 --  um, só para quem deve.
 -- =====================================================================
-revoke execute on function public.trein_resgatar(text, uuid, text, text, text, text) from public;
+revoke execute on function public.trein_resgatar(text, uuid, text, text, text, text) from public, anon, authenticated;
 revoke execute on function public.trein_emitir_certificado(uuid)  from public;
 revoke execute on function public.trein_conferir_certificado(text) from public;
 revoke execute on function public.trein_espiar_cupom(text)         from public;
-revoke execute on function public.trein_pode_ver(uuid)             from public;
-revoke execute on function public.trein_is_equipe()                from public;
 
 -- e agora, de propósito, quem pode o quê:
 grant execute on function public.trein_emitir_certificado(uuid)   to authenticated;
 grant execute on function public.trein_conferir_certificado(text) to anon, authenticated;
 grant execute on function public.trein_espiar_cupom(text)         to anon, authenticated;
--- trein_resgatar fica SÓ para a service role (a Edge Function). Era o que
--- o comentário original prometia e o revoke não cumpria: chamada direta
--- pelo REST matriculava gente à força, consumindo vaga.
--- trein_pode_ver e trein_is_equipe são usadas DENTRO das políticas de RLS,
--- que rodam como dono — não precisam de grant para ninguém.
+grant execute on function public.trein_resgatar(text, uuid, text, text, text, text) to service_role;
+
+-- ATENÇÃO — trein_pode_ver E trein_is_equipe NÃO ENTRAM AQUI, DE PROPÓSITO.
+--
+-- Uma versão anterior deste arquivo revogava as duas, com a justificativa
+-- de que "políticas de RLS rodam como dono e não precisam de grant".
+-- ISSO ESTÁ ERRADO, e o erro era capaz de derrubar o site inteiro.
+--
+-- A expressão de uma política é avaliada com o papel de QUEM FEZ a
+-- consulta. Ser `security definer` muda o que a função enxerga por dentro,
+-- não quem tem permissão de chamá-la. Sem EXECUTE, toda política que as
+-- usa levanta "permission denied for function": trein_curso_publico (a
+-- vitrine), trein_aula_lib (as aulas), trein_stor_read (os vídeos) e todas
+-- as *_equipe (o admin) — tudo fora do ar de uma vez, e por um revoke que
+-- não consertava nada.
+grant execute on function public.trein_pode_ver(uuid)  to anon, authenticated;
+grant execute on function public.trein_is_equipe()     to anon, authenticated;
 
 
 -- =====================================================================

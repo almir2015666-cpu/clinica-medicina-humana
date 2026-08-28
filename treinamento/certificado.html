@@ -301,6 +301,13 @@
         if (m.indexOf('NAO_APROVADO') !== -1) {
           return erro('O certificado sai depois de você ser aprovado na prova.');
         }
+        if (m.indexOf('MATRICULA_CANCELADA') !== -1) {
+          return erro('Este treinamento foi cancelado. Fale com o RH da sua empresa.');
+        }
+        if (m.indexOf('MATRICULA_VENCIDA') !== -1) {
+          return erro('O prazo deste treinamento venceu antes de o certificado ' +
+                      'ser emitido. Fale com o RH da sua empresa.');
+        }
         return erro('Não consegui emitir o certificado. Tente de novo mais tarde.');
       }
 
@@ -314,7 +321,36 @@
 
       if (!r.data || !perfil.data) return erro('Não encontrei esse certificado.');
 
-      var d = { cert: em.data, curso: r.data.trein_curso, aluno: perfil.data };
+      // O PAPEL SAI DO RETRATO CONGELADO NO DIA DA EMISSAO.
+      //
+      // A validacao publica ja le o retrato gravado em trein_certificado.
+      // Se a impressao continuasse lendo os dados AO VIVO, bastaria alguem
+      // corrigir a carga horaria de 8 para 4 no admin para todo certificado
+      // ja emitido reimprimir como 4 horas — enquanto a pagina de validacao
+      // continuaria dizendo 8. O auditor confere o papel e nao bate.
+      //
+      // O ao vivo fica so como reserva, para certificado emitido antes de o
+      // retrato existir.
+      var congelado = em.data || {};
+      var cursoVivo = (r.data && r.data.trein_curso) || {};
+      var d = {
+        cert: congelado,
+        curso: {
+          codigo: cursoVivo.codigo,
+          titulo: congelado.curso_titulo || cursoVivo.titulo,
+          titulo_certificado: cursoVivo.titulo_certificado,
+          carga_horaria: (congelado.carga_horaria != null
+                          ? congelado.carga_horaria : cursoVivo.carga_horaria),
+          // o conteudo programatico e do CURSO, nao do aluno: ele descreve
+          // a ementa e pode ser corrigido sem invalidar papel nenhum
+          conteudo_programatico: cursoVivo.conteudo_programatico
+        },
+        aluno: {
+          nome:    congelado.nome    || perfil.data.nome,
+          cpf:     congelado.cpf     || perfil.data.cpf,
+          empresa: congelado.empresa || perfil.data.empresa
+        }
+      };
       alvo.innerHTML = folhaFrente(d) + folhaVerso(d);
       document.title = 'Certificado de ' + d.aluno.nome;
     })();

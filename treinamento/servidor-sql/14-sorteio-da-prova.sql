@@ -1,4 +1,4 @@
--- =====================================================================
+﻿-- =====================================================================
 --  O SORTEIO DA PROVA
 --
 --  Rode no SQL Editor. Pode rodar mais de uma vez.
@@ -49,6 +49,13 @@ create table if not exists public.trein_sorteio (
 
 create index if not exists idx_trein_sorteio_mat
   on public.trein_sorteio(matricula_id, criado_em desc);
+
+-- Prova aberta no instante em que este arquivo roda ficaria com gabarito
+-- vazio (o `default '{}'` preenche as linhas antigas), e ao ser enviada
+-- daria ZERO acertos — reprovando quem talvez tivesse acertado tudo. Some
+-- com os sorteios que ninguem respondeu ainda: a pessoa reabre a prova e
+-- recebe um sorteio novo, com gabarito.
+delete from public.trein_sorteio where usado = false;
 
 -- para quem já tinha a tabela da primeira versão deste arquivo
 alter table public.trein_sorteio

@@ -21,8 +21,9 @@
         <span><b>Medicina Humana</b><span>Treinamentos</span></span>
       </a>
       <div class="i-topo__dir">
+        <div class="lang" id="cmh-idioma"></div>
         <a class="i-sair" href="painel.html">Meus módulos</a>
-        <button class="i-sair" id="sair">Sair</button>
+<button class="i-sair" id="sair">Sair</button>
       </div>
     </div>
   </header>
@@ -152,6 +153,23 @@
       var a = E.aulas[E.atual];
       E.maxVisto = 0;   // recomeça do zero: sair do site reinicia a aula
 
+      // MARCA A ABERTURA DA AULA NO SERVIDOR.
+      // O gatilho do banco exige que tenha passado, no relógio da parede,
+      // pelo menos 90% da duração entre abrir e concluir. Ele conta a
+      // partir desta linha; sem ela, o tempo decorrido seria sempre zero e
+      // ninguém concluiria nada.
+      //
+      // Grava `concluida: false` — mas só para aula que ainda não foi
+      // concluída, senão reabrir uma aula pronta a desmarcaria e travaria
+      // a sequência que ela já tinha liberado.
+      if (!demo && !E.feitas[a.id]) {
+        await sb.from('trein_progresso').upsert({
+          matricula_id: mat, aula_id: a.id,
+          segundos_vistos: 0, concluida: false,
+          atualizado_em: new Date().toISOString()
+        }, { onConflict: 'matricula_id,aula_id' });
+      }
+
       var fonte = '';
       if (demo) {
         fonte = 'img/amostra.mp4';   // 20 segundos, só para ver a trava agir
@@ -233,7 +251,13 @@
         atualizado_em: new Date().toISOString()
       }, { onConflict: 'matricula_id,aula_id' });
       if (r.error) {
-        $('estado').textContent = 'Não consegui guardar o progresso. Recarregue.';
+        var m = String(r.error.message || '');
+        $('estado').textContent =
+          m.indexOf('AULA_RAPIDA_DEMAIS') >= 0
+            ? 'A aula ainda não pode ser concluída: falta tempo de vídeo.'
+          : m.indexOf('AULA_NAO_ASSISTIDA') >= 0
+            ? 'Assista à aula inteira para concluir.'
+            : 'Não consegui guardar o progresso. Recarregue a página.';
         return;
       }
       E.feitas[a.id] = true;
@@ -479,5 +503,6 @@
     })();
   })();
   </script>
+  <script src="../js/idioma.js"></script>
 </body>
 </html>

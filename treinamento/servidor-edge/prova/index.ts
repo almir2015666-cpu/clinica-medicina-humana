@@ -196,6 +196,24 @@ Deno.serve(async (req) => {
 
     const dadas = new Map(respostas.map((r: any) => [String(r.questao_id), r.escolha]));
 
+    // AS RESPOSTAS SÃO DESTA PROVA?
+    //
+    // Sem esta conferência, abrir o painel numa segunda aba destruía a
+    // prova da primeira: aquele `delete` lá em cima apagava o sorteio
+    // aberto, nascia outro, e o envio da aba antiga era corrigido contra
+    // um sorteio que ele nunca viu. Nenhum id batia, e o aluno levava um
+    // ZERO gravado para sempre no histórico por ter aberto outra aba.
+    //
+    // Agora, nesse caso, o sorteio novo não é queimado e a pessoa é
+    // mandada de volta para refazer — que é chato, mas é honesto.
+    const doSorteio = new Set((sorteio.questoes as string[]).map(String));
+    const daOutra = respostas.some((r: any) => !doSorteio.has(String(r.questao_id)));
+    if (daOutra) {
+      await admin.from("trein_sorteio").update({ usado: false }).eq("id", sorteio.id);
+      return json({ error: "Esta prova foi reaberta em outra aba. " +
+                           "Feche as outras abas e abra a prova de novo." }, 409);
+    }
+
     let acertos = 0;
     (sorteio.questoes as string[]).forEach((qid, i) => {
       // o denominador é o TAMANHO DO SORTEIO. Questão não respondida
@@ -209,9 +227,19 @@ Deno.serve(async (req) => {
 
     // guarda TODAS as tentativas, e não só a última: numa fiscalização o
     // que vale é poder mostrar o histórico
-    await admin.from("trein_tentativa").insert({
+    //
+    // E O ERRO É CONFERIDO. Se esta gravação falha em silêncio, a tela diz
+    // "Aprovado! o seu certificado já está pronto", o aluno clica, e o
+    // banco responde NAO_APROVADO — porque a aprovação não existe em lugar
+    // nenhum. Ele passou, e o sistema jura que não. Melhor mandar refazer.
+    const { error: erroTentativa } = await admin.from("trein_tentativa").insert({
       matricula_id: matricula, acertos, total, nota, aprovado,
     });
+    if (erroTentativa) {
+      return json({ error: "Corrigi a sua prova, mas não consegui gravar o " +
+                           "resultado. Nada foi perdido: abra a prova e envie " +
+                           "de novo." }, 500);
+    }
 
     // quantas vezes já tentou, para a tela poder dizer
     const { count } = await admin
