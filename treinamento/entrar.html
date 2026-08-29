@@ -9,6 +9,30 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/estilo.css?v=3" />
+  <style>
+    /* AS DUAS PORTAS, lado a lado.
+       Uma so ficaria maior que a outra e pareceria a "certa"; iguais, a
+       pessoa le as duas antes de escolher, que e o ponto.
+       O verbo em primeiro lugar em cada uma ("Sou..."), porque quem chega
+       aqui sabe QUEM e, e nao necessariamente o nome do que procura. */
+    .portas{display:grid;gap:.9rem;max-width:520px;margin:0 auto 1.4rem;
+      grid-template-columns:1fr 1fr}
+    .porta{display:block;text-align:left;text-decoration:none;cursor:pointer;
+      background:#fff;border:1.5px solid var(--linha);border-radius:14px;
+      padding:.95rem 1.1rem;font:inherit;color:inherit;
+      transition:border-color .15s, box-shadow .15s}
+    .porta b{display:block;font:600 .98rem 'Poppins',sans-serif;
+      color:var(--navy);margin-bottom:.2rem}
+    .porta span{display:block;font-size:.82rem;color:var(--fraco);
+      line-height:1.45}
+    .porta:hover{border-color:var(--navy-2);
+      box-shadow:0 6px 18px rgba(10,46,92,.10)}
+    .porta.on{border-color:var(--ambar);
+      box-shadow:0 6px 18px rgba(245,168,0,.18)}
+    @media(max-width:560px){
+      .portas{grid-template-columns:1fr}
+    }
+  </style>
   <link rel="stylesheet" href="css/acessibilidade.css?v=1" />
   <link rel="icon" type="image/png" href="../assets/favicon.png?v=2" />
 </head>
@@ -49,8 +73,30 @@
     <div class="container">
       <div class="secao__cab">
         <span class="risco"></span>
-        <h2>Área do Aluno</h2>
-        <p>Entre com o seu CPF, ou use o código que a sua empresa enviou.</p>
+        <h2>Entrar</h2>
+        <p>São dois acessos diferentes. Escolha o seu.</p>
+      </div>
+
+      <!-- AS DUAS PORTAS.
+           O trabalhador e o RH da empresa entram por caminhos diferentes,
+           com contas diferentes, e ate agora so a porta do aluno estava
+           visivel: o RH tinha de receber o endereco do painel por e-mail e
+           guardar. Quem perdesse o link nao achava mais.
+
+           A escolha vem ANTES do formulario, e nao depois: o RH que
+           tentasse o CPF dele na tela do aluno levaria "CPF ou senha
+           incorretos", e concluiria que o acesso nao funciona. -->
+      <div class="portas">
+        <button class="porta on" id="portaAluno" type="button">
+          <b>Sou trabalhador</b>
+          <span>Assistir às aulas, fazer a prova e baixar o meu
+                certificado</span>
+        </button>
+        <a class="porta" href="empresa.html">
+          <b>Sou RH da empresa</b>
+          <span>Acompanhar quem da minha equipe já concluiu, e os
+                prazos</span>
+        </a>
       </div>
 <!-- ============ ENTRAR ============ -->
         <div class="caixa" id="viewLogin">
@@ -64,7 +110,7 @@
           </div>
 
           <form class="form" id="formLogin" autocomplete="on">
-            <h2>Entrar</h2>
+            <h2>Área do aluno</h2>
             <label for="loginCpf">CPF</label>
             <input id="loginCpf" type="text" inputmode="numeric" autocomplete="username"
                    placeholder="000.000.000-00" maxlength="14" />
