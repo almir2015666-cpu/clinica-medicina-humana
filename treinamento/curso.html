@@ -86,7 +86,8 @@
 
     var E = {           // o estado da sala
       curso: null, aulas: [], feitas: {}, atual: 0,
-      maxVisto: 0,      // até onde ele JÁ assistiu nesta sessão, em segundos
+      maxVisto: 0,      // até onde ele JÁ assistiu, em segundos
+      parou: {},        // por aula: onde ele estava quando saiu
       notaMinima: 70, questoes: [], respostas: {}
     };
 
@@ -151,8 +152,18 @@
 
     // ---------------------------------------------------------------- aula
     async function abrirAula() {
+      // DESLIGA O GRAVADOR DA AULA ANTERIOR.
+      // Ele guarda o progresso de dez em dez segundos e fecha sobre a aula
+      // em que nasceu. Sem desligar, trocar de aula deixaria o relógio
+      // antigo correndo, gravando no lugar errado, e cada troca acrescenta
+      // mais um.
+      if (E.pararDeGravar) { E.pararDeGravar(); E.pararDeGravar = null; }
+
       var a = E.aulas[E.atual];
-      E.maxVisto = 0;   // recomeça do zero: sair do site reinicia a aula
+      // Zera aqui e recebe o valor certo mais abaixo, depois de o vídeo
+      // existir na tela. Deixar o valor da aula anterior seria pior do
+      // que zerar: a trava do avanço passaria a usar o teto de outra aula.
+      E.maxVisto = 0;
 
       // MARCA A ABERTURA DA AULA NO SERVIDOR.
       // O gatilho do banco exige que tenha passado, no relógio da parede,
@@ -164,9 +175,14 @@
       // concluída, senão reabrir uma aula pronta a desmarcaria e travaria
       // a sequência que ela já tinha liberado.
       if (!demo && !E.feitas[a.id]) {
+        // `segundos_vistos` vai com o que ele JÁ tinha, e não com zero:
+        // mandar zero aqui apagaria o progresso do aluno toda vez que ele
+        // abrisse a aula, que é justamente o que se quer deixar de fazer.
+        // (O servidor também não deixa o número diminuir, mas depender
+        // disso seria contar com a rede de proteção em vez do chão.)
         await sb.from('trein_progresso').upsert({
           matricula_id: mat, aula_id: a.id,
-          segundos_vistos: 0, concluida: false,
+          segundos_vistos: Math.round(E.parou[a.id] || 0), concluida: false,
           atualizado_em: new Date().toISOString()
         }, { onConflict: 'matricula_id,aula_id' });
       }
@@ -208,11 +224,62 @@
           '</div>' +
         '</div>' +
         (a.descricao ? '<div class="recado">' + seguro(a.descricao) + '</div>' : '') +
-        '<div class="recado"><b>Sobre esta aula:</b> não é possível adiantar o ' +
-        'vídeo, e sair da página faz a aula recomeçar. É assim que a carga ' +
-        'horária do seu certificado tem valor.</div>';
+        '<div class="recado"><b>Sobre esta aula:</b> não é possível adiantar ' +
+        'o vídeo, mas você pode sair e voltar: a aula continua de onde ' +
+        'parou. É assim que a carga horária do seu certificado tem ' +
+        'valor.</div>';
 
       var v = $('v'), barra = $('barra'), marcador = $('marcador');
+
+      // RETOMAR DE ONDE PAROU.
+      //
+      // `maxVisto` recebe o que já foi assistido antes de o vídeo abrir,
+      // e é ele que a trava do avanço usa como teto. Sem esta linha, o
+      // aluno voltaria aos 35 minutos e a trava o jogaria de volta ao
+      // zero, porque para ela nada teria sido assistido ainda.
+      E.maxVisto = E.feitas[a.id] ? 0 : (E.parou[a.id] || 0);
+
+      v.addEventListener('loadedmetadata', function () {
+        if (!E.maxVisto || !v.duration) return;
+        // A menos de 10 segundos do fim, recomeçar é melhor do que abrir
+        // no encerramento e a aula terminar antes de a pessoa entender.
+        if (E.maxVisto > v.duration - 10) { E.maxVisto = 0; return; }
+        v.currentTime = E.maxVisto;
+        $('estado').textContent = 'Continuando de ' + relogio(E.maxVisto);
+      });
+
+      // GUARDAR ENQUANTO ASSISTE.
+      //
+      // De dez em dez segundos, e só quando o número cresceu. Guardar a
+      // cada `timeupdate` seriam quatro gravações por segundo, por aluno.
+      // Sem guardar durante, quem fecha a aba no meio perde tudo, que é
+      // exatamente o que estamos consertando.
+      var guardado = E.maxVisto;
+      var salvando = false;
+      async function guardarProgresso() {
+        if (demo || E.feitas[a.id] || salvando) return;
+        if (E.maxVisto - guardado < 10) return;
+        salvando = true;
+        var quanto = Math.round(E.maxVisto);
+        var r = await sb.from('trein_progresso').upsert({
+          matricula_id: mat, aula_id: a.id,
+          segundos_vistos: quanto, concluida: false,
+          atualizado_em: new Date().toISOString()
+        }, { onConflict: 'matricula_id,aula_id' });
+        salvando = false;
+        // Falhou? Não adianta o número: na próxima volta ele tenta de
+        // novo com o valor de agora, que é maior.
+        if (!r.error) { guardado = quanto; E.parou[a.id] = quanto; }
+      }
+      var relogioGravacao = setInterval(guardarProgresso, 10000);
+
+      // Ao sair da aula, do vídeo ou da página, guarda o que deu.
+      v.addEventListener('pause', guardarProgresso);
+      window.addEventListener('pagehide', guardarProgresso);
+      E.pararDeGravar = function () {
+        clearInterval(relogioGravacao);
+        guardarProgresso();
+      };
 
       $('play').addEventListener('click', function () {
         if (v.paused) { v.play(); this.textContent = 'Pausar'; }
@@ -327,6 +394,7 @@
     }
 
     async function abrirProva() {
+      if (E.pararDeGravar) { E.pararDeGravar(); E.pararDeGravar = null; }
       E.atual = -1; desenharLista();
       $('palco').innerHTML = '<p class="palco__sub">Carregando a prova…</p>';
       var p = await chamarProva({ acao: 'pegar' });
@@ -523,9 +591,11 @@
       }
       E.aulas = ra.data || [];
 
-      ((await sb.from('trein_progresso').select('aula_id,concluida')
+      ((await sb.from('trein_progresso').select('aula_id,concluida,segundos_vistos')
         .eq('matricula_id', mat)).data || []).forEach(function (p) {
         if (p.concluida) E.feitas[p.aula_id] = true;
+        // onde ele parou nesta aula, para o video voltar dali
+        E.parou[p.aula_id] = Number(p.segundos_vistos) || 0;
       });
 
       if (!E.aulas.length) {
