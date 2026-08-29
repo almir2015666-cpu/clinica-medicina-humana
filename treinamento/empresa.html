@@ -109,9 +109,13 @@
           <p class="val__intro">Você recebeu um código ao contratar os
              treinamentos. Com ele você vê, a qualquer hora, quem da sua
              equipe já concluiu, quem está no meio e quem ainda não começou.
-             <strong>Não precisa de cadastro nem de senha</strong>.</p>
+             <strong>O acesso é nominal</strong>: cada pessoa do RH tem o
+             seu, e ele pode ser desligado quando alguém sai da empresa.</p>
 
           <ul class="val__lista">
+            <li><b>Tudo da sua empresa, e não só de uma compra</b>
+              O acesso é ligado ao CNPJ. Você vê todos os treinamentos que
+              a empresa contratou, de qualquer época, numa lista só.</li>
             <li><b>Quem ainda não fez</b>
               É a pergunta que o RH mais faz, e a que aparece primeiro na
               tela. Dá para cobrar antes de o prazo acabar.</li>
@@ -125,19 +129,24 @@
         </div>
 
         <div class="val__caixa">
-          <h2>Ver a minha equipe</h2>
-          <form id="formEmp" autocomplete="off">
-            <label for="codigo">Código recebido</label>
-            <input id="codigo" type="text" placeholder="Cole aqui o código"
-                   autocapitalize="characters" spellcheck="false" required />
+          <h2>Entrar</h2>
+          <form id="formEmp" autocomplete="on">
+            <label for="emailRh">E-mail</label>
+            <input id="emailRh" type="email" autocomplete="username"
+                   placeholder="o e-mail que você informou" required />
+            <label for="senhaRh">Senha</label>
+            <input id="senhaRh" type="password" autocomplete="current-password"
+                   placeholder="a senha que a clínica enviou" required />
             <button class="btn btn--ambar" id="btnEmp" type="submit"
                     style="width:100%;justify-content:center;margin-top:1rem">
-              Ver a equipe</button>
+              Entrar</button>
           </form>
           <div class="val__res" id="erroEmp"></div>
           <p class="fraco" style="font-size:.82rem;margin-top:1.1rem">
-            É o mesmo código que a sua equipe usa para criar o acesso.
-            Guarde-o como documento: quem tiver o código vê esta lista.</p>
+            Ainda não tem acesso, ou esqueceu a senha?
+            <a href="https://wa.me/5571993010103?text=Ol%C3%A1%21%20Preciso%20de%20acesso%20ao%20painel%20de%20acompanhamento%20da%20minha%20empresa."
+               target="_blank" rel="noopener">Fale com a nossa equipe</a>
+            e a gente envia por e-mail.</p>
         </div>
       </div>
 
@@ -157,7 +166,7 @@
         </table></div>
 
         <p style="margin-top:1.4rem">
-          <button class="btn" id="outra">Ver outro código</button>
+          <button class="btn" id="outra">Sair</button>
           <a class="btn btn--zap" style="margin-left:.5rem" target="_blank"
              rel="noopener"
              href="https://wa.me/5571993010103?text=Ol%C3%A1%21%20Gostaria%20de%20renovar%20treinamentos%20da%20minha%20equipe.">
@@ -317,68 +326,97 @@
       desenhar();
     });
 
-    async function buscar(codigo) {
-      var b = $('btnEmp');
-      b.disabled = true; b.textContent = 'Procurando…';
-      recado('');
-      var r = await sb.rpc('trein_turma_do_cupom', { p_codigo: codigo });
-      b.disabled = false; b.textContent = 'Ver a equipe';
+    // CARREGA A TURMA DE QUEM ESTÁ LOGADO.
+    //
+    // A função do banco não recebe parâmetro nenhum, de propósito: quem
+    // decide qual empresa aparece é o login, e não algo que o navegador
+    // manda. Sem parâmetro não existe "e se eu pedir a empresa do
+    // vizinho".
+    //
+    // Devolve `true` quando conseguiu mostrar, para quem chamou saber se
+    // deve continuar na tela de login.
+    async function carregarTurma(silencioso) {
+      var r = await sb.rpc('trein_minha_turma');
 
-      // FALHA DE REDE NÃO É "CÓDIGO ERRADO".
-      // O supabase-js devolve {data:null, error} sem levantar exceção. Sem
-      // separar os dois, um soluço de internet diria ao cliente que o
-      // código dele não vale, e ele ligaria achando que foi enganado.
       if (r.error) {
         var m = String(r.error.message || '');
-        if (m.indexOf('CUPOM_NAO_ENCONTRADO') >= 0) {
-          return recado('<b>Não encontrei esse código.</b>' +
-            '<p>Confira se copiou inteiro, sem faltar nenhum pedaço. ' +
-            'Se persistir, fale com a nossa equipe.</p>');
+        // Logado, mas não é RH: acontece quando um aluno, ou alguém da
+        // clínica, abre esta página com a sessão dele aberta. Não desligo
+        // a sessão dessa pessoa por isso; só mostro o login.
+        if (m.indexOf('SEM_ACESSO') >= 0) {
+          if (!silencioso) {
+            recado('<b>Esta conta não tem acesso ao painel de empresa.</b>' +
+              '<p>Se você é aluno, entre pela <a href="entrar.html">Área do ' +
+              'Aluno</a>. Se o seu acesso foi desligado, fale com a nossa ' +
+              'equipe.</p>');
+          }
+          return false;
         }
-        return recado('<b>Não consegui consultar agora.</b>' +
-          '<p>A consulta não chegou ao servidor. Isso não diz nada sobre o ' +
-          'seu código: tente de novo em instantes.</p>', 'atencao');
+        // FALHA DE REDE NÃO É "SEM ACESSO". O supabase-js devolve
+        // {data:null, error} sem levantar exceção; sem separar os dois, um
+        // soluço de internet diria ao cliente que ele foi descredenciado.
+        if (!silencioso) {
+          recado('<b>Não consegui consultar agora.</b>' +
+            '<p>A consulta não chegou ao servidor. Isso não diz nada sobre o ' +
+            'seu acesso: tente de novo em instantes.</p>', 'atencao');
+        }
+        return false;
       }
 
       turma = r.data || [];
-      if (!turma.length) {
-        return recado('<b>Esse código existe, mas ninguém o usou ainda.</b>' +
-          '<p>Assim que a sua equipe criar o acesso com ele, as pessoas ' +
-          'aparecem aqui.</p>', 'atencao');
-      }
+      sb.rpc('trein_rh_entrou');   // registra a visita, sem travar a tela
 
-      $('tituloEmp').textContent = turma[0].empresa || 'Sua equipe';
-      $('subEmp').textContent = turma.length +
-        (turma.length === 1 ? ' treinamento' : ' treinamentos') +
-        ' neste código · atualizado agora';
+      $('tituloEmp').textContent =
+        (turma[0] && turma[0].empresa) || 'Sua equipe';
+      $('subEmp').textContent = turma.length
+        ? turma.length + (turma.length === 1 ? ' treinamento' : ' treinamentos') +
+          ' na sua empresa · atualizado agora'
+        : 'Ainda não há ninguém cadastrado nos treinamentos da sua empresa.';
       $('viewBusca').style.display = 'none';
       $('viewTurma').style.display = 'block';
       desenhar();
       window.scrollTo({ top: 0 });
+      return true;
     }
 
-    $('formEmp').addEventListener('submit', function (ev) {
+    $('formEmp').addEventListener('submit', async function (ev) {
       ev.preventDefault();
-      var c = $('codigo').value.trim();
-      if (c) buscar(c);
+      var b = $('btnEmp');
+      b.disabled = true; b.textContent = 'Entrando…';
+      recado('');
+
+      var r = await sb.auth.signInWithPassword({
+        email: $('emailRh').value.trim().toLowerCase(),
+        password: $('senhaRh').value
+      });
+      b.disabled = false; b.textContent = 'Entrar';
+
+      if (r.error) {
+        return recado('<b>E-mail ou senha incorretos.</b>' +
+          '<p>Confira se copiou a senha inteira, sem espaço no fim. Se ' +
+          'perdeu a senha, fale com a nossa equipe e a gente envia outra.</p>');
+      }
+      // Entrou no Auth mas não é RH: a sessão é desfeita, porque foi ESTA
+      // página que a criou. Deixá-la aberta trocaria a sessão que a pessoa
+      // já tinha por uma que não serve para nada aqui.
+      if (!(await carregarTurma())) await sb.auth.signOut();
     });
 
-    $('outra').addEventListener('click', function () {
+    $('outra').addEventListener('click', async function () {
+      await sb.auth.signOut();
+      turma = [];
       $('viewTurma').style.display = 'none';
       $('viewBusca').style.display = '';
-      $('codigo').value = '';
-      $('codigo').focus();
+      $('senhaRh').value = '';
+      $('emailRh').focus();
     });
 
-    // Aceita o código pelo endereço, para a clínica poder mandar o link
-    // pronto ao cliente em vez de pedir que ele copie e cole.
-    (function () {
-      var c = new URLSearchParams(location.search).get('c') || '';
-      c = c.trim().slice(0, 60);
-      if (c && /^[A-Za-z0-9-]+$/.test(c)) {
-        $('codigo').value = c;
-        buscar(c);
-      }
+    // Já estava logado? Entra direto, sem pedir de novo. Em silêncio: se a
+    // sessão aberta for de um aluno, a tela de login aparece limpa, sem um
+    // erro que ele não pediu para ver.
+    (async function () {
+      var sessao = await sb.auth.getSession();
+      if (sessao.data.session) await carregarTurma(true);
     })();
   })();
   </script>

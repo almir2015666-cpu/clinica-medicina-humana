@@ -166,6 +166,45 @@
         </div>
         <div class="modulos" id="grade"></div>
 
+        <!-- ACESSO DAS EMPRESAS AO PAINEL DE ACOMPANHAMENTO.
+             Fica aqui, fora dos cursos, porque o acesso e da empresa e
+             nao de um curso: ele mostra tudo o que aquele CNPJ contratou,
+             de qualquer epoca. -->
+        <div class="form-aula" id="caixaRh" style="margin-top:2.4rem">
+          <h3>Acesso das empresas</h3>
+          <p style="color:var(--meio);font-size:.86rem;margin:-.5rem 0 .9rem">
+            Cria o login que o RH da empresa usa em
+            <b>clinicamedicinahumana.com.br/treinamento/empresa.html</b> para
+            acompanhar a equipe. Ele ve o andamento e o prazo de cada pessoa,
+            com o CPF mascarado, e <b>nao</b> ve nota de reprovacao.
+            O acesso e ligado ao <b>CNPJ</b>, entao vale para todas as
+            compras daquela empresa.
+          </p>
+
+          <div style="display:grid;gap:.6rem;
+            grid-template-columns:repeat(auto-fit,minmax(210px,1fr))">
+            <div><label for="rhNome">Nome de quem vai usar</label>
+              <input id="rhNome" type="text" placeholder="Fulano de Tal" /></div>
+            <div><label for="rhEmail">E-mail</label>
+              <input id="rhEmail" type="email" placeholder="rh@empresa.com.br" /></div>
+            <div><label for="rhCnpj">CNPJ da empresa</label>
+              <input id="rhCnpj" type="text" placeholder="00.000.000/0000-00" /></div>
+            <div><label for="rhEmpresa">Nome da empresa</label>
+              <input id="rhEmpresa" type="text" placeholder="Construtora Exemplo Ltda" /></div>
+          </div>
+
+          <div class="msg" id="msgRh"></div>
+          <div id="senhaRh" style="display:none"></div>
+
+          <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;
+            margin-top:1rem">
+            <button class="i-botao" id="criarRh">Criar acesso</button>
+            <button class="mini" id="listarRh">Ver os acessos</button>
+          </div>
+
+          <div id="listaRh" style="margin-top:1.2rem"></div>
+        </div>
+
         <!-- A ASSINATURA DA RESPONSAVEL TECNICA.
              Fica aqui, e nao dentro de um curso, porque e uma so para
              todos: trocar aqui muda todo certificado emitido daqui em
@@ -294,6 +333,14 @@
       s = Math.floor(s || 0);
       return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
     }
+    // Data no formato daqui. O admin nao tinha esta funcao porque, ate
+    // agora, nenhuma tela dele mostrava data: a primeira e a lista de
+    // acessos das empresas, que diz quando cada RH entrou pela ultima vez.
+    function dataBr(iso) {
+      var p = String(iso || '').slice(0, 10).split('-');
+      return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : '';
+    }
+
     function recado(el, texto, bom) {
       if (!el) return;
       el.className = 'msg ' + (bom ? 'bom' : 'ruim');
@@ -533,6 +580,164 @@
       await montarAssinatura();
       recado(msg, 'Assinatura removida.', true);
     }
+
+    // ------------------------------------- acesso das empresas ao painel
+    //
+    // Criar usuario exige a chave de servico, que abre o banco inteiro, e
+    // ela nao pode viver aqui: este arquivo e baixado por qualquer pessoa
+    // que abra o site. Quem cria e a Edge Function `rh`, no servidor, e
+    // ela confere de novo se quem pediu e da equipe.
+    var FUNCAO_RH = window.SUPA.url + '/functions/v1/rh';
+
+    async function chamarRh(corpo) {
+      try {
+        var sessao = await sb.auth.getSession();
+        var r = await fetch(FUNCAO_RH, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json', apikey: window.SUPA.key,
+            Authorization: 'Bearer ' +
+              (sessao.data.session ? sessao.data.session.access_token : '')
+          },
+          body: JSON.stringify(corpo)
+        });
+        return await r.json();
+      } catch (e) {
+        return { error: 'Nao consegui falar com o servidor. Verifique a ' +
+                        'conexao e tente de novo.' };
+      }
+    }
+
+    // A senha aparece UMA vez. Ela nao fica guardada em lugar nenhum: o
+    // Auth guarda so o resumo criptografico. Por isso a tela ja monta o
+    // recado pronto para copiar e colar no e-mail, em vez de deixar a
+    // pessoa transcrever caractere por caractere.
+    function mostrarSenha(d) {
+      var caixa = $('senhaRh');
+      var texto =
+        'Acesso ao acompanhamento dos treinamentos\n\n' +
+        'Endereco: https://clinicamedicinahumana.com.br/treinamento/empresa.html\n' +
+        'E-mail: ' + d.email + '\n' +
+        'Senha: ' + d.senha + '\n\n' +
+        'Guarde esta senha: por seguranca, nao conseguimos consulta-la ' +
+        'depois. Se precisar, geramos outra.';
+      caixa.style.display = 'block';
+      caixa.innerHTML =
+        '<div style="background:#0f2138;border:1px solid var(--linha);' +
+        'border-radius:10px;padding:1rem 1.1rem;margin-top:.9rem">' +
+        '<p style="margin:0 0 .5rem;color:var(--ambar);font:600 .82rem ' +
+        '\'Poppins\',sans-serif;letter-spacing:.06em;text-transform:uppercase">' +
+        (d.refeita ? 'Senha nova' : 'Acesso criado') + '</p>' +
+        '<p style="margin:0 0 .2rem"><b>' + seguro(d.nome || '') + '</b></p>' +
+        '<p style="margin:0 0 .1rem;font-size:.9rem">' + seguro(d.email) + '</p>' +
+        '<p style="margin:.4rem 0 .8rem;font:700 1.15rem \'Consolas\',monospace;' +
+        'letter-spacing:.08em;color:#fff">' + seguro(d.senha) + '</p>' +
+        '<button class="mini" id="copiarRh">Copiar o recado pronto</button>' +
+        '<p style="margin:.7rem 0 0;color:var(--meio);font-size:.8rem">' +
+        'Esta senha nao aparece de novo. Se ela se perder, gere outra.</p>' +
+        '</div>';
+      $('copiarRh').addEventListener('click', function () {
+        navigator.clipboard.writeText(texto).then(function () {
+          $('copiarRh').textContent = 'Copiado';
+        }, function () {
+          // Navegador sem permissao para a area de transferencia: mostra o
+          // texto para a pessoa copiar a mao, em vez de nao fazer nada.
+          recado($('msgRh'), 'Nao consegui copiar sozinho. Selecione e copie:' +
+            '<br /><textarea readonly style="width:100%;min-height:110px;' +
+            'margin-top:.5rem">' + seguro(texto) + '</textarea>', true);
+        });
+      });
+    }
+
+    async function criarAcessoRh() {
+      var b = $('criarRh'), msg = $('msgRh');
+      var nome = $('rhNome').value.trim();
+      var email = $('rhEmail').value.trim().toLowerCase();
+      var cnpj = $('rhCnpj').value.replace(/\D/g, '');
+      var empresa = $('rhEmpresa').value.trim();
+
+      if (nome.length < 3) return recado(msg, 'Diga o nome de quem vai usar.');
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
+        return recado(msg, 'E-mail invalido.');
+      if (cnpj.length !== 14) return recado(msg, 'O CNPJ precisa de 14 digitos.');
+
+      b.disabled = true; b.textContent = 'Criando...';
+      recado(msg, '');
+      $('senhaRh').style.display = 'none';
+      var r = await chamarRh({ acao: 'criar', nome: nome, email: email,
+                               empresa_cnpj: cnpj, empresa_nome: empresa });
+      b.disabled = false; b.textContent = 'Criar acesso';
+      if (r.error) return recado(msg, seguro(r.error));
+
+      await anotar('trein_rh_criado', email + ' · ' + (empresa || cnpj));
+      mostrarSenha(r);
+      $('rhNome').value = ''; $('rhEmail').value = '';
+      $('rhCnpj').value = ''; $('rhEmpresa').value = '';
+      listarAcessosRh();
+    }
+
+    async function listarAcessosRh() {
+      var alvo = $('listaRh');
+      var r = await sb.from('trein_rh')
+        .select('id,nome,email,empresa_nome,empresa_cnpj,ativo,ultimo_acesso')
+        .order('empresa_nome');
+      if (r.error) {
+        return recado($('msgRh'), 'Nao consegui listar: ' + seguro(r.error.message));
+      }
+      var linhas = r.data || [];
+      if (!linhas.length) {
+        alvo.innerHTML = '<p style="color:var(--meio);font-size:.88rem">' +
+          'Nenhuma empresa tem acesso ainda.</p>';
+        return;
+      }
+      alvo.innerHTML =
+        '<table style="width:100%;border-collapse:collapse;font-size:.88rem">' +
+        '<tbody>' + linhas.map(function (a) {
+          return '<tr style="border-top:1px solid var(--linha)">' +
+            '<td style="padding:.6rem .5rem .6rem 0">' +
+              '<b>' + seguro(a.empresa_nome || '(sem nome)') + '</b>' +
+              '<div style="color:var(--meio);font-size:.82rem">' +
+                seguro(a.nome) + ' · ' + seguro(a.email) + '</div></td>' +
+            '<td style="padding:.6rem .5rem;color:var(--meio);font-size:.82rem;' +
+              'white-space:nowrap">' +
+              (a.ultimo_acesso
+                ? 'entrou em ' + dataBr(a.ultimo_acesso)
+                : 'nunca entrou') + '</td>' +
+            '<td style="padding:.6rem 0;text-align:right;white-space:nowrap">' +
+              '<button class="mini" data-senha="' + seguro(a.email) + '">Nova senha</button> ' +
+              '<button class="mini" data-liga="' + seguro(a.id) + '" ' +
+                'data-para="' + (a.ativo ? 'desativar' : 'ativar') + '">' +
+                (a.ativo ? 'Desligar' : 'Religar') + '</button></td>' +
+          '</tr>';
+        }).join('') + '</tbody></table>';
+    }
+
+    $('listaRh').addEventListener('click', async function (ev) {
+      var bs = ev.target.closest('button[data-senha]');
+      var bl = ev.target.closest('button[data-liga]');
+      if (bs) {
+        if (!confirm('Gerar uma senha nova para ' + bs.dataset.senha +
+                     '? A senha atual deixa de funcionar.')) return;
+        bs.disabled = true;
+        var r = await chamarRh({ acao: 'nova_senha', email: bs.dataset.senha });
+        bs.disabled = false;
+        if (r.error) return recado($('msgRh'), seguro(r.error));
+        await anotar('trein_rh_senha_nova', bs.dataset.senha);
+        mostrarSenha(r);
+        return;
+      }
+      if (bl) {
+        bl.disabled = true;
+        var r2 = await chamarRh({ acao: bl.dataset.para, id: bl.dataset.liga });
+        bl.disabled = false;
+        if (r2.error) return recado($('msgRh'), seguro(r2.error));
+        await anotar('trein_rh_' + bl.dataset.para, bl.dataset.liga);
+        listarAcessosRh();
+      }
+    });
+
+    $('criarRh').addEventListener('click', criarAcessoRh);
+    $('listarRh').addEventListener('click', listarAcessosRh);
 
     // =================================================================
     // O LIMPADOR DE ASSINATURA
