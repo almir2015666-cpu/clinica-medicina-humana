@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <meta name="description" content="Acompanhe os treinamentos da sua equipe na Clínica Medicina Humana. Digite o código que recebeu e veja quem já concluiu." />
+  <title>Acompanhar a minha equipe | Clínica Medicina Humana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/estilo.css?v=3" />
+  <link rel="stylesheet" href="css/acessibilidade.css?v=1" />
+  <link rel="icon" type="image/png" href="../assets/favicon.png?v=2" />
+  <style>
+    /* =================================================================
+       O PAINEL DO RH
+
+       Ele não tem conta e não vai ter: uma senha a mais é uma senha a
+       esquecer, e conta para cliente é cadastro para manter. O código do
+       cupom, que já está na mão dele, é o que autoriza.
+
+       A tela foi desenhada para uma pergunta só, a que ele faz ao
+       telefone hoje: QUEM AINDA NÃO FEZ. Por isso os pendentes vêm
+       primeiro na contagem do topo, e a lista pode ser filtrada por eles.
+       ================================================================= */
+    .emp__resumo{display:grid;gap:.9rem;margin:0 0 1.6rem;
+      grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+    .emp__num{background:#fff;border:1px solid var(--linha);
+      border-radius:var(--raio);padding:1rem 1.1rem}
+    .emp__num b{display:block;font:800 1.7rem 'Poppins',sans-serif;
+      color:var(--navy);line-height:1.1}
+    .emp__num span{font-size:.82rem;color:var(--fraco)}
+    .emp__num.alerta b{color:#b8442f}
+
+    .emp__filtros{display:flex;gap:.5rem;flex-wrap:wrap;margin:0 0 1rem}
+    .emp__filtros button{border:1px solid var(--linha);background:#fff;
+      color:var(--navy);font:600 .84rem 'Poppins',sans-serif;cursor:pointer;
+      padding:.45rem 1rem;border-radius:999px}
+    .emp__filtros button.aqui{background:var(--navy);color:#fff;
+      border-color:var(--navy)}
+
+    /* A tabela rola dentro da própria caixa. No celular do RH, uma tabela
+       de seis colunas não cabe, e sem isto ela empurraria a página
+       inteira para o lado. */
+    .emp__rolo{overflow-x:auto;border:1px solid var(--linha);
+      border-radius:var(--raio);background:#fff}
+    .emp__tab{border-collapse:collapse;width:100%;min-width:680px}
+    .emp__tab th,.emp__tab td{padding:.75rem .9rem;text-align:left;
+      border-bottom:1px solid var(--linha);font-size:.92rem;vertical-align:top}
+    .emp__tab th{background:#f5f8fb;font:600 .8rem 'Poppins',sans-serif;
+      color:var(--navy);text-transform:uppercase;letter-spacing:.05em;
+      white-space:nowrap}
+    .emp__tab tr:last-child td{border-bottom:0}
+    .emp__tab .nome{font-weight:600;color:var(--navy)}
+    .emp__tab .fraco{color:var(--fraco);font-size:.82rem}
+
+    .selo{display:inline-block;font:600 .76rem 'Poppins',sans-serif;
+      padding:.22rem .6rem;border-radius:999px;white-space:nowrap}
+    .selo.ok{background:#e6f6ec;color:#1d7a44}
+    .selo.anda{background:#eaf1fa;color:#1c4b86}
+    .selo.parado{background:#fdf0ec;color:#b8442f}
+    .selo.aviso{background:#fff6e2;color:#8a6100}
+
+    .emp__cod{font:600 .8rem 'Consolas',monospace;letter-spacing:.05em}
+    .emp__vazio{padding:2.2rem 1.2rem;text-align:center;color:var(--fraco)}
+
+    @media(max-width:900px){
+      .val{grid-template-columns:1fr;gap:2rem}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="faixa">
+    <div class="container faixa__in">
+      <span>(71) 3493-7220</span>
+      <a href="https://wa.me/5571993010103?text=Ol%C3%A1%21%20Gostaria%20de%20falar%20sobre%20treinamentos%20em%20NRs." target="_blank" rel="noopener">Comercial: (71) 99301-0103</a>
+      <div class="faixa__dir">
+        <a href="../index.html">Site da clínica</a>
+        <a href="../contatos.html">Contatos</a>
+      </div>
+    </div>
+  </div>
+
+  <header class="topo" id="topo">
+    <div class="container topo__in">
+      <a class="marca" href="index.html">
+        <span class="marca__chip"><img src="img/logo.png" alt="Clínica Medicina Humana" /></span>
+        <span class="marca__txt"><b>Medicina Humana</b><span>Treinamentos em NRs</span></span>
+      </a>
+      <nav class="topo__nav">
+        <a href="index.html#cursos">Cursos</a>
+        <a href="index.html#como">Como funciona</a>
+        <a href="validar.html">Validar certificado</a>
+        <a class="btn btn--ambar" href="entrar.html">Entrar</a>
+        <div class="lang" id="cmh-idioma"></div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="secao">
+    <div class="container">
+
+      <div class="val" id="viewBusca">
+        <div class="val__texto">
+          <span class="risco"></span>
+          <h1>Acompanhe a sua equipe</h1>
+          <p class="val__intro">Você recebeu um código ao contratar os
+             treinamentos. Com ele você vê, a qualquer hora, quem da sua
+             equipe já concluiu, quem está no meio e quem ainda não começou.
+             <strong>Não precisa de cadastro nem de senha</strong>.</p>
+
+          <ul class="val__lista">
+            <li><b>Quem ainda não fez</b>
+              É a pergunta que o RH mais faz, e a que aparece primeiro na
+              tela. Dá para cobrar antes de o prazo acabar.</li>
+            <li><b>Quando vence cada um</b>
+              Treinamento tem validade. Aqui você enxerga quem precisa
+              reciclar antes de a fiscalização perguntar.</li>
+            <li><b>O código de conferência</b>
+              De cada certificado emitido, para você conferir ou repassar a
+              quem pedir.</li>
+          </ul>
+        </div>
+
+        <div class="val__caixa">
+          <h2>Ver a minha equipe</h2>
+          <form id="formEmp" autocomplete="off">
+            <label for="codigo">Código recebido</label>
+            <input id="codigo" type="text" placeholder="Cole aqui o código"
+                   autocapitalize="characters" spellcheck="false" required />
+            <button class="btn btn--ambar" id="btnEmp" type="submit"
+                    style="width:100%;justify-content:center;margin-top:1rem">
+              Ver a equipe</button>
+          </form>
+          <div class="val__res" id="erroEmp"></div>
+          <p class="fraco" style="font-size:.82rem;margin-top:1.1rem">
+            É o mesmo código que a sua equipe usa para criar o acesso.
+            Guarde-o como documento: quem tiver o código vê esta lista.</p>
+        </div>
+      </div>
+
+      <div id="viewTurma" style="display:none">
+        <span class="risco"></span>
+        <h1 id="tituloEmp" style="margin-bottom:.3rem">Equipe</h1>
+        <p class="fraco" id="subEmp" style="margin:0 0 1.6rem"></p>
+
+        <div class="emp__resumo" id="resumo"></div>
+        <div class="emp__filtros" id="filtros"></div>
+        <div class="emp__rolo"><table class="emp__tab">
+          <thead><tr>
+            <th>Pessoa</th><th>Treinamento</th><th>Situação</th>
+            <th>Aulas</th><th>Prazo</th><th>Certificado</th>
+          </tr></thead>
+          <tbody id="corpoEmp"></tbody>
+        </table></div>
+
+        <p style="margin-top:1.4rem">
+          <button class="btn" id="outra">Ver outro código</button>
+          <a class="btn btn--zap" style="margin-left:.5rem" target="_blank"
+             rel="noopener"
+             href="https://wa.me/5571993010103?text=Ol%C3%A1%21%20Gostaria%20de%20renovar%20treinamentos%20da%20minha%20equipe.">
+            Renovar treinamentos</a>
+        </p>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="rodape">
+    <div class="container">
+      <div class="rodape__grade">
+        <div>
+          <h4>Clínica Medicina Humana</h4>
+          <p>Treinamentos em Normas Regulamentadoras para empresas.<br />
+             R. do Alecrim, 76, Centro, Camaçari/BA</p>
+          <p>(71) 3493-7220 · Comercial (71) 99301-0103</p>
+        </div>
+        <div>
+          <h4>Treinamentos</h4>
+          <a href="index.html#cursos">Todos os cursos</a>
+          <a href="index.html#como">Como funciona</a>
+          <a href="entrar.html">Área do aluno</a>
+          <a href="validar.html">Validar certificado</a>
+          <a href="empresa.html">Acompanhar minha equipe</a>
+        </div>
+        <div>
+          <h4>A clínica</h4>
+          <a href="../index.html">Site principal</a>
+          <a href="../medicina-ocupacional.html">Medicina Ocupacional</a>
+          <a href="../contatos.html">Contatos</a>
+        </div>
+      </div>
+      <div class="rodape__fim">© 2026 Clínica Medicina Humana. Todos os direitos reservados.</div>
+    </div>
+  </footer>
+
+  <script src="../js/supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); };
+    var sb = supabase.createClient(window.SUPA.url, window.SUPA.key);
+    var turma = [];
+    var filtro = 'todos';
+
+    // ESCAPA O QUE VEM DO BANCO ANTES DE VIRAR HTML.
+    // O nome é digitado pelo próprio aluno no resgate: sem isto, alguém se
+    // cadastraria como <img src=x onerror=...> e o script rodaria no
+    // navegador de todo RH que abrisse a lista da empresa dele.
+    function seguro(t) {
+      return String(t == null ? '' : t)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+    function dataBr(iso) {
+      var p = String(iso || '').slice(0, 10).split('-');
+      return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : '';
+    }
+    function recado(texto, tipo) {
+      var c = $('erroEmp');
+      c.className = 'val__res ' + (tipo || 'ruim');
+      c.style.display = texto ? 'block' : 'none';
+      c.innerHTML = texto || '';
+    }
+
+    // A que grupo cada situação pertence, para o filtro e para a cor.
+    function grupo(s) {
+      if (s.indexOf('Aprovado') === 0) return 'ok';
+      if (s === 'Cancelado' || s === 'Prazo vencido') return 'parado';
+      if (s === 'Não começou') return 'parado';
+      return 'anda';
+    }
+    function selo(s) {
+      var g = grupo(s);
+      if (s === 'Aprovado, vencido') g = 'aviso';
+      return '<span class="selo ' + g + '">' + seguro(s) + '</span>';
+    }
+
+    // Vence em menos de 45 dias: é o aviso que faz o RH renovar antes de
+    // o trabalhador ficar sem o treinamento válido.
+    function venceLogo(iso) {
+      if (!iso) return false;
+      var dias = (new Date(iso) - new Date()) / 86400000;
+      return dias >= 0 && dias <= 45;
+    }
+
+    function desenhar() {
+      var n = { total: turma.length, ok: 0, anda: 0, parado: 0, vencendo: 0 };
+      turma.forEach(function (t) {
+        n[grupo(t.situacao)] += 1;
+        if (venceLogo(t.expira_em)) n.vencendo += 1;
+      });
+
+      $('resumo').innerHTML =
+        caixa(n.total, 'pessoas na lista') +
+        caixa(n.ok, 'concluíram') +
+        caixa(n.anda, 'em andamento') +
+        caixa(n.parado, 'não começaram ou pararam', n.parado > 0) +
+        (n.vencendo ? caixa(n.vencendo, 'vencem em até 45 dias', true) : '');
+
+      $('filtros').innerHTML =
+        aba('todos', 'Todos') + aba('parado', 'Pendentes') +
+        aba('anda', 'Em andamento') + aba('ok', 'Concluídos');
+
+      var lista = turma.filter(function (t) {
+        return filtro === 'todos' || grupo(t.situacao) === filtro;
+      });
+
+      if (!lista.length) {
+        $('corpoEmp').innerHTML =
+          '<tr><td colspan="6" class="emp__vazio">Ninguém nesta situação.</td></tr>';
+        return;
+      }
+
+      $('corpoEmp').innerHTML = lista.map(function (t) {
+        return '<tr>' +
+          '<td><span class="nome">' + seguro(t.aluno) + '</span>' +
+            '<div class="fraco">' + seguro(t.cpf_masc) + '</div></td>' +
+          '<td>' + seguro(t.curso) +
+            '<div class="fraco">' + seguro(t.codigo_curso) +
+            (t.carga_horaria ? ' · ' + Number(t.carga_horaria) + 'h' : '') +
+            '</div></td>' +
+          '<td>' + selo(t.situacao) + '</td>' +
+          '<td>' + (t.aulas_total
+            ? t.aulas_feitas + ' de ' + t.aulas_total
+            : '<span class="fraco">sem aulas</span>') + '</td>' +
+          '<td>' + (t.expira_em
+            ? dataBr(t.expira_em) +
+              (venceLogo(t.expira_em)
+                ? '<div class="fraco" style="color:#b8442f">vence logo</div>' : '')
+            : '') + '</td>' +
+          '<td>' + (t.certificado
+            ? '<span class="emp__cod">' + seguro(t.certificado) + '</span>' +
+              '<div class="fraco"><a href="validar.html?c=' +
+              encodeURIComponent(t.certificado) + '" target="_blank">conferir</a>' +
+              (t.emitido_em ? ' · ' + dataBr(t.emitido_em) : '') + '</div>'
+            : '<span class="fraco">—</span>') + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function caixa(n, texto, alerta) {
+      return '<div class="emp__num' + (alerta ? ' alerta' : '') + '">' +
+        '<b>' + n + '</b><span>' + texto + '</span></div>';
+    }
+    function aba(id, texto) {
+      return '<button data-f="' + id + '"' +
+        (filtro === id ? ' class="aqui"' : '') + '>' + texto + '</button>';
+    }
+
+    $('filtros').addEventListener('click', function (ev) {
+      var b = ev.target.closest('button[data-f]');
+      if (!b) return;
+      filtro = b.dataset.f;
+      desenhar();
+    });
+
+    async function buscar(codigo) {
+      var b = $('btnEmp');
+      b.disabled = true; b.textContent = 'Procurando…';
+      recado('');
+      var r = await sb.rpc('trein_turma_do_cupom', { p_codigo: codigo });
+      b.disabled = false; b.textContent = 'Ver a equipe';
+
+      // FALHA DE REDE NÃO É "CÓDIGO ERRADO".
+      // O supabase-js devolve {data:null, error} sem levantar exceção. Sem
+      // separar os dois, um soluço de internet diria ao cliente que o
+      // código dele não vale, e ele ligaria achando que foi enganado.
+      if (r.error) {
+        var m = String(r.error.message || '');
+        if (m.indexOf('CUPOM_NAO_ENCONTRADO') >= 0) {
+          return recado('<b>Não encontrei esse código.</b>' +
+            '<p>Confira se copiou inteiro, sem faltar nenhum pedaço. ' +
+            'Se persistir, fale com a nossa equipe.</p>');
+        }
+        return recado('<b>Não consegui consultar agora.</b>' +
+          '<p>A consulta não chegou ao servidor. Isso não diz nada sobre o ' +
+          'seu código: tente de novo em instantes.</p>', 'atencao');
+      }
+
+      turma = r.data || [];
+      if (!turma.length) {
+        return recado('<b>Esse código existe, mas ninguém o usou ainda.</b>' +
+          '<p>Assim que a sua equipe criar o acesso com ele, as pessoas ' +
+          'aparecem aqui.</p>', 'atencao');
+      }
+
+      $('tituloEmp').textContent = turma[0].empresa || 'Sua equipe';
+      $('subEmp').textContent = turma.length +
+        (turma.length === 1 ? ' treinamento' : ' treinamentos') +
+        ' neste código · atualizado agora';
+      $('viewBusca').style.display = 'none';
+      $('viewTurma').style.display = 'block';
+      desenhar();
+      window.scrollTo({ top: 0 });
+    }
+
+    $('formEmp').addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var c = $('codigo').value.trim();
+      if (c) buscar(c);
+    });
+
+    $('outra').addEventListener('click', function () {
+      $('viewTurma').style.display = 'none';
+      $('viewBusca').style.display = '';
+      $('codigo').value = '';
+      $('codigo').focus();
+    });
+
+    // Aceita o código pelo endereço, para a clínica poder mandar o link
+    // pronto ao cliente em vez de pedir que ele copie e cole.
+    (function () {
+      var c = new URLSearchParams(location.search).get('c') || '';
+      c = c.trim().slice(0, 60);
+      if (c && /^[A-Za-z0-9-]+$/.test(c)) {
+        $('codigo').value = c;
+        buscar(c);
+      }
+    })();
+  })();
+  </script>
+  <script src="js/acessibilidade.js?v=1"></script>
+  <script src="../js/idioma.js?v=3"></script>
+</body>
+</html>
