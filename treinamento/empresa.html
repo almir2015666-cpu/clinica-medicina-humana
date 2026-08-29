@@ -44,7 +44,7 @@
        inteira para o lado. */
     .emp__rolo{overflow-x:auto;border:1px solid var(--linha);
       border-radius:var(--raio);background:#fff}
-    .emp__tab{border-collapse:collapse;width:100%;min-width:680px}
+    .emp__tab{border-collapse:collapse;width:100%;min-width:780px}
     .emp__tab th,.emp__tab td{padding:.75rem .9rem;text-align:left;
       border-bottom:1px solid var(--linha);font-size:.92rem;vertical-align:top}
     .emp__tab th{background:#f5f8fb;font:600 .8rem 'Poppins',sans-serif;
@@ -67,14 +67,76 @@
        a página pública de autenticidade, que é a que o RH manda para o
        auditor. Um link só, chamado de qualquer jeito, faria o RH mandar o
        documento quando devia mandar a conferência. */
-    .emp__acoes{display:flex;gap:.7rem;margin-top:.15rem}
+    /* `nowrap` nos dois: sem ele "Abrir certificado" partia entre as duas
+       palavras e a coluna virava um amontoado de meia palavra por linha.
+       E `flex-wrap`, para que, quando nao couberem lado a lado, eles
+       desçam INTEIROS, um sob o outro. */
+    .emp__acoes{display:flex;gap:.75rem;margin-top:.2rem;flex-wrap:wrap}
     .emp__acoes a{font-size:.8rem;color:var(--navy-2,#12457f);
-      text-decoration:none;border-bottom:1px solid currentColor}
+      text-decoration:none;border-bottom:1px solid currentColor;
+      white-space:nowrap}
     .emp__acoes a:hover{color:var(--navy)}
+    /* A coluna do certificado e a mais apertada da tabela: ela carrega o
+       codigo, dois links e a data. Sem um piso, o navegador espreme ela
+       para dar espaco ao nome do treinamento. */
+    .emp__tab th:last-child,.emp__tab td:last-child{min-width:190px}
     .emp__vazio{padding:2.2rem 1.2rem;text-align:center;color:var(--fraco)}
 
     @media(max-width:900px){
       .val{grid-template-columns:1fr;gap:2rem}
+    }
+
+    /* =================================================================
+       NO PAPEL
+
+       O RH imprime esta lista para levar ao auditor e para arquivar. Sem
+       isto ela sai com o menu, o rodape, os botoes e o WhatsApp no meio,
+       e com a tabela cortada ao meio na virada da pagina.
+
+       Deitada, porque sao seis colunas: em pe, o nome do treinamento
+       quebra em tres linhas e a tabela fica ilegivel.
+       ================================================================= */
+    @page{size:A4 landscape;margin:1.4cm}
+
+    @media print{
+      .faixa,.topo,.rodape,.emp__filtros,#viewBusca,
+      .emp__acoes,#excel,#outra,.btn{display:none!important}
+      body{background:#fff}
+      .secao{padding:0}
+      .container{max-width:none;padding:0}
+
+      /* O cabecalho da tabela SE REPETE em toda pagina. Sem isso, da
+         segunda folha em diante o auditor le uma coluna de datas sem
+         saber se e prazo ou emissao. */
+      .emp__tab thead{display:table-header-group}
+      .emp__tab tr{break-inside:avoid}
+      .emp__rolo{overflow:visible;border:0}
+      .emp__tab{min-width:0;font-size:.82rem}
+      .emp__tab th{background:#0a2e5c!important;color:#fff!important;
+        print-color-adjust:exact;-webkit-print-color-adjust:exact}
+      .emp__tab th,.emp__tab td{padding:.4rem .5rem;
+        border-bottom:1px solid #ccd5df}
+
+      /* Os selos coloridos viram texto com contorno: impressora preto e
+         branco transformaria verde e vermelho no MESMO cinza, e ai
+         "Aprovado" e "Nao comecou" ficariam indistinguiveis. */
+      .selo{background:none!important;color:#16202c!important;
+        border:1px solid #8894a3;padding:.1rem .4rem;font-size:.72rem}
+
+      .emp__resumo{display:flex;gap:1.2rem;margin-bottom:.8rem}
+      .emp__num{border:0;padding:0}
+      /* `display:inline` junta o numero e o rotulo na mesma linha, para o
+         resumo caber numa faixa so. Sem o espaco a direita, saia
+         "6pessoas na lista" colado. */
+      .emp__num b{font-size:1.1rem;display:inline;margin-right:.3rem}
+      .emp__num span{font-size:.78rem}
+      .emp__num+.emp__num{border-left:1px solid #ccd5df;padding-left:1.2rem}
+      .emp__num.alerta b{color:#16202c!important}
+
+      h1{font-size:1.3rem;margin:0 0 .1rem}
+      /* Quem imprimiu e quando: papel sem data nao serve de comprovante,
+         porque ninguem sabe se e de hoje ou do ano passado. */
+      #subEmp::after{content:" · impresso em " attr(data-hoje)}
     }
   </style>
 </head>
@@ -478,6 +540,10 @@
         ? turma.length + (turma.length === 1 ? ' treinamento' : ' treinamentos') +
           ' na sua empresa · atualizado agora'
         : 'Ainda não há ninguém cadastrado nos treinamentos da sua empresa.';
+      // A data vai para o atributo porque o CSS de impressao a escreve no
+      // papel: lista impressa sem data nao serve de comprovante.
+      $('subEmp').setAttribute('data-hoje',
+        new Date().toLocaleDateString('pt-BR'));
       $('viewBusca').style.display = 'none';
       $('viewTurma').style.display = 'block';
       desenhar();
