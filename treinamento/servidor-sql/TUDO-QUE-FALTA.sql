@@ -12,6 +12,10 @@
 --   . Apostilas aprofundadas: NR-10-SEP, NR-05 (CIPA) e NR-11
 --   . Apostilas aprofundadas: BRIG, NR-18, NR-20 e NR-34.5
 --   . Apostilas aprofundadas: DD, DD-REC, as duas integracoes, NR-06, NR-17, NR-26 e LOTO
+--   . A prova aberta sobrevive ao F5, e fecha a leitura do banco
+--   . A aula continua de onde parou
+--   . A turma da empresa (base do painel do RH)
+--   . O login proprio do RH da empresa
 -- =====================================================================
 
 
@@ -3380,6 +3384,433 @@ Proteção esquecida do lado de fora é o acidente da semana seguinte.
 > Este material é de apoio e não substitui a norma, o procedimento interno da sua empresa nem a orientação do responsável técnico. Em caso de divergência, vale o texto oficial.
 '
 where codigo = 'LOTO';
+
+-- #####################################################################
+-- #  A prova aberta sobrevive ao F5, e fecha a leitura do banco
+-- #  (vem de 43-sorteio-que-sobrevive.sql)
+-- #####################################################################
+
+-- =====================================================================
+--  A PROVA ABERTA PASSA A SOBREVIVER
+--
+--  Rode quando quiser. Pode rodar mais de uma vez.
+--
+--  DOIS PROBLEMAS, UM CONSERTO
+--
+--  1. DAVA PARA LER O BANCO INTEIRO SEM RESPONDER NADA.
+--     A espera de 30 minutos e o limite de 3 por dia contam TENTATIVAS,
+--     e tentativa so existe quando o aluno envia. Abrir a prova nao conta.
+--     Entao bastava abrir, ler as 10, fechar, abrir de novo, ler outras
+--     10, e em umas quinze rodadas ele teria visto as 150 questoes sem
+--     nunca ter sido reprovado uma vez.
+--
+--     A funcao ja apagava o sorteio anterior nao usado, mas isso resolve
+--     outra coisa: impede escolher o sorteio mais facil para responder.
+--     Nao impede ter LIDO os anteriores.
+--
+--  2. RECARREGAR A PAGINA PERDIA A PROVA.
+--     Quem apertava F5 no meio, ou caiu a internet, ou fechou sem querer,
+--     voltava e recebia uma prova NOVA, perdendo as respostas ja dadas.
+--     Numa prova de dez questoes isso e recomecar do zero por acidente.
+--
+--  O conserto e o mesmo para os dois: enquanto houver uma prova aberta e
+--  ainda valida, o servidor devolve A MESMA, e nao uma nova. Reabrir para
+--  de ser uma forma de ver questao diferente, e passa a ser o jeito
+--  normal de voltar para onde se estava.
+--
+--  Para devolver a mesma prova e preciso guardar tambem a ORDEM em que as
+--  alternativas foram embaralhadas. Sem ela, as questoes voltariam iguais
+--  mas com as alternativas em outra posicao, e o gabarito guardado, que
+--  aponta posicao, deixaria de bater.
+-- =====================================================================
+
+alter table public.trein_sorteio
+  add column if not exists ordem jsonb;
+
+comment on column public.trein_sorteio.ordem is
+  'Ordem em que as alternativas de cada questao foram embaralhadas, na '
+  'mesma sequencia de `questoes`. Guardada para que reabrir a prova '
+  'devolva exatamente a mesma, com as alternativas nas mesmas posicoes.';
+
+-- Sorteio velho e lixo: ninguem volta a uma prova aberta ontem, e deixar
+-- acumular so faz a consulta do "tem prova aberta?" ficar mais lenta a
+-- cada semana.
+create index if not exists idx_trein_sorteio_aberto
+  on public.trein_sorteio (matricula_id, criado_em desc)
+  where not usado;
+
+-- #####################################################################
+-- #  A aula continua de onde parou
+-- #  (vem de 44-retomar-a-aula.sql)
+-- #####################################################################
+
+-- =====================================================================
+--  A AULA PASSA A CONTINUAR DE ONDE PAROU
+--
+--  Rode quando quiser. Pode rodar mais de uma vez.
+--
+--  O QUE MUDA PARA O ALUNO
+--  Sair da página deixa de fazer a aula recomeçar do zero. Quem assistiu
+--  35 dos 40 minutos e perdeu a conexão volta aos 35, e não aos 0.
+--
+--  O QUE PRECISOU MUDAR NO SERVIDOR
+--  Enquanto a aula recomeçava sempre, `segundos_vistos` era só um número
+--  de tela: mesmo que alguém escrevesse um valor enorme, a aula reiniciava
+--  na próxima abertura e a conclusão continuava presa ao tempo real.
+--
+--  Com a retomada, esse número passa a decidir ONDE o vídeo começa. E aí
+--  ele vira um alvo: bastaria gravar `segundos_vistos` alto uma vez para
+--  o vídeo abrir perto do fim, e esperar o relógio correr sem assistir.
+--
+--  A trava nova é uma frase só: NINGUÉM ASSISTE MAIS SEGUNDOS DO QUE O
+--  RELÓGIO ANDOU. O progresso não pode crescer mais rápido que o tempo
+--  real, e o excesso é aparado em vez de recusado, para não quebrar a
+--  sessão de quem está assistindo direito.
+-- =====================================================================
+
+create or replace function public.trein_progresso_confere()
+returns trigger
+language plpgsql security definer set search_path = public as $$
+declare
+  v_curso_da_matricula uuid;
+  v_curso_da_aula      uuid;
+  v_duracao            int;
+  v_antes              int;
+  v_inicio             timestamptz;
+  v_ultimo             timestamptz;
+  v_teto               int;
+begin
+  select m.curso_id into v_curso_da_matricula
+    from public.trein_matricula m where m.id = new.matricula_id;
+
+  select a.curso_id, a.duracao_seg into v_curso_da_aula, v_duracao
+    from public.trein_aula a where a.id = new.aula_id;
+
+  if v_curso_da_aula is distinct from v_curso_da_matricula then
+    raise exception 'AULA_DE_OUTRO_CURSO';
+  end if;
+
+  select p.segundos_vistos, p.iniciado_em, p.atualizado_em
+    into v_antes, v_inicio, v_ultimo
+    from public.trein_progresso p
+   where p.matricula_id = new.matricula_id and p.aula_id = new.aula_id;
+
+  -- o relógio do aluno não volta
+  if v_antes is not null and new.segundos_vistos < v_antes then
+    new.segundos_vistos := v_antes;
+  end if;
+
+  -- a hora de início é do servidor e nunca é reescrita pelo cliente
+  new.iniciado_em := coalesce(v_inicio, now());
+  new.atualizado_em := now();
+
+  -- NINGUÉM ASSISTE MAIS SEGUNDOS DO QUE O RELÓGIO ANDOU.
+  --
+  -- O progresso só pode crescer o tanto de tempo que passou de verdade
+  -- desde a última gravação. Com 60 segundos de tolerância, que cobrem
+  -- folgado o intervalo entre gravações e qualquer diferença de relógio.
+  --
+  -- Aparar em vez de recusar é de propósito: quem está assistindo direito
+  -- nunca chega perto deste teto, e quem tentar forçar simplesmente não
+  -- ganha o crédito, sem levar erro na cara no meio da aula.
+  if v_antes is not null then
+    v_teto := v_antes
+            + ceil(extract(epoch from (now() - coalesce(v_ultimo, v_inicio))))::int
+            + 60;
+    if new.segundos_vistos > v_teto then
+      new.segundos_vistos := v_teto;
+    end if;
+  elsif new.segundos_vistos > 60 then
+    -- primeira gravação desta aula: não existe passado para creditar
+    new.segundos_vistos := 60;
+  end if;
+
+  if new.concluida and v_duracao is not null and v_duracao > 0 then
+    -- 90%, e não 100%: o `timeupdate` do navegador não bate no último
+    -- segundo exato, e vídeo recodificado tem duração com casa decimal.
+    if new.segundos_vistos < (v_duracao * 0.9) then
+      raise exception 'AULA_NAO_ASSISTIDA';
+    end if;
+    -- e o tempo REAL desde que ele abriu a aula
+    if now() - new.iniciado_em < make_interval(secs => v_duracao * 0.9) then
+      raise exception 'AULA_RAPIDA_DEMAIS';
+    end if;
+  end if;
+
+  return new;
+end;
+$$;
+
+-- #####################################################################
+-- #  A turma da empresa (base do painel do RH)
+-- #  (vem de 45-painel-da-empresa.sql)
+-- #####################################################################
+
+-- =====================================================================
+--  O PAINEL DO RH DA EMPRESA CLIENTE
+--
+--  Rode quando quiser. Pode rodar mais de uma vez.
+--
+--  O PROBLEMA QUE ELE RESOLVE
+--  Hoje quem enxerga o andamento é só a clínica. O RH da empresa que
+--  comprou fica ligando para perguntar quem já terminou, e descobre que
+--  alguém não fez quando o auditor pergunta pelo certificado.
+--
+--  QUEM ENTRA, E COMO
+--  O RH não tem conta e não vai ter: uma senha a mais é uma senha a
+--  esquecer, e conta para cliente é cadastro para manter. Ele usa o que
+--  já está na mão dele, o CÓDIGO DO CUPOM que a clínica enviou.
+--
+--  O QUE O CÓDIGO ABRE, E O QUE NÃO ABRE
+--  Ele abre a turma DAQUELE cupom, e nada mais. Não existe listagem
+--  geral, não dá para pedir outra empresa, e o código de uma empresa não
+--  serve para a outra.
+--
+--  E ele mostra menos do que a clínica vê, de propósito:
+--    - CPF sai mascarado;
+--    - nota da reprovação não aparece, nem quantas tentativas foram;
+--    - o RH precisa saber quem está pendente, e não humilhar ninguém.
+--
+--  SOBRE A FORÇA DO CÓDIGO
+--  Aqui o código funciona como senha, e senha curta se adivinha. Os
+--  códigos gerados pelo SistemaCMH têm três blocos, o que torna a
+--  tentativa por força bruta impraticável na prática. Ainda assim, quem
+--  tiver o código vê a turma: ele deve ser tratado como o documento que
+--  é, e não colado em grupo de WhatsApp aberto.
+-- =====================================================================
+
+create or replace function public.trein_turma_do_cupom(p_codigo text)
+returns table (
+  empresa        text,
+  aluno          text,
+  cpf_masc       text,
+  curso          text,
+  codigo_curso   text,
+  carga_horaria  int,
+  situacao       text,
+  aulas_feitas   int,
+  aulas_total    int,
+  expira_em      date,
+  certificado    text,
+  emitido_em     date
+)
+language plpgsql stable security definer set search_path = public as $$
+declare
+  v_cupom public.trein_cupom%rowtype;
+begin
+  -- Espaço e caixa não podem separar quem tem o código de quem não tem:
+  -- o RH copia de um PDF e cola com espaço no fim mais vezes do que não.
+  select * into v_cupom
+    from public.trein_cupom
+   where upper(regexp_replace(codigo, '\s', '', 'g'))
+       = upper(regexp_replace(coalesce(p_codigo, ''), '\s', '', 'g'));
+
+  if not found then
+    raise exception 'CUPOM_NAO_ENCONTRADO';
+  end if;
+
+  return query
+  select
+    v_cupom.empresa,
+    al.nome,
+    -- 074.421.955-80 vira 074.***.***-80: sobra o suficiente para o RH
+    -- reconhecer de quem se trata na folha de pagamento, e não o
+    -- suficiente para virar cadastro de terceiro.
+    case when length(regexp_replace(al.cpf, '\D', '', 'g')) = 11
+         then substr(regexp_replace(al.cpf, '\D', '', 'g'), 1, 3)
+              || '.***.***-'
+              || substr(regexp_replace(al.cpf, '\D', '', 'g'), 10, 2)
+         else '***' end,
+    c.titulo,
+    c.codigo,
+    c.carga_horaria,
+    case
+      when ce.id is not null and m.expira_em < current_date then 'Aprovado, vencido'
+      when ce.id is not null                                then 'Aprovado'
+      when m.cancelada                                      then 'Cancelado'
+      when m.expira_em < current_date                       then 'Prazo vencido'
+      when coalesce(feitas.q, 0) = 0                        then 'Não começou'
+      when coalesce(feitas.q, 0) >= coalesce(tot.q, 0)
+       and coalesce(tot.q, 0) > 0                           then 'Aulas concluídas, falta a prova'
+      else 'Em andamento'
+    end,
+    coalesce(feitas.q, 0)::int,
+    coalesce(tot.q, 0)::int,
+    m.expira_em,
+    ce.codigo,
+    ce.emitido_em::date
+  from public.trein_resgate r
+  join public.trein_aluno al on al.id = r.aluno_id
+  join public.trein_matricula m on m.aluno_id = al.id and m.cupom_id = v_cupom.id
+  join public.trein_curso c on c.id = m.curso_id
+  left join public.trein_certificado ce on ce.matricula_id = m.id
+  left join lateral (
+    select count(*) as q from public.trein_aula a where a.curso_id = c.id
+  ) tot on true
+  left join lateral (
+    select count(*) as q from public.trein_progresso p
+     where p.matricula_id = m.id and p.concluida
+  ) feitas on true
+  where r.cupom_id = v_cupom.id
+  order by al.nome, c.ordem;
+end;
+$$;
+
+-- `anon` executa de propósito: o RH não tem login, e é o código que
+-- autoriza. A função não aceita "me dê tudo": sem um código válido, ela
+-- levanta exceção antes de chegar na consulta.
+revoke execute on function public.trein_turma_do_cupom(text) from public;
+grant execute on function public.trein_turma_do_cupom(text) to anon, authenticated;
+
+-- #####################################################################
+-- #  O login proprio do RH da empresa
+-- #  (vem de 46-login-do-rh.sql)
+-- #####################################################################
+
+-- =====================================================================
+--  LOGIN PRÓPRIO PARA O RH DA EMPRESA CLIENTE
+--
+--  Rode DEPOIS do 45. Pode rodar mais de uma vez.
+--
+--  POR QUE TROCAR O CÓDIGO POR LOGIN
+--  O painel nasceu abrindo com o código do cupom, porque era o que o RH
+--  já tinha na mão. Funciona, mas o código circula: ele vai por e-mail
+--  para a empresa inteira, é colado em grupo, é repassado ao encarregado.
+--  Quem recebe de segunda mão passa a ver a lista de gente da empresa.
+--
+--  Com login, o acesso é nominal e revogável: dá para saber quem entrou,
+--  e dá para tirar o acesso de quem saiu da empresa sem trocar o código
+--  de todo mundo.
+--
+--  E resolve uma limitação que o código tinha: o cupom é de uma compra,
+--  e a empresa faz várias ao longo do ano. Pelo código, o RH via só a
+--  turma daquela compra. Pelo login, ele vê TUDO da empresa dele, porque
+--  o vínculo passa a ser o CNPJ.
+-- =====================================================================
+
+create table if not exists public.trein_rh (
+  -- o mesmo id do usuário no Auth: uma linha aqui é uma conta lá
+  id            uuid primary key references auth.users(id) on delete cascade,
+  nome          text not null,
+  email         text not null,
+  -- Só os dígitos. CNPJ digitado com ponto num lugar e sem ponto no
+  -- outro é o jeito mais fácil de o RH não enxergar a própria empresa.
+  empresa_cnpj  text not null,
+  empresa_nome  text,
+  ativo         boolean not null default true,
+  criado_por    text,
+  criado_em     timestamptz not null default now(),
+  ultimo_acesso timestamptz
+);
+
+create index if not exists idx_trein_rh_cnpj on public.trein_rh (empresa_cnpj);
+
+alter table public.trein_rh enable row level security;
+
+-- O RH lê a própria linha, e só ela: é assim que a tela sabe o nome da
+-- empresa dele. Ninguém lista os outros.
+drop policy if exists trein_rh_self on public.trein_rh;
+create policy trein_rh_self on public.trein_rh
+  for select using (id = auth.uid());
+
+-- A equipe da clínica administra.
+drop policy if exists trein_rh_equipe on public.trein_rh;
+create policy trein_rh_equipe on public.trein_rh
+  for all using (public.trein_is_equipe()) with check (public.trein_is_equipe());
+
+-- ---------------------------------------------------------------------
+--  A turma da empresa de quem está logado
+-- ---------------------------------------------------------------------
+--  Não recebe parâmetro nenhum, de propósito: quem decide qual empresa
+--  vai ser mostrada é o login, e não algo que o navegador manda. Sem
+--  parâmetro não existe "e se eu pedir a empresa do vizinho".
+create or replace function public.trein_minha_turma()
+returns table (
+  empresa        text,
+  cupom          text,
+  aluno          text,
+  cpf_masc       text,
+  curso          text,
+  codigo_curso   text,
+  carga_horaria  int,
+  situacao       text,
+  aulas_feitas   int,
+  aulas_total    int,
+  expira_em      date,
+  certificado    text,
+  emitido_em     date
+)
+language plpgsql stable security definer set search_path = public as $$
+declare
+  v_rh public.trein_rh%rowtype;
+begin
+  select * into v_rh from public.trein_rh where id = auth.uid();
+  if not found or not v_rh.ativo then
+    raise exception 'SEM_ACESSO';
+  end if;
+
+  return query
+  select
+    coalesce(v_rh.empresa_nome, cu.empresa),
+    cu.codigo,
+    al.nome,
+    case when length(regexp_replace(al.cpf, '\D', '', 'g')) = 11
+         then substr(regexp_replace(al.cpf, '\D', '', 'g'), 1, 3)
+              || '.***.***-'
+              || substr(regexp_replace(al.cpf, '\D', '', 'g'), 10, 2)
+         else '***' end,
+    c.titulo,
+    c.codigo,
+    c.carga_horaria,
+    case
+      when ce.id is not null and m.expira_em < current_date then 'Aprovado, vencido'
+      when ce.id is not null                                then 'Aprovado'
+      when m.cancelada                                      then 'Cancelado'
+      when m.expira_em < current_date                       then 'Prazo vencido'
+      when coalesce(feitas.q, 0) = 0                        then 'Não começou'
+      when coalesce(feitas.q, 0) >= coalesce(tot.q, 0)
+       and coalesce(tot.q, 0) > 0                           then 'Aulas concluídas, falta a prova'
+      else 'Em andamento'
+    end,
+    coalesce(feitas.q, 0)::int,
+    coalesce(tot.q, 0)::int,
+    m.expira_em,
+    ce.codigo,
+    ce.emitido_em::date
+  from public.trein_cupom cu
+  join public.trein_matricula m on m.cupom_id = cu.id
+  join public.trein_aluno al on al.id = m.aluno_id
+  join public.trein_curso c on c.id = m.curso_id
+  left join public.trein_certificado ce on ce.matricula_id = m.id
+  left join lateral (
+    select count(*) as q from public.trein_aula a where a.curso_id = c.id
+  ) tot on true
+  left join lateral (
+    select count(*) as q from public.trein_progresso p
+     where p.matricula_id = m.id and p.concluida
+  ) feitas on true
+  -- O vínculo é o CNPJ, e não o cupom: a empresa compra várias vezes ao
+  -- longo do ano, e o RH precisa ver tudo, e não só a última compra.
+  where regexp_replace(coalesce(cu.empresa_cnpj, ''), '\D', '', 'g')
+      = v_rh.empresa_cnpj
+  order by al.nome, c.ordem;
+end;
+$$;
+revoke execute on function public.trein_minha_turma() from public;
+grant execute on function public.trein_minha_turma() to authenticated;
+
+-- ---------------------------------------------------------------------
+--  Marcar que ele entrou
+-- ---------------------------------------------------------------------
+create or replace function public.trein_rh_entrou()
+returns void
+language plpgsql volatile security definer set search_path = public as $$
+begin
+  update public.trein_rh set ultimo_acesso = now() where id = auth.uid();
+end;
+$$;
+revoke execute on function public.trein_rh_entrou() from public;
+grant execute on function public.trein_rh_entrou() to authenticated;
 
 
 -- =====================================================================
