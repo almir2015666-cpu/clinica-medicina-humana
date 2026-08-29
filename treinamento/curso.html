@@ -191,19 +191,29 @@
       if (demo) {
         fonte = 'img/amostra.mp4';   // 20 segundos, só para ver a trava agir
       } else if (a.video_url) {
-        // arquivo no Storage privado: precisa de link assinado, que vence
-        // sozinho. Link direto não abriria — o bucket não é público.
-        var caminho = a.video_url.replace(/^\/+/, '');
-        var ass = await sb.storage.from('treinamentos')
-          .createSignedUrl(caminho, 60 * 60 * 4);
-        fonte = (ass.data && ass.data.signedUrl) || '';
+        // O vídeo mora no Cloudflare R2, num balde fechado, e o endereço é
+        // assinado pela Edge Function `video`, que confere no banco se
+        // esta matrícula pode ver este curso. Link direto não abre, e o
+        // assinado vence em quatro horas: copiado e repassado, ele morre
+        // no mesmo dia.
+        var ass = await chamarVideo({
+          acao: 'assistir', chave: a.video_url.replace(/^\/+/, '')
+        });
+        fonte = (ass && ass.url) || '';
+        if (!fonte && ass && ass.error) E.recadoVideo = ass.error;
       }
 
       if (!fonte) {
+        // O recado do servidor tem precedência: "o seu acesso venceu" é
+        // uma informação bem diferente de "o vídeo não foi publicado", e
+        // mostrar a segunda no lugar da primeira faz o aluno ligar
+        // reclamando de uma coisa que não aconteceu.
         $('palco').innerHTML = '<h1>' + seguro(a.titulo) + '</h1>' +
           '<p class="palco__sub">' + seguro(E.curso.titulo) + '</p>' +
-          '<div class="recado">O vídeo desta aula ainda não foi publicado. ' +
-          'Fale com a nossa equipe.</div>';
+          '<div class="recado">' + seguro(E.recadoVideo ||
+            'O vídeo desta aula ainda não foi publicado. Fale com a nossa ' +
+            'equipe.') + '</div>';
+        E.recadoVideo = '';
         return;
       }
 
@@ -250,15 +260,31 @@
 
       // GUARDAR ENQUANTO ASSISTE.
       //
-      // De dez em dez segundos, e só quando o número cresceu. Guardar a
-      // cada `timeupdate` seriam quatro gravações por segundo, por aluno.
-      // Sem guardar durante, quem fecha a aba no meio perde tudo, que é
-      // exatamente o que estamos consertando.
+      // De MINUTO em minuto, e só quando o número cresceu.
+      //
+      // Era de dez em dez segundos, e a conta não fechava com o tamanho
+      // que a clínica quer chegar: mil alunos assistindo ao mesmo tempo
+      // seriam cerca de cem gravações por segundo, e cada uma dispara o
+      // gatilho que faz três consultas. Umas quatrocentas consultas por
+      // segundo só para guardar em que ponto do vídeo cada um está.
+      //
+      // A um minuto, são dezesseis por segundo, e o banco nem sente. O que
+      // se perde é precisão na retomada: quem fecha a aba volta até um
+      // minuto atrás, em vez de dez segundos. Ninguém repara nisso, e é
+      // barato demais perto do gargalo que evita.
+      //
+      // Guardar a cada `timeupdate` seriam quatro gravações por segundo,
+      // por aluno. Sem guardar durante, quem fecha a aba no meio perde
+      // tudo, que é o que estamos consertando.
       var guardado = E.maxVisto;
       var salvando = false;
       async function guardarProgresso() {
         if (demo || E.feitas[a.id] || salvando) return;
-        if (E.maxVisto - guardado < 10) return;
+        // O piso é de 25 segundos, e não de 60: quem assiste 40 segundos
+        // e pausa tem o progresso guardado assim mesmo, porque o `pause`
+        // também chama esta função. Com piso de 60, esse trecho se
+        // perderia.
+        if (E.maxVisto - guardado < 25) return;
         salvando = true;
         var quanto = Math.round(E.maxVisto);
         var r = await sb.from('trein_progresso').upsert({
@@ -271,7 +297,7 @@
         // novo com o valor de agora, que é maior.
         if (!r.error) { guardado = quanto; E.parou[a.id] = quanto; }
       }
-      var relogioGravacao = setInterval(guardarProgresso, 10000);
+      var relogioGravacao = setInterval(guardarProgresso, 60000);
 
       // Ao sair da aula, do vídeo ou da página, guarda o que deu.
       v.addEventListener('pause', guardarProgresso);
@@ -352,6 +378,28 @@
     }
 
     // ---------------------------------------------------------------- prova
+    // Pede à Edge Function `video` o endereço assinado do vídeo no R2.
+    // O arquivo não passa pela função: ela assina e o navegador busca
+    // direto, senão a mesma transferência seria paga duas vezes.
+    async function chamarVideo(corpo) {
+      try {
+        var s = await sb.auth.getSession();
+        var r = await fetch(window.SUPA.url + '/functions/v1/video', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json', apikey: window.SUPA.key,
+            Authorization: 'Bearer ' +
+              (s.data.session ? s.data.session.access_token : '')
+          },
+          body: JSON.stringify(corpo)
+        });
+        return await r.json();
+      } catch (e) {
+        return { error: 'Não consegui falar com o servidor. Verifique a ' +
+                        'conexão e tente de novo.' };
+      }
+    }
+
     async function chamarProva(corpo) {
       if (demo) {
         // na amostra a correção é local. Na plataforma de verdade ela é

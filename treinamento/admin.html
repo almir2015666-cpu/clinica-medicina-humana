@@ -581,6 +581,65 @@
       recado(msg, 'Assinatura removida.', true);
     }
 
+    // ------------------------------------------------- os vídeos, no R2
+    //
+    // Os vídeos das aulas moram no Cloudflare R2, e não no Storage do
+    // Supabase. O motivo é o preço de ENTREGAR: guardar vídeo custa
+    // centavos em qualquer lugar, mas o Supabase cobra por GB que sai, e
+    // com muita gente assistindo isso vira a maior conta do sistema. O R2
+    // não cobra saída nenhuma.
+    //
+    // As chaves do R2 ficam nos segredos da Edge Function `video`. Elas
+    // dão escrita no balde inteiro e não podem viver aqui: este arquivo é
+    // baixado por qualquer pessoa que abra o site.
+    //
+    // O arquivo NUNCA passa pela função: ela assina um endereço temporário
+    // e o navegador fala direto com o R2.
+    async function chamarVideo(corpo) {
+      try {
+        var sessao = await sb.auth.getSession();
+        var r = await fetch(window.SUPA.url + '/functions/v1/video', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json', apikey: window.SUPA.key,
+            Authorization: 'Bearer ' +
+              (sessao.data.session ? sessao.data.session.access_token : '')
+          },
+          body: JSON.stringify(corpo)
+        });
+        return await r.json();
+      } catch (e) {
+        return { error: 'Nao consegui falar com o servidor. Verifique a ' +
+                        'conexao e tente de novo.' };
+      }
+    }
+
+    // O envio é por XMLHttpRequest, e não por `fetch`, por um motivo só:
+    // o `fetch` não informa quanto do arquivo já subiu. Numa aula de
+    // 300 MB, uma barra parada é indistinguível de um programa travado, e
+    // a pessoa cancela no meio.
+    function enviarParaR2(url, arquivo, aoAndar) {
+      return new Promise(function (ok) {
+        var x = new XMLHttpRequest();
+        x.open('PUT', url, true);
+        if (arquivo.type) x.setRequestHeader('Content-Type', arquivo.type);
+        x.upload.onprogress = function (ev) {
+          if (ev.lengthComputable && aoAndar) aoAndar(ev.loaded / ev.total);
+        };
+        x.onload = function () {
+          ok(x.status >= 200 && x.status < 300
+            ? { ok: true }
+            : { error: 'O armazenamento recusou o arquivo (erro ' +
+                       x.status + ').' });
+        };
+        x.onerror = function () {
+          ok({ error: 'A conexão caiu durante o envio.' });
+        };
+        x.onabort = function () { ok({ error: 'Envio cancelado.' }); };
+        x.send(arquivo);
+      });
+    }
+
     // ------------------------------------- acesso das empresas ao painel
     //
     // Criar usuario exige a chave de servico, que abre o banco inteiro, e
@@ -1863,9 +1922,10 @@
       if (!caixa) return;
       if (caixa.innerHTML) { caixa.innerHTML = ''; return; }
       caixa.innerHTML = '<p style="color:var(--meio);font-size:.85rem">Abrindo…</p>';
-      var ass = await sb.storage.from('treinamentos')
-        .createSignedUrl(String(aula.video_url).replace(/^\/+/, ''), 60 * 30);
-      if (!ass.data || !ass.data.signedUrl) {
+      var ass = await chamarVideo({
+        acao: 'assistir', chave: String(aula.video_url).replace(/^\/+/, '')
+      });
+      if (!ass || !ass.url) {
         caixa.innerHTML = '<p style="color:var(--vermelho);font-size:.85rem">' +
           'Não consegui abrir este arquivo — ele pode ter sido removido do ' +
           'armazenamento.</p>';
@@ -1873,7 +1933,7 @@
       }
       caixa.innerHTML = '<video controls style="width:100%;max-width:520px;' +
         'border-radius:12px;margin:-.2rem 0 .9rem;background:#000" src="' +
-        ass.data.signedUrl + '"></video>';
+        ass.url + '"></video>';
     }
 
     // Título a partir do nome do arquivo, quando vêm vários de uma vez.
@@ -1962,7 +2022,10 @@
         var pedacos = arquivo.name.split('.');
         var ext = (pedacos.length > 1 ? pedacos.pop() : 'mp4')
           .toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5) || 'mp4';
-        var caminho = atual.id + '/' + Date.now() + '-' + i + '.' + ext;
+        // O nome do arquivo no armazenamento vem do SERVIDOR, logo abaixo:
+        // nome escolhido aqui viaja com o que a pessoa digitou no
+        // computador dela e vira parte de um endereço.
+        var caminho = '';
 
         // a duração sai do próprio arquivo: pedir para digitar é pedir para
         // errar, e o número aparece para o aluno
@@ -1980,15 +2043,30 @@
           v.src = URL.createObjectURL(arquivo);
         });
 
-        var envio = await sb.storage.from('treinamentos')
-          .upload(caminho, arquivo, { upsert: false, contentType: arquivo.type });
+        // Pede o endereço assinado e envia direto para o R2. O nome do
+        // arquivo é escolhido pelo servidor, e não aqui: nome vindo do
+        // computador de quem envia vira parte de um endereço público.
+        var pedido = await chamarVideo({
+          acao: 'enviar', curso_id: atual.id, ext: ext
+        });
+        if (!pedido || !pedido.url) {
+          botao.disabled = false; botao.textContent = 'Publicar';
+          $('prog').style.display = 'none';
+          return verCurso((prontas ? prontas + ' aula(s) entraram. ' : '') +
+            'Parei em "' + seguro(arquivo.name) + '": ' +
+            seguro((pedido && pedido.error) || 'não consegui preparar o envio.'));
+        }
+        caminho = pedido.chave;
+        var envio = await enviarParaR2(pedido.url, arquivo, function (parte) {
+          $('progI').style.width = Math.round(parte * 100) + '%';
+        });
         if (envio.error) {
           botao.disabled = false; botao.textContent = 'Publicar';
           $('prog').style.display = 'none';
           // o aviso vai DENTRO do verCurso: escrito antes, o redesenho o
           // apaga; escrito depois, cai num elemento que já saiu da página
           return verCurso((prontas ? prontas + ' aula(s) entraram. ' : '') +
-            'Parei em "' + seguro(arquivo.name) + '": ' + seguro(envio.error.message));
+            'Parei em "' + seguro(arquivo.name) + '": ' + seguro(envio.error));
         }
 
         ordem += 1;
@@ -2002,7 +2080,7 @@
         if (r.error) {
           // o vídeo subiu mas a aula não gravou: apaga o arquivo, senão fica
           // ocupando espaço sem nada apontando para ele
-          await sb.storage.from('treinamentos').remove([caminho]);
+          await chamarVideo({ acao: 'apagar', chave: caminho });
           botao.disabled = false; botao.textContent = 'Publicar';
           $('prog').style.display = 'none';
           return verCurso((prontas ? prontas + ' aula(s) entraram. ' : '') +
@@ -2041,12 +2119,13 @@
       anotar('trein_aula_removida', atual.codigo + ': ' + ((a && a.titulo) || id));
       if (a && a.video_url) {
         // o mesmo tratamento de caminho usado para ler o video
-        var rem = await sb.storage.from('treinamentos')
-          .remove([String(a.video_url).replace(/^\/+/, '')]);
-        if (rem.error) {
+        var rem = await chamarVideo({
+          acao: 'apagar', chave: String(a.video_url).replace(/^\/+/, '')
+        });
+        if (rem && rem.error) {
           carregarCursos();
           return verCurso('A aula saiu da lista, mas o arquivo de video '
-            + 'continuou no armazenamento: ' + seguro(rem.error.message), true);
+            + 'continuou no armazenamento: ' + seguro(rem.error), true);
         }
       }
       carregarCursos();   // o cartão do curso mostra a contagem de aulas
