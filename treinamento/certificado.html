@@ -699,6 +699,49 @@
         return;
       }
 
+      // O CERTIFICADO PELO OLHO DA EMPRESA (?empresa=<codigo>)
+      //
+      // Quem guarda o documento por anos, e quem o mostra ao auditor, é o
+      // RH — não o trabalhador. Sem isto ele tinha de pedir a cada pessoa
+      // que baixasse e reenviasse, uma por uma.
+      //
+      // Quem decide se pode é o SERVIDOR, e não este endereço: a função
+      // confere que o CNPJ do cupom daquela matrícula é o CNPJ do RH
+      // logado. Ter o código, que vem impresso no papel, não basta.
+      if (busca.get('empresa')) {
+        var cod = String(busca.get('empresa')).trim().slice(0, 60);
+        var re = await sb.rpc('trein_certificado_da_empresa', { p_codigo: cod });
+        var d0 = (re.data && re.data.length) ? re.data[0] : null;
+
+        if (re.error || !d0) {
+          var m0 = String((re.error && re.error.message) || '');
+          alvo.innerHTML = '<p class="aviso">' + (
+            m0.indexOf('SEM_ACESSO') >= 0
+              ? 'Entre pelo <a href="empresa.html">acompanhamento da sua ' +
+                'empresa</a> para abrir os certificados da equipe.'
+            : re.error
+              ? 'Não consegui abrir agora. Tente de novo em instantes.'
+              : 'Este certificado não é da sua empresa, ou o código está ' +
+                'errado.') + '</p>';
+          return;
+        }
+
+        var doRh = {
+          cert: { codigo: d0.codigo, emitido_em: d0.emitido_em,
+                  valido_ate: d0.valido_ate },
+          aluno: { nome: d0.nome, cpf: d0.cpf, empresa: d0.empresa },
+          curso: { codigo: d0.curso_codigo, titulo: d0.curso_titulo,
+                   titulo_certificado: d0.titulo_certificado,
+                   carga_horaria: d0.carga_horaria,
+                   conteudo_programatico: d0.conteudo_programatico }
+        };
+        await buscarAssinatura();
+        alvo.innerHTML = folhaFrente(doRh) + folhaVerso(doRh);
+        ajustarVersoQuandoDerCerto();
+        document.title = 'Certificado de ' + d0.nome;
+        return;
+      }
+
       if (busca.get('amostra')) {
         // `?amostra=1&curso=<id>` desenha a amostra com o TEXTO DAQUELE
         // curso — título do certificado, carga horária e conteúdo
