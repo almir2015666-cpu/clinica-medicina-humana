@@ -341,7 +341,14 @@
       var html = '<div class="i-prova"><h1>Prova final</h1>' +
         '<p class="palco__sub">' + E.questoes.length + ' perguntas · você ' +
         'precisa de ' + E.notaMinima + '% para ser aprovado. Errou? Pode ' +
-        'refazer, esperando 30 minutos, até 3 vezes por dia.</p>';
+        'refazer, esperando 30 minutos, até 3 vezes por dia.</p>' +
+        // Reabrir a prova devolve A MESMA, e não uma nova. Sem este aviso
+        // o aluno acha que o sistema travou nas mesmas perguntas.
+        (p.retomada
+          ? '<p class="palco__sub" style="color:var(--ambar)">Você já tinha ' +
+            'aberto esta prova. Ela continua a mesma, com as perguntas na ' +
+            'mesma ordem.</p>'
+          : '');
       E.questoes.forEach(function (q, i) {
         html += '<div class="i-pergunta" id="p' + i + '"><b>' + (i + 1) + '. ' +
           seguro(q.enunciado) + '</b>';
@@ -402,12 +409,52 @@
         (r.aprovado
           ? '<p>O seu certificado já está pronto, no seu nome.</p>' +
             '<a class="i-botao" href="certificado.html?' + (demo ? 'amostra=1' : 'm=' + mat) + '">Ver o meu certificado</a>'
-          : '<p>Reveja as aulas com calma. Você pode tentar de novo daqui a ' +
-              '<b>30 minutos</b>, até 3 vezes por dia. A espera existe para ' +
-              'a prova medir o que você aprendeu, e não a insistência.</p>' +
-            '<button class="i-botao i-botao--linha" id="denovo">Refazer a prova</button>') +
+          : (r.acabaram_hoje
+              ? '<p>Você já fez ' + (r.max_por_dia || 3) + ' provas hoje. ' +
+                'Reveja as aulas e volte amanhã: o limite existe para a ' +
+                'prova medir o que você aprendeu, e não a insistência.</p>'
+              : '<p>Reveja as aulas com calma. A espera existe para a prova ' +
+                'medir o que você aprendeu, e não a insistência.</p>' +
+                '<p class="conta" id="conta"></p>' +
+                '<button class="i-botao i-botao--linha" id="denovo" disabled>' +
+                'Refazer a prova</button>')) +
         '</div>';
-      if (!r.aprovado) $('denovo').addEventListener('click', abrirProva);
+
+      // O BOTÃO SÓ ACORDA QUANDO O SERVIDOR FOR ACEITAR.
+      //
+      // Antes ele nascia clicável, e clicar dava a mensagem de espera: o
+      // aluno recebia um convite e uma recusa em seguida, e a tela dele
+      // parecia quebrada. Agora ele nasce desabilitado, com o relógio
+      // correndo, e acorda sozinho.
+      //
+      // Quem manda no prazo continua sendo o servidor. Isto aqui é
+      // cortesia visual: mexer no relógio do computador não adianta,
+      // porque a recusa é lá, e não aqui.
+      if (!r.aprovado && !r.acabaram_hoje) {
+        var faltam = Number(r.espere_segundos) || 0;
+        var botao = $('denovo'), conta = $('conta');
+
+        function mostrar() {
+          if (faltam <= 0) { conta.textContent = ''; return; }
+          var m = Math.floor(faltam / 60), sg = faltam % 60;
+          conta.textContent = 'Você poderá tentar de novo em ' + m + ':' +
+            (sg < 10 ? '0' : '') + sg;
+        }
+        mostrar();
+
+        var relogio = setInterval(function () {
+          faltam -= 1;
+          if (faltam <= 0) {
+            clearInterval(relogio);
+            conta.textContent = '';
+            botao.disabled = false;
+            return;
+          }
+          mostrar();
+        }, 1000);
+
+        botao.addEventListener('click', abrirProva);
+      }
     }
 
     // ---------------------------------------------------------------- início
