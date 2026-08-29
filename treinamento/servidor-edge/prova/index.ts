@@ -59,6 +59,10 @@ function embaralhar<T>(lista: T[]): T[] {
 const ESPERA_MS = 30 * 60 * 1000;
 const MAX_POR_DIA = 3;
 const FUSO = "America/Bahia";
+// Por quanto tempo uma prova aberta continua sendo a mesma prova.
+// Tres horas cobrem folgado quem se distraiu, almocou ou perdeu a
+// conexao, e nao tanto que a prova de ontem volte hoje.
+const PROVA_ABERTA_MS = 3 * 60 * 60 * 1000;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
@@ -179,6 +183,69 @@ Deno.serve(async (req) => {
       }
     }
 
+    // JA EXISTE UMA PROVA ABERTA? ENTAO E ELA.
+    //
+    // Conserta duas coisas de uma vez.
+    //
+    // A primeira e uma brecha: a espera e o limite diario contam
+    // TENTATIVAS, e tentativa so nasce quando o aluno envia. Abrir a prova
+    // nao contava. Bastava abrir, ler as dez, fechar, abrir de novo, e em
+    // umas quinze rodadas ele teria lido as 150 questoes sem nunca ter
+    // sido reprovado. Devolvendo sempre a MESMA prova, reabrir deixa de
+    // mostrar questao nova.
+    //
+    // A segunda e um incomodo grande: quem apertava F5, perdia a conexao
+    // ou fechava a aba sem querer voltava e recebia uma prova NOVA,
+    // perdendo o que ja tinha respondido. Agora volta para a mesma.
+    const { data: aberta } = await admin
+      .from("trein_sorteio")
+      .select("id,questoes,ordem,criado_em")
+      .eq("matricula_id", matricula).eq("usado", false)
+      .order("criado_em", { ascending: false })
+      .limit(1).maybeSingle();
+
+    if (aberta?.ordem &&
+        Date.now() - new Date(aberta.criado_em).getTime() < PROVA_ABERTA_MS) {
+      const ids: string[] = aberta.questoes ?? [];
+      const { data: qs } = await admin
+        .from("trein_questao")
+        .select("id,enunciado,alternativas")
+        .in("id", ids);
+
+      // `in` devolve em ordem qualquer; a prova tem ordem propria, e ela
+      // precisa ser respeitada porque o gabarito guardado segue essa
+      // mesma sequencia.
+      const porId = new Map((qs ?? []).map((q: any) => [String(q.id), q]));
+      const ordem: number[][] = aberta.ordem as number[][];
+      const remontada: any[] = [];
+      let inteira = true;
+
+      ids.forEach((id, i) => {
+        const q = porId.get(String(id));
+        const pos = ordem[i];
+        if (!q || !Array.isArray(pos)) { inteira = false; return; }
+        const originais: string[] = Array.isArray(q.alternativas) ? q.alternativas : [];
+        // Questao editada no admin depois do sorteio: se o numero de
+        // alternativas mudou, a ordem guardada nao serve mais e a prova
+        // e refeita, em vez de sair com alternativa faltando.
+        if (pos.length !== originais.length) { inteira = false; return; }
+        remontada.push({
+          id: q.id,
+          enunciado: q.enunciado,
+          alternativas: pos.map((p) => originais[p]),
+        });
+      });
+
+      if (inteira && remontada.length === ids.length && remontada.length) {
+        return json({
+          curso: curso.titulo ?? "",
+          nota_minima: notaMinima,
+          questoes: remontada,
+          retomada: true,
+        });
+      }
+    }
+
     const { data: banco } = await admin
       .from("trein_questao")
       .select("id,enunciado,alternativas,correta")
@@ -196,9 +263,11 @@ Deno.serve(async (req) => {
 
     const paraOAluno: any[] = [];
     const gabarito: number[] = [];
+    const ordemSorteada: number[][] = [];
     for (const q of escolhidas) {
       const originais: string[] = Array.isArray(q.alternativas) ? q.alternativas : [];
       const posicoes = embaralhar(originais.map((_, i) => i));
+      ordemSorteada.push(posicoes);
       paraOAluno.push({
         id: q.id,
         enunciado: q.enunciado,
@@ -218,6 +287,9 @@ Deno.serve(async (req) => {
       matricula_id: matricula,
       questoes: escolhidas.map((q: any) => q.id),
       gabarito,
+      // guardada para que reabrir devolva esta mesma prova, com as
+      // alternativas nas mesmas posicoes
+      ordem: ordemSorteada,
     });
     if (erroSorteio) {
       return json({ error: "Não consegui montar a prova. Tente de novo." }, 500);
@@ -312,8 +384,30 @@ Deno.serve(async (req) => {
       .select("id", { count: "exact", head: true })
       .eq("matricula_id", matricula);
 
+    // Quando ele podera tentar de novo, para a tela nao oferecer um botao
+    // que so vai dar erro. Reprovado ve o relogio; aprovado nao ve nada,
+    // porque para ele acabou.
+    let esperar = 0;
+    let acabaramHoje = false;
+    if (!aprovado) {
+      esperar = Math.ceil(ESPERA_MS / 1000);
+      const { data: doDia } = await admin
+        .from("trein_tentativa").select("feita_em")
+        .eq("matricula_id", matricula)
+        .order("feita_em", { ascending: false }).limit(30);
+      const dia = (d: string) =>
+        new Intl.DateTimeFormat("en-CA", { timeZone: FUSO }).format(new Date(d));
+      const hoje = new Intl.DateTimeFormat("en-CA", { timeZone: FUSO })
+        .format(new Date());
+      acabaramHoje =
+        (doDia ?? []).filter((t) => dia(t.feita_em) === hoje).length >= MAX_POR_DIA;
+    }
+
     return json({
       acertos, total, nota, aprovado,
+      espere_segundos: esperar,
+      acabaram_hoje: acabaramHoje,
+      max_por_dia: MAX_POR_DIA,
       nota_minima: notaMinima,
       tentativas: count ?? 1,
       // não devolvemos quais errou: com o gabarito na mão, refazer a prova

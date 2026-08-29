@@ -299,6 +299,14 @@ body.interno .a11y-fab:hover{transform:scale(1.07);border-color:var(--ambar)}
   .i-alt{padding:.85rem .8rem;font-size:.95rem}
   .i-resultado{padding:2rem 1.2rem;margin:1.2rem 0}
   .i-resultado .nota{font-size:2.8rem}
+
+/* O relógio da espera, na tela de reprovado. Numero em fonte de largura
+   fixa: sem isso o texto inteiro treme a cada segundo, porque o "1" e o
+   "8" tem larguras diferentes e a linha se reajusta. */
+.conta{font:600 .95rem 'Poppins',sans-serif;color:var(--ambar,#f5a800);
+  margin:.6rem 0 .2rem;font-variant-numeric:tabular-nums}
+.i-botao[disabled]{opacity:.45;cursor:not-allowed}
+
   .i-botao{width:100%;text-align:center}
 
   /* cartoes do painel */
