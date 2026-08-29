@@ -63,6 +63,15 @@
     .selo.aviso{background:#fff6e2;color:#8a6100}
 
     .emp__cod{font:600 .8rem 'Consolas',monospace;letter-spacing:.05em}
+    /* Dois caminhos por certificado, e eles fazem coisas diferentes:
+       "Abrir" traz o documento para guardar ou imprimir; "Conferir" mostra
+       a página pública de autenticidade, que é a que o RH manda para o
+       auditor. Um link só, chamado de qualquer jeito, faria o RH mandar o
+       documento quando devia mandar a conferência. */
+    .emp__acoes{display:flex;gap:.7rem;margin-top:.15rem}
+    .emp__acoes a{font-size:.8rem;color:var(--navy-2,#12457f);
+      text-decoration:none;border-bottom:1px solid currentColor}
+    .emp__acoes a:hover{color:var(--navy)}
     .emp__vazio{padding:2.2rem 1.2rem;text-align:center;color:var(--fraco)}
 
     @media(max-width:900px){
@@ -166,7 +175,8 @@
         </table></div>
 
         <p style="margin-top:1.4rem">
-          <button class="btn" id="outra">Sair</button>
+          <button class="btn btn--navy" id="excel">Baixar em Excel</button>
+          <button class="btn" id="outra" style="margin-left:.5rem">Sair</button>
           <a class="btn btn--zap" style="margin-left:.5rem" target="_blank"
              rel="noopener"
              href="https://wa.me/5571993010103?text=Ol%C3%A1%21%20Gostaria%20de%20renovar%20treinamentos%20da%20minha%20equipe.">
@@ -205,6 +215,7 @@
     </div>
   </footer>
 
+  <script src="js/excel.js?v=1"></script>
   <script src="../js/supabase-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -302,9 +313,17 @@
             : '') + '</td>' +
           '<td>' + (t.certificado
             ? '<span class="emp__cod">' + seguro(t.certificado) + '</span>' +
-              '<div class="fraco"><a href="validar.html?c=' +
-              encodeURIComponent(t.certificado) + '" target="_blank">conferir</a>' +
-              (t.emitido_em ? ' · ' + dataBr(t.emitido_em) : '') + '</div>'
+              '<div class="emp__acoes">' +
+                '<a href="certificado.html?empresa=' +
+                  encodeURIComponent(t.certificado) + '" target="_blank">' +
+                  'Abrir certificado</a>' +
+                '<a href="validar.html?c=' +
+                  encodeURIComponent(t.certificado) + '" target="_blank">' +
+                  'Conferir</a>' +
+              '</div>' +
+              (t.emitido_em
+                ? '<div class="fraco">emitido em ' + dataBr(t.emitido_em) +
+                  '</div>' : '')
             : '<span class="fraco">—</span>') + '</td>' +
         '</tr>';
       }).join('');
@@ -318,6 +337,94 @@
       return '<button data-f="' + id + '"' +
         (filtro === id ? ' class="aqui"' : '') + '>' + texto + '</button>';
     }
+
+    // ------------------------------------------------- baixar em Excel
+    //
+    // Três abas, e a divisão não é enfeite: cada uma responde a uma
+    // pergunta diferente que o RH faz.
+    //
+    //   Todos ....... o retrato completo, para arquivar
+    //   Pendentes ... quem cobrar hoje, que é o uso do dia a dia
+    //   Certificados  o que mostrar ao auditor, só o que está válido
+    //
+    // Numa aba só, com filtro, o RH teria de saber montar filtro no Excel.
+    // Assim ele abre e a resposta já está separada.
+    function baixarExcel() {
+      if (!turma.length) return;
+
+      var hoje = new Date().toISOString().slice(0, 10);
+      var colunas = [
+        { titulo: 'Pessoa', largura: 30 },
+        { titulo: 'CPF', largura: 16 },
+        { titulo: 'Treinamento', largura: 34 },
+        { titulo: 'Norma', largura: 12 },
+        { titulo: 'Carga horária', largura: 13 },
+        { titulo: 'Situação', largura: 26 },
+        { titulo: 'Aulas', largura: 10 },
+        { titulo: 'Prazo', largura: 12, tipo: 'data' },
+        { titulo: 'Certificado', largura: 18 },
+        { titulo: 'Emitido em', largura: 12, tipo: 'data' }
+      ];
+
+      function linha(t) {
+        return [
+          t.aluno || '', t.cpf_masc || '', t.curso || '', t.codigo_curso || '',
+          t.carga_horaria ? Number(t.carga_horaria) + ' h' : '',
+          t.situacao || '',
+          t.aulas_total ? t.aulas_feitas + ' de ' + t.aulas_total : '',
+          t.expira_em || '', t.certificado || '', t.emitido_em || ''
+        ];
+      }
+
+      var pendentes = turma.filter(function (t) {
+        return grupo(t.situacao) !== 'ok';
+      });
+      var certificados = turma.filter(function (t) { return t.certificado; });
+
+      var abas = [
+        { nome: 'Todos', colunas: colunas, linhas: turma.map(linha) }
+      ];
+      // Aba vazia é pior do que aba ausente: o RH abre, vê o nada e fica
+      // sem saber se é a lista que está vazia ou o sistema que falhou.
+      if (pendentes.length) {
+        abas.push({ nome: 'Pendentes', colunas: colunas,
+                    linhas: pendentes.map(linha) });
+      }
+      if (certificados.length) {
+        abas.push({
+          nome: 'Certificados', colunas: [
+            { titulo: 'Pessoa', largura: 30 },
+            { titulo: 'CPF', largura: 16 },
+            { titulo: 'Treinamento', largura: 34 },
+            { titulo: 'Norma', largura: 12 },
+            { titulo: 'Carga horária', largura: 13 },
+            { titulo: 'Código do certificado', largura: 22 },
+            { titulo: 'Emitido em', largura: 12, tipo: 'data' },
+            { titulo: 'Válido até', largura: 12, tipo: 'data' },
+            { titulo: 'Situação', largura: 20 }
+          ],
+          linhas: certificados.map(function (t) {
+            return [
+              t.aluno || '', t.cpf_masc || '', t.curso || '',
+              t.codigo_curso || '',
+              t.carga_horaria ? Number(t.carga_horaria) + ' h' : '',
+              t.certificado || '', t.emitido_em || '', t.expira_em || '',
+              (t.expira_em && t.expira_em < hoje) ? 'Vencido' : 'Válido'
+            ];
+          })
+        });
+      }
+
+      // O nome do arquivo leva empresa e data: o RH guarda vários ao longo
+      // do ano, e "treinamentos.xlsx" três vezes na pasta de Downloads não
+      // diz qual é qual.
+      var empresa = ((turma[0] && turma[0].empresa) || 'empresa')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
+      Planilha.baixar('treinamentos-' + empresa + '-' + hoje + '.xlsx', abas);
+    }
+
+    $('excel').addEventListener('click', baixarExcel);
 
     $('filtros').addEventListener('click', function (ev) {
       var b = ev.target.closest('button[data-f]');
