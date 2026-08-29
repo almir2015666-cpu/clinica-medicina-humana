@@ -29,6 +29,13 @@
       box-shadow:0 6px 18px rgba(10,46,92,.10)}
     .porta.on{border-color:var(--ambar);
       box-shadow:0 6px 18px rgba(245,168,0,.18)}
+    .jaentrou{max-width:520px;margin:0 auto 1.2rem;background:#fff8e8;
+      border:1.5px solid var(--ambar);border-radius:14px;
+      padding:1rem 1.2rem;text-align:center}
+    .jaentrou p{margin:0 0 .8rem;color:#6b5200;font-size:.92rem}
+    .jaentrou b{color:var(--navy)}
+    .jaentrou__bts{display:flex;gap:.6rem;justify-content:center;
+      flex-wrap:wrap}
     @media(max-width:560px){
       .portas{grid-template-columns:1fr}
     }
@@ -172,10 +179,23 @@
              página voltou a ser só a porta de entrada. Enquanto os dois
              existiam, o aluno logado caía nesta tela clara e vazia em vez
              do painel de verdade. -->
-        <p class="dica" id="jaEntrou" style="display:none;text-align:center">
-          Você já está conectado. <a href="painel.html">Ir para os meus
-          treinamentos →</a>
-        </p>
+        <!-- SESSÃO ABERTA NÃO ENTRA SOZINHA.
+             Esta página redirecionava direto para o painel quando havia
+             uma sessão no navegador. Num computador da clínica, ou num
+             celular emprestado, isso jogava quem clicou em "Entrar"
+             DENTRO da conta de quem usou antes: nome, CPF, treinamentos e
+             certificado de outra pessoa.
+
+             Agora ela pergunta. Continuar é um clique, e trocar de conta
+             também. -->
+        <div class="jaentrou" id="jaEntrou" style="display:none">
+          <p><b id="jaQuem">Alguém</b> está conectado neste navegador.</p>
+          <div class="jaentrou__bts">
+            <a class="btn btn--navy" href="painel.html">Continuar</a>
+            <button class="btn" type="button" id="trocarConta">
+              Não sou eu, sair</button>
+          </div>
+        </div>
 
     </div>
   </main>
@@ -461,12 +481,31 @@
         + 'via do certificado, fale com o RH da sua empresa.');
     }
 
-    sb.auth.getSession().then(function (res) {
+    sb.auth.getSession().then(async function (res) {
       if (!(res && res.data && res.data.session)) return;
       if (location.hash === '#venceu') { sb.auth.signOut(); return; }
-      if (location.hash !== '#codigo') { location.replace('painel.html'); return; }
-      aba('resgatar');
+
+      // Mostra o PRIMEIRO NOME de quem está conectado, e não o e-mail.
+      // O e-mail interno do aluno é o CPF dele: escrevê-lo aqui entregaria
+      // o documento de outra pessoa a quem só passou pela tela.
+      var quem = '';
+      try {
+        var p = await sb.from('trein_aluno').select('nome')
+          .eq('id', res.data.session.user.id).maybeSingle();
+        quem = ((p.data && p.data.nome) || '').split(' ')[0];
+      } catch (e) { quem = ''; }
+      $('jaQuem').textContent = quem || 'Alguém';
       $('jaEntrou').style.display = 'block';
+
+      if (location.hash === '#codigo') aba('resgatar');
+    });
+
+    $('trocarConta').addEventListener('click', async function () {
+      this.disabled = true;
+      this.textContent = 'Saindo…';
+      await sb.auth.signOut();
+      // Recarrega sem o hash: a tela volta limpa, na porta do aluno.
+      location.replace('entrar.html');
     });
   })();
   </script>
