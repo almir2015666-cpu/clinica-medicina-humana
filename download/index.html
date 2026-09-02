@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Pagina escondida: nao ha link para ela em lugar nenhum do site, e o
+       noindex/nofollow pede aos buscadores que nao a guardem. Isso a esconde,
+       nao a tranca: quem tiver o endereco baixa. -->
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <title>Sistema CMH — instalação</title>
+  <link rel="icon" type="image/png" href="../assets/favicon.png?v=2" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --navy:#0a2e5c; --navy2:#12457f; }
+    * { box-sizing: border-box; }
+    html,body { min-height:100%; margin:0; }
+    body {
+      font-family:'Poppins',system-ui,Arial,sans-serif;
+      background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);
+      color:#fff; display:flex; align-items:center; justify-content:center;
+      padding:32px 24px;
+    }
+    .box { max-width:560px; width:100%; text-align:center; }
+    .logo { max-width:170px; margin:0 auto 24px; display:block; }
+    h1 { font-size:1.5rem; font-weight:600; margin:0 0 6px; }
+    .versao { font-size:.9rem; opacity:.85; margin:0 0 28px; min-height:1.4em; }
+
+    .btn {
+      display:inline-block; padding:16px 34px;
+      background:#fff; color:var(--navy); text-decoration:none;
+      border-radius:10px; font-weight:600; font-size:1.05rem;
+      transition:transform .15s ease, box-shadow .15s ease;
+      box-shadow:0 6px 18px rgba(0,0,0,.18);
+    }
+    .btn:hover { transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.24); }
+    .peso { display:block; font-size:.78rem; font-weight:400; opacity:.7; margin-top:4px; }
+
+    .alternativa { margin-top:22px; font-size:.88rem; line-height:1.6; opacity:.9; }
+    .alternativa a { color:#fff; font-weight:600; }
+    .alternativa a:hover { opacity:.8; }
+    #blocoPasta[hidden] { display:none; }
+
+    .secao {
+      margin:32px 0 0; padding:24px 0 0; text-align:left;
+      border-top:1px solid rgba(255,255,255,.2);
+    }
+    .secao h2 { font-size:.95rem; font-weight:600; margin:0 0 14px; }
+    .secao ol, .secao ul { margin:0; padding-left:22px; }
+    .secao li { font-size:.9rem; line-height:1.65; margin-bottom:12px; opacity:.9; }
+    .secao strong { font-weight:600; opacity:1; }
+
+    .aviso {
+      margin-top:22px; padding:16px 18px; text-align:left;
+      background:rgba(255,255,255,.08); border-radius:10px;
+      border-left:3px solid rgba(255,255,255,.45);
+      font-size:.85rem; line-height:1.6;
+    }
+    .aviso b { font-weight:600; }
+
+    .conferir {
+      margin-top:26px; font-size:.72rem; opacity:.55; line-height:1.6;
+      word-break:break-all; text-align:left;
+    }
+    .conferir code { font-family:ui-monospace,Consolas,monospace; }
+    .conferir summary { cursor:pointer; opacity:.9; margin-bottom:8px; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <img src="../assets/logo.png" alt="Clínica Medicina Humana" class="logo"
+         onerror="this.style.display='none';" />
+
+    <h1>Sistema CMH</h1>
+    <p class="versao" id="versao">Carregando a versão…</p>
+
+    <a class="btn" id="baixar"
+       href="https://ojhulerxocgaxbiutrnm.supabase.co/storage/v1/object/public/publico/SistemaCMH.exe?download=SistemaCMH.exe">
+      Baixar o programa
+      <span class="peso" id="peso">Windows</span>
+    </a>
+
+    <p class="alternativa" id="blocoPasta" hidden>
+      O antivírus barrou ou o arquivo some depois de baixar?
+      <a id="baixarPasta"
+         href="https://ojhulerxocgaxbiutrnm.supabase.co/storage/v1/object/public/publico/SistemaCMH-pasta.zip?download=SistemaCMH-pasta.zip">
+        Baixe a versão em pasta</a><span id="pesoPasta"></span> — é o mesmo
+      programa, num formato que os antivírus costumam aceitar sem reclamar.
+      Também abre mais rápido.
+    </p>
+
+    <div class="secao">
+      <h2>Depois de baixar</h2>
+      <ol>
+        <li><strong>Não precisa instalar.</strong> No arquivo único, é só dar
+          dois cliques. Na versão em pasta, clique com o botão direito no
+          <em>.zip</em> → <strong>Extrair tudo</strong>, e depois dois cliques
+          em <strong>SistemaCMH.exe</strong> lá dentro.</li>
+        <li>Na primeira vez, o Windows costuma mostrar a tela azul
+          <em>"O Windows protegeu o computador"</em>. Clique em
+          <strong>Mais informações</strong> → <strong>Executar assim
+          mesmo</strong>. Isso aparece porque o programa é nosso e não tem
+          certificado de loja, não porque haja algo errado com ele.</li>
+        <li>Entre com <strong>o mesmo usuário e senha</strong> que você já usa
+          no sistema. Se ainda não tem, peça ao administrador.</li>
+      </ol>
+    </div>
+
+    <div class="secao">
+      <h2>Se o antivírus acusar vírus</h2>
+      <ul>
+        <li><strong>É alarme falso, e sabemos por quê.</strong> O programa é
+          empacotado com uma ferramenta (PyInstaller) que junta tudo num
+          executável só. Vírus disfarçados usam a mesma técnica, então alguns
+          antivírus condenam o formato — não o conteúdo.</li>
+        <li><strong>O que fazer:</strong> baixe a versão em pasta pelo link
+          acima. Se ainda assim for barrada, avise a clínica dizendo
+          <strong>qual antivírus é e o nome exato que apareceu na tela</strong>
+          — com isso conseguimos pedir a correção ao fabricante.</li>
+        <li>Se quiser conferir por conta própria antes de abrir, use o
+          <a href="https://www.virustotal.com/gui/home/upload" target="_blank"
+             rel="noopener">VirusTotal</a>: ele passa mais de 70 antivírus no
+          mesmo arquivo e mostra que o alarme é de poucos deles.</li>
+      </ul>
+    </div>
+
+    <div class="aviso">
+      <b>Nos computadores da clínica não é preciso baixar nada.</b>
+      Eles se atualizam sozinhos: basta abrir o programa. Esta página é para
+      máquina nova, notebook de casa ou quando o programa não abre mais.
+    </div>
+
+    <details class="conferir">
+      <summary>Conferir se o arquivo veio inteiro (opcional)</summary>
+      Abra o PowerShell na pasta do download e rode
+      <code>Get-FileHash SistemaCMH.exe</code>. Tem de dar exatamente:
+      <br /><code id="sha">—</code>
+      <div id="linhaShaPasta" hidden>
+        <br />Para o <code>SistemaCMH-pasta.zip</code>:
+        <br /><code id="shaPasta">—</code>
+      </div>
+    </details>
+  </div>
+
+  <script>
+    /* A página não sabe, sozinha, qual é a versão de hoje — e não pode saber
+       pelo HTML, senão alguém teria de editar o site a cada publicação e um
+       dia esqueceria. Então ela pergunta ao mesmo lugar de onde o arquivo
+       vem. O versao.json é escrito pelo publicar.py junto com os arquivos,
+       então os dois nunca se desencontram.
+
+       Se a consulta falhar, o botão principal continua valendo: o link é fixo
+       e sempre aponta para a versão mais nova. O que se perde é o texto da
+       versão e o link da pasta — e é de propósito que a pasta só apareça
+       quando o versao.json confirma que ela existe lá, para a página nunca
+       oferecer um download que devolve erro. */
+    (function () {
+      var BASE = 'https://ojhulerxocgaxbiutrnm.supabase.co/storage/v1/object/public/publico/';
+      var elVersao = document.getElementById('versao');
+      var elPeso = document.getElementById('peso');
+      var elSha = document.getElementById('sha');
+      var blocoPasta = document.getElementById('blocoPasta');
+      var pesoPasta = document.getElementById('pesoPasta');
+      var linhaShaPasta = document.getElementById('linhaShaPasta');
+      var elShaPasta = document.getElementById('shaPasta');
+
+      function mb(bytes) {
+        return (bytes / 1024 / 1024).toFixed(1).replace('.', ',') + ' MB';
+      }
+
+      function dataBr(iso) {
+        var p = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+        return p ? p[3] + '/' + p[2] + '/' + p[1] : '';
+      }
+
+      fetch(BASE + 'versao.json', { cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (f) {
+          var quando = dataBr(f.publicado_em);
+          elVersao.textContent = 'Versão ' + f.versao + (quando ? ' — de ' + quando : '');
+          if (f.tamanho) { elPeso.textContent = 'Windows · ' + mb(f.tamanho); }
+          if (f.sha256) { elSha.textContent = f.sha256.toUpperCase(); }
+
+          if (f.pasta) {
+            blocoPasta.hidden = false;
+            if (f.tamanho_pasta) { pesoPasta.textContent = ' (' + mb(f.tamanho_pasta) + ')'; }
+            if (f.sha256_pasta) {
+              elShaPasta.textContent = f.sha256_pasta.toUpperCase();
+              linhaShaPasta.hidden = false;
+            }
+          }
+        })
+        .catch(function () {
+          elVersao.textContent = 'Versão mais recente';
+        });
+    })();
+  </script>
+</body>
+</html>
