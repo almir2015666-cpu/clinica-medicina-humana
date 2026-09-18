@@ -1467,6 +1467,42 @@ body.tem-campanha .page-hero{padding-top:186px}
 .slide--campanha .btn-hero__circle span{border-color:currentColor}
 .slide--campanha .btn-hero:hover,.slide--campanha .btn-hero__circle:hover{filter:brightness(1.07);background:var(--camp-cor)}
 
+/* laço ao lado do logo */
+.brand{position:relative}
+/* flutua à direita do logo: sem ocupar espaço, o menu não é empurrado */
+.brand__laco{position:absolute;right:-24px;top:50%;margin-top:-18px;width:20px;height:28px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));pointer-events:none}
+.brand__laco .laco{width:100%;height:100%;display:block}
+.header.scrolled .brand__laco{width:16px;height:23px}
+@media(max-width:560px){.brand__laco{width:15px;height:21px}}
+
+/* faixa grande "Campanha do mês" na home */
+.banda-campanha{position:relative;overflow:hidden;color:#fff;padding:3.2rem 0;margin:1rem 0 0;
+  background:radial-gradient(circle at 18% 50%,color-mix(in srgb,var(--camp-cor) 45%,transparent),transparent 42%),linear-gradient(135deg,#0a2e5c 0%,#12213a 100%)}
+.banda-campanha::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;background:var(--camp-cor)}
+.banda-campanha__in{display:flex;align-items:center;gap:3rem}
+.banda-campanha__laco{flex:none;width:110px;filter:drop-shadow(0 14px 30px rgba(0,0,0,.35))}
+.banda-campanha__laco .laco{width:100%;height:auto;display:block}
+.banda-campanha__txt{max-width:720px}
+.banda-campanha__selo{display:inline-block;font-family:var(--font-display);font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;background:var(--camp-cor);color:var(--camp-tinta);padding:.3rem .8rem;border-radius:20px;margin-bottom:.9rem}
+.banda-campanha h2{color:#fff;font-family:var(--font-display);font-weight:400;font-size:clamp(1.7rem,3.4vw,2.5rem);line-height:1.1;margin:0 0 .8rem}
+.banda-campanha p{color:rgba(255,255,255,.9);font-size:1.08rem;line-height:1.65;margin:0 0 1.4rem}
+.banda-campanha__acoes{display:flex;flex-wrap:wrap;align-items:center;gap:1.2rem}
+.banda-campanha__btn{background:var(--camp-cor);color:var(--camp-tinta);font-family:var(--font-display);font-weight:700;padding:.8rem 1.5rem;border-radius:30px;transition:filter .2s}
+.banda-campanha__btn:hover{filter:brightness(1.08);color:var(--camp-tinta)}
+.banda-campanha__link{color:#fff;font-family:var(--font-display);font-weight:600;border-bottom:2px solid var(--camp-cor);padding-bottom:2px}
+.banda-campanha__link:hover{color:#fff;opacity:.85}
+@media(max-width:700px){
+  .banda-campanha{padding:2.4rem 0}
+  .banda-campanha__in{flex-direction:column;align-items:flex-start;gap:1.2rem}
+  .banda-campanha__laco{width:56px}
+}
+
+/* rodapé: fio na cor do mês e o nome da campanha */
+.footer--campanha{border-top:6px solid var(--camp-cor)}
+.footer__campanha{display:inline-flex;align-items:center;gap:.45rem}
+.footer__campanha .laco{width:12px;height:17px}
+.footer__bottom .footer__campanha a{margin-left:0;font-weight:600}
+
 /* caixa "onde buscar ajuda" das matérias de campanha */
 .box-ajuda{background:#fff8d6;border:2px solid #f7c600;border-radius:14px;padding:1.4rem 1.6rem;margin:2rem 0}
 .box-ajuda h3{margin:0 0 .8rem;color:#2b2400;font-size:1.2rem}
