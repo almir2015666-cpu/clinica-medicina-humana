@@ -183,7 +183,7 @@ window.CMH_EN = {
  "Clique num curso para ver as aulas dele e subir os vídeos.": "Click a course to see its classes and upload the videos.",
  "Clínica Medicina Humana": "Clínica Medicina Humana",
  "Clínica Medicina Humana — Cuidar de você é a nossa vocação": "Clínica Medicina Humana — Caring for you is our calling",
- "Clínica Medicina Humana – Camaçari, BA | Consultas, exames e medicina ocupacional": "Clínica Medicina Humana – Camaçari, BA | Appointments, exams and occupational medicine",
+ "Clínica Medicina Humana – Cuidando de você em cada detalhe | Camaçari - BA": "Clínica Medicina Humana – Caring for you in every detail | Camaçari - BA",
  "Clínica Medicina Humana — cuidado completo, tecnologia avançada e equipe qualificada para você e sua família.": "Clínica Medicina Humana — complete care, advanced technology and a qualified team for you and your family.",
  "Clínica médica em Camaçari - BA: consultas com especialistas, exames laboratoriais e de imagem, medicina ocupacional (ASO, PCMSO, PGR, eSocial) e treinamentos em NRs. Rua do Alecrim, 76, Centro.": "Medical clinic in Camaçari, Bahia: specialist appointments, laboratory and imaging exams, occupational medicine (ASO, PCMSO, PGR, eSocial) and NR training courses. Rua do Alecrim, 76, downtown.",
  "Colonoscopia:": "Colonoscopy:",

@@ -184,7 +184,7 @@ window.CMH_ZH = {
  "Clique num curso para ver as aulas dele e subir os vídeos.": "点击某个课程即可查看其课时并上传视频。",
  "Clínica Medicina Humana": "Medicina Humana诊所",
  "Clínica Medicina Humana — Cuidar de você é a nossa vocação": "Medicina Humana诊所——关爱您是我们的使命",
- "Clínica Medicina Humana – Camaçari, BA | Consultas, exames e medicina ocupacional": "Medicina Humana诊所 – 巴伊亚州卡马萨里 | 问诊、检查与职业医学",
+ "Clínica Medicina Humana – Cuidando de você em cada detalhe | Camaçari - BA": "Medicina Humana诊所 – 细致入微，呵护您的健康 | 巴伊亚州卡马萨里",
  "Clínica Medicina Humana — cuidado completo, tecnologia avançada e equipe qualificada para você e sua família.": "Medicina Humana诊所——为您和家人提供全方位照护、先进技术和专业团队。",
  "Clínica médica em Camaçari - BA: consultas com especialistas, exames laboratoriais e de imagem, medicina ocupacional (ASO, PCMSO, PGR, eSocial) e treinamentos em NRs. Rua do Alecrim, 76, Centro.": "巴伊亚州卡马萨里的医疗诊所：专科问诊、实验室与影像检查、职业医学（ASO、PCMSO、PGR、eSocial）及NR培训。地址：Rua do Alecrim, 76，市中心。",
  "Colonoscopia:": "结肠镜检查：",
