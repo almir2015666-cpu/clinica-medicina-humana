@@ -10,7 +10,32 @@
    site ganhar texto novo, o texto novo aparece em português mesmo com o
    inglês ligado — não quebra nada, só fica sem traduzir.
    ===================================================================== */
-window.CMH_EN = {
+window.CMH_EN = { "Medicina Ocupacional em Camaçari para Empresas": "Occupational Medicine in Camaçari for Companies",
+ "Saúde e segurança do trabalho para empresas de Camaçari, do Polo Industrial e da região metropolitana de Salvador, com conformidade, agilidade e tranquilidade.": "Occupational health and safety for companies in Camaçari, the Industrial Complex and the Salvador metropolitan area, with compliance, speed and peace of mind.",
+ "Aptidão antes do início das atividades · saiba mais →": "Fitness before starting work · learn more →",
+ "Atendimento em Camaçari e região": "Service in Camaçari and the region",
+ "A clínica fica no Centro de Camaçari, na Rua do Alecrim, 76, a poucos minutos do Polo Industrial. Atendemos empresas de Camaçari, Candeias e de toda a região metropolitana de Salvador: os exames são feitos na clínica, o agendamento é pelo site ou pelo WhatsApp, e o ASO fica disponível online para a empresa e para o trabalhador.": "The clinic is in downtown Camaçari, at Rua do Alecrim, 76, a few minutes from the Industrial Complex. We serve companies in Camaçari, Candeias and the whole Salvador metropolitan area: exams are done at the clinic, scheduling is by website or WhatsApp, and the ASO is available online for the company and the worker.",
+ "Veja como funcionam os exames ocupacionais em Camaçari →": "See how occupational exams work in Camaçari →",
+ "Perguntas frequentes sobre medicina ocupacional": "Frequently asked questions about occupational medicine",
+ "Quais exames ocupacionais a Clínica Medicina Humana faz em Camaçari?": "Which occupational exams does Clínica Medicina Humana perform in Camaçari?",
+ "Admissional, periódico, de retorno ao trabalho, de mudança de função e demissional, com os exames complementares que o PCMSO da empresa exigir, como audiometria e exames laboratoriais. O ASO fica disponível online para a empresa e para o trabalhador.": "Pre-employment, periodic, return-to-work, change-of-function and termination exams, with the complementary tests required by the company's PCMSO, such as audiometry and laboratory tests. The ASO is available online for the company and the worker.",
+ "Minha empresa é pequena. Precisa de PCMSO e PGR?": "My company is small. Does it need a PCMSO and a PGR?",
+ "Toda empresa com empregado registrado precisa organizar a saúde e a segurança do trabalho. Micro e pequenas empresas de baixo risco têm regras simplificadas em alguns casos, e nós avaliamos a situação de cada uma antes de propor o que é obrigatório.": "Every company with a registered employee must organize occupational health and safety. Low-risk micro and small companies have simplified rules in some cases, and we assess each one before proposing what is mandatory.",
+ "Vocês cuidam do eSocial?": "Do you handle eSocial?",
+ "Geramos e organizamos os eventos de saúde e segurança do trabalho, o S-2220, o S-2240 e o S-2210, a partir dos exames e laudos que realizamos, para que a empresa envie tudo correto e no prazo.": "We generate and organize the occupational health and safety events, S-2220, S-2240 and S-2210, from the exams and reports we perform, so the company submits everything correctly and on time.",
+ "Como a empresa agenda os exames dos funcionários?": "How does the company schedule employee exams?",
+ "Empresas conveniadas agendam pelo site, na página Agende seu exame, ou pelo WhatsApp do comercial, (71) 99301-0103. A data fica garantida depois da confirmação da nossa equipe.": "Partner companies schedule on the website, on the Schedule your exam page, or through the sales team's WhatsApp, (71) 99301-0103. The date is guaranteed after our team confirms.",
+ "Onde o trabalhador pega o ASO?": "Where does the worker get the ASO?",
+ "Na página Pegue seu ASO, no site, a qualquer hora, sem precisar voltar à clínica.": "On the Get your ASO page, on the website, at any time, without having to return to the clinic.",
+ "Vocês atendem empresas fora de Camaçari?": "Do you serve companies outside Camaçari?",
+ "Sim. Atendemos empresas de Camaçari, do Polo Industrial e da região metropolitana de Salvador, incluindo Candeias. Os exames são feitos na clínica, no Centro de Camaçari.": "Yes. We serve companies in Camaçari, the Industrial Complex and the Salvador metropolitan area, including Candeias. Exams are done at the clinic, in downtown Camaçari.",
+ "Qual é o endereço e o horário de atendimento?": "What are the address and opening hours?",
+ "Rua do Alecrim, 76, Centro, Camaçari - BA, CEP 42800-025. Segunda a sexta, das 7h às 18h; sábado, das 7h às 12h.": "Rua do Alecrim, 76, Centro, Camaçari - BA, ZIP 42800-025. Monday to Friday, 7 am to 6 pm; Saturday, 7 am to noon.",
+ "Um novo conceito em cuidar de você em Camaçari: consultas, exames e medicina ocupacional, com tecnologia de ponta, estrutura diferenciada e equipe médica e assistencial altamente qualificada.": "A new concept in caring for you in Camaçari: appointments, exams and occupational medicine, with state-of-the-art technology, outstanding facilities and a highly qualified medical and support team.",
+ "Exames ocupacionais": "Occupational exams",
+ "Exame admissional, periódico ou demissional? Veja os exames ocupacionais em Camaçari →": "Pre-employment, periodic or termination exam? See occupational exams in Camaçari →",
+ "Quais são os exames e o que o trabalhador precisa levar? Veja os exames ocupacionais →": "Which exams are there and what does the worker need to bring? See occupational exams →",
+
  "(71) 3493-7220 · Comercial (71) 99301-0103": "(71) 3493-7220 · Sales (71) 99301-0103",
  "(71) 90000-0000": "(71) 90000-0000",
  "(estresse, sobrecarga) entre os fatores a gerenciar — a saúde mental no trabalho também é responsabilidade da empresa.": "(stress, work overload) among the factors to be managed — mental health at work is the company's responsibility too.",

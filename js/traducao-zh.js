@@ -11,7 +11,32 @@
    não existem em documento nenhum, e é justamente por essas siglas que
    um auditor procura.
    ===================================================================== */
-window.CMH_ZH = {
+window.CMH_ZH = { "Medicina Ocupacional em Camaçari para Empresas": "面向企业的卡马萨里职业医学服务",
+ "Saúde e segurança do trabalho para empresas de Camaçari, do Polo Industrial e da região metropolitana de Salvador, com conformidade, agilidade e tranquilidade.": "为卡马萨里、工业园区及萨尔瓦多都市圈的企业提供职业健康与安全服务：合规、高效、安心。",
+ "Aptidão antes do início das atividades · saiba mais →": "上岗前的健康评估 · 了解更多 →",
+ "Atendimento em Camaçari e região": "服务卡马萨里及周边地区",
+ "A clínica fica no Centro de Camaçari, na Rua do Alecrim, 76, a poucos minutos do Polo Industrial. Atendemos empresas de Camaçari, Candeias e de toda a região metropolitana de Salvador: os exames são feitos na clínica, o agendamento é pelo site ou pelo WhatsApp, e o ASO fica disponível online para a empresa e para o trabalhador.": "诊所位于卡马萨里市中心 Rua do Alecrim, 76，距工业园区仅几分钟。我们服务卡马萨里、坎德亚斯及整个萨尔瓦多都市圈的企业：检查在诊所进行，可通过网站或 WhatsApp 预约，ASO 可在线获取，企业和员工均可查看。",
+ "Veja como funcionam os exames ocupacionais em Camaçari →": "了解卡马萨里职业健康检查的流程 →",
+ "Perguntas frequentes sobre medicina ocupacional": "职业医学常见问题",
+ "Quais exames ocupacionais a Clínica Medicina Humana faz em Camaçari?": "Medicina Humana 诊所在卡马萨里提供哪些职业健康检查？",
+ "Admissional, periódico, de retorno ao trabalho, de mudança de função e demissional, com os exames complementares que o PCMSO da empresa exigir, como audiometria e exames laboratoriais. O ASO fica disponível online para a empresa e para o trabalhador.": "入职、定期、复工、转岗和离职检查，以及企业 PCMSO 要求的辅助检查，如听力测试和实验室检查。ASO 可在线获取，企业和员工均可查看。",
+ "Minha empresa é pequena. Precisa de PCMSO e PGR?": "我的公司很小，需要 PCMSO 和 PGR 吗？",
+ "Toda empresa com empregado registrado precisa organizar a saúde e a segurança do trabalho. Micro e pequenas empresas de baixo risco têm regras simplificadas em alguns casos, e nós avaliamos a situação de cada uma antes de propor o que é obrigatório.": "凡有正式员工的企业都必须做好职业健康与安全管理。低风险的微型和小型企业在某些情况下适用简化规则，我们会先评估每家企业的情况，再提出必须履行的义务。",
+ "Vocês cuidam do eSocial?": "你们负责 eSocial 吗？",
+ "Geramos e organizamos os eventos de saúde e segurança do trabalho, o S-2220, o S-2240 e o S-2210, a partir dos exames e laudos que realizamos, para que a empresa envie tudo correto e no prazo.": "我们根据所做的检查和报告生成并整理职业健康与安全事件（S-2220、S-2240 和 S-2210），确保企业按时、准确地提交。",
+ "Como a empresa agenda os exames dos funcionários?": "企业如何为员工预约检查？",
+ "Empresas conveniadas agendam pelo site, na página Agende seu exame, ou pelo WhatsApp do comercial, (71) 99301-0103. A data fica garantida depois da confirmação da nossa equipe.": "合作企业可通过网站的“预约检查”页面或商务部 WhatsApp (71) 99301-0103 预约。日期在我们团队确认后方为有效。",
+ "Onde o trabalhador pega o ASO?": "员工在哪里获取 ASO？",
+ "Na página Pegue seu ASO, no site, a qualquer hora, sem precisar voltar à clínica.": "在网站的“获取您的 ASO”页面，随时可取，无需再到诊所。",
+ "Vocês atendem empresas fora de Camaçari?": "你们服务卡马萨里以外的企业吗？",
+ "Sim. Atendemos empresas de Camaçari, do Polo Industrial e da região metropolitana de Salvador, incluindo Candeias. Os exames são feitos na clínica, no Centro de Camaçari.": "是的。我们服务卡马萨里、工业园区及萨尔瓦多都市圈（含坎德亚斯）的企业。检查在卡马萨里市中心的诊所进行。",
+ "Qual é o endereço e o horário de atendimento?": "地址和营业时间是什么？",
+ "Rua do Alecrim, 76, Centro, Camaçari - BA, CEP 42800-025. Segunda a sexta, das 7h às 18h; sábado, das 7h às 12h.": "Rua do Alecrim, 76, Centro, Camaçari - BA，邮编 42800-025。周一至周五 7:00–18:00；周六 7:00–12:00。",
+ "Um novo conceito em cuidar de você em Camaçari: consultas, exames e medicina ocupacional, com tecnologia de ponta, estrutura diferenciada e equipe médica e assistencial altamente qualificada.": "在卡马萨里关爱您的全新理念：问诊、检查与职业医学，配备先进技术、优越设施和高素质的医疗与护理团队。",
+ "Exames ocupacionais": "职业健康检查",
+ "Exame admissional, periódico ou demissional? Veja os exames ocupacionais em Camaçari →": "入职、定期或离职检查？查看卡马萨里职业健康检查 →",
+ "Quais são os exames e o que o trabalhador precisa levar? Veja os exames ocupacionais →": "有哪些检查、员工需要携带什么？查看职业健康检查 →",
+
  "(71) 3493-7220 · Comercial (71) 99301-0103": "(71) 3493-7220 · 商务 (71) 99301-0103",
  "(71) 90000-0000": "(71) 90000-0000",
  "(estresse, sobrecarga) entre os fatores a gerenciar — a saúde mental no trabalho também é responsabilidade da empresa.": "（压力、超负荷）纳入需要管理的因素——职场心理健康同样是企业的责任。",
