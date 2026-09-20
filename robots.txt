@@ -1,0 +1,11 @@
+# Clinica Medicina Humana — clinicamedicinahumana.com.br
+
+User-agent: *
+Allow: /
+
+# As paginas restritas (admin, area medica e pegue seu ASO) ja trazem a
+# marcacao noindex na propria pagina. Elas nao sao bloqueadas aqui de
+# proposito: se o rastreamento fosse barrado, o Google nao chegaria a ler
+# o noindex e poderia listar o endereco assim mesmo.
+
+Sitemap: https://clinicamedicinahumana.com.br/sitemap.xml
