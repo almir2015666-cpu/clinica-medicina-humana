@@ -11,396 +11,395 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     /* =================================================================
-       FICHA DO PROCESSO — o atestado de um colaborador
+       FICHA DO PROCESSO, em dois modos
 
-       O ARRANJO é o do sistema que o RH das empresas já usa (faixa com
-       número/abertura/autor, painel de ações, blocos recolhíveis, lupa
-       ao lado de cada campo de cadastro). AS CORES são as da clínica.
+       RH DA EMPRESA: o formulário no arranjo do sistema que o RH já usa
+       (faixa do processo, painel de ações, contexto, funcionário com o
+       parecer ao lado), bem enxuto, mais as abas Histórico e Anexos.
 
-       QUEM PREENCHE O QUÊ:
-         empresa -> colaborador, datas, observações e o arquivo do atestado
-         clínica -> tipo, médico, entidade, CID, responsável e o PARECER
-       O parecer do médico muda o processo sozinho (ver dados.js).
+       MÉDICO (Dr. Everaldo): outra tela, feita para DECIDIR. O atestado
+       aberto à esquerda, para ler sem baixar; à direita só o que pesa na
+       decisão: quem, quando, quantos dias, o histórico do paciente, a
+       classificação e o parecer. O que é assunto do RH (requisitante,
+       painel de ações, abas, gestão de anexos) não aparece para ele.
+
+       O PARECER NÃO SE DIGITA: o médico escolhe os motivos numa lista
+       pronta. Texto livre vira recado ambíguo para a empresa; motivo de
+       lista vira instrução clara, e fica igual em todo processo.
        ================================================================= */
     :root{
       --navy:#0a2e5c; --blue-700:#0b5aa5; --blue-500:#1290e0; --blue-400:#3bb3ef;
       --pale:#eaf6fd; --mist:#f4fafe;
-      --ink:#12283f; --muted:#56718b; --line:#e2edf6; --linha-forte:#cfe3f3;
+      --ink:#12283f; --muted:#5b6b7b; --line:#e2e8ef; --linha-forte:#cfdbe6;
       --ok:#1c7d43; --atencao:#b7791f; --erro:#b3261e;
-      --sombra-sm:0 4px 14px rgba(11,90,165,.08);
-      --sombra-lg:0 30px 80px rgba(10,46,92,.35);
+      --sombra-lg:0 24px 60px rgba(10,46,92,.3);
     }
     *{box-sizing:border-box}
     html,body{margin:0}
-    body{font-family:'Inter',system-ui,Arial,sans-serif;color:var(--ink);background:var(--mist);
-      min-height:100vh}
+    body{font-family:'Inter',system-ui,Arial,sans-serif;font-size:14px;color:var(--ink);background:#fff;min-height:100vh}
     button,input,select,textarea{font-family:inherit}
-
-    .demo{background:#fff8e8;border-bottom:1px solid #f3dca6;color:#6b5200;
-      font-size:.85rem;padding:.6rem 1.2rem;text-align:center;line-height:1.45}
-
-    /* ---------- topo ---------- */
-    .topo{background:linear-gradient(135deg,var(--navy) 0%,var(--blue-700) 100%);
-      color:#fff;padding:.9rem 1.2rem;display:flex;align-items:center;gap:1rem;
-      box-shadow:var(--sombra-sm);position:sticky;top:0;z-index:40}
-    .topo img{height:34px;filter:brightness(0) invert(1)}
-    .topo__voltar{color:#fff;text-decoration:none;font:500 .9rem 'Inter';display:inline-flex;
-      align-items:center;gap:.4rem;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);
-      border-radius:10px;padding:.5rem .8rem}
-    .topo__voltar:hover{background:rgba(255,255,255,.26)}
-    .topo__quem{margin-left:auto;font-size:.84rem;color:rgba(255,255,255,.85);text-align:right;line-height:1.3}
-    .topo__quem b{display:block;color:#fff;font-weight:600}
+    [hidden]{display:none!important}
 
     /* ---------- cabeçalho: título + abas ---------- */
-    .cab{background:#fff;border-bottom:1px solid var(--line);padding:0 1.4rem;display:flex;
-      align-items:flex-end;gap:1rem;flex-wrap:wrap}
-    .cab h1{font:700 1.45rem/1.2 'Poppins',sans-serif;color:var(--navy);margin:1.1rem 0 1rem;
-      flex:1 1 auto;min-width:260px}
-    .abas{display:flex;gap:.2rem;overflow-x:auto}
-    .aba{background:none;border:none;cursor:pointer;padding:1rem 1rem .85rem;display:flex;
-      align-items:center;gap:.5rem;font:500 .95rem 'Poppins',sans-serif;color:var(--muted);
-      border-bottom:3px solid transparent;white-space:nowrap;position:relative}
+    .cab{display:flex;align-items:flex-end;gap:1rem;flex-wrap:wrap;padding:.9rem 1.2rem 0;border-bottom:1px solid var(--line)}
+    .cab__tit{flex:1 1 auto;min-width:240px;padding-bottom:.7rem;display:flex;align-items:center;gap:.6rem}
+    .cab h1{font:600 1.08rem/1.3 'Poppins',sans-serif;color:var(--navy);margin:0}
+    .chip-sit{font:500 .72rem 'Inter';padding:.12rem .5rem;border-radius:999px;background:var(--pale);color:var(--blue-700)}
+    .chip-sit.fim{background:#e8f6ee;color:var(--ok)} .chip-sit.nao{background:#fdecea;color:var(--erro)}
+    .chip-sit.esp{background:#fff4e2;color:var(--atencao)}
+    .abas{display:flex;gap:0}
+    .aba{background:none;border:none;cursor:pointer;padding:.7rem .9rem .6rem;display:flex;align-items:center;gap:.4rem;
+      font:500 .8rem 'Inter';text-transform:uppercase;letter-spacing:.02em;color:var(--muted);
+      border-bottom:2px solid transparent;white-space:nowrap}
     .aba:hover{color:var(--blue-700)}
-    .aba.on{color:var(--navy);font-weight:600;border-bottom-color:var(--blue-500)}
-    .aba .n{position:absolute;left:1.9rem;bottom:.55rem;background:#f5b400;color:#fff;
-      font:700 .64rem 'Inter';border-radius:4px;padding:0 .28rem;line-height:1.3}
+    .aba.on{color:var(--blue-700);border-bottom-color:var(--blue-500)}
+    .aba .n{font-size:.74rem;opacity:.75}
+    .bt-mini{border:1px solid var(--line);background:#fff;border-radius:7px;padding:.3rem .6rem;cursor:pointer;
+      font:500 .76rem 'Inter';color:var(--navy);margin-left:auto}
+    .bt-mini:hover{border-color:var(--blue-400)}
 
-    .conteudo{max-width:1320px;margin:0 auto;padding:1rem 1.2rem 6rem}
-    .obrig{color:var(--erro);font-size:.86rem;margin:.2rem 0 .8rem}
+    .conteudo{padding:.8rem 1.2rem 5rem}
+    .obrig{color:var(--erro);font-size:.76rem;margin:0 0 .5rem}
 
-    /* ---------- a faixa do processo ---------- */
-    .faixa{display:grid;grid-template-columns:auto 1.2fr 1fr 1.2fr 1.5fr;align-items:center;
-      gap:1rem;background:linear-gradient(135deg,var(--navy),var(--blue-700));color:#fff;
-      border-radius:12px 12px 0 0;padding:.9rem 1.3rem;text-align:center}
-    .faixa img{height:36px;filter:brightness(0) invert(1)}
-    .faixa__nome{font:600 .9rem 'Poppins',sans-serif;letter-spacing:.03em}
-    .faixa b{display:block;font:600 1rem 'Poppins',sans-serif;margin-bottom:.15rem}
-    .faixa span{font-size:.95rem;color:rgba(255,255,255,.9)}
-
-    /* ---------- blocos recolhíveis ---------- */
-    .bloco{background:#fff;border:1px solid var(--line);border-top:none}
-    .bloco:last-of-type{border-radius:0 0 12px 12px}
-    .bloco__cab{width:100%;display:flex;align-items:center;justify-content:space-between;
-      background:linear-gradient(135deg,#0d3a6f,var(--blue-700));color:#fff;border:none;cursor:pointer;
-      padding:.6rem 1.3rem;font:600 1.08rem 'Poppins',sans-serif;text-align:left}
-    .bloco__cab::after{content:"";width:0;height:0;border-left:7px solid transparent;
-      border-right:7px solid transparent;border-bottom:7px solid rgba(255,255,255,.55);transition:transform .2s}
-    .bloco.fechado .bloco__cab::after{transform:rotate(180deg)}
-    .bloco.fechado .bloco__corpo{display:none}
-    .bloco__corpo{padding:1rem 1.3rem 1.2rem}
-
-    .acoes{display:flex;gap:.5rem;flex-wrap:wrap}
-    .pilula{border:none;cursor:pointer;background:var(--blue-500);color:#fff;border-radius:20px;
-      padding:.4rem .95rem;font:600 .84rem 'Poppins',sans-serif;display:inline-flex;align-items:center;gap:.35rem}
+    /* ---------- a ficha do RH ---------- */
+    .faixa{display:grid;grid-template-columns:1.2fr 1fr 1.2fr 1.4fr;align-items:center;gap:.8rem;
+      background:var(--navy);color:#fff;border-radius:6px 6px 0 0;padding:.45rem .9rem;text-align:center}
+    .faixa__nome{font:600 .74rem 'Poppins',sans-serif;letter-spacing:.04em;text-align:left}
+    .faixa b{display:block;font:600 .74rem 'Inter';opacity:.85}
+    .faixa span{font-size:.84rem}
+    .sec{border:1px solid var(--line);border-top:none}
+    .sec:last-child{border-radius:0 0 6px 6px}
+    .sec__cab{width:100%;display:flex;align-items:center;justify-content:space-between;border:none;cursor:pointer;
+      background:#12406f;color:#fff;padding:.32rem .9rem;font:600 .82rem 'Poppins',sans-serif;text-align:left}
+    .sec__cab::after{content:"";border-left:5px solid transparent;border-right:5px solid transparent;
+      border-bottom:5px solid rgba(255,255,255,.6);transition:transform .2s}
+    .sec.fechado .sec__cab::after{transform:rotate(180deg)}
+    .sec.fechado .sec__corpo{display:none}
+    .sec__corpo{padding:.5rem .9rem .65rem}
+    .acoes{display:flex;gap:.35rem;flex-wrap:wrap}
+    .pilula{border:none;cursor:pointer;background:var(--blue-500);color:#fff;border-radius:999px;
+      padding:.18rem .65rem;font:600 .72rem 'Inter'}
     .pilula:hover{background:var(--blue-700)}
     .pilula:disabled{opacity:.45;cursor:not-allowed}
 
-    .grade{display:grid;gap:.9rem 1rem}
-    .g-func{grid-template-columns:1fr 2.2fr 1.3fr}
-    .g-datas{grid-template-columns:repeat(4,1fr);margin-top:.9rem}
-    .g-cad{grid-template-columns:repeat(5,1fr);margin-top:.9rem}
-    .g-par{grid-template-columns:1fr 3fr}
-    .cpo label{display:block;font:600 .84rem 'Poppins',sans-serif;color:var(--navy);margin-bottom:.35rem;
-      text-align:center}
+    .grade{display:grid;gap:.45rem .55rem}
+    .g-ctx{grid-template-columns:1.4fr 1fr 1.2fr}
+    .g-l1{grid-template-columns:1fr 2.2fr 1.1fr .8fr 1.1fr .6fr}
+    .g-cad{grid-template-columns:repeat(5,1fr);margin-top:.45rem}
+    .func{display:grid;grid-template-columns:118px 1fr;gap:.7rem;align-items:start}
+    .cpo label{display:block;font:600 .72rem 'Inter';color:var(--navy);margin-bottom:.2rem;text-align:center;white-space:nowrap;
+      overflow:hidden;text-overflow:ellipsis}
     .cpo label i{color:var(--erro);font-style:normal}
-    .cpo input,.cpo select,.cpo textarea{width:100%;padding:.62rem .75rem;border:1.5px solid var(--line);
-      border-radius:9px;font-size:.93rem;color:var(--ink);background:#fff;text-align:center}
-    .cpo textarea{text-align:left;min-height:84px;resize:vertical}
-    .cpo input:focus,.cpo select:focus,.cpo textarea:focus{outline:none;border-color:var(--blue-500);
-      box-shadow:0 0 0 3px rgba(18,144,224,.12)}
-    .cpo input[readonly],.cpo select:disabled,.cpo textarea[readonly]{background:#f1f5f9;color:#3b5068}
-    .cpo.erro input,.cpo.erro select,.cpo.erro textarea,.cpo.erro .lupa-caixa{border-color:var(--erro)}
-    /* campo com lupa: o texto não se digita, escolhe-se na lista */
-    .lupa-caixa{display:flex;border:1.5px solid var(--line);border-radius:9px;overflow:hidden;background:#f1f5f9}
-    .lupa-caixa input{border:none;border-radius:0;background:transparent;cursor:pointer;
-      text-overflow:ellipsis;font-size:.88rem}
+    .cpo.erro select{border-color:var(--erro)}
+    .cpo input,.cpo select,.cpo textarea{width:100%;height:30px;padding:.2rem .5rem;border:1px solid var(--linha-forte);
+      border-radius:5px;font-size:.82rem;color:var(--ink);background:#fff;text-align:center}
+    .cpo textarea{height:auto;min-height:48px;text-align:left;resize:vertical;padding:.35rem .5rem}
+    .cpo input:focus,.cpo select:focus,.cpo textarea:focus{outline:none;border-color:var(--blue-500);box-shadow:0 0 0 2px rgba(18,144,224,.12)}
+    .cpo input[readonly],.cpo textarea[readonly]{background:#f3f5f7;color:#3b4a5a}
+    .cpo.erro input,.cpo.erro textarea,.cpo.erro .lupa-caixa{border-color:var(--erro)}
+    .cpo-obs{margin-top:.45rem}
+    .lupa-caixa{display:flex;height:30px;border:1px solid var(--linha-forte);border-radius:5px;overflow:hidden;background:#f3f5f7}
+    .lupa-caixa input{border:none;height:28px;border-radius:0;background:transparent;cursor:pointer;text-overflow:ellipsis;
+      font-size:.78rem;text-align:left}
     .lupa-caixa input:focus{box-shadow:none}
-    .lupa{flex:0 0 38px;border:none;cursor:pointer;background:var(--blue-700);color:#fff;display:grid;place-items:center}
+    .lupa{flex:0 0 28px;border:none;cursor:pointer;background:#12406f;color:#fff;display:grid;place-items:center}
     .lupa:hover{background:var(--navy)}
-    .lupa:disabled{background:#9ab0c4;cursor:not-allowed}
-    .limpa{flex:0 0 26px;border:none;cursor:pointer;background:transparent;color:var(--muted);font-size:1rem}
+    .lupa:disabled{background:#a9b6c3;cursor:not-allowed}
+    .limpa{flex:0 0 20px;border:none;cursor:pointer;background:transparent;color:var(--muted);font-size:.9rem}
     .limpa:hover{color:var(--erro)}
+    .limpa:disabled{visibility:hidden}
+    /* MÉDICO E RESPONSÁVEL SÃO SEMPRE O DR. EVERALDO: aparecem, mas não se
+       escolhem. Na tela dele, somem de vez (seria ele se vendo). */
+    .fixo .lupa,.fixo .limpa{display:none}
+    .fixo .lupa-caixa input{cursor:default}
+    #avCad .fixo{display:none}
+    .par-caixa{height:30px;display:grid;place-items:center;border:1px solid var(--linha-forte);border-radius:5px;
+      font:600 .8rem 'Inter';background:#f3f5f7}
+    .par-caixa.Aprovado{color:var(--ok)} .par-caixa.Reprovado{color:var(--erro)} .par-caixa.Pendente{color:var(--muted)}
+    .nota-par{margin:.5rem 0 0;font-size:.8rem;color:var(--muted)}
+    .nota-par b{color:var(--ink)}
+    .nota-par.pede{color:#7a4a00;background:#fff4e2;border-radius:6px;padding:.4rem .6rem}
 
-    .parecer-sel{font-weight:700}
-    .parecer-sel.Aprovado{color:var(--ok)} .parecer-sel.Reprovado{color:var(--erro)}
-    .nota{font-size:.84rem;color:var(--muted);margin:.7rem 0 0;line-height:1.5}
-
-    /* ---------- a barra de baixo ---------- */
-    .rodape{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);
-      box-shadow:0 -6px 20px rgba(11,90,165,.08);padding:.7rem 1.2rem;display:flex;gap:.6rem;
-      align-items:center;justify-content:flex-end;z-index:30}
-    .rodape__recado{margin-right:auto;font-size:.9rem;line-height:1.4}
-    .rodape__recado.erro{color:var(--erro)} .rodape__recado.ok{color:var(--ok)}
-    .bt{border:1.5px solid var(--line);background:#fff;color:var(--navy);cursor:pointer;border-radius:10px;
-      padding:.65rem 1.1rem;font:600 .9rem 'Poppins',sans-serif}
-    .bt:hover{border-color:var(--blue-400);background:var(--mist)}
-    .bt--forte{background:linear-gradient(135deg,var(--blue-700),var(--blue-500));color:#fff;border-color:transparent;
-      box-shadow:0 8px 20px rgba(11,90,165,.22);padding:.65rem 1.6rem}
-    .bt--forte:hover{filter:brightness(1.06);background:linear-gradient(135deg,var(--blue-700),var(--blue-500))}
-    .bt--forte:disabled{opacity:.6;cursor:progress}
-    .bt--vermelho{background:var(--erro);color:#fff;border-color:transparent}
-    .bt--vermelho:hover{background:#8f1d17}
-
-    /* ---------- outras abas ---------- */
-    .painel{display:none}
-    .painel.on{display:block}
-    .cartao{background:#fff;border:1px solid var(--line);border-radius:12px;padding:1.2rem 1.4rem}
-    .info{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem 1.6rem}
-    .info div{border-bottom:1px solid var(--line);padding-bottom:.6rem}
-    .info small{display:block;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.03em;margin-bottom:.2rem}
-    .tab{width:100%;border-collapse:collapse;font-size:.92rem}
-    .tab th{text-align:left;font:600 .78rem 'Poppins';text-transform:uppercase;color:var(--navy);
-      border-bottom:2px solid var(--line);padding:.6rem .7rem}
-    .tab td{padding:.65rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
-    /* histórico: comentário + linha do tempo */
-    .comenta{display:flex;gap:.9rem;align-items:center;padding:1rem 1.2rem}
-    .avatar{flex:0 0 40px;height:40px;border-radius:50%;background:var(--blue-500);color:#fff;display:grid;
-      place-items:center;font:600 .9rem 'Poppins'}
-    .avatar--clinica{background:var(--navy)}
-    .comenta textarea{flex:1;border:none;resize:none;font-size:.97rem;color:var(--ink);padding:.5rem 0;min-height:2.4rem}
+    /* ---------- histórico ---------- */
+    .comenta{display:flex;gap:.7rem;align-items:center;border:1px solid var(--line);border-radius:8px;padding:.55rem .8rem}
+    .avatar{flex:0 0 32px;height:32px;border-radius:50%;background:var(--blue-500);color:#fff;display:grid;place-items:center;
+      font:600 .74rem 'Poppins'}
+    .comenta textarea{flex:1;border:none;resize:none;font-size:.86rem;color:var(--ink);padding:.3rem 0;min-height:1.8rem}
     .comenta textarea:focus{outline:none}
-    .hist-filtro{display:flex;gap:.4rem;margin:1rem 0 .4rem;flex-wrap:wrap}
-    .chip{border:1.5px solid var(--line);background:#fff;border-radius:20px;padding:.35rem .85rem;cursor:pointer;
-      font:500 .84rem 'Inter';color:var(--muted)}
-    .chip.on{border-color:var(--blue-500);color:var(--blue-700);background:var(--pale);font-weight:600}
-    .linha-tempo{list-style:none;margin:0;padding:0 0 0 1.4rem;border-left:2px solid var(--line);margin-left:1.2rem}
-    .linha-tempo li{position:relative;margin:1rem 0 1rem 1rem}
-    .linha-tempo li::before{content:"";position:absolute;left:-2.05rem;top:.9rem;width:12px;height:12px;border-radius:50%;
-      background:#fff;border:3px solid var(--blue-400)}
+    .hist-filtro{display:flex;gap:.3rem;margin:.8rem 0 .2rem;flex-wrap:wrap}
+    .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:.22rem .7rem;cursor:pointer;font:500 .76rem 'Inter';color:var(--muted)}
+    .chip.on{border-color:var(--blue-500);color:var(--blue-700);background:var(--pale)}
+    .linha-tempo{list-style:none;margin:0 0 0 .6rem;padding:0 0 0 1rem;border-left:2px solid var(--line)}
+    .linha-tempo li{position:relative;margin:.6rem 0}
+    .linha-tempo li::before{content:"";position:absolute;left:-1.42rem;top:.7rem;width:9px;height:9px;border-radius:50%;
+      background:#fff;border:2px solid var(--blue-400)}
     .linha-tempo li.coment::before{border-color:var(--navy);background:var(--navy)}
     .linha-tempo li.parecer::before{border-color:var(--ok);background:var(--ok)}
-    .ev{background:#fff;border:1px solid var(--line);border-radius:12px;padding:.8rem 1rem}
-    .coment .ev{background:var(--pale);border-color:var(--linha-forte)}
-    .ev__cab{display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap;font-size:.84rem;color:var(--muted);margin-bottom:.25rem}
-    .ev__cab b{color:var(--navy);font-size:.92rem}
-    .ev__txt{white-space:pre-wrap;line-height:1.5}
-    /* anexos */
-    .anx-barra{display:flex;gap:.8rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
-    .anx-busca{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:9px;background:#fff;
-      overflow:hidden;flex:0 1 560px;min-width:260px}
-    .anx-busca select{border:none;background:var(--navy);color:#fff;font:600 .88rem 'Poppins';padding:.62rem .7rem;cursor:pointer}
-    .anx-busca input{flex:1;border:none;padding:.6rem .8rem;font-size:.92rem;min-width:0}
+    .ev{border:1px solid var(--line);border-radius:8px;padding:.5rem .75rem}
+    .coment .ev{background:var(--mist)}
+    .ev__cab{display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap;font-size:.76rem;color:var(--muted);margin-bottom:.15rem}
+    .ev__cab b{color:var(--navy);font-size:.82rem}
+    .ev__txt{white-space:pre-wrap;line-height:1.5;font-size:.86rem}
+    .p-Aprovado{color:var(--ok);font-weight:600} .p-Reprovado{color:var(--erro);font-weight:600}
+    .p-Pendente{color:var(--atencao);font-weight:600}
+
+    /* ---------- anexos ---------- */
+    .anx-barra{display:flex;gap:.6rem;align-items:center;margin-bottom:.6rem;flex-wrap:wrap}
+    .anx-busca{display:flex;align-items:center;border:1px solid var(--linha-forte);border-radius:6px;overflow:hidden;flex:0 1 480px;min-width:240px}
+    .anx-busca select{border:none;background:#12406f;color:#fff;font:600 .76rem 'Inter';padding:.42rem .5rem;cursor:pointer}
+    .anx-busca input{flex:1;border:none;padding:.4rem .6rem;font-size:.82rem;min-width:0}
     .anx-busca input:focus{outline:none}
-    .anx-busca svg{margin-right:.7rem;color:var(--muted)}
-    .anx-filtro{border:1.5px solid var(--line);border-radius:9px;padding:.58rem .6rem;background:#fff;font-size:.88rem;color:var(--ink)}
-    .anx-dir{margin-left:auto;display:flex;gap:.5rem}
-    .anx-tab th{font:600 .88rem 'Poppins';text-transform:none;letter-spacing:0;padding:.9rem .7rem}
-    .anx-tab td{padding:.85rem .7rem;vertical-align:middle}
-    .anx-nome{display:flex;align-items:center;gap:.55rem;color:var(--ink);text-decoration:none}
+    .anx-filtro{border:1px solid var(--linha-forte);border-radius:6px;padding:.38rem .5rem;font-size:.8rem}
+    .anx-dir{margin-left:auto;display:flex;gap:.4rem}
+    .tab{width:100%;border-collapse:collapse;font-size:.84rem}
+    .tab th{text-align:left;font:500 .78rem 'Inter';color:#2b3a4a;border-bottom:1px solid var(--line);padding:.5rem .6rem}
+    .tab td{padding:.5rem .6rem;border-bottom:1px solid #eef2f6;vertical-align:middle}
+    .anx-nome{display:flex;align-items:center;gap:.45rem;color:var(--ink);text-decoration:none}
     .anx-nome:hover{color:var(--blue-700);text-decoration:underline}
-    .ico-bt{border:none;background:none;cursor:pointer;color:var(--navy);padding:.35rem;border-radius:8px;line-height:0}
-    .ico-bt:hover{background:var(--pale);color:var(--blue-700)}
+    .ico-bt{border:none;background:none;cursor:pointer;color:var(--navy);padding:.25rem;border-radius:6px;line-height:0}
+    .ico-bt:hover{background:var(--pale)}
     .ico-bt--apaga:hover{background:#fdecea;color:var(--erro)}
-    .soltar{display:block;border:2px dashed var(--linha-forte);border-radius:12px;padding:1.2rem;text-align:center;
-      color:var(--muted);background:var(--mist);cursor:pointer;margin:1rem}
-    .soltar small{display:block;margin-top:.2rem}
+    .soltar{display:block;border:1.5px dashed var(--linha-forte);border-radius:8px;padding:.8rem;text-align:center;
+      color:var(--muted);cursor:pointer;margin:.7rem 0 0;font-size:.82rem}
     .soltar:hover,.soltar.sobre{border-color:var(--blue-500);background:var(--pale)}
     .soltar b{color:var(--blue-700)}
+    .cartao{border:1px solid var(--line);border-radius:8px;overflow:auto}
+
+    /* ---------- botões ---------- */
+    .bt{border:1px solid var(--linha-forte);background:#fff;color:var(--navy);cursor:pointer;border-radius:7px;
+      padding:.4rem .8rem;font:500 .8rem 'Inter'}
+    .bt:hover{border-color:var(--blue-400);background:var(--mist)}
+    .bt--forte{background:var(--blue-700);color:#fff;border-color:transparent}
+    .bt--forte:hover{background:var(--navy)}
+    .bt--forte:disabled{opacity:.6;cursor:progress}
+    .bt--vermelho{background:var(--erro);color:#fff;border-color:transparent}
+
+    /* o botão Enviar, pequeno, no canto: como na referência */
+    .enviar-flut{position:fixed;right:1.2rem;bottom:1rem;display:flex;align-items:center;gap:.6rem;z-index:30;max-width:calc(100vw - 2.4rem)}
+    .recado{font-size:.82rem;line-height:1.4;background:#fff;border:1px solid var(--line);border-radius:8px;padding:.45rem .7rem;
+      box-shadow:0 6px 18px rgba(10,46,92,.1);max-width:520px}
+    .recado:empty{display:none}
+    .recado.erro{color:var(--erro);border-color:#f3c9c4} .recado.ok{color:var(--ok);border-color:#bfe3cc}
+    body.modo-medico .enviar-flut{bottom:auto;top:.8rem}
+    .enviar-flut .bt--forte{padding:.55rem 1.3rem;font-weight:600;box-shadow:0 6px 16px rgba(11,90,165,.25)}
+
+    /* =================================================================
+       O MODO DO MÉDICO
+       ================================================================= */
+    .avaliar{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(360px,1fr);gap:1rem;align-items:start}
+    .av-visor{position:sticky;top:.8rem;border:1px solid var(--line);border-radius:8px;overflow:hidden;
+      height:calc(100vh - 7rem);display:flex;flex-direction:column}
+    .av-visor__cab{display:flex;align-items:center;gap:.4rem;padding:.4rem .5rem;border-bottom:1px solid var(--line);flex-wrap:wrap}
+    .av-arquivos{display:flex;gap:.3rem;flex:1;flex-wrap:wrap;min-width:0}
+    .av-arq{border:1px solid var(--line);background:#fff;border-radius:6px;padding:.22rem .55rem;font-size:.76rem;cursor:pointer;
+      max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+    .av-arq.on{border-color:var(--blue-500);background:var(--pale);color:var(--blue-700)}
+    .av-visor__corpo{flex:1;background:#eef2f6;display:grid;place-items:center;overflow:auto}
+    .av-visor__corpo iframe{width:100%;height:100%;border:0;background:#fff}
+    .av-visor__corpo img{max-width:100%}
+    .av-vazio{color:var(--muted);font-size:.86rem;padding:2rem;text-align:center}
+    .av-lado{display:flex;flex-direction:column;gap:.7rem}
+    .av-bloco{border:1px solid var(--line);border-radius:8px;padding:.7rem .85rem}
+    .av-bloco h3{font:600 .72rem 'Inter';text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 .5rem}
+    .av-nome{font:600 1rem 'Poppins',sans-serif;color:var(--navy)}
+    .av-dados{display:grid;grid-template-columns:auto 1fr;gap:.25rem .8rem;margin:.4rem 0 0;font-size:.84rem}
+    .av-dados dt{color:var(--muted)} .av-dados dd{margin:0}
+    .av-obs{margin:.5rem 0 0;font-size:.82rem;background:var(--mist);border-radius:6px;padding:.4rem .6rem}
+    .av-hist-resumo{font-size:.82rem;color:var(--muted);margin-bottom:.4rem}
+    .av-alerta{font-size:.8rem;background:#fdecea;color:#8a1c14;border-radius:6px;padding:.4rem .6rem;margin-bottom:.45rem}
+    .av-alerta.leve{background:#fff4e2;color:#7a4a00}
+    .av-hist{list-style:none;margin:0;padding:0;max-height:220px;overflow:auto}
+    .av-hist li{display:grid;grid-template-columns:1fr auto;gap:.1rem .6rem;padding:.35rem 0;border-top:1px solid #eef2f6;font-size:.8rem}
+    .av-hist li:first-child{border-top:none}
+    .av-hist a{color:var(--ink);text-decoration:none} .av-hist a:hover{color:var(--blue-700);text-decoration:underline}
+    .av-hist small{color:var(--muted);grid-column:1/-1}
+    #avCad .g-cad{grid-template-columns:1fr 1fr;margin-top:0}
+    #avCad .cpo label{text-align:left}
+    .decisao{display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem}
+    .decisao button{border:1px solid var(--linha-forte);background:#fff;border-radius:7px;padding:.5rem .4rem;cursor:pointer;
+      font:600 .82rem 'Inter';color:var(--ink)}
+    .decisao button[data-par="Aprovado"].on{background:var(--ok);border-color:var(--ok);color:#fff}
+    .decisao button[data-par="Pendente"].on{background:var(--atencao);border-color:var(--atencao);color:#fff}
+    .decisao button[data-par="Reprovado"].on{background:var(--erro);border-color:var(--erro);color:#fff}
+    .motivos{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.55rem}
+    .motivos:empty{display:none}
+    .motivos__tit{width:100%;font-size:.76rem;color:var(--muted)}
+    .motivo{border:1px solid var(--linha-forte);background:#fff;border-radius:999px;padding:.25rem .65rem;cursor:pointer;
+      font-size:.76rem;color:var(--ink);text-align:left}
+    .motivo.on{border-color:var(--navy);background:var(--navy);color:#fff}
+    .motivos.erro .motivo{border-color:var(--erro)}
+    .av-dica{margin:.5rem 0 0;font-size:.76rem;color:var(--muted)}
+    .av-obs-caixa{margin-top:.6rem}
+    .av-obs-caixa label{display:block;font-size:.76rem;color:var(--muted);margin-bottom:.25rem}
+    .av-obs-txt{width:100%;margin-top:.4rem;border:1px solid var(--linha-forte);border-radius:7px;padding:.45rem .6rem;
+      font-size:.84rem;resize:vertical;color:var(--ink)}
+    .av-obs-txt:focus{outline:none;border-color:var(--blue-500);box-shadow:0 0 0 2px rgba(18,144,224,.12)}
+    .av-botoes{display:flex;gap:.4rem;margin-top:.7rem;flex-wrap:wrap}
+    .av-botoes .bt--forte{flex:1}
+    .av-conversa{list-style:none;margin:0;padding:0;max-height:180px;overflow:auto}
+    .av-conversa li{font-size:.8rem;padding:.35rem 0;border-top:1px solid #eef2f6}
+    .av-conversa li:first-child{border-top:none}
+    .av-conversa b{color:var(--navy)} .av-conversa small{color:var(--muted);margin-left:.3rem}
 
     /* ---------- janelas (buscas e cadastros) ---------- */
-    .veu{position:fixed;inset:0;background:rgba(10,30,55,.5);display:none;align-items:flex-start;
-      justify-content:center;padding:4vh 1rem;z-index:100}
+    .veu{position:fixed;inset:0;background:rgba(10,30,55,.45);display:none;align-items:flex-start;justify-content:center;
+      padding:5vh 1rem;z-index:100}
     .veu.abre{display:flex}
-    .janela{background:#fff;border-radius:14px;box-shadow:var(--sombra-lg);width:min(1180px,100%);
-      max-height:92vh;display:flex;flex-direction:column}
-    .janela--media{width:min(980px,100%)}
-    .janela__cab{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem .6rem}
-    .janela__cab h2{font:700 1.5rem 'Poppins',sans-serif;margin:0;color:var(--navy)}
-    .fechar-x{border:none;background:none;cursor:pointer;font-size:1.7rem;line-height:1;color:var(--muted);padding:.2rem .5rem}
-    .fechar-x:hover{color:var(--ink)}
-    .janela__busca{display:flex;align-items:center;justify-content:flex-end;gap:.6rem;padding:0 1.4rem .6rem;
-      font:600 .88rem 'Poppins';color:var(--navy);flex-wrap:wrap}
-    .janela__busca input{border:1.5px solid var(--line);border-radius:9px;padding:.55rem .7rem;min-width:260px;font-size:.92rem}
+    .janela{background:#fff;border-radius:10px;box-shadow:var(--sombra-lg);width:min(1100px,100%);max-height:88vh;
+      display:flex;flex-direction:column}
+    .janela--media{width:min(900px,100%)}
+    .janela__cab{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.1rem .4rem}
+    .janela__cab h2{font:600 1.05rem 'Poppins',sans-serif;margin:0;color:var(--navy)}
+    .fechar-x{border:none;background:none;cursor:pointer;font-size:1.4rem;line-height:1;color:var(--muted);padding:.1rem .4rem}
+    .janela__busca{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;padding:0 1.1rem .5rem;
+      font:500 .78rem 'Inter';color:var(--navy);flex-wrap:wrap}
+    .janela__busca input{border:1px solid var(--linha-forte);border-radius:6px;padding:.38rem .6rem;min-width:240px;font-size:.84rem}
     .janela__busca input:focus{outline:none;border-color:var(--blue-500)}
-    .janela__corpo{overflow:auto;padding:0 1.4rem;flex:1;min-height:120px}
-    .lista{width:100%;border-collapse:collapse;font-size:.86rem}
-    .lista th{position:sticky;top:0;background:#fff;font:600 .82rem 'Poppins';color:var(--navy);
-      border-bottom:2px solid var(--navy);padding:.4rem .6rem;cursor:pointer;white-space:nowrap}
-    .lista th .s{color:var(--blue-500);font-size:.7rem;margin-left:.3rem}
-    .lista td{padding:.32rem .6rem;text-align:center;border-bottom:1px solid #eef3f8}
-    .lista td:first-child{background:#f6f9fc;font-variant-numeric:tabular-nums}
+    .janela__corpo{overflow:auto;padding:0 1.1rem;flex:1;min-height:100px}
+    .lista{width:100%;border-collapse:collapse;font-size:.8rem}
+    .lista th{position:sticky;top:0;background:#fff;font:600 .76rem 'Inter';color:var(--navy);border-bottom:1px solid var(--navy);
+      padding:.3rem .5rem;cursor:pointer;white-space:nowrap}
+    .lista th .s{color:var(--blue-500);font-size:.66rem;margin-left:.25rem}
+    .lista td{padding:.26rem .5rem;text-align:center;border-bottom:1px solid #eef2f6}
+    .lista td:first-child{background:#f6f8fa;font-variant-numeric:tabular-nums}
     .lista tbody tr{cursor:pointer}
     .lista tbody tr:hover td{background:var(--pale)}
-    .janela__pe{display:flex;align-items:center;gap:.6rem;padding:.8rem 1.4rem;border-top:1px solid var(--line);
-      font-size:.88rem;color:var(--muted);flex-wrap:wrap}
-    .janela__pe .dir{margin-left:auto;display:flex;gap:.5rem}
-    .carregando{padding:2rem;text-align:center;color:var(--muted)}
-    .form-jan{padding:.4rem 1.4rem 1.2rem}
+    .janela__pe{display:flex;align-items:center;gap:.5rem;padding:.6rem 1.1rem;border-top:1px solid var(--line);
+      font-size:.78rem;color:var(--muted);flex-wrap:wrap}
+    .janela__pe .dir{margin-left:auto;display:flex;gap:.4rem}
+    .carregando{padding:1.6rem;text-align:center;color:var(--muted)}
+    .form-jan{padding:.3rem 1.1rem 1rem}
     .g-ent{grid-template-columns:1fr 1.4fr 1.4fr}
-    .g-prof{grid-template-columns:1.6fr 1fr 1fr .8fr}
+    .g-prof{grid-template-columns:1.6fr 1fr 1fr .7fr}
     .form-jan .cpo label{text-align:left}
     .form-jan .cpo input,.form-jan .cpo select{text-align:left}
-    .aviso-cnpj{font-size:.86rem;margin-top:.8rem;min-height:1.3em;line-height:1.45}
+    .aviso-cnpj{font-size:.8rem;margin:.6rem 0 0;min-height:1.2em;line-height:1.45}
     .aviso-cnpj.ok{color:var(--ok)} .aviso-cnpj.erro{color:var(--erro)} .aviso-cnpj.busca{color:var(--blue-700)}
 
-    @media(max-width:1000px){
-      .faixa{grid-template-columns:1fr 1fr;text-align:left}
-      .faixa img,.faixa__nome{display:none}
-      .g-cad{grid-template-columns:1fr 1fr}
-      .g-func,.g-datas,.g-par,.g-ent,.g-prof{grid-template-columns:1fr 1fr}
+    .painel{display:none} .painel.on{display:block}
+
+    @media(max-width:1100px){
+      .g-l1{grid-template-columns:1fr 2fr 1fr}
+      .g-cad{grid-template-columns:1fr 1fr 1fr}
+      .avaliar{grid-template-columns:1fr}
+      .av-visor{position:static;height:70vh}
     }
-    @media(max-width:620px){
-      .topo__quem{display:none}
-      .g-func,.g-datas,.g-cad,.g-par,.g-ent,.g-prof{grid-template-columns:1fr}
-      .cab h1{font-size:1.15rem}
+    @media(max-width:700px){
+      .faixa{grid-template-columns:1fr 1fr;text-align:left}
+      .faixa__nome{display:none}
+      .func{grid-template-columns:1fr}
+      .g-ctx,.g-l1,.g-cad,.g-ent,.g-prof{grid-template-columns:1fr 1fr}
       .janela__busca input{min-width:0;width:100%}
+      .decisao{grid-template-columns:1fr}
     }
     @media print{
-      .demo,.topo,.abas,.rodape,.acoes-bloco{display:none}
-      .bloco.fechado .bloco__corpo{display:block}
+      .abas,.enviar-flut,#secAcoes,.bt-mini{display:none!important}
+      .sec.fechado .sec__corpo{display:block}
     }
   </style>
 </head>
-<body>
-
-  <div class="demo"><b>Demonstração.</b> Dados de exemplo, guardados só neste navegador.</div>
-
-  <header class="topo">
-    <a class="topo__voltar" href="painel.html">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-      Voltar à lista</a>
-    <img src="../assets/logo.png" alt="Clínica Medicina Humana" onerror="this.style.display='none'" />
-    <div class="topo__quem">entrou como<b id="quem">—</b></div>
-  </header>
+<body data-pagina="processo">
 
   <div class="cab">
-    <h1 id="titulo">Carregando…</h1>
-    <nav class="abas" role="tablist">
-      <button class="aba on" data-aba="formulario" type="button">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-          <rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
-        Formulário</button>
-      <button class="aba" data-aba="informacoes" type="button">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-          <circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
-        Informações</button>
-      <button class="aba" data-aba="historico" type="button">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-          <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-        <span class="n" id="nHist">0</span>Histórico</button>
-      <button class="aba" data-aba="anexos" type="button">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-             stroke-linecap="round" aria-hidden="true">
-          <path d="M21 11.5 12.5 20a5 5 0 0 1-7-7L14 4.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15.5 8"/></svg>
-        <span class="n" id="nAnexos">0</span>Anexos</button>
+    <div class="cab__tit"><h1 id="titulo">Carregando…</h1><span class="chip-sit" id="chipSit" hidden></span></div>
+    <nav class="abas" id="abas" role="tablist">
+      <button class="aba on" data-aba="formulario" type="button">Formulário</button>
+      <button class="aba" data-aba="historico" type="button">Histórico <span class="n" id="nHist"></span></button>
+      <button class="aba" data-aba="anexos" type="button">Anexos <span class="n" id="nAnexos"></span></button>
     </nav>
+    <button class="bt-mini" id="btImprimir" type="button" style="margin-bottom:.55rem">Imprimir</button>
   </div>
 
   <main class="conteudo">
 
-    <!-- ======================= FORMULÁRIO ======================= -->
+    <!-- ======================= FORMULÁRIO (RH) ======================= -->
     <section class="painel on" id="p-formulario">
       <p class="obrig">Todos os campos com * são de preenchimento obrigatório e os campos com ** são
-        obrigatórios em etapas específicas.</p>
+        de preenchimento obrigatório em etapas específicas.</p>
 
-      <div class="faixa">
-        <img src="../assets/logo.png" alt="" onerror="this.style.display='none'" />
-        <div class="faixa__nome">CADASTRO DE ATESTADO</div>
-        <div><b>Nº Processo</b><span id="fxNumero">—</span></div>
-        <div><b>Data Abertura</b><span id="fxAbertura">—</span></div>
-        <div><b>Usuário Criação</b><span id="fxAutor">—</span></div>
-      </div>
-
-      <div class="bloco acoes-bloco">
-        <button class="bloco__cab" type="button">Painel de Ações</button>
-        <div class="bloco__corpo acoes">
-          <button class="pilula" id="btCadEntidade" type="button">+ Cadastrar Entidade</button>
-          <button class="pilula" id="btCadProf" type="button">+ Cadastrar Profissional Saúde</button>
+      <div class="ficha">
+        <div class="faixa">
+          <div class="faixa__nome">CADASTRO DE ATESTADO</div>
+          <div><b>Nº Processo</b><span id="fxNumero"></span></div>
+          <div><b>Data Abertura</b><span id="fxAbertura"></span></div>
+          <div><b>Usuário Criação</b><span id="fxAutor"></span></div>
         </div>
-      </div>
 
-      <div class="bloco">
-        <button class="bloco__cab" type="button">Contexto</button>
-        <div class="bloco__corpo">
-          <div class="grade g-par">
-            <div class="cpo"><label for="fEmpresa">Empresa (coligada) <i>*</i></label>
-              <input id="fEmpresa" readonly /></div>
-            <div class="cpo"><label for="fRequisitante">Requisitante</label>
-              <input id="fRequisitante" readonly /></div>
+        <section class="sec" id="secAcoes">
+          <button class="sec__cab" type="button">Painel de Ações</button>
+          <div class="sec__corpo acoes">
+            <button class="pilula" id="btCadEntidade" type="button">Cadastrar Entidade</button>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <div class="bloco">
-        <button class="bloco__cab" type="button">Funcionário</button>
-        <div class="bloco__corpo">
-          <div class="grade g-func">
-            <div class="cpo" data-campo="chapa"><label for="fChapa">Chapa <i>*</i></label>
-              <input id="fChapa" autocomplete="off" /></div>
-            <div class="cpo" data-campo="nome"><label for="fNome">Nome <i>*</i></label>
-              <input id="fNome" autocomplete="off" /></div>
-            <div class="cpo"><label for="fFilial">Filial</label>
-              <input id="fFilial" autocomplete="off" /></div>
+        <section class="sec">
+          <button class="sec__cab" type="button">Contexto</button>
+          <div class="sec__corpo">
+            <div class="grade g-ctx">
+              <div class="cpo"><label for="fEmpresa">Coligada <i>*</i></label><input id="fEmpresa" readonly /></div>
+              <div class="cpo" data-campo="filial"><label for="fFilial">Filial</label>
+                <input id="fFilial" autocomplete="off" />
+                <select id="fFilialSel" hidden></select></div>
+              <div class="cpo"><label for="fRequisitante">Requisitante</label><input id="fRequisitante" readonly /></div>
+            </div>
           </div>
-          <div class="grade g-datas">
-            <div class="cpo" data-campo="inicio"><label for="fInicio">Data Início Atestado <i>*</i></label>
-              <input id="fInicio" type="date" /></div>
-            <div class="cpo" data-campo="hora"><label for="fHora">Hora Início Atestado <i>*</i></label>
-              <input id="fHora" type="time" /></div>
-            <div class="cpo" data-campo="dias"><label for="fDias">Qtd. Dias <i>*</i></label>
-              <input id="fDias" type="number" min="1" max="730" step="1" /></div>
-            <div class="cpo"><label for="fFim">Data Fim Atestado</label>
-              <input id="fFim" readonly tabindex="-1" /></div>
-          </div>
+        </section>
 
-          <!-- os cinco campos de cadastro: escolhe-se na lupa -->
-          <div class="grade g-cad">
-            <div class="cpo" data-campo="tipo"><label>Tipo de Atestado <i>**</i></label>
-              <div class="lupa-caixa"><input id="fTipo" readonly data-busca="tipo" placeholder="—" />
-                <button class="limpa" data-limpa="tipo" type="button" aria-label="Limpar tipo">×</button>
-                <button class="lupa" data-busca="tipo" type="button" aria-label="Escolher o tipo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></div></div>
-            <div class="cpo" data-campo="medico"><label>Médico <i>**</i></label>
-              <div class="lupa-caixa"><input id="fMedico" readonly data-busca="medico" placeholder="—" />
-                <button class="limpa" data-limpa="medico" type="button" aria-label="Limpar médico">×</button>
-                <button class="lupa" data-busca="medico" type="button" aria-label="Escolher o médico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></div></div>
-            <div class="cpo" data-campo="entidade"><label>Entidade <i>**</i></label>
-              <div class="lupa-caixa"><input id="fEntidade" readonly data-busca="entidade" placeholder="—" />
-                <button class="limpa" data-limpa="entidade" type="button" aria-label="Limpar entidade">×</button>
-                <button class="lupa" data-busca="entidade" type="button" aria-label="Escolher a entidade"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></div></div>
-            <div class="cpo" data-campo="cid"><label>CID</label>
-              <div class="lupa-caixa"><input id="fCid" readonly data-busca="cid" placeholder="—" />
-                <button class="limpa" data-limpa="cid" type="button" aria-label="Limpar CID">×</button>
-                <button class="lupa" data-busca="cid" type="button" aria-label="Escolher a CID"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></div></div>
-            <div class="cpo" data-campo="responsavel"><label>Responsável Abono <i>**</i></label>
-              <div class="lupa-caixa"><input id="fResponsavel" readonly data-busca="responsavel" placeholder="—" />
-                <button class="limpa" data-limpa="responsavel" type="button" aria-label="Limpar responsável">×</button>
-                <button class="lupa" data-busca="responsavel" type="button" aria-label="Escolher o responsável"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></div></div>
-          </div>
+        <section class="sec">
+          <button class="sec__cab" type="button">Funcionário</button>
+          <div class="sec__corpo">
+            <div class="func">
+              <div class="cpo"><label>Parecer</label><div class="par-caixa" id="parCaixa"></div></div>
+              <div>
+                <div class="grade g-l1">
+                  <div class="cpo" data-campo="chapa"><label for="fChapa">Matrícula <i>*</i></label><input id="fChapa" autocomplete="off" /></div>
+                  <div class="cpo" data-campo="nome"><label for="fNome">Nome <i>*</i></label><input id="fNome" autocomplete="off" /></div>
+                  <div class="cpo" data-campo="inicio"><label for="fInicio">Data Início Atestado <i>*</i></label><input id="fInicio" type="date" /></div>
+                  <div class="cpo" data-campo="hora"><label for="fHora">Hora Início <i>*</i></label><input id="fHora" type="time" /></div>
+                  <div class="cpo"><label for="fFim">Data Fim Atestado</label><input id="fFim" readonly tabindex="-1" /></div>
+                  <div class="cpo" data-campo="dias"><label for="fDias">Qtd. Dias <i>*</i></label><input id="fDias" type="number" min="1" max="730" step="1" /></div>
+                </div>
 
-          <div class="cpo" style="margin-top:.9rem"><label for="fObs">Observações</label>
-            <textarea id="fObs" placeholder="Algo que a clínica precise saber sobre este atestado"></textarea></div>
-        </div>
-      </div>
+                <!-- os cinco campos de cadastro: escolhe-se na lupa -->
+                <div class="grade g-cad" id="gCad">
+                  <div class="cpo" data-campo="tipo"><label>Tipo de Atestado <i>*</i></label>
+                    <div class="lupa-caixa"><input id="fTipo" readonly data-busca="tipo" placeholder="Selecionar" />
+                      <button class="limpa" data-limpa="tipo" type="button" aria-label="Limpar tipo">×</button>
+                      <button class="lupa" data-busca="tipo" type="button" aria-label="Escolher o tipo"></button></div></div>
+                  <div class="cpo fixo" data-campo="medico"><label>Médico</label>
+                    <div class="lupa-caixa"><input id="fMedico" readonly data-busca="medico" placeholder="Selecionar" />
+                      <button class="limpa" data-limpa="medico" type="button" aria-label="Limpar médico">×</button>
+                      <button class="lupa" data-busca="medico" type="button" aria-label="Escolher o médico"></button></div></div>
+                  <div class="cpo" data-campo="entidade"><label>Entidade <i>*</i></label>
+                    <div class="lupa-caixa"><input id="fEntidade" readonly data-busca="entidade" placeholder="Selecionar" />
+                      <button class="limpa" data-limpa="entidade" type="button" aria-label="Limpar entidade">×</button>
+                      <button class="lupa" data-busca="entidade" type="button" aria-label="Escolher a entidade"></button></div></div>
+                  <div class="cpo" data-campo="cid"><label>Cid</label>
+                    <div class="lupa-caixa"><input id="fCid" readonly data-busca="cid" placeholder="Selecionar" />
+                      <button class="limpa" data-limpa="cid" type="button" aria-label="Limpar CID">×</button>
+                      <button class="lupa" data-busca="cid" type="button" aria-label="Escolher a CID"></button></div></div>
+                  <div class="cpo fixo" data-campo="responsavel"><label>Responsável Abono</label>
+                    <div class="lupa-caixa"><input id="fResponsavel" readonly data-busca="responsavel" placeholder="Selecionar" />
+                      <button class="limpa" data-limpa="responsavel" type="button" aria-label="Limpar responsável">×</button>
+                      <button class="lupa" data-busca="responsavel" type="button" aria-label="Escolher o responsável"></button></div></div>
+                </div>
 
-      <div class="bloco">
-        <button class="bloco__cab" type="button">Parecer da clínica</button>
-        <div class="bloco__corpo">
-          <div class="grade g-par">
-            <div class="cpo" data-campo="parecer"><label for="fParecer">Parecer <i>**</i></label>
-              <select id="fParecer" class="parecer-sel">
-                <option>Pendente</option><option>Aprovado</option><option>Reprovado</option>
-              </select></div>
-            <div class="cpo" data-campo="parecerObs"><label for="fParecerObs">Observação do parecer</label>
-              <textarea id="fParecerObs" placeholder="Obrigatória quando o parecer é Pendente ou Reprovado: diga à empresa o que falta ou por quê"></textarea></div>
+                <div class="cpo cpo-obs"><label for="fObs">Observações</label>
+                  <textarea id="fObs" rows="2"></textarea></div>
+              </div>
+            </div>
+            <p class="nota-par" id="notaPar" hidden></p>
           </div>
-          <p class="nota" id="notaParecer"></p>
-        </div>
+        </section>
       </div>
     </section>
 
-    <!-- ======================= INFORMAÇÕES ======================= -->
-    <section class="painel" id="p-informacoes">
-      <div class="cartao"><div class="info" id="info"></div></div>
-    </section>
-
-    <!-- ======================= HISTÓRICO ======================= -->
+    <!-- ======================= HISTÓRICO (RH) ======================= -->
     <section class="painel" id="p-historico">
-      <!-- o comentário é conversa entre a empresa e a clínica, dentro do
-           próprio processo: some o "manda por WhatsApp e ninguém acha
-           depois". Grava na hora e avisa quem está do outro lado. -->
-      <div class="cartao comenta">
-        <div class="avatar" id="avatarEu">?</div>
+      <!-- a conversa entre a empresa e a clínica mora dentro do processo:
+           some o "mandei no WhatsApp" que ninguém acha depois -->
+      <div class="comenta">
+        <div class="avatar" id="avatarEu"></div>
         <textarea id="comentario" rows="1" placeholder="Digite um comentário nesta solicitação…"></textarea>
         <button class="bt" id="btComentar" type="button" disabled>Comentar</button>
       </div>
@@ -412,7 +411,7 @@
       <ol class="linha-tempo" id="histCorpo"></ol>
     </section>
 
-    <!-- ======================= ANEXOS ======================= -->
+    <!-- ======================= ANEXOS (RH) ======================= -->
     <section class="painel" id="p-anexos">
       <div class="anx-barra">
         <div class="anx-busca">
@@ -421,36 +420,91 @@
             <option value="atividade">Pela atividade</option>
           </select>
           <input id="anxTexto" type="search" placeholder="Digite o título do anexo que deseja buscar" autocomplete="off" />
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
         </div>
         <select id="anxTipo" class="anx-filtro" aria-label="Filtrar por tipo de arquivo">
-          <option value="">Todos os tipos</option><option value="application/pdf">Só PDF</option>
-          <option value="image">Só imagens</option>
+          <option value="">Todos os tipos</option><option value="application/pdf">Só PDF</option><option value="image">Só imagens</option>
         </select>
         <div class="anx-dir">
-          <button class="bt" id="anxBaixarSel" type="button" style="display:none">Baixar marcados</button>
-          <button class="bt bt--forte" id="anxAdicionar" type="button">+ Adicionar</button>
+          <button class="bt" id="anxBaixarSel" type="button" hidden>Baixar marcados</button>
+          <button class="bt bt--forte" id="anxAdicionar" type="button">Adicionar</button>
         </div>
       </div>
       <input type="file" id="arquivo" accept="application/pdf,image/jpeg,image/png" multiple hidden />
-      <div class="cartao" style="padding:0;overflow:auto">
-        <table class="tab anx-tab">
-          <thead><tr><th style="width:42px"><input type="checkbox" id="anxTodos" aria-label="Marcar todos" /></th>
+      <div class="cartao">
+        <table class="tab">
+          <thead><tr><th style="width:36px"><input type="checkbox" id="anxTodos" aria-label="Marcar todos" /></th>
             <th>Título</th><th>Código</th><th>Versão</th><th>Usuário que anexou</th><th>Data de inclusão</th>
-            <th>Incluído em atividade</th><th style="width:120px"></th></tr></thead>
+            <th>Incluído em atividade</th><th style="width:100px"></th></tr></thead>
           <tbody id="anexosCorpo"></tbody></table>
-        <label class="soltar" id="soltar" for="arquivo">
-          <b>Arraste o atestado para cá</b> ou clique para escolher — PDF, JPG ou PNG
-          <small>Na demonstração, até 1,5 MB por arquivo.</small>
-        </label>
+      </div>
+      <label class="soltar" id="soltar" for="arquivo"><b>Arraste o atestado para cá</b> ou clique para escolher.
+        PDF, JPG ou PNG, até 10 MB.</label>
+    </section>
+
+    <!-- ======================= AVALIAÇÃO (MÉDICO) ======================= -->
+    <section class="avaliar" id="p-avaliar" hidden>
+      <div class="av-visor">
+        <div class="av-visor__cab">
+          <div class="av-arquivos" id="avArquivos"></div>
+          <button class="bt" id="avAbrir" type="button">Abrir em nova aba</button>
+          <button class="bt" id="avBaixar" type="button">Baixar</button>
+        </div>
+        <div class="av-visor__corpo" id="avVisor"></div>
+      </div>
+
+      <div class="av-lado">
+        <section class="av-bloco">
+          <h3>Colaborador</h3>
+          <div class="av-nome" id="avNome"></div>
+          <dl class="av-dados" id="avDados"></dl>
+          <p class="av-obs" id="avObs" hidden></p>
+        </section>
+
+        <section class="av-bloco">
+          <h3>Histórico do paciente</h3>
+          <div id="avHist"><div class="av-hist-resumo">Carregando…</div></div>
+        </section>
+
+        <section class="av-bloco">
+          <h3>Dados do atestado <span style="text-transform:none;letter-spacing:0;font-weight:400">(informados pela empresa; corrija se precisar)</span></h3>
+          <div id="avCad"></div>
+        </section>
+
+        <section class="av-bloco">
+          <h3>Parecer</h3>
+          <div class="decisao" id="decisao">
+            <button type="button" data-par="Aprovado">Aprovar</button>
+            <button type="button" data-par="Pendente">Pendente</button>
+            <button type="button" data-par="Reprovado">Reprovar</button>
+          </div>
+          <p class="av-dica" id="avDica">Escolha a decisão. Em Pendente e Reprovar aparecem os motivos para marcar.</p>
+          <div class="motivos" id="motivos"></div>
+          <!-- O BALÃO: para quando os motivos prontos não bastam. Só
+               aparece em Pendente e Reprovar, que é quando a empresa
+               precisa de uma explicação. Vazio, sem texto de exemplo. -->
+          <div class="av-obs-caixa" id="avObsCaixa" hidden>
+            <label for="avObsTxt">Observação (opcional)</label>
+            <textarea class="av-obs-txt" id="avObsTxt" rows="3"></textarea>
+          </div>
+          <div class="av-botoes">
+            <button class="bt bt--forte" id="avSalvar" type="button">Salvar parecer</button>
+            <button class="bt" id="avProximo" type="button">Salvar e abrir o próximo</button>
+          </div>
+        </section>
+
+        <section class="av-bloco" id="avConversaBloco" hidden>
+          <h3>Recados da empresa</h3>
+          <ul class="av-conversa" id="avConversa"></ul>
+        </section>
       </div>
     </section>
   </main>
 
-  <div class="rodape">
-    <span class="rodape__recado" id="recado" role="status"></span>
-    <button class="bt" id="btImprimir" type="button">Imprimir</button>
+  <!-- o estado do parecer (quem mexe nele é a tela do médico) -->
+  <select id="fParecer" hidden><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select>
+
+  <div class="enviar-flut">
+    <span class="recado" id="recado" role="status"></span>
     <button class="bt bt--forte" id="btEnviar" type="button">Enviar</button>
   </div>
 
@@ -463,7 +517,7 @@
         <input id="buscaTexto" type="search" autocomplete="off" /></div>
       <div class="janela__corpo" id="buscaCorpo"></div>
       <div class="janela__pe"><span id="buscaConta"></span>
-        <div class="dir"><button class="bt" id="buscaCadastrar" type="button" style="display:none">+ Cadastrar novo</button>
+        <div class="dir"><button class="bt" id="buscaCadastrar" type="button" hidden>Cadastrar novo</button>
           <button class="bt" data-fecha="veuBusca" type="button">Fechar</button></div></div>
     </div>
   </div>
@@ -480,10 +534,10 @@
           <div class="cpo"><label for="eRazao">Razão Social <i>*</i></label><input id="eRazao" autocomplete="off" /></div>
           <div class="cpo"><label for="eFantasia">Nome Fantasia</label><input id="eFantasia" autocomplete="off" /></div>
         </div>
-        <p class="aviso-cnpj" id="eAviso">Digite o CNPJ: a razão social e o nome fantasia vêm sozinhos da Receita.</p>
+        <p class="aviso-cnpj" id="eAviso"></p>
       </div>
       <div class="janela__pe"><div class="dir">
-        <button class="bt bt--forte" id="eSalvar" type="button">CADASTRAR</button>
+        <button class="bt bt--forte" id="eSalvar" type="button">Cadastrar</button>
         <button class="bt bt--vermelho" data-fecha="veuEntidade" type="button">Fechar</button></div></div>
     </div>
   </div>
@@ -508,7 +562,10 @@
     </div>
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
 <script src="dados.js"></script>
+<script src="casca.js"></script>
 <script>
 (function () {
   "use strict";
@@ -518,10 +575,31 @@
   var SESSAO = H.sessao();
   if (!SESSAO) { window.location.replace("index.html"); return; }
   var MEDICO = SESSAO.tipo === "medico";
-  $("quem").textContent = SESSAO.nome;
 
   var P = null;            // o processo aberto
   var NOVO = false;
+
+  /* OS MOTIVOS DO PARECER. Lista fechada, de propósito (ver o topo do
+     arquivo). Para acrescentar um motivo, é só pôr uma linha aqui. */
+  var MOTIVOS = {
+    Pendente: [
+      "Atestado ilegível: enviar nova foto ou arquivo",
+      "Falta a CID ou a autorização do colaborador para informá-la",
+      "Falta assinatura ou carimbo com o registro do profissional",
+      "Falta a data de emissão",
+      "Falta a quantidade de dias de afastamento",
+      "O arquivo enviado não é o atestado",
+      "Enviar o atestado original para conferência"
+    ],
+    Reprovado: [
+      "Profissional sem registro válido no conselho",
+      "Indício de rasura ou adulteração",
+      "Datas do atestado não conferem com o afastamento informado",
+      "Atestado entregue fora do prazo",
+      "Atestado de comparecimento não justifica o dia inteiro",
+      "Documento não é atestado médico ou odontológico"
+    ]
+  };
 
   /* ---------------- utilidades ---------------- */
   function dm(iso) {
@@ -532,7 +610,7 @@
   function dataHora(iso) {
     if (!iso) return "";
     var d = new Date(iso);
-    return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR");
+    return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR").slice(0, 5);
   }
   function crua(t) { return String(t == null ? "" : t).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
   function esc(t) {
@@ -543,20 +621,45 @@
     var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]) + n);
     return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
   }
-  function recado(texto, tipo) { $("recado").textContent = texto || ""; $("recado").className = "rodape__recado " + (tipo || ""); }
+  function diasEntre(a, b) {
+    var x = a.split("-"), y = b.split("-");
+    return Math.round((new Date(+y[0], +y[1] - 1, +y[2]) - new Date(+x[0], +x[1] - 1, +x[2])) / 86400000);
+  }
+  function recado(texto, tipo) { $("recado").textContent = texto || ""; $("recado").className = "recado " + (tipo || ""); }
+  var LUPA = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" ' +
+    'stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+  Array.prototype.forEach.call(document.querySelectorAll(".lupa"), function (b) { b.innerHTML = LUPA; });
 
   /* ---------------- quem pode mexer em quê ----------------
-     Processo finalizado não se mexe mais — a não ser pelo médico, que
+     Processo finalizado não se mexe mais, a não ser pelo médico, que
      pode rever o próprio parecer. A empresa nunca mexe no parecer. */
-  function podeEditarEmpresa() { return !MEDICO && P.situacao !== "finalizado"; }
-  function podeEditarClinica() { return MEDICO || (!MEDICO && P.situacao !== "finalizado"); }
+  /* O RH MEXE EM DOIS MOMENTOS SÓ: no atestado novo, e quando a clínica
+     devolveu pedindo algo ("Aguardando documento"). Enquanto a clínica
+     avalia, a ficha é só leitura: reenviar à toa enchia o histórico de
+     "reenviado" e não mudava nada para o médico. */
+  function podeEditarEmpresa() { return !MEDICO && (NOVO || P.atividade === "Aguardando documento"); }
+  function podeEditarClinica() { return MEDICO || P.situacao !== "finalizado"; }
+
+  /* ---------------- o modo da tela ---------------- */
+  if (MEDICO) {
+    $("abas").hidden = true;
+    $("btImprimir").hidden = true;
+    $("p-formulario").classList.remove("on");
+    $("p-avaliar").hidden = false;
+    $("btEnviar").hidden = true;
+    // a classificação mora na coluna do médico
+    $("avCad").appendChild($("gCad"));
+    document.body.classList.add("modo-medico");
+  }
 
   /* ---------------- abrir ---------------- */
   var qs = new URLSearchParams(location.search);
-  var pedido = qs.get("novo") && !MEDICO ? Promise.resolve(H.processoEmBranco()) : H.obterProcesso(qs.get("id"));
   NOVO = !!(qs.get("novo") && !MEDICO);
+  var pedido = NOVO ? Promise.resolve(H.processoEmBranco()) : H.obterProcesso(qs.get("id"));
 
-  pedido.then(function (p) {
+  pedido.catch(function (e) {
+    recado(e.message, "erro"); return null;
+  }).then(function (p) {
     if (!p) {
       $("titulo").textContent = "Processo não encontrado";
       recado("Este processo não existe ou não é da sua empresa.", "erro");
@@ -570,57 +673,74 @@
   function preencher() {
     document.title = (NOVO ? "Novo atestado" : "Processo " + P.processo) + " | Homologação de atestados";
     $("titulo").textContent = NOVO ? "Novo atestado" : P.processo + " - " + P.atividade;
+    var chip = $("chipSit");
+    chip.hidden = NOVO;
+    chip.textContent = P.situacao === "finalizado" ? "Finalizado" : "Em aberto";
+    chip.className = "chip-sit " + ({Homologado: "fim", "Não homologado": "nao", "Aguardando documento": "esp"}[P.atividade] || "");
     $("fxNumero").textContent = NOVO ? "(novo)" : P.processo;
-    $("fxAbertura").textContent = NOVO ? "—" : dataHora(P.abertura);
-    $("fxAutor").textContent = P.criadoPor || "—";
+    $("fxAbertura").textContent = NOVO ? "" : dataHora(P.abertura);
+    $("fxAutor").textContent = P.criadoPor || "";
     $("fEmpresa").value = P.empresa;
     $("fRequisitante").value = P.requisitante;
     $("fChapa").value = P.chapa;
     $("fNome").value = P.nome;
     $("fFilial").value = P.filial || "";
+    $("fFilial").hidden = false;
+    $("fFilialSel").hidden = true;
     $("fInicio").value = P.inicio;
     $("fHora").value = P.horaInicio || "08:00";
     $("fDias").value = P.dias || 1;
     $("fObs").value = P.observacoes || "";
     $("fParecer").value = P.parecer || "Pendente";
-    $("fParecerObs").value = P.parecerObs || "";
+    // médico e responsável pelo abono são o Dr. Everaldo, sempre
+    if (!P.responsavel) P.responsavel = H.RESPONSAVEIS[0];
+    P.medico = H.MEDICO_FIXO;
     ["tipo", "medico", "entidade", "cid", "responsavel"].forEach(mostrarEscolha);
     calcularFim();
-    pintarParecer();
 
     var emp = podeEditarEmpresa(), cli = podeEditarClinica();
-    ["fChapa", "fNome", "fFilial", "fInicio", "fHora", "fDias", "fObs"].forEach(function (id) {
-      $(id).readOnly = !(emp || (MEDICO && P.situacao !== "finalizado"));
-    });
+    ["fChapa", "fNome", "fFilial", "fInicio", "fHora", "fDias", "fObs"].forEach(function (id) { $(id).readOnly = !emp; });
     Array.prototype.forEach.call(document.querySelectorAll(".lupa,.limpa"), function (b) { b.disabled = !cli; });
     $("btCadEntidade").disabled = !cli;
-    $("btCadProf").disabled = !cli;
-    $("fParecer").disabled = !MEDICO;
-    $("fParecerObs").readOnly = !MEDICO;
-    $("btEnviar").textContent = MEDICO ? "Salvar parecer" : (NOVO ? "Enviar à clínica" : "Reenviar à clínica");
-    $("btEnviar").style.display = (MEDICO || emp) ? "" : "none";
+    $("btEnviar").textContent = NOVO ? "Enviar à clínica" : "Reenviar à clínica";
+    $("btEnviar").hidden = MEDICO || !emp;
 
-    $("notaParecer").textContent = MEDICO
-      ? "Aprovado ou Reprovado finaliza o processo na hora, e a empresa já vê o resultado. " +
-        "Pendente devolve à empresa como \"Aguardando documento\", com a sua observação."
-      : (P.situacao === "finalizado"
-          ? "Processo finalizado pela clínica."
-          : "O parecer é dado pelo médico da clínica. Assim que ele decidir, o resultado aparece aqui e na lista.");
+    // o parecer, do lado do funcionário, e o motivo embaixo
+    $("parCaixa").textContent = P.parecer;
+    $("parCaixa").className = "par-caixa " + P.parecer;
+    var nota = $("notaPar");
+    nota.hidden = !(P.parecerObs || P.atividade === "Aguardando documento");
+    nota.className = "nota-par" + (P.atividade === "Aguardando documento" ? " pede" : "");
+    nota.innerHTML = P.atividade === "Aguardando documento"
+      ? "<b>A clínica pediu:</b> " + esc(P.parecerObs) + ". Corrija ou anexe o que falta e clique em Reenviar à clínica."
+      : "<b>Motivo do parecer:</b> " + esc(P.parecerObs);
 
-    if (P.atividade === "Aguardando documento" && !MEDICO && P.parecerObs) {
-      recado("A clínica pediu: " + P.parecerObs, "erro");
-    }
-    desenharInfo();
     desenharHistorico();
     desenharAnexos();
+    if (MEDICO) montarAvaliacao();
+    if (emp) montarFiliais();
   }
 
-  function pintarParecer() {
-    $("fParecer").className = "parecer-sel " + $("fParecer").value;
+  /* A FILIAL VEM DA LISTA QUE A CLÍNICA CADASTROU para a empresa (no
+     SistemaCMH). Uma só: já vem escolhida. Mais de uma: o RH escolhe.
+     Nenhuma cadastrada: o campo fica livre, como antes. */
+  function montarFiliais() {
+    H.listarFiliais().then(function (lista) {
+      if (!lista.length) return;
+      var sel = $("fFilialSel");
+      var atual = P.filial && lista.indexOf(P.filial) >= 0 ? P.filial : (lista.length === 1 ? lista[0] : "");
+      sel.innerHTML = (lista.length > 1 ? '<option value="">Escolha a filial</option>' : "") +
+        lista.map(function (f) { return '<option value="' + esc(f) + '">' + esc(f) + "</option>"; }).join("");
+      sel.value = atual;
+      sel.hidden = false;
+      $("fFilial").hidden = true;
+    }, function () { /* sem a lista, o campo continua livre */ });
   }
-  $("fParecer").addEventListener("change", pintarParecer);
+  function filialEscolhida() {
+    return $("fFilialSel").hidden ? $("fFilial").value.trim() : $("fFilialSel").value;
+  }
 
-  /* Data fim = início + dias − 1, às 23:59 (um dia de atestado termina
+  /* Data fim = início + dias - 1, às 23:59 (um dia de atestado termina
      no mesmo dia em que começa). Não se digita: sai das outras duas. */
   function calcularFim() {
     var ini = $("fInicio").value, dias = Math.max(1, parseInt($("fDias").value, 10) || 1);
@@ -647,22 +767,19 @@
     b.addEventListener("click", function () {
       var q = b.getAttribute("data-limpa");
       P[q] = null; mostrarEscolha(q);
+      if (q === "cid" && MEDICO) desenharHistPaciente();
     });
   });
 
   var BUSCAS = {
-    tipo: {titulo: "Selecione o Tipo de Atestado",
-      colunas: [["codigo", "Código"], ["nome", "Nome"]],
+    tipo: {titulo: "Selecione o Tipo de Atestado", colunas: [["codigo", "Código"], ["nome", "Nome"]],
       carregar: function () { return Promise.resolve(H.TIPOS); }},
     medico: {titulo: "Selecione o Profissional",
       colunas: [["codigo", "Código"], ["nome", "Nome"], ["registro", "Registro"], ["uf", "Uf Registro"]],
       carregar: H.listarProfissionais, cadastrar: abrirCadProf},
-    entidade: {titulo: "Selecione a Entidade",
-      colunas: [["codigo", "Código"], ["nome", "Nome"], ["cnpj", "CNPJ"]],
+    entidade: {titulo: "Selecione a Entidade", colunas: [["codigo", "Código"], ["nome", "Nome"], ["cnpj", "CNPJ"]],
       carregar: H.listarEntidades, cadastrar: abrirCadEntidade},
-    cid: {titulo: "Selecione a CID",
-      colunas: [["codigo", "Código"], ["nome", "Nome"]],
-      carregar: H.listarCID},
+    cid: {titulo: "Selecione a CID", colunas: [["codigo", "Código"], ["nome", "Nome"]], carregar: H.listarCID},
     responsavel: {titulo: "Selecione o Responsável",
       colunas: [["codigo", "CRM"], ["nome", "Nome"], ["registro", "Registro"], ["funcao", "Função"]],
       carregar: function () { return Promise.resolve(H.RESPONSAVEIS); }}
@@ -675,7 +792,7 @@
     busca = {qual: qual, linhas: [], ordem: cfg.colunas[0][0], desc: false};
     $("buscaTitulo").textContent = cfg.titulo;
     $("buscaTexto").value = "";
-    $("buscaCadastrar").style.display = cfg.cadastrar ? "" : "none";
+    $("buscaCadastrar").hidden = !cfg.cadastrar;
     $("buscaCorpo").innerHTML = '<div class="carregando">Carregando…</div>';
     $("buscaConta").textContent = "";
     abrirVeu("veuBusca");
@@ -690,7 +807,7 @@
   }
   /* "Busque os 100 primeiros registros": como no sistema de origem, a
      tela mostra no máximo 100 linhas, e a pesquisa vasculha a lista
-     INTEIRA — as 14 mil CIDs, inclusive — sem ligar para acento. */
+     INTEIRA (as 14 mil CIDs, inclusive), sem ligar para acento. */
   function desenharBusca() {
     var cfg = BUSCAS[busca.qual];
     var termos = crua($("buscaTexto").value).split(/\s+/).filter(Boolean);
@@ -716,11 +833,11 @@
       return '<tr data-i="' + i + '">' + cfg.colunas.map(function (c) { return "<td>" + esc(l[c[0]]) + "</td>"; }).join("") + "</tr>";
     }).join("") + "</tbody></table>";
     if (!mostra.length) h = '<div class="carregando">Nada encontrado com essa pesquisa.' +
-      (cfg.cadastrar ? " Use <b>+ Cadastrar novo</b> abaixo." : "") + "</div>";
+      (cfg.cadastrar ? " Use <b>Cadastrar novo</b>, aqui embaixo." : "") + "</div>";
     $("buscaCorpo").innerHTML = h;
     $("buscaConta").textContent = achadas.length
       ? "1 até " + mostra.length + " de " + achadas.length + " registros" +
-        (achadas.length > 100 ? " — refine a pesquisa para ver os outros" : "")
+        (achadas.length > 100 ? ". Refine a pesquisa para ver os outros." : "")
       : "0 registros";
     Array.prototype.forEach.call($("buscaCorpo").querySelectorAll("th"), function (th) {
       th.addEventListener("click", function () {
@@ -756,9 +873,13 @@
     var cpo = document.querySelector('[data-campo="' + qual + '"]');
     if (cpo) cpo.classList.remove("erro");
     fecharVeu("veuBusca");
+    if (qual === "cid" && MEDICO) desenharHistPaciente();
   }
   Array.prototype.forEach.call(document.querySelectorAll("[data-busca]"), function (el) {
-    el.addEventListener("click", function () { abrirBusca(el.getAttribute("data-busca")); });
+    el.addEventListener("click", function () {
+      if (el.closest(".fixo")) return;
+      abrirBusca(el.getAttribute("data-busca"));
+    });
   });
 
   /* ---------------- janelas ---------------- */
@@ -776,8 +897,8 @@
   /* ---------------- cadastro de entidade ----------------
      DIGITOU O CNPJ, VEM O RESTO. Ao completar os 14 números a tela
      pergunta à Receita (BrasilAPI, com a CNPJ.ws de reserva) e preenche
-     razão social e nome fantasia. Continua dando para digitar à mão —
-     entidade sem CNPJ (médico autônomo com CPF, por exemplo) existe. */
+     razão social e nome fantasia. Continua dando para digitar à mão:
+     entidade sem CNPJ (médico autônomo, por exemplo) existe. */
   function mascaraCNPJ(v) {
     var d = H.soDigitos(v).slice(0, 14);
     return d.replace(/^(\d{2})(\d)/, "$1.$2").replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
@@ -809,15 +930,15 @@
     if (n.length < 14) { ultimoCNPJ = ""; if (n.length) avisoEnt("Faltam " + (14 - n.length) + " número(s)."); return; }
     if (n === ultimoCNPJ) return;
     ultimoCNPJ = n;
-    if (!cnpjValido(n)) { avisoEnt("Este CNPJ não existe — confira os números.", "erro"); return; }
+    if (!cnpjValido(n)) { avisoEnt("Este CNPJ não existe. Confira os números.", "erro"); return; }
     avisoEnt("Buscando na Receita…", "busca");
     H.buscarCNPJ(n).then(function (r) {
       if (ultimoCNPJ !== n) return;
       dadosCNPJ = r;
       $("eRazao").value = r.nome || "";
       $("eFantasia").value = r.fantasia || "";
-      avisoEnt("Encontrado na Receita" + (r.cidade ? " — " + r.cidade + "/" + r.uf : "") +
-        (r.situacao ? " · situação: " + r.situacao : "") + ". Confira e clique em CADASTRAR.", "ok");
+      avisoEnt("Encontrado na Receita" + (r.cidade ? ": " + r.cidade + "/" + r.uf : "") +
+        (r.situacao ? ", situação " + r.situacao : "") + ". Confira e clique em Cadastrar.", "ok");
     }).catch(function (e) {
       if (ultimoCNPJ !== n) return;
       avisoEnt(e && e.naoExiste
@@ -830,14 +951,14 @@
     var razao = $("eRazao").value.trim();
     if (!razao) { avisoEnt("Escreva a razão social (ou digite o CNPJ para ela vir sozinha).", "erro"); $("eRazao").focus(); return; }
     var n = H.soDigitos($("eCnpj").value);
-    if (n && !cnpjValido(n)) { avisoEnt("Este CNPJ não existe — confira os números ou apague o campo.", "erro"); return; }
+    if (n && !cnpjValido(n)) { avisoEnt("Este CNPJ não existe. Confira os números ou apague o campo.", "erro"); return; }
     H.criarEntidade({nome: razao, fantasia: $("eFantasia").value.trim(), cnpj: n,
                      cidade: dadosCNPJ.cidade, uf: dadosCNPJ.uf}).then(function (r) {
       if (!r.ok && !r.entidade) { avisoEnt(r.recado, "erro"); return; }
       // cadastrou (ou já existia): já fica escolhida no processo
       P.entidade = r.entidade; mostrarEscolha("entidade");
       fecharVeu("veuEntidade");
-      recado(r.ok ? "Entidade cadastrada e escolhida neste processo." : r.recado + " — escolhida neste processo.", "ok");
+      recado(r.ok ? "Entidade cadastrada e escolhida neste processo." : r.recado + ". Ela foi escolhida neste processo.", "ok");
     });
   });
 
@@ -850,7 +971,6 @@
     abrirVeu("veuProf");
     $("pNome").focus();
   }
-  $("btCadProf").addEventListener("click", abrirCadProf);
   $("pSalvar").addEventListener("click", function () {
     var nome = $("pNome").value.trim(), num = $("pNumero").value.trim();
     function erro(t, el) { $("pAviso").textContent = t; $("pAviso").className = "aviso-cnpj erro"; if (el) el.focus(); }
@@ -860,11 +980,11 @@
       if (!r.ok && !r.profissional) return erro(r.recado);
       P.medico = r.profissional; mostrarEscolha("medico");
       fecharVeu("veuProf");
-      recado(r.ok ? "Profissional cadastrado e escolhido neste processo." : r.recado + " — escolhido neste processo.", "ok");
+      recado(r.ok ? "Profissional cadastrado e escolhido neste processo." : r.recado + ". Ele foi escolhido neste processo.", "ok");
     });
   });
 
-  /* ---------------- abas ---------------- */
+  /* ---------------- abas e blocos ---------------- */
   Array.prototype.forEach.call(document.querySelectorAll(".aba"), function (a) {
     a.addEventListener("click", function () {
       Array.prototype.forEach.call(document.querySelectorAll(".aba"), function (o) { o.classList.remove("on"); });
@@ -873,32 +993,24 @@
       $("p-" + a.getAttribute("data-aba")).classList.add("on");
     });
   });
-  Array.prototype.forEach.call(document.querySelectorAll(".bloco__cab"), function (c) {
+  Array.prototype.forEach.call(document.querySelectorAll(".sec__cab"), function (c) {
     c.addEventListener("click", function () { c.parentNode.classList.toggle("fechado"); });
   });
 
-  function desenharInfo() {
-    var itens = [
-      ["Processo", NOVO ? "(novo)" : P.processo], ["Empresa", P.empresa], ["Situação", P.situacao === "aberto" ? "Em aberto" : "Finalizado"],
-      ["Atividade atual", P.atividade], ["Parecer", P.parecer], ["Responsável pelo abono", P.responsavel ? ROTULO.responsavel(P.responsavel) : "—"],
-      ["Aberto em", NOVO ? "—" : dataHora(P.abertura)], ["Aberto por", P.criadoPor], ["Colaborador", (P.nome || "—") + (P.chapa ? " · chapa " + P.chapa : "")],
-      ["Afastamento", P.inicio ? dm(P.inicio) + " a " + dm(P.fim) + " (" + P.dias + " dia" + (P.dias > 1 ? "s" : "") + ")" : "—"],
-      ["Entidade", P.entidade ? P.entidade.nome : "—"], ["CID", P.cid ? ROTULO.cid(P.cid) : "—"]
-    ];
-    $("info").innerHTML = itens.map(function (i) { return "<div><small>" + esc(i[0]) + "</small>" + esc(i[1]) + "</div>"; }).join("");
-  }
   /* ---------------- histórico ---------------- */
   function iniciais(nome) {
     var p = String(nome || "?").replace(/^(dr|dra|rh)\.?\s+[—-]?\s*/i, "").split(/\s+/).filter(Boolean);
     return ((p[0] || "?").charAt(0) + (p.length > 1 ? p[p.length - 1].charAt(0) : "")).toUpperCase();
   }
   $("avatarEu").textContent = iniciais(SESSAO.nome);
-  if (MEDICO) $("avatarEu").classList.add("avatar--clinica");
+  // "Parecer: Reprovado" em vermelho, "Aprovado" em verde, "Pendente" em âmbar
+  function pintarParecer(txt) {
+    return esc(txt).replace(/^Parecer: (Aprovado|Reprovado|Pendente)/, 'Parecer: <span class="p-$1">$1</span>');
+  }
   var filtroHist = "tudo";
   function desenharHistorico() {
     var todos = (P.historico || []).slice().reverse();
-    $("nHist").textContent = todos.length;
-    $("nHist").style.display = todos.length ? "" : "none";
+    $("nHist").textContent = todos.length || "";
     var h = todos.filter(function (e) {
       return filtroHist === "tudo" || (filtroHist === "comentario" ? e.comentario : !e.comentario);
     });
@@ -906,11 +1018,11 @@
       var cls = e.comentario ? "coment" : (/^Parecer/.test(e.oque) ? "parecer" : "");
       return '<li class="' + cls + '"><div class="ev"><div class="ev__cab"><b>' + esc(e.quem) + "</b>" +
         (e.comentario ? "comentou" : "") + "<span>" + esc(dataHora(e.quando)) + "</span></div>" +
-        '<div class="ev__txt">' + esc(e.oque) + "</div></div></li>";
+        '<div class="ev__txt">' + pintarParecer(e.oque) + "</div></div></li>";
     }).join("") : '<li><div class="ev" style="color:var(--muted)">' +
       (NOVO ? "O histórico começa quando o atestado é enviado à clínica." : "Nada aqui com este filtro.") + "</div></li>";
     $("comentario").disabled = NOVO;
-    $("comentario").placeholder = NOVO ? "Envie o atestado primeiro — depois dá para comentar aqui."
+    $("comentario").placeholder = NOVO ? "Envie o atestado primeiro. Depois dá para comentar aqui."
                                        : "Digite um comentário nesta solicitação…";
   }
   Array.prototype.forEach.call(document.querySelectorAll("[data-hf]"), function (c) {
@@ -922,7 +1034,7 @@
   $("comentario").addEventListener("input", function () {
     $("btComentar").disabled = !$("comentario").value.trim();
     $("comentario").style.height = "auto";
-    $("comentario").style.height = Math.min(200, $("comentario").scrollHeight) + "px";
+    $("comentario").style.height = Math.min(160, $("comentario").scrollHeight) + "px";
   });
   $("comentario").addEventListener("keydown", function (ev) {
     if (ev.key === "Enter" && (ev.ctrlKey || ev.metaKey)) $("btComentar").click();
@@ -941,19 +1053,19 @@
 
   /* ---------------- anexos ----------------
      No processo que já existe, anexar e tirar gravam NA HORA. No
-     atestado novo, os arquivos esperam o "Enviar à clínica" — não há
+     atestado novo, os arquivos esperam o "Enviar à clínica": não há
      processo ainda onde pendurá-los. */
   function tamanho(b) { return b > 1048576 ? (b / 1048576).toFixed(1).replace(".", ",") + " MB" : Math.ceil(b / 1024) + " KB"; }
   function podeAnexar() { return podeEditarEmpresa() || MEDICO; }
-  var ICO_PDF = '<svg width="24" height="26" viewBox="0 0 24 26" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' +
+  var ICO_PDF = '<svg width="20" height="22" viewBox="0 0 24 26" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' +
     '<path d="M14 1H5a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8z"/><path d="M14 1v7h7"/>' +
     '<rect x="5.5" y="15" width="13" height="7" rx="1" fill="#fff"/><text x="12" y="20.6" font-size="5.4" text-anchor="middle" ' +
     'fill="currentColor" stroke="none" font-family="Arial" font-weight="700">PDF</text></svg>';
-  var ICO_IMG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' +
+  var ICO_IMG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' +
     '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>';
-  var ICO_BAIXA = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>';
-  var ICO_VER = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
-  var ICO_LIXO = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15M10 11v6M14 11v6"/></svg>';
+  var ICO_BAIXA = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>';
+  var ICO_VER = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var ICO_LIXO = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15M10 11v6M14 11v6"/></svg>';
 
   function anexosFiltrados() {
     var campo = $("anxCampo").value, t = crua($("anxTexto").value), tipo = $("anxTipo").value;
@@ -964,40 +1076,43 @@
   }
   function desenharAnexos() {
     var todos = P.anexos || [];
-    $("nAnexos").textContent = todos.length;
-    $("nAnexos").style.display = todos.length ? "" : "none";
-    $("soltar").style.display = podeAnexar() ? "" : "none";
-    $("anxAdicionar").style.display = podeAnexar() ? "" : "none";
+    $("nAnexos").textContent = todos.length || "";
+    $("soltar").hidden = !podeAnexar();
+    $("anxAdicionar").hidden = !podeAnexar();
     var a = anexosFiltrados();
     $("anexosCorpo").innerHTML = a.length ? a.map(function (x) {
       var i = todos.indexOf(x);
-      var podeTirar = !NOVO ? (podeAnexar() && x.quem === SESSAO.nome) : true;
+      var podeTirar = NOVO || (podeAnexar() && x.meu);
       return '<tr><td><input type="checkbox" class="anx-marca" data-i="' + i + '" aria-label="Marcar ' + esc(x.nome) + '" /></td>' +
         '<td><a href="#" class="anx-nome" data-ver="' + i + '">' + (x.tipo === "application/pdf" ? ICO_PDF : ICO_IMG) +
-        esc(x.nome) + '</a><small style="color:var(--muted);display:block;margin-left:2.1rem">' + tamanho(x.tamanho) + "</small></td>" +
-        "<td>" + esc(x.codigo || "—") + "</td><td>" + esc(x.versao || 1000) + "</td><td>" + esc(x.quem || "—") + "</td>" +
+        esc(x.nome) + '</a><small style="color:var(--muted);margin-left:1.9rem">' + tamanho(x.tamanho) + "</small></td>" +
+        "<td>" + esc(x.codigo) + "</td><td>" + esc(x.versao || 1000) + "</td><td>" + esc(x.quem) + "</td>" +
         "<td>" + esc(x.quando ? dataHora(x.quando) : "ainda não enviado") + "</td><td>" + esc(x.atividade || "Início") + "</td>" +
         '<td style="white-space:nowrap"><button class="ico-bt" data-ver="' + i + '" type="button" title="Abrir">' + ICO_VER + "</button>" +
         '<button class="ico-bt" data-baixa="' + i + '" type="button" title="Baixar">' + ICO_BAIXA + "</button>" +
         (podeTirar ? '<button class="ico-bt ico-bt--apaga" data-tira="' + i + '" type="button" title="Tirar">' + ICO_LIXO + "</button>" : "") +
         "</td></tr>";
-    }).join("") : '<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:1.6rem">' +
+    }).join("") : '<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:1.2rem">' +
       (todos.length ? "Nenhum anexo com essa busca." : "Nenhum arquivo anexado ainda.") + "</td></tr>";
     $("anxTodos").checked = false;
-    $("anxBaixarSel").style.display = "none";
+    $("anxBaixarSel").hidden = true;
   }
+  /* O balde é PRIVADO: cada abertura pede ao servidor um link que vale
+     cinco minutos. A janela abre JÁ, no clique; se esperasse o link, o
+     navegador a tomaria por propaganda e bloquearia. */
   function verAnexo(x) {
     var jan = window.open("", "_blank");
     if (!jan) { recado("O navegador bloqueou a janela. Libere as janelas para este site.", "erro"); return; }
-    jan.document.write("<title>" + esc(x.nome) + "</title>" + (x.tipo === "application/pdf"
-      ? '<iframe src="' + x.dados + '" style="border:0;position:fixed;inset:0;width:100%;height:100%"></iframe>'
-      : '<img src="' + x.dados + '" style="max-width:100%" alt="" />'));
-    jan.document.close();
+    jan.document.write("<title>" + esc(x.nome) + "</title><p style='font-family:Arial;color:#5b6b7b'>Abrindo…</p>");
+    H.urlAnexo(x).then(function (url) { jan.location.href = url; },
+      function (e) { jan.close(); recado(e.message, "erro"); });
   }
   function baixarAnexo(x) {
-    var a = document.createElement("a");
-    a.href = x.dados; a.download = x.nome;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    H.urlAnexo(x, true).then(function (url) {
+      var a = document.createElement("a");
+      a.href = url; a.download = x.nome;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }, function (e) { recado(e.message, "erro"); });
   }
   $("anexosCorpo").addEventListener("click", function (ev) {
     var el = ev.target.closest("[data-ver],[data-baixa],[data-tira]");
@@ -1009,14 +1124,14 @@
     if (!confirm("Tirar o arquivo \"" + x.nome + "\" deste processo?")) return;
     if (NOVO) { P.anexos.splice(P.anexos.indexOf(x), 1); desenharAnexos(); return; }
     H.tirarAnexo(P.id, x.codigo).then(function (r) {
-      if (!r.ok) return;
+      if (!r.ok) { recado(r.recado, "erro"); return; }
       P.anexos = r.processo.anexos; P.historico = r.processo.historico;
       desenharAnexos(); desenharHistorico(); recado("Arquivo tirado.", "ok");
     });
   });
   $("anexosCorpo").addEventListener("change", function () {
     var n = $("anexosCorpo").querySelectorAll(".anx-marca:checked").length;
-    $("anxBaixarSel").style.display = n ? "" : "none";
+    $("anxBaixarSel").hidden = !n;
     $("anxBaixarSel").textContent = "Baixar marcados (" + n + ")";
   });
   $("anxTodos").addEventListener("change", function () {
@@ -1029,9 +1144,7 @@
       setTimeout(function () { baixarAnexo(x); }, k * 350);   // um de cada vez, senão o navegador barra
     });
   });
-  ["anxTexto", "anxTipo", "anxCampo"].forEach(function (id) {
-    $(id).addEventListener("input", desenharAnexos);
-  });
+  ["anxTexto", "anxTipo", "anxCampo"].forEach(function (id) { $(id).addEventListener("input", desenharAnexos); });
   $("anxCampo").addEventListener("change", function () {
     $("anxTexto").placeholder = {nome: "Digite o título do anexo que deseja buscar",
       quem: "Digite o nome de quem anexou", atividade: "Digite a atividade"}[$("anxCampo").value];
@@ -1042,24 +1155,19 @@
     if (!podeAnexar()) return;
     Array.prototype.forEach.call(arquivos, function (f) {
       if (!/^(application\/pdf|image\/(jpeg|png))$/.test(f.type)) { recado(f.name + ": só PDF, JPG ou PNG.", "erro"); return; }
-      if (f.size > 1.5 * 1048576) { recado(f.name + ": maior que 1,5 MB — na demonstração não cabe.", "erro"); return; }
-      var r = new FileReader();
-      r.onload = function () {
-        var arq = {nome: f.name, tipo: f.type, tamanho: f.size, dados: r.result};
-        if (NOVO) {
-          var a = H.novoAnexo(arq, "Início"); a.quando = "";
-          P.anexos.push(a); desenharAnexos();
-          recado("Arquivo pronto. Ele vai junto quando você clicar em Enviar à clínica.", "ok");
-          return;
-        }
-        H.anexar(P.id, arq).then(function (res) {
-          if (!res.ok) { recado(res.recado, "erro"); return; }
-          P.anexos = res.processo.anexos; P.historico = res.processo.historico;
-          desenharAnexos(); desenharHistorico();
-          recado("Arquivo anexado ao processo " + P.processo + ".", "ok");
-        });
-      };
-      r.readAsDataURL(f);
+      if (f.size > H.TETO_ANEXO) { recado(f.name + " passa do limite de tamanho. Reduza o arquivo (ou fotografe de novo) e tente outra vez.", "erro"); return; }
+      if (NOVO) {
+        P.anexos.push(H.novoAnexo(f)); desenharAnexos();
+        recado("Arquivo pronto. Ele vai junto quando você clicar em Enviar à clínica.", "ok");
+        return;
+      }
+      recado("Enviando " + f.name + "…");
+      H.anexar(P.id, f).then(function (res) {
+        if (!res.ok) { recado(res.recado, "erro"); return; }
+        P.anexos = res.processo.anexos; P.historico = res.processo.historico;
+        desenharAnexos(); desenharHistorico();
+        recado("Arquivo anexado ao processo " + P.processo + ".", "ok");
+      });
     });
   }
   $("arquivo").addEventListener("change", function () { receber($("arquivo").files); $("arquivo").value = ""; });
@@ -1071,59 +1179,239 @@
   });
   $("soltar").addEventListener("drop", function (ev) { ev.preventDefault(); receber(ev.dataTransfer.files); });
 
+  /* =================================================================
+     A TELA DO MÉDICO
+     ================================================================= */
+  var motivosMarcados = [];
+  var MARCA_OBS = "Observação: ";
+  var anexoAberto = null;
+
+  function montarAvaliacao() {
+    document.title = "Avaliar processo " + P.processo + " | Homologação de atestados";
+    $("titulo").textContent = "Processo " + P.processo;
+    // quem, quando, quantos dias
+    $("avNome").textContent = P.nome;
+    var linhas = [
+      ["Empresa", P.empresa],
+      ["Matrícula", P.chapa + (P.filial ? " · " + P.filial : "")],
+      ["Afastamento", dm(P.inicio) + " às " + (P.horaInicio || "08:00") + " até " + dm(P.fim)],
+      ["Dias", P.dias + (P.dias > 1 ? " dias" : " dia")],
+      ["Enviado em", dataHora(P.abertura) + (P.requisitante ? ", por " + P.requisitante : "")]
+    ];
+    $("avDados").innerHTML = linhas.map(function (l) { return "<dt>" + l[0] + "</dt><dd>" + esc(l[1]) + "</dd>"; }).join("");
+    $("avObs").hidden = !P.observacoes;
+    $("avObs").innerHTML = "<b>Observação da empresa:</b> " + esc(P.observacoes);
+
+    // o atestado, aberto
+    anexoAberto = (P.anexos || [])[0] || null;
+    desenharVisor();
+
+    // o parecer atual
+    /* O texto do parecer guarda os dois juntos: "motivo; motivo.
+       Observação: texto livre". Aqui eles se separam de novo. */
+    var obsTxt = String(P.parecerObs || ""), corte = obsTxt.indexOf(MARCA_OBS);
+    var livre = corte >= 0 ? obsTxt.slice(corte + MARCA_OBS.length) : "";
+    motivosMarcados = (corte >= 0 ? obsTxt.slice(0, corte) : obsTxt).replace(/\.\s*$/, "").split("; ").filter(Boolean);
+    $("avObsTxt").value = livre;
+    marcarDecisao(P.parecer === "Pendente" && !P.parecerObs ? "" : P.parecer);
+
+    // recados da empresa (só os comentários: o resto é burocracia)
+    var coment = (P.historico || []).filter(function (e) { return e.comentario; });
+    $("avConversaBloco").hidden = !coment.length;
+    $("avConversa").innerHTML = coment.slice().reverse().map(function (e) {
+      return "<li><b>" + esc(e.quem) + "</b><small>" + esc(dataHora(e.quando)) + "</small><br>" + esc(e.oque) + "</li>";
+    }).join("");
+
+    desenharHistPaciente();
+  }
+
+  function desenharVisor() {
+    var ax = P.anexos || [];
+    $("avArquivos").innerHTML = ax.map(function (a, i) {
+      return '<button type="button" class="av-arq' + (a === anexoAberto ? " on" : "") + '" data-i="' + i + '" title="' +
+        esc(a.nome) + '">' + esc(a.nome) + "</button>";
+    }).join("");
+    $("avAbrir").hidden = $("avBaixar").hidden = !anexoAberto;
+    if (!anexoAberto) {
+      $("avVisor").innerHTML = '<div class="av-vazio">A empresa não anexou o arquivo do atestado.<br>' +
+        "Marque Pendente e escolha o motivo \"O arquivo enviado não é o atestado\" ou peça o documento.</div>";
+      return;
+    }
+    $("avVisor").innerHTML = '<div class="av-vazio">Abrindo o atestado…</div>';
+    var alvo = anexoAberto;
+    H.urlAnexo(alvo).then(function (url) {
+      if (alvo !== anexoAberto) return;
+      $("avVisor").innerHTML = alvo.tipo === "application/pdf"
+        ? '<iframe src="' + esc(url) + '" title="Atestado"></iframe>'
+        : '<img src="' + esc(url) + '" alt="Atestado de ' + esc(P.nome) + '" />';
+    }, function (e) {
+      $("avVisor").innerHTML = '<div class="av-vazio">' + esc(e.message) + "</div>";
+    });
+  }
+  $("avArquivos").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-i]");
+    if (!b) return;
+    anexoAberto = P.anexos[Number(b.getAttribute("data-i"))];
+    desenharVisor();
+  });
+  $("avAbrir").addEventListener("click", function () { if (anexoAberto) verAnexo(anexoAberto); });
+  $("avBaixar").addEventListener("click", function () { if (anexoAberto) baixarAnexo(anexoAberto); });
+
+  /* O HISTÓRICO DO PACIENTE: os outros atestados da mesma pessoa, na
+     mesma empresa, e a conta da REGRA DOS 60 DIAS (Decreto 3.048/1999,
+     art. 75): atestados pela mesma doença que, somados em 60 dias,
+     passam de 15 dias saem da empresa e vão para o INSS. "Mesma doença"
+     aqui é a mesma categoria da CID (as três primeiras posições). */
+  var HIST = null;
+  function desenharHistPaciente() {
+    if (!HIST) {
+      H.historicoDoColaborador(P).then(function (l) { HIST = l; desenharHistPaciente(); },
+        function (e) { $("avHist").innerHTML = '<div class="av-hist-resumo">' + esc(e.message) + "</div>"; });
+      return;
+    }
+    var validos = HIST.filter(function (h) { return h.parecer !== "Reprovado"; });
+    var umAno = somaDias(P.inicio, -365);
+    var noAno = validos.filter(function (h) { return h.inicio >= umAno && h.inicio <= P.inicio; });
+    var diasAno = noAno.reduce(function (s, h) { return s + h.dias; }, 0);
+    var janela = validos.filter(function (h) { var d = diasEntre(h.inicio, P.inicio); return d >= 0 && d <= 60; });
+    var alerta = "";
+    if (P.cid) {
+      var cat = P.cid.codigo.slice(0, 3);
+      var mesma = janela.filter(function (h) { return h.cid && h.cid.codigo.slice(0, 3) === cat; });
+      var soma = mesma.reduce(function (s, h) { return s + h.dias; }, 0) + Number(P.dias || 0);
+      if (mesma.length && soma > 15) {
+        alerta = '<div class="av-alerta"><b>Regra dos 60 dias:</b> com este, são ' + (mesma.length + 1) +
+          " atestados pela CID " + esc(cat) + " em 60 dias, somando " + soma + " dias. O que passar de 15 dias cabe ao INSS.</div>";
+      } else if (mesma.length) {
+        alerta = '<div class="av-alerta leve">Mesma CID (' + esc(cat) + ") nos últimos 60 dias: " + mesma.length +
+          " atestado(s), " + soma + " dias com este.</div>";
+      }
+    } else {
+      var soma60 = janela.reduce(function (s, h) { return s + h.dias; }, 0) + Number(P.dias || 0);
+      if (janela.length && soma60 > 15) {
+        alerta = '<div class="av-alerta leve">Nos últimos 60 dias, com este, são ' + soma60 + " dias de atestado. " +
+          "Escolha a CID para conferir se é a mesma doença (regra dos 60 dias).</div>";
+      }
+    }
+    $("avHist").innerHTML =
+      '<div class="av-hist-resumo">' + (HIST.length
+        ? HIST.length + " atestado(s) anterior(es) nesta empresa · " + diasAno + " dia(s) nos 12 meses antes deste"
+        : "Primeiro atestado deste colaborador nesta empresa.") + "</div>" + alerta +
+      (HIST.length ? '<ul class="av-hist">' + HIST.map(function (h) {
+        return '<li><a href="processo.html?id=' + encodeURIComponent(h.id) + '">' + dm(h.inicio) + " a " + dm(h.fim) +
+          ", " + h.dias + (h.dias > 1 ? " dias" : " dia") + "</a>" + '<span class="p-' + esc(h.parecer) + '">' + esc(h.parecer) + "</span>" +
+          "<small>" + esc(h.cid ? h.cid.codigo + ": " + h.cid.nome : "sem CID") + "</small></li>";
+      }).join("") + "</ul>" : "");
+  }
+
+  function marcarDecisao(par) {
+    Array.prototype.forEach.call(document.querySelectorAll("#decisao button"), function (b) {
+      b.classList.toggle("on", b.getAttribute("data-par") === par);
+    });
+    if (par) $("fParecer").value = par;
+    $("avDica").hidden = !!par;
+    $("avObsCaixa").hidden = !(par === "Pendente" || par === "Reprovado");
+    var lista = MOTIVOS[par] || [];
+    motivosMarcados = motivosMarcados.filter(function (m) { return lista.indexOf(m) >= 0; });
+    $("motivos").className = "motivos";
+    $("motivos").innerHTML = lista.length ? '<div class="motivos__tit">' +
+      (par === "Pendente" ? "O que a empresa precisa corrigir ou enviar:" : "Por que o atestado foi reprovado:") + "</div>" +
+      lista.map(function (m) {
+        return '<button type="button" class="motivo' + (motivosMarcados.indexOf(m) >= 0 ? " on" : "") + '">' + esc(m) + "</button>";
+      }).join("") : "";
+  }
+  $("decisao").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-par]");
+    if (b) marcarDecisao(b.getAttribute("data-par"));
+  });
+  $("motivos").addEventListener("click", function (ev) {
+    var b = ev.target.closest(".motivo");
+    if (!b) return;
+    var m = b.textContent, i = motivosMarcados.indexOf(m);
+    if (i >= 0) motivosMarcados.splice(i, 1); else motivosMarcados.push(m);
+    b.classList.toggle("on", i < 0);
+    $("motivos").classList.remove("erro");
+  });
+
   /* ---------------- enviar ----------------
      A conferência mostra TODOS os campos que faltam de uma vez, pintados
-     de vermelho — e não um por vez, que faz a pessoa clicar cinco vezes. */
+     de vermelho, e não um por vez (que faz a pessoa clicar cinco vezes). */
   function conferir() {
     Array.prototype.forEach.call(document.querySelectorAll(".cpo.erro"), function (c) { c.classList.remove("erro"); });
     var falta = [];
     function exige(campo, ok, nome) { if (!ok) { falta.push(nome); var c = document.querySelector('[data-campo="' + campo + '"]'); if (c) c.classList.add("erro"); } }
-    exige("chapa", $("fChapa").value.trim(), "chapa");
-    exige("nome", $("fNome").value.trim(), "nome");
-    exige("inicio", $("fInicio").value, "data de início");
-    exige("hora", $("fHora").value, "hora de início");
-    exige("dias", parseInt($("fDias").value, 10) >= 1, "quantidade de dias");
-    if (!MEDICO && !(P.anexos && P.anexos.length)) falta.push("o arquivo do atestado (aba Anexos)");
-    if (MEDICO) {
-      var par = $("fParecer").value;
-      if (par === "Aprovado") {
-        exige("tipo", P.tipo, "tipo de atestado"); exige("medico", P.medico, "médico");
-        exige("entidade", P.entidade, "entidade"); exige("responsavel", P.responsavel, "responsável pelo abono");
-      }
-      if (par !== "Aprovado") exige("parecerObs", $("fParecerObs").value.trim(), "a observação do parecer (diga à empresa o porquê)");
+    if (!MEDICO) {
+      exige("chapa", $("fChapa").value.trim(), "matrícula");
+      exige("nome", $("fNome").value.trim(), "nome");
+      if (!$("fFilialSel").hidden) exige("filial", $("fFilialSel").value, "filial");
+      exige("inicio", $("fInicio").value, "data de início");
+      exige("hora", $("fHora").value, "hora de início");
+      exige("dias", parseInt($("fDias").value, 10) >= 1, "quantidade de dias");
+      exige("tipo", P.tipo, "tipo de atestado");
+      exige("entidade", P.entidade, "entidade");
+      if (!(P.anexos && P.anexos.length)) falta.push("o arquivo do atestado (aba Anexos)");
+      return falta;
+    }
+    var par = document.querySelector("#decisao button.on");
+    if (!par) { falta.push("a decisão (Aprovar, Pendente ou Reprovar)"); return falta; }
+    if (par.getAttribute("data-par") === "Aprovado") {
+      exige("tipo", P.tipo, "tipo de atestado"); exige("entidade", P.entidade, "entidade");
+    } else if (!motivosMarcados.length && !$("avObsTxt").value.trim()) {
+      falta.push("pelo menos um motivo (ou uma observação)");
+      $("motivos").classList.add("erro");
     }
     return falta;
   }
 
-  $("btEnviar").addEventListener("click", function () {
+  function salvar() {
     var falta = conferir();
-    if (falta.length) { recado("Falta preencher: " + falta.join(", ") + ".", "erro"); return; }
-    var dias = parseInt($("fDias").value, 10);
-    P.chapa = $("fChapa").value.trim();
-    P.nome = $("fNome").value.trim().toUpperCase();
-    P.filial = $("fFilial").value.trim();
-    P.inicio = $("fInicio").value;
-    P.horaInicio = $("fHora").value;
-    P.dias = dias;
-    P.fim = somaDias(P.inicio, dias - 1);
-    P.observacoes = $("fObs").value.trim();
-    if (MEDICO) { P.parecer = $("fParecer").value; P.parecerObs = $("fParecerObs").value.trim(); }
-    $("btEnviar").disabled = true;
-    H.salvarProcesso(P).then(function (r) {
-      $("btEnviar").disabled = false;
-      if (!r.ok) { recado(r.recado, "erro"); return; }
+    if (falta.length) { recado("Falta: " + falta.join(", ") + ".", "erro"); return Promise.resolve(false); }
+    if (!MEDICO) {
+      var dias = parseInt($("fDias").value, 10);
+      P.chapa = $("fChapa").value.trim();
+      P.nome = $("fNome").value.trim().toUpperCase();
+      P.filial = filialEscolhida();
+      P.inicio = $("fInicio").value;
+      P.horaInicio = $("fHora").value;
+      P.dias = dias;
+      P.fim = somaDias(P.inicio, dias - 1);
+      P.observacoes = $("fObs").value.trim();
+    } else {
+      P.parecer = $("fParecer").value;
+      var livre = P.parecer === "Aprovado" ? "" : $("avObsTxt").value.trim();
+      var partes = P.parecer === "Aprovado" ? [] : motivosMarcados.slice();
+      P.parecerObs = [partes.join("; "), livre ? MARCA_OBS + livre : ""].filter(Boolean).join(". ");
+    }
+    $("btEnviar").disabled = $("avSalvar").disabled = $("avProximo").disabled = true;
+    return H.salvarProcesso(P).then(function (r) {
+      $("btEnviar").disabled = $("avSalvar").disabled = $("avProximo").disabled = false;
+      if (!r.ok) { recado(r.recado, "erro"); return false; }
       var eraNovo = NOVO;
-      P = r.processo; NOVO = false;
+      P = r.processo; NOVO = false; HIST = HIST || null;
       if (eraNovo) history.replaceState(null, "", "processo.html?id=" + encodeURIComponent(P.id));
       preencher();
-      recado(MEDICO
-        ? "Parecer salvo: " + P.parecer + ". O processo agora está \"" + P.atividade + "\" — a empresa já vê."
-        : "Enviado à clínica. Processo " + P.processo + " aguardando o parecer do médico.", "ok");
+      recado(r.aviso || (MEDICO
+        ? "Parecer salvo: " + P.parecer + ". O processo agora está \"" + P.atividade + "\", e a empresa já vê."
+        : "Enviado à clínica. Processo " + P.processo + " aguardando o parecer do médico."), r.aviso ? "erro" : "ok");
+      return true;
+    });
+  }
+  $("btEnviar").addEventListener("click", salvar);
+  $("avSalvar").addEventListener("click", salvar);
+  // salvar e já abrir o próximo da fila (o mais antigo esperando)
+  $("avProximo").addEventListener("click", function () {
+    var atual = P && P.id;
+    salvar().then(function (ok) {
+      if (!ok) return;
+      H.listarProcessos().then(function (l) {
+        var fila = l.filter(function (x) { return x.atividade === "Clínica avalia atestado" && x.id !== atual; })
+          .sort(function (a, b) { return a.abertura < b.abertura ? -1 : 1; });
+        location.href = fila.length ? "processo.html?id=" + encodeURIComponent(fila[0].id) : "painel.html?aba=aberto";
+      });
     });
   });
 
   $("btImprimir").addEventListener("click", function () {
-    Array.prototype.forEach.call(document.querySelectorAll(".aba"), function (o) { o.classList.remove("on"); });
     document.querySelector('[data-aba="formulario"]').click();
     window.print();
   });

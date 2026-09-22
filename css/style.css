@@ -1285,15 +1285,15 @@ body.aviso-aberto{overflow:hidden}
 /* O 5o card da home. */
 .card__img--nr{background:#0a2e5c url('../assets/treinamentos-card.png') center/cover no-repeat}
 
-/* Com 5 cards, 4 colunas deixariam um orfao sozinho na segunda linha.
-   Entao: 5 lado a lado na tela larga e 3+2 na intermediaria, que parece
-   proposital. Abaixo disso continuam valendo as regras de 2 e 1 coluna. */
-@media(min-width:1280px){
-  .cards .container{max-width:1460px}
-  .cards__grid{grid-template-columns:repeat(5,1fr);max-width:1460px}
-}
-@media(min-width:1025px) and (max-width:1279px){
-  .cards__grid{grid-template-columns:repeat(3,1fr)}
+/* O 6o card da home: Homologacao de atestados. */
+.card__img--homol{background:#0a2256 url('../assets/homologacao-card.svg') center/cover no-repeat}
+
+/* Com 6 cards, 3 em cima e 3 embaixo: seis lado a lado ficariam
+   apertados, com o texto espremido em colunas estreitas. Abaixo disso
+   continuam valendo as regras de 2 e 1 coluna. */
+@media(min-width:1025px){
+  .cards .container{max-width:1280px}
+  .cards__grid{grid-template-columns:repeat(3,1fr);max-width:1180px}
 }
 
 /* Sao quatro botoes no topo agora. Aperta o espaco entre eles para nao

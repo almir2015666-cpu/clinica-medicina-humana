@@ -50,7 +50,7 @@
 
     /* ---------- filtros: uma linha só, acima de tudo ---------- */
     .filtros{background:#fff;border-bottom:1px solid var(--line);padding:.8rem 1.2rem;display:flex;gap:.7rem;
-      align-items:flex-end;flex-wrap:wrap;position:sticky;top:62px;z-index:30}
+      align-items:flex-end;flex-wrap:wrap;position:sticky;top:0;z-index:30}
     .f{display:flex;flex-direction:column;gap:.3rem}
     .f label{font:500 .74rem 'Poppins';color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
     .f select,.f input{border:1.5px solid var(--line);border-radius:9px;padding:.5rem .6rem;font-size:.9rem;color:var(--ink);background:#fff}
@@ -178,18 +178,90 @@
       .cartao,.kpi{break-inside:avoid}
       .tab-rolo{max-height:none;overflow:visible}
     }
+    /* ---------- cabeçalho, seções, resumo, janela ---------- */
+    .cab-rel{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+      background:#fff;padding:1rem 1.2rem .7rem}
+    .cab-rel h1{font:600 1.08rem/1.3 'Poppins',sans-serif;color:var(--navy);margin:0}
+    .cab-rel p{margin:.1rem 0 0;color:var(--muted);font-size:.8rem}
+    .cab-rel__acoes{display:flex;gap:.4rem}
+    .secoes{display:flex;gap:0;background:#fff;border-bottom:1px solid var(--line);padding:0 .8rem;overflow-x:auto}
+    .secoes button{border:none;background:none;cursor:pointer;padding:.8rem .9rem .65rem;white-space:nowrap;
+      font:500 .8rem 'Inter',sans-serif;text-transform:uppercase;letter-spacing:.02em;color:#5b6b7b;
+      border-bottom:2px solid transparent}
+    .secoes button.on{color:var(--blue-700);border-bottom-color:var(--blue-500)}
+    .secoes .conta{margin-left:.3rem;opacity:.75}
+    .grade > [data-sec]{display:none}
+    .grade > [data-sec].sec-on{display:block}
+    .resumo{margin:0;font-size:.9rem;line-height:1.65;color:var(--ink)}
+    .kpi--clica{cursor:pointer}
+    .tab tbody tr.clica{cursor:pointer}
+    .tab tbody tr.clica:hover td{background:var(--pale)}
+    .veu{position:fixed;inset:0;background:rgba(10,30,55,.45);display:none;align-items:flex-start;
+      justify-content:center;padding:6vh 1rem;z-index:120}
+    .veu.abre{display:flex}
+    .janela{background:#fff;border-radius:10px;width:min(860px,100%);max-height:84vh;display:flex;flex-direction:column;
+      box-shadow:0 24px 60px rgba(10,46,92,.3)}
+    .janela__cab{display:flex;justify-content:space-between;align-items:flex-start;padding:1rem 1.2rem .6rem;gap:1rem}
+    .janela__cab h2{font:600 1rem 'Poppins',sans-serif;color:var(--navy);margin:0}
+    .janela__cab p{margin:.15rem 0 0;color:var(--muted);font-size:.8rem}
+    .janela__corpo{overflow:auto;padding:0 1.2rem 1.2rem}
+    .fechar-x{border:none;background:none;font-size:1.5rem;line-height:1;cursor:pointer;color:var(--muted)}
+
+    /* =================================================================
+       ENXUTO — o peso da referência: fonte miúda, sem caixas pesadas.
+       ================================================================= */
+    body{font-size:14px;background:#fff}
+    .filtros{padding:.55rem 1.2rem;gap:.55rem;border-bottom:1px solid var(--line)}
+    .f label{font:500 .66rem 'Inter',sans-serif}
+    .f select,.f input{padding:.34rem .5rem;font-size:.82rem;border-width:1px;border-radius:7px}
+    .presets{border-width:1px;border-radius:7px}
+    .presets button{padding:.36rem .6rem;font-size:.8rem}
+    .conteudo{padding:.9rem 1.2rem 2rem;max-width:none}
+    .periodo-txt{font-size:.82rem;margin-bottom:.7rem}
+    .kpis{gap:.6rem;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+    .kpi{border-radius:8px;padding:.7rem .85rem}
+    .kpi small{font:500 .68rem 'Inter',sans-serif}
+    .kpi strong{font:600 1.45rem/1.2 'Poppins',sans-serif;margin:.25rem 0 .15rem}
+    .kpi .var,.kpi .dica{font-size:.74rem}
+    .kpi strong small{display:inline;text-transform:none;letter-spacing:0;font:500 .82rem 'Inter',sans-serif;color:var(--muted)}
+    @media(min-width:1000px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
+    .grade{gap:.7rem}
+    .cartao{border-radius:8px;padding:.8rem 1rem .9rem}
+    .cartao__cab{margin-bottom:.6rem}
+    .cartao h2{font:600 .88rem 'Poppins',sans-serif}
+    .cartao h2 + p{font-size:.76rem}
+    .alterna{border-width:1px;border-radius:7px}
+    .alterna button{font-size:.74rem;padding:.3rem .55rem}
+    .colunas{height:190px}
+    .barra{font-size:.82rem}
+    .barra__trilho{height:10px}
+    .tab{font-size:.84rem}
+    .tab th{font:500 .78rem 'Inter',sans-serif;text-transform:none;letter-spacing:0;color:#2b3a4a;padding:.55rem .7rem;
+      border-bottom:1px solid var(--line)}
+    .tab td{padding:.48rem .7rem}
+    .bt{padding:.36rem .7rem;font:500 .78rem 'Inter',sans-serif;border-width:1px;border-radius:7px}
+    .procura{padding:.36rem .6rem;font-size:.82rem;border-width:1px;border-radius:7px}
+    .alerta{padding:.6rem .8rem;border-radius:8px}
+    .alerta p{font-size:.82rem}
+    .grupo-al{border-radius:8px;padding:.7rem .8rem}
+    @media print{
+      .secoes,.cab-rel__acoes,#btCopiarResumo{display:none!important}
+      .grade > [data-sec]{display:block!important}
+    }
+
   </style>
 </head>
-<body>
-  <div class="demo"><b>Demonstração.</b> Números calculados sobre os processos de exemplo.</div>
+<body data-pagina="relatorios">
+  <div class="demo" id="avisoCarga" style="display:none" role="alert"></div>
 
-  <header class="topo">
-    <a class="topo__voltar" href="painel.html">‹ Voltar à lista</a>
-    <h1>Relatórios de atestados<span id="quem">—</span></h1>
-    <div class="topo__dir">
-      <button class="bt-topo" id="btImprimir" type="button">Imprimir / PDF</button>
+  <div class="cab-rel">
+    <div><h1>Relatórios</h1>
+      <p>O que os atestados dizem sobre a sua empresa, no período e nos filtros escolhidos.</p></div>
+    <div class="cab-rel__acoes">
+      <button class="bt" id="btExcelTudo" type="button">Excel completo</button>
+      <button class="bt" id="btImprimir" type="button">Imprimir / PDF</button>
     </div>
-  </header>
+  </div>
 
   <section class="filtros" aria-label="Filtros do relatório">
     <div class="f"><label>Período</label>
@@ -204,20 +276,22 @@
       <div class="f"><label for="fDe">De</label><input type="date" id="fDe" /></div>
       <div class="f"><label for="fAte">Até</label><input type="date" id="fAte" /></div>
     </div>
-    <div class="f" id="caixaEmpresa" style="display:none"><label for="fEmpresa">Empresa</label>
-      <select id="fEmpresa"><option value="">todas</option></select></div>
-    <div class="f"><label for="fFilial">Filial</label><select id="fFilial"><option value="">todas</option></select></div>
-    <div class="f"><label for="fTipo">Tipo</label><select id="fTipo"><option value="">todos</option></select></div>
     <div class="f"><label for="fParecer">Contar</label>
       <select id="fParecer">
-        <option value="semReprovado">tudo, menos reprovados</option>
-        <option value="">tudo</option>
-        <option value="Aprovado">só aprovados (abonados)</option>
-        <option value="Pendente">só pendentes</option>
+        <option value="semReprovado">Tudo, menos reprovados</option>
+        <option value="">Tudo</option>
+        <option value="Aprovado">Só aprovados (abonados)</option>
+        <option value="Pendente">Só pendentes</option>
       </select></div>
-    <div class="f f--efetivo"><label for="fEfetivo" title="Quantas pessoas a empresa tem — para calcular a taxa de absenteísmo">Nº de colaboradores</label>
-      <input type="number" id="fEfetivo" min="1" step="1" placeholder="ex.: 250" /></div>
   </section>
+
+  <!-- AS SEÇÕES: a página inteira de uma vez era um rolo sem fim. Cada
+       aba responde a uma pergunta do RH. -->
+  <nav class="secoes" id="secoes">
+    <button type="button" data-sec="geral" class="on">Visão geral</button>
+    <button type="button" data-sec="cid">Doenças (CID)</button>
+    <button type="button" data-sec="pessoas">Colaboradores</button>
+  </nav>
 
   <main class="conteudo">
     <p class="periodo-txt" id="periodoTxt"></p>
@@ -225,7 +299,15 @@
     <div class="kpis" id="kpis"></div>
 
     <div class="grade">
-      <section class="cartao c12">
+      <section class="cartao c12" data-sec="geral">
+        <div class="cartao__cab">
+          <div><h2>Resumo do período</h2><p>Pronto para colar num e-mail para a diretoria.</p></div>
+          <button class="bt" id="btCopiarResumo" type="button">Copiar</button>
+        </div>
+        <p class="resumo" id="resumo"></p>
+      </section>
+
+      <section class="cartao c12" data-sec="geral">
         <div class="cartao__cab">
           <div><h2 id="tMes">Dias perdidos por mês</h2>
             <p>Cada atestado conta nos meses em que o colaborador esteve afastado.</p></div>
@@ -238,52 +320,57 @@
         <div id="gMes"></div>
       </section>
 
-      <section class="cartao c7">
+      <section class="cartao c7" data-sec="cid">
         <div class="cartao__cab"><div><h2>Por grupo de doença (capítulo da CID)</h2>
           <p>Dias perdidos em cada capítulo da CID-10. Atestado sem CID fica em "Sem CID informada".</p></div></div>
         <div id="gCap"></div>
       </section>
-      <section class="cartao c5">
+      <section class="cartao c5" data-sec="cid">
         <div class="cartao__cab"><div><h2>CIDs mais frequentes</h2><p>Os 10 códigos com mais atestados no período.</p></div></div>
         <div id="gCid"></div>
       </section>
 
-      <section class="cartao c6">
+      <section class="cartao c12" data-sec="cid">
+        <div class="cartao__cab"><div><h2>Todas as CIDs do período</h2>
+          <p>Atestados, dias e pessoas por código. Clique no título da coluna para ordenar.</p></div></div>
+        <div class="tab-rolo"><table class="tab"><thead><tr id="cidCab"></tr></thead><tbody id="cidCorpo"></tbody></table></div>
+      </section>
+
+      <section class="cartao c6" data-sec="geral">
         <div class="cartao__cab"><div><h2>Por tipo de atestado</h2><p>Quantidade de atestados.</p></div></div>
         <div id="gTipo"></div>
       </section>
-      <section class="cartao c6">
+      <section class="cartao c6" data-sec="geral">
         <div class="cartao__cab"><div><h2>Por filial</h2><p>Dias perdidos em cada unidade.</p></div></div>
         <div id="gFilial"></div>
       </section>
 
-      <section class="cartao c4">
+      <section class="cartao c4" data-sec="geral">
         <div class="cartao__cab"><div><h2>Duração dos atestados</h2><p>Quantos atestados em cada faixa de dias.</p></div></div>
         <div id="gDur"></div>
       </section>
-      <section class="cartao c4">
+      <section class="cartao c4" data-sec="geral">
         <div class="cartao__cab"><div><h2>Dia da semana em que começa</h2>
           <p>Muito atestado na segunda ou na sexta costuma merecer uma conversa.</p></div></div>
         <div id="gSemana"></div>
       </section>
-      <section class="cartao c4">
+      <section class="cartao c4" data-sec="geral">
         <div class="cartao__cab"><div><h2>Parecer da clínica</h2><p>Todos os atestados do período, inclusive reprovados.</p></div></div>
         <div id="gParecer"></div>
         <div style="margin-top:1.2rem"><h2 style="font:600 .92rem 'Poppins';color:var(--navy);margin:0 0 .6rem">Onde o atestado foi emitido</h2>
           <div id="gEntidade"></div></div>
       </section>
 
-      <section class="cartao c12">
-        <div class="cartao__cab"><div><h2>Pontos de atenção</h2>
-          <p>O que os números pedem que o RH faça. Clique no nome para ver os atestados daquela pessoa.</p></div></div>
-        <div class="alertas" id="alertas"></div>
+      <section class="cartao c12" data-sec="pessoas">
+        <div class="cartao__cab"><div><h2>Quem mais se afastou</h2><p>Os 10 colaboradores com mais dias perdidos no período.</p></div></div>
+        <div id="gTop"></div>
       </section>
 
-      <section class="cartao c12">
+      <section class="cartao c12" data-sec="pessoas">
         <div class="cartao__cab">
           <div><h2>Colaboradores com atestado no período</h2><p id="colabSub"></p></div>
           <div class="bts">
-            <input class="procura" id="procura" type="search" placeholder="Procurar nome, chapa, CID…" />
+            <input class="procura" id="procura" type="search" placeholder="Procurar nome, matrícula, CID…" />
             <button class="bt" id="btExcel" type="button">Excel</button>
             <button class="bt" id="btCsv" type="button">CSV</button>
           </div>
@@ -293,15 +380,26 @@
     </div>
 
     <p class="fonte">Dias perdidos contam só os dias que caem dentro do período escolhido (um atestado de
-      28/06 a 05/07 conta 3 dias em junho e 5 em julho). Taxa de absenteísmo por atestado = dias perdidos ÷
-      (nº de colaboradores × dias corridos do período). Capítulos e descrições da CID-10: DATASUS, versão 2008.
-      A regra dos 60 dias segue o Decreto 3.048/1999, art. 75 — a decisão sobre o encaminhamento ao INSS é do
-      médico do trabalho.</p>
+      28/06 a 05/07 conta 3 dias em junho e 5 em julho). Capítulos e descrições da CID-10: DATASUS, versão 2008.
+</p>
   </main>
 
   <div class="dica-flut" id="dica" role="tooltip"></div>
 
+  <!-- a ficha de um colaborador: todos os atestados dele, em ordem -->
+  <div class="veu" id="veuPessoa" role="dialog" aria-modal="true" aria-labelledby="pessoaNome">
+    <div class="janela">
+      <div class="janela__cab"><div><h2 id="pessoaNome"></h2><p id="pessoaSub"></p></div>
+        <button class="fechar-x" id="pessoaFechar" type="button" aria-label="Fechar">×</button></div>
+      <div class="janela__corpo"><table class="tab"><thead><tr><th>Processo</th><th>Afastamento</th>
+        <th class="n">Dias</th><th>CID</th><th>Tipo</th><th>Parecer</th></tr></thead><tbody id="pessoaCorpo"></tbody></table></div>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
 <script src="dados.js"></script>
+<script src="casca.js"></script>
 <script>
 (function () {
   "use strict";
@@ -310,7 +408,8 @@
   var SESSAO = H.sessao();
   if (!SESSAO) { window.location.replace("index.html"); return; }
   var MEDICO = SESSAO.tipo === "medico";
-  $("quem").textContent = MEDICO ? "Todas as empresas · " + SESSAO.nome : SESSAO.empresa;
+  // relatório de empresa é assunto do RH; o médico volta para a fila dele
+  if (MEDICO) { window.location.replace("painel.html"); return; }
 
   /* Os 22 capítulos da CID-10 (DATASUS). Nome curto, para caber no
      gráfico; o nome inteiro aparece ao passar o mouse. */
@@ -364,7 +463,7 @@
 
   /* ---------------- estado ---------------- */
   var TUDO = [];
-  var CHAVE_EFETIVO = "cmh_homologacao_efetivo";
+  var ULTIMO = null;                 // o que o último desenho calculou (resumo, exportação)
   var estado = {preset: "12m", medida: "dias", ordem: {k: "dias", desc: true}, procura: ""};
 
   function aplicarPreset(p) {
@@ -383,13 +482,10 @@
   }
 
   function filtrados(de, ate) {
-    var emp = $("fEmpresa").value, fil = $("fFilial").value, tipo = $("fTipo").value, par = $("fParecer").value;
+    var par = $("fParecer").value;
     return TUDO.filter(function (p) {
       if (!p.inicio || !p.fim) return false;
       if (p.fim < de || p.inicio > ate) return false;
-      if (emp && p.empresa !== emp) return false;
-      if (fil && p.filial !== fil) return false;
-      if (tipo && (!p.tipo || p.tipo.codigo !== tipo)) return false;
       if (par === "semReprovado" && p.parecer === "Reprovado") return false;
       if (par && par !== "semReprovado" && p.parecer !== par) return false;
       return true;
@@ -433,6 +529,7 @@
   }
 
   function desenhar() {
+    var caps = [], cids = [];
     var de = $("fDe").value, ate = $("fAte").value;
     if (!de || !ate) return;
     if (de > ate) { var t = de; de = ate; ate = t; $("fDe").value = de; $("fAte").value = ate; }
@@ -459,19 +556,12 @@
       return '<span class="var"><b class="' + (v > 0 ? "sobe" : "desce") + '">' + (v > 0 ? "▲ " : "▼ ") + fmt(Math.abs(v)) +
         "%</b> vs. período anterior (" + fmt(antes) + ")</span>";
     }
-    var efetivo = Number($("fEfetivo").value) || 0;
-    var taxa = efetivo ? r.dias / (efetivo * nDias) * 100 : null;
-    var taxaAnt = efetivo ? ra.dias / (efetivo * nDias) * 100 : null;
     var kpis = [
       ["Atestados", fmt(r.atestados), variacao(r.atestados, ra.atestados)],
-      ["Colaboradores afastados", fmt(r.pessoas), variacao(r.pessoas, ra.pessoas) +
-        (efetivo ? '<div class="dica">' + fmt(r.pessoas / efetivo * 100, 1) + "% do quadro</div>" : "")],
+      ["Colaboradores afastados", fmt(r.pessoas), variacao(r.pessoas, ra.pessoas)],
       ["Dias perdidos", fmt(r.dias), variacao(r.dias, ra.dias)],
-      ["Média por atestado", r.atestados ? fmt(r.dias / r.atestados, 1) + '<small style="font-size:1rem"> dias</small>' : "—",
-        '<span class="var">dias dentro do período</span>'],
-      ["Taxa de absenteísmo", taxa == null ? "—" : fmt(taxa, 2) + "%",
-        taxa == null ? '<div class="dica">Preencha o nº de colaboradores, lá em cima, para calcular.</div>'
-                     : '<span class="var">antes: ' + fmt(taxaAnt, 2) + "%</span>"]
+      ["Média por atestado", r.atestados ? fmt(r.dias / r.atestados, 1) + '<small style="font-size:1rem"> dias</small>' : "0",
+        '<span class="var">dias dentro do período</span>']
     ];
     $("kpis").innerHTML = kpis.map(function (k) {
       return '<div class="kpi"><small>' + k[0] + "</small><strong>" + k[1] + "</strong>" + k[2] + "</div>";
@@ -501,23 +591,23 @@
     }).join("") + '</div><div class="rotulos">' + meses.map(function (m) { return "<span>" + esc(m.rot) + "</span>"; }).join("") + "</div>";
 
     /* ----- capítulo da CID ----- */
-    var caps = agrupar(lista, function (p) {
-      var c = p.cid && capitulo(p.cid.codigo); return c ? c[2] + "|" + c[3] + "|" + c[4] : "—|Sem CID informada|Atestado sem CID";
+    caps = agrupar(lista, function (p) {
+      var c = p.cid && capitulo(p.cid.codigo); return c ? c[2] + "|" + c[3] + "|" + c[4] : "|Sem CID informada|Atestado sem CID";
     }, de, ate).sort(function (x, y) { return y.dias - x.dias; });
     barras("gCap", caps.map(function (g) {
       var p = g.nome.split("|");
-      return {pre: p[0] !== "—" ? p[0] : "", nome: p[1], valor: g.dias,
+      return {pre: p[0], nome: p[1], valor: g.dias,
         dica: "<b>" + esc(p[2]) + "</b><br>" + fmt(g.dias) + " dias · " + fmt(g.atestados) + " atestado(s) · " + fmt(g.nPessoas) + " pessoa(s)"};
     }), "dias");
 
     /* ----- CIDs ----- */
     var nomesCid = {};
     lista.forEach(function (p) { if (p.cid) nomesCid[p.cid.codigo] = p.cid.nome; });
-    var cids = agrupar(lista.filter(function (p) { return p.cid; }), function (p) { return p.cid.codigo; }, de, ate)
+    cids = agrupar(lista.filter(function (p) { return p.cid; }), function (p) { return p.cid.codigo; }, de, ate)
       .sort(function (x, y) { return y.atestados - x.atestados || y.dias - x.dias; }).slice(0, 10);
     barras("gCid", cids.map(function (g) {
       return {pre: g.nome, nome: nomesCid[g.nome], valor: g.atestados,
-        dica: "<b>" + esc(g.nome) + " — " + esc(nomesCid[g.nome]) + "</b><br>" + fmt(g.atestados) + " atestado(s) · " +
+        dica: "<b>" + esc(g.nome) + ": " + esc(nomesCid[g.nome]) + "</b><br>" + fmt(g.atestados) + " atestado(s) · " +
           fmt(g.dias) + " dias · " + fmt(g.nPessoas) + " pessoa(s)"};
     }));
 
@@ -529,7 +619,7 @@
     barras("gFilial", agrupar(lista, function (p) { return p.filial || "Sem filial"; }, de, ate)
       .sort(function (x, y) { return y.dias - x.dias; }).map(function (g) {
         return {nome: g.nome, valor: g.dias, dica: "<b>" + esc(g.nome) + "</b><br>" + fmt(g.dias) + " dias · " + fmt(g.atestados) +
-          " atestado(s) · " + fmt(g.nPessoas) + " pessoa(s)" + (efetivo ? "" : "")};
+          " atestado(s) · " + fmt(g.nPessoas) + " pessoa(s)"};
       }), "dias");
     barras("gEntidade", agrupar(lista, function (p) { return p.entidade ? p.entidade.nome : "Não informada"; }, de, ate)
       .sort(function (x, y) { return y.atestados - x.atestados; }).slice(0, 6).map(function (g) {
@@ -554,8 +644,7 @@
 
     /* ----- parecer (conta TODOS, inclusive reprovados) ----- */
     var todosPer = TUDO.filter(function (p) {
-      return p.inicio && p.fim && !(p.fim < de || p.inicio > ate) &&
-        (!$("fEmpresa").value || p.empresa === $("fEmpresa").value) && (!$("fFilial").value || p.filial === $("fFilial").value);
+      return p.inicio && p.fim && !(p.fim < de || p.inicio > ate);
     });
     var cont = {Aprovado: 0, Reprovado: 0, Pendente: 0};
     todosPer.forEach(function (p) { cont[p.parecer] = (cont[p.parecer] || 0) + 1; });
@@ -568,125 +657,16 @@
       return '<span><i style="background:' + cores[k] + '"></i>' + k + ": <b>" + fmt(cont[k]) + "</b> (" + fmt(cont[k] / tot * 100) + "%)</span>";
     }).join("") + "</div>" : '<div class="vazio-g">Nenhum atestado no período.</div>';
 
-    alertas(lista, de, ate, todosPer);
     colaboradores(lista, de, ate);
-  }
-
-  /* =================================================================
-     PONTOS DE ATENÇÃO — o que exige ação do RH
-
-     1. REGRA DOS 60 DIAS (Decreto 3.048/1999, art. 75, §§ 4º e 5º):
-        atestados pela MESMA doença que, somados dentro de 60 dias,
-        passam de 15 dias → a partir do 16º dia o afastamento é do INSS.
-        "Mesma doença" aqui = mesma categoria da CID (as 3 primeiras
-        posições: M54.5 e M54.2 contam juntas). Quem decide é o médico;
-        a tela só aponta.
-     2. Afastamento único maior que 15 dias — encaminhar ao INSS.
-     3. Recorrência: 3 ou mais atestados da mesma pessoa no período.
-     4. Concentração em segunda/sexta acima do esperado (40%, o dobro
-        do natural para dois dias úteis de cinco).
-     5. Processos parados à espera de documento da empresa.
-     ================================================================= */
-  function alertas(lista, de, ate, todosPer) {
-    var out = [];
-    var porPessoa = {};
-    lista.forEach(function (p) {
-      var k = p.empresa + "|" + p.chapa;
-      (porPessoa[k] = porPessoa[k] || []).push(p);
-    });
-
-    Object.keys(porPessoa).forEach(function (k) {
-      var ps = porPessoa[k].slice().sort(function (a, b) { return a.inicio < b.inicio ? -1 : 1; });
-      var nome = ps[0].nome, chapa = ps[0].chapa;
-      // regra dos 60 dias, por categoria da CID
-      var porCat = {};
-      ps.forEach(function (p) { if (p.cid && p.parecer !== "Reprovado") (porCat[p.cid.codigo.slice(0, 3)] = porCat[p.cid.codigo.slice(0, 3)] || []).push(p); });
-      Object.keys(porCat).forEach(function (cat) {
-        var g = porCat[cat];
-        if (g.length < 2) return;
-        for (var i = 0; i < g.length; i++) {
-          var soma = 0, janela = [];
-          for (var j = i; j < g.length; j++) {
-            if (diasEntre(g[i].inicio, g[j].inicio) > 60) break;
-            soma += g[j].dias; janela.push(g[j]);
-          }
-          if (janela.length > 1 && soma > 15) {
-            out.push({nivel: "forte", eti: "INSS · 60 dias", pessoa: nome, chapa: chapa,
-              txt: fmt(janela.length) + " atestados pela CID " + cat + " (" + esc(janela.map(function (x) { return x.cid.codigo; }).join(", ")) +
-                ") somam " + fmt(soma) + " dias entre " + dm(janela[0].inicio) + " e " + dm(janela[janela.length - 1].fim) +
-                ". Pela regra dos 60 dias, o que passar de 15 pode caber ao INSS — leve ao médico do trabalho."});
-            return;
-          }
-        }
-      });
-      ps.forEach(function (p) {
-        if (p.dias > 15 && p.parecer !== "Reprovado") out.push({nivel: "forte", eti: "Mais de 15 dias", pessoa: nome, chapa: chapa,
-          txt: "Atestado de " + fmt(p.dias) + " dias (" + dm(p.inicio) + " a " + dm(p.fim) + ", processo " + esc(p.processo) +
-            "). A empresa paga os 15 primeiros; do 16º em diante, o colaborador deve ser encaminhado ao INSS."});
-      });
-      if (ps.length >= 3) out.push({nivel: "atencao", eti: "Recorrência", pessoa: nome, chapa: chapa,
-        txt: fmt(ps.length) + " atestados no período, somando " + fmt(ps.reduce(function (s, p) { return s + sobrepoe(p, de, ate); }, 0)) +
-          " dias. Vale uma conversa, ou avaliação com o médico do trabalho."});
-    });
-
-    var segSex = lista.filter(function (p) { var d = d0(p.inicio).getDay(); return d === 1 || d === 5; }).length;
-    if (lista.length >= 10 && segSex / lista.length > 0.4) out.push({nivel: "info", eti: "Padrão", pessoa: "",
-      txt: fmt(segSex / lista.length * 100) + "% dos atestados começam na segunda ou na sexta — acima dos 40% que chamam atenção."});
-
-    var parados = todosPer.filter(function (p) { return p.atividade === "Aguardando documento"; });
-    if (parados.length) out.push({nivel: "atencao", eti: "Pendência", pessoa: "",
-      txt: fmt(parados.length) + " processo(s) parados esperando documento da empresa. " +
-        '<a href="painel.html">Ver na lista</a>'});
-
-    /* UM GRUPO POR TIPO DE ALERTA, e não um cartão por pessoa: com 20
-       afastamentos longos, a lista virava uma parede vermelha e o que
-       importava (a regra dos 60 dias, que ninguém percebe sozinho)
-       sumia no meio. Cada grupo mostra 3 e abre o resto num clique. */
-    var ordem = {forte: 0, atencao: 1, info: 2};
-    var EXPLICA = {
-      "INSS · 60 dias": "Atestados pela mesma doença que, somados em 60 dias, passam de 15 dias.",
-      "Mais de 15 dias": "Afastamentos longos: do 16º dia em diante o pagamento é do INSS.",
-      "Recorrência": "Três ou mais atestados da mesma pessoa no período."
-    };
-    var grupos = {}, ordemGrupos = [];
-    out.forEach(function (a) {
-      if (!grupos[a.eti]) { grupos[a.eti] = []; ordemGrupos.push(a.eti); }
-      grupos[a.eti].push(a);
-    });
-    ordemGrupos.sort(function (x, y) {
-      var px = x === "INSS · 60 dias" ? -1 : ordem[grupos[x][0].nivel], py = y === "INSS · 60 dias" ? -1 : ordem[grupos[y][0].nivel];
-      return px - py;
-    });
-    var ico = {forte: "⛔", atencao: "⚠️", info: "ℹ️"};
-    function cartao(a) {
-      return '<div class="alerta' + (a.nivel === "forte" ? " alerta--forte" : a.nivel === "info" ? " alerta--info" : "") + '">' +
-        '<span class="alerta__ico" aria-hidden="true">' + ico[a.nivel] + "</span><div>" +
-        (a.pessoa ? "<b>" + esc(a.pessoa) + "</b> · chapa " + esc(a.chapa) : '<span class="etiqueta etiqueta--' + a.nivel + '">' + esc(a.eti) + "</span>") +
-        "<p>" + a.txt + "</p></div>" +
-        (a.pessoa ? '<a href="painel.html#' + encodeURIComponent(a.chapa) + '">Ver atestados</a>' : "<span></span>") + "</div>";
-    }
-    $("alertas").innerHTML = out.length ? ordemGrupos.map(function (eti, gi) {
-      var g = grupos[eti];
-      if (!g[0].pessoa) return g.map(cartao).join("");
-      return '<div class="grupo-al"><div class="grupo-al__cab"><span class="etiqueta etiqueta--' + g[0].nivel + '">' + esc(eti) + "</span>" +
-        "<b>" + fmt(g.length) + " colaborador" + (g.length > 1 ? "es" : "") + "</b>" +
-        (EXPLICA[eti] ? '<span class="grupo-al__exp">' + EXPLICA[eti] + "</span>" : "") + "</div>" +
-        '<div class="alertas">' + g.slice(0, 3).map(cartao).join("") +
-        (g.length > 3 ? '<div class="alertas mais" id="mais' + gi + '" hidden>' + g.slice(3).map(cartao).join("") + "</div>" +
-          '<button class="bt ver-mais" type="button" data-alvo="mais' + gi + '">Ver os outros ' + fmt(g.length - 3) + "</button>" : "") +
-        "</div></div>";
-    }).join("") : '<div class="alerta alerta--info"><span class="alerta__ico">✅</span><div><b>Nada pedindo ação neste período.</b></div><span></span></div>';
-    Array.prototype.forEach.call($("alertas").querySelectorAll(".ver-mais"), function (b) {
-      b.addEventListener("click", function () {
-        var alvo = $(b.getAttribute("data-alvo"));
-        alvo.hidden = !alvo.hidden;
-        b.textContent = alvo.hidden ? "Ver os outros " + alvo.children.length : "Mostrar menos";
-      });
-    });
+    tabelaCids(lista, de, ate);
+    topPessoas(lista, de, ate);
+    ULTIMO = {lista: lista, de: de, ate: ate, r: r, ra: ra, caps: caps, cids: cids,
+              };
+    escreverResumo();
   }
 
   /* ---------------- tabela de colaboradores ---------------- */
-  var COLS = [["nome", "Colaborador"], ["chapa", "Chapa"], ["filial", "Filial"], ["atestados", "Atestados"],
+  var COLS = [["nome", "Colaborador"], ["chapa", "Matrícula"], ["filial", "Filial"], ["atestados", "Atestados"],
               ["dias", "Dias perdidos"], ["cids", "CIDs"], ["ultimo", "Último atestado"]];
   var LINHAS = [];
   function colaboradores(lista, de, ate) {
@@ -716,7 +696,7 @@
       return '<th data-k="' + c[0] + '">' + c[1] + (k === c[0] ? '<span class="s">' + (estado.ordem.desc ? "▼" : "▲") + "</span>" : "") + "</th>";
     }).join("");
     $("colabCorpo").innerHTML = ls.length ? ls.map(function (l) {
-      return "<tr>" + cols.map(function (c) {
+      return '<tr class="clica" data-pessoa="' + esc(l.empresa + "|" + l.chapa) + '">' + cols.map(function (c) {
         var v = l[c[0]];
         if (c[0] === "ultimo") v = dm(v);
         var num = c[0] === "atestados" || c[0] === "dias";
@@ -734,6 +714,150 @@
     return {cols: cols, linhas: ls};
   }
   $("procura").addEventListener("input", function () { estado.procura = $("procura").value; tabela(); });
+  $("colabCorpo").addEventListener("click", function (ev) {
+    var tr = ev.target.closest("tr[data-pessoa]");
+    if (tr) abrirPessoa(tr.getAttribute("data-pessoa"));
+  });
+
+  /* ---------------- a ficha de um colaborador ----------------
+     Todos os atestados da pessoa, e não só os do período: recorrência
+     se enxerga na linha do tempo inteira. */
+  function abrirPessoa(chave) {
+    var ps = TUDO.filter(function (p) { return p.empresa + "|" + p.chapa === chave; })
+      .sort(function (a, b) { return a.inicio < b.inicio ? 1 : -1; });
+    if (!ps.length) return;
+    var dias = ps.reduce(function (s, p) { return s + (p.parecer === "Reprovado" ? 0 : p.dias); }, 0);
+    $("pessoaNome").textContent = ps[0].nome;
+    $("pessoaSub").textContent = "Matrícula " + ps[0].chapa + (ps[0].filial ? " · " + ps[0].filial : "") + " · " +
+      ps.length + " atestado(s) no total, " + fmt(dias) + " dia(s) sem contar reprovados";
+    $("pessoaCorpo").innerHTML = ps.map(function (p) {
+      var cor = {Aprovado: "var(--ok)", Reprovado: "var(--erro)"}[p.parecer] || "var(--muted)";
+      return "<tr><td><a href=\"processo.html?id=" + encodeURIComponent(p.id) + "\">" + esc(p.processo) + "</a></td><td>" +
+        dm(p.inicio) + " a " + dm(p.fim) + '</td><td class="n">' + fmt(p.dias) + "</td><td>" +
+        esc(p.cid ? p.cid.codigo + ": " + p.cid.nome : "Sem CID") + "</td><td>" + esc(p.tipo ? p.tipo.nome : "") +
+        '</td><td style="color:' + cor + ';font-weight:500">' + esc(p.parecer) + "</td></tr>";
+    }).join("");
+    $("veuPessoa").classList.add("abre");
+  }
+  $("pessoaFechar").addEventListener("click", function () { $("veuPessoa").classList.remove("abre"); });
+  $("veuPessoa").addEventListener("mousedown", function (ev) { if (ev.target === $("veuPessoa")) $("veuPessoa").classList.remove("abre"); });
+  document.addEventListener("keydown", function (ev) { if (ev.key === "Escape") $("veuPessoa").classList.remove("abre"); });
+
+  /* ---------------- quem mais se afastou ---------------- */
+  function topPessoas(lista, de, ate) {
+    var g = {};
+    lista.forEach(function (p) {
+      var k = p.empresa + "|" + p.chapa;
+      if (!g[k]) g[k] = {k: k, nome: p.nome, dias: 0, n: 0};
+      g[k].dias += sobrepoe(p, de, ate); g[k].n++;
+    });
+    var top = Object.keys(g).map(function (k) { return g[k]; })
+      .sort(function (a, b) { return b.dias - a.dias || b.n - a.n; }).slice(0, 10);
+    barras("gTop", top.map(function (x) {
+      return {nome: x.nome, valor: x.dias, dica: "<b>" + esc(x.nome) + "</b><br>" + fmt(x.dias) + " dias · " + fmt(x.n) +
+        " atestado(s)<br>clique para ver os atestados", pessoa: x.k};
+    }), "dias");
+    Array.prototype.forEach.call($("gTop").querySelectorAll(".barra"), function (el, i) {
+      el.style.cursor = "pointer";
+      el.addEventListener("click", function () { abrirPessoa(top[i].k); });
+    });
+  }
+
+  /* ---------------- todas as CIDs ---------------- */
+  var ordemCid = {k: "atestados", desc: true};
+  var LINHAS_CID = [];
+  function tabelaCids(lista, de, ate) {
+    var g = {};
+    lista.forEach(function (p) {
+      var cod = p.cid ? p.cid.codigo : "";
+      if (!g[cod]) g[cod] = {codigo: cod, nome: p.cid ? p.cid.nome : "Sem CID informada",
+        capitulo: p.cid && capitulo(cod) ? capitulo(cod)[3] : "", atestados: 0, dias: 0, pessoas: {}};
+      g[cod].atestados++; g[cod].dias += sobrepoe(p, de, ate); g[cod].pessoas[p.empresa + "|" + p.chapa] = 1;
+    });
+    LINHAS_CID = Object.keys(g).map(function (k) { g[k].npessoas = Object.keys(g[k].pessoas).length; return g[k]; });
+    desenharCids();
+  }
+  function desenharCids() {
+    var cols = [["codigo", "CID"], ["nome", "Descrição"], ["capitulo", "Grupo"], ["atestados", "Atestados"],
+                ["dias", "Dias"], ["npessoas", "Pessoas"]];
+    var k = ordemCid.k, s = ordemCid.desc ? -1 : 1;
+    var ls = LINHAS_CID.slice().sort(function (a, b) {
+      var x = a[k], y = b[k];
+      if (typeof x === "string") { x = crua(x); y = crua(y); }
+      return x < y ? -s : x > y ? s : 0;
+    });
+    $("cidCab").innerHTML = cols.map(function (c) {
+      return '<th data-k="' + c[0] + '">' + c[1] + (k === c[0] ? '<span class="s">' + (ordemCid.desc ? "▼" : "▲") + "</span>" : "") + "</th>";
+    }).join("");
+    $("cidCorpo").innerHTML = ls.length ? ls.map(function (l) {
+      return "<tr>" + cols.map(function (c) {
+        var num = typeof l[c[0]] === "number";
+        return '<td class="' + (num ? "n" : "") + '">' + esc(num ? fmt(l[c[0]]) : l[c[0]]) + "</td>";
+      }).join("") + "</tr>";
+    }).join("") : '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.2rem">Nenhum atestado no período.</td></tr>';
+    Array.prototype.forEach.call($("cidCab").querySelectorAll("th"), function (th) {
+      th.addEventListener("click", function () {
+        var kk = th.getAttribute("data-k");
+        if (ordemCid.k === kk) ordemCid.desc = !ordemCid.desc;
+        else ordemCid = {k: kk, desc: kk === "atestados" || kk === "dias" || kk === "npessoas"};
+        desenharCids();
+      });
+    });
+  }
+
+  /* ---------------- o resumo em texto ----------------
+     Escrito como gente escreve, para colar num e-mail sem editar. */
+  function escreverResumo() {
+    var u = ULTIMO;
+    if (!u) return;
+    var r = u.r, ra = u.ra;
+    if (!r.atestados) { $("resumo").textContent = "Nenhum atestado no período escolhido."; return; }
+    function comparar(a, b, oque) {
+      if (!b) return "";
+      var v = (a - b) / b * 100;
+      if (Math.abs(v) < 0.5) return ", o mesmo de " + oque + " no período anterior";
+      return " (" + (v > 0 ? "alta" : "queda") + " de " + fmt(Math.abs(v)) + "% em relação ao período anterior)";
+    }
+    var capTop = u.caps.filter(function (c) { return c.nome.indexOf("|") !== 0; })[0];
+    var cidTop = u.cids[0];
+    var partes = [
+      "De " + dm(u.de) + " a " + dm(u.ate) + ", " + fmt(r.pessoas) + " colaborador(es) apresentaram " + fmt(r.atestados) +
+        " atestado(s), somando " + fmt(r.dias) + " dia(s) de afastamento" + comparar(r.dias, ra.dias, "dias") + "."
+    ];
+    if (capTop) partes.push("O grupo de doenças com mais dias perdidos foi " + capTop.nome.split("|")[2].toLowerCase() +
+      " (" + fmt(capTop.dias) + " dias).");
+    if (cidTop) partes.push("A CID mais frequente foi " + cidTop.nome + ": " + (function () {
+      var n = u.lista.filter(function (p) { return p.cid && p.cid.codigo === cidTop.nome; })[0];
+      return n ? n.cid.nome.toLowerCase() : "";
+    })() + " (" + fmt(cidTop.atestados) + " atestado(s)).");
+    $("resumo").textContent = partes.join(" ");
+  }
+  $("btCopiarResumo").addEventListener("click", function () {
+    var txt = $("resumo").textContent;
+    (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function () {
+      $("btCopiarResumo").textContent = "Copiado ✓";
+      setTimeout(function () { $("btCopiarResumo").textContent = "Copiar"; }, 1800);
+    }, function () { window.prompt("Copie o resumo:", txt); });
+  });
+
+  /* ---------------- as seções ---------------- */
+  function mostrarSecao(sec) {
+    Array.prototype.forEach.call(document.querySelectorAll("#secoes button"), function (b) {
+      b.classList.toggle("on", b.getAttribute("data-sec") === sec);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".grade > [data-sec]"), function (c) {
+      c.classList.toggle("sec-on", c.getAttribute("data-sec") === sec);
+    });
+    try { sessionStorage.setItem("cmh_homol_rel_secao", sec); } catch (e) { /* segue */ }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("#secoes button"), function (b) {
+    b.addEventListener("click", function () { mostrarSecao(b.getAttribute("data-sec")); });
+  });
+  (function () {
+    var s = "geral";
+    try { s = sessionStorage.getItem("cmh_homol_rel_secao") || "geral"; } catch (e) { /* segue */ }
+    mostrarSecao(s);
+  })();
 
   /* ---------------- levar embora ---------------- */
   function baixar(nome, texto, tipo) {
@@ -772,6 +896,29 @@
     baixar(nomeArq("xls"), t, "application/vnd.ms-excel");
   });
   $("btImprimir").addEventListener("click", function () { window.print(); });
+  $("btExcelTudo").addEventListener("click", function () {
+    if (!ULTIMO) return;
+    function x(t) { return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+    var cols = ["Processo", "Colaborador", "Matrícula", "Filial", "Início", "Fim", "Dias", "Dias no período", "CID",
+                "Descrição da CID", "Tipo", "Entidade", "Parecer", "Motivo", "Enviado em"];
+    var linhas = ULTIMO.lista.slice().sort(function (a, b) { return a.inicio < b.inicio ? -1 : 1; }).map(function (p) {
+      return [p.processo, p.nome, p.chapa, p.filial, dm(p.inicio), dm(p.fim), p.dias, sobrepoe(p, ULTIMO.de, ULTIMO.ate),
+        p.cid ? p.cid.codigo : "", p.cid ? p.cid.nome : "", p.tipo ? p.tipo.nome : "", p.entidade ? p.entidade.nome : "",
+        p.parecer, p.parecerObs || "",
+        p.abertura ? new Date(p.abertura).toLocaleString("pt-BR") : ""];
+    });
+    var t = '<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?>' +
+      '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+      '<Styles><Style ss:ID="c"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#0B5AA5" ss:Pattern="Solid"/></Style></Styles>' +
+      '<Worksheet ss:Name="Atestados"><Table>' + cols.map(function () { return '<Column ss:Width="120"/>'; }).join("") +
+      "<Row>" + cols.map(function (c) { return '<Cell ss:StyleID="c"><Data ss:Type="String">' + x(c) + "</Data></Cell>"; }).join("") + "</Row>" +
+      linhas.map(function (l) {
+        return "<Row>" + l.map(function (v) {
+          return '<Cell><Data ss:Type="' + (typeof v === "number" ? "Number" : "String") + '">' + x(v) + "</Data></Cell>";
+        }).join("") + "</Row>";
+      }).join("") + "</Table></Worksheet></Workbook>";
+    baixar("atestados-" + ULTIMO.de + "-a-" + ULTIMO.ate + ".xls", t, "application/vnd.ms-excel");
+  });
 
   /* ---------------- ligar os filtros ---------------- */
   Array.prototype.forEach.call(document.querySelectorAll("#presets button"), function (b) {
@@ -783,11 +930,7 @@
       desenhar();
     });
   });
-  ["fEmpresa", "fFilial", "fTipo", "fParecer"].forEach(function (id) { $(id).addEventListener("change", desenhar); });
-  $("fEfetivo").addEventListener("input", function () {
-    try { localStorage.setItem(CHAVE_EFETIVO, $("fEfetivo").value); } catch (e) { /* segue */ }
-    desenhar();
-  });
+  $("fParecer").addEventListener("change", desenhar);
   Array.prototype.forEach.call(document.querySelectorAll("#medida button"), function (b) {
     b.addEventListener("click", function () {
       Array.prototype.forEach.call(document.querySelectorAll("#medida button"), function (o) { o.classList.remove("on"); });
@@ -795,20 +938,13 @@
     });
   });
 
-  function encher(id, valores) {
-    valores.sort().forEach(function (v) { var o = document.createElement("option"); o.value = v; o.textContent = v; $(id).appendChild(o); });
-  }
-
   H.listarProcessos().then(function (lista) {
     TUDO = lista;
-    var emp = {}, fil = {};
-    lista.forEach(function (p) { emp[p.empresa] = 1; if (p.filial) fil[p.filial] = 1; });
-    if (MEDICO) { $("caixaEmpresa").style.display = ""; encher("fEmpresa", Object.keys(emp)); }
-    encher("fFilial", Object.keys(fil));
-    H.TIPOS.forEach(function (t) { var o = document.createElement("option"); o.value = t.codigo; o.textContent = t.nome; $("fTipo").appendChild(o); });
-    try { var e = localStorage.getItem(CHAVE_EFETIVO); if (e) $("fEfetivo").value = e; } catch (er) { /* segue */ }
     aplicarPreset("12m");
     desenhar();
+  }, function (e) {
+    $("avisoCarga").textContent = e.message + " Recarregue a página para tentar de novo.";
+    $("avisoCarga").style.display = "block";
   });
 })();
 </script>

@@ -61,6 +61,15 @@
       cursor:pointer;display:inline-flex;align-items:center;gap:.4rem;transition:background .15s}
     .bt-topo:hover{background:rgba(255,255,255,.26)}
 
+    /* o que cada um vê: o médico não precisa de requisitante, filial,
+       colunas, densidade nem exportação — e o RH não filtra por empresa */
+    body.eh-medico .so-rh, body:not(.eh-medico) .so-medico{display:none!important}
+
+    /* ---------- título ---------- */
+    .cab-lista{background:#fff;padding:1.1rem 1.2rem .2rem}
+    .cab-lista h1{font:700 1.35rem/1.2 'Poppins',sans-serif;color:var(--navy);margin:0}
+    .cab-lista p{margin:.25rem 0 0;color:var(--muted);font-size:.88rem}
+
     /* ---------- abas ---------- */
     .abas{background:#fff;border-bottom:1px solid var(--line);padding:0 1.2rem;
       display:flex;gap:.3rem;overflow-x:auto}
@@ -198,46 +207,68 @@
       .topo,.abas,.barra,.gaveta,.pe,.demo{display:none}
       .rolo{border:none;overflow:visible}
     }
+    /* =================================================================
+       ENXUTO — o peso da referência (o sistema que o RH já usa): fonte
+       miúda, sem negrito, linhas finas, sem caixas pesadas. A lista é
+       ferramenta de consulta rápida; o que chama atenção é o dado, não a
+       moldura.
+       ================================================================= */
+    body{font-size:14px;background:#fff}
+    .cab-lista{padding:1rem 1.2rem .1rem}
+    .cab-lista h1{font:600 1.08rem/1.3 'Poppins',sans-serif}
+    .cab-lista p{font-size:.8rem;margin-top:.1rem}
+    .abas{padding:0 .8rem;gap:0}
+    .aba{font:500 .8rem 'Inter',sans-serif;text-transform:uppercase;letter-spacing:.02em;
+      padding:.85rem .9rem .7rem;border-bottom-width:2px;color:#5b6b7b}
+    .aba.on{color:var(--blue-700)}
+    .aba .conta,.aba.on .conta{background:none;color:inherit;padding:0;margin-left:.3rem;
+      font-size:.78rem;font-weight:500;opacity:.75}
+    .barra{padding:.3rem .8rem;border-bottom:none;gap:.1rem}
+    .ferr{font:500 .76rem 'Inter',sans-serif;letter-spacing:.02em;padding:.4rem .5rem;gap:.35rem}
+    .ferr svg{width:14px;height:14px}
+    .bt-novo{margin-left:.4rem;padding:.38rem .75rem;font:500 .8rem 'Inter',sans-serif;
+      border-radius:8px;box-shadow:none;background:var(--blue-700)}
+    .procurar{min-width:min(260px,100%)}
+    .procurar input{border:none;border-bottom:1px solid var(--line);border-radius:0;
+      background:transparent;padding:.45rem .4rem .45rem 2rem;font-size:.86rem}
+    .procurar input:focus{box-shadow:none;border-bottom-color:var(--blue-500);background:transparent}
+    .gaveta{padding:.9rem 1rem;box-shadow:none}
+    .gaveta h3{font:600 .74rem 'Inter',sans-serif}
+    .cpo label{font:500 .72rem 'Inter',sans-serif}
+    .cpo input,.cpo select{padding:.42rem .55rem;font-size:.84rem;border-width:1px;border-radius:7px}
+    .bt{padding:.42rem .8rem;font:500 .8rem 'Inter',sans-serif;border-width:1px;border-radius:7px}
+    .bt--forte{box-shadow:none;background:var(--blue-700)}
+    .quadro{padding:0 .8rem}
+    .rolo{border-radius:6px 6px 0 0;border-color:var(--line)}
+    table{font-size:.86rem}
+    thead th{font:500 .82rem 'Inter',sans-serif;text-transform:none;letter-spacing:0;color:#2b3a4a;
+      padding:.62rem .75rem;border-bottom:1px solid var(--line)}
+    tbody td{padding:.56rem .75rem;border-bottom-color:#eef2f6}
+    tbody tr:hover td{background:#f7fafc}
+    body.dens-compacta tbody td{padding:.34rem .75rem}
+    body.dens-larga tbody td{padding:.85rem .75rem}
+    .nome,.dias{font-weight:400}
+    a.abre,.nome a.abre{font-weight:400;color:var(--ink)}
+    tbody tr:hover a.abre{color:var(--blue-700)}
+    .selo{background:none!important;padding:0;font-size:.84rem;font-weight:500}
+    .selo--pend{color:#5b6b7b}
+    .bt-pdf{padding:.18rem .45rem;border-width:1px;border-radius:6px;font-size:.66rem}
+    .pe{border-radius:0 0 6px 6px;padding:.4rem .9rem;font-size:.8rem;margin-bottom:.8rem}
+    .pe select{padding:.2rem .4rem;font-size:.8rem;border-width:1px}
+    .seta-bt{width:28px;height:28px;border-width:1px;border-radius:6px}
+
   </style>
 </head>
-<body>
+<body data-pagina="painel">
 
-  <div class="demo">
-    <b>Tela de demonstração.</b> Os processos são inventados e ficam guardados
-    só neste navegador. Quando o cadastro das empresas estiver pronto, ela
-    passa a mostrar os atestados de verdade.
-    <button type="button" id="btZerar" style="margin-left:.4rem;background:none;border:none;
-      color:#5a4500;text-decoration:underline;cursor:pointer;font:inherit">recomeçar a demonstração</button>
+  <!-- aviso de erro de carga: só aparece se a lista não vier -->
+  <div class="demo" id="avisoCarga" style="display:none" role="alert"></div>
+
+
+  <div class="cab-lista">
+    <h1 id="tituloTela">Processos</h1>
+    <p id="subTela"></p>
   </div>
-
-  <header class="topo">
-    <div class="topo__marca">
-      <img src="../assets/logo.png" alt="Clínica Medicina Humana"
-           onerror="this.style.display='none'" />
-      <div class="topo__titulo" id="tituloTela">Gestão de atestados
-        <span>Clínica Medicina Humana</span></div>
-    </div>
-    <div class="topo__dir">
-      <div class="topo__quem">entrou como<b id="quem">Empresa de exemplo</b></div>
-      <a class="bt-topo" href="relatorios.html" style="text-decoration:none">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
-        Relatórios</a>
-      <button class="bt-topo" id="btAjuda" type="button" title="Como usar esta tela">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2" stroke-linecap="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 4.2 2.7c-.8.4-1.3 1-1.3 1.9"/>
-          <path d="M12 17h.01"/></svg>
-        Ajuda
-      </button>
-      <button class="bt-topo" id="btSair" type="button">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
-        Sair
-      </button>
-    </div>
-  </header>
 
   <nav class="abas">
     <button class="aba on" data-situacao="aberto" type="button">Processos em aberto
@@ -247,7 +278,7 @@
   </nav>
 
   <div class="barra">
-    <button class="ferr" id="ferrColunas" type="button">
+    <button class="so-rh ferr" id="ferrColunas" type="button">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" aria-hidden="true"><path d="M4 4h4v16H4zM10 4h4v16h-4zM16 4h4v16h-4z"/></svg>
       Colunas</button>
@@ -256,17 +287,17 @@
            stroke-width="2" stroke-linecap="round" aria-hidden="true">
         <path d="M3 5h18M6 12h12M10 19h4"/></svg>
       Filtros <span class="pino" id="pinoFiltros" style="display:none">0</span></button>
-    <button class="ferr" id="ferrDensidade" type="button">
+    <button class="ferr" id="btAtualizar" type="button" title="Buscar os processos de novo">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="2" stroke-linecap="round" aria-hidden="true">
-        <path d="M4 6h16M4 12h16M4 18h16"/></svg>
-      Densidade</button>
-    <button class="ferr" id="ferrExportar" type="button">
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>
+      <span id="btAtualizarTxt">Atualizar</span></button>
+    <button class="so-rh ferr" id="ferrExportar" type="button">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
       Exportar</button>
-    <button class="bt-novo" id="btNovo" type="button">
+    <button class="so-rh bt-novo" id="btNovo" type="button">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
       Novo atestado</button>
@@ -275,7 +306,7 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" aria-hidden="true">
         <circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
-      <input id="busca" type="search" placeholder="Procurar em tudo — nome, chapa, processo…"
+      <input id="busca" type="search" placeholder="Procurar por nome, matrícula, processo…"
              autocomplete="off" />
     </div>
   </div>
@@ -295,14 +326,19 @@
     <div class="grade">
       <div class="cpo"><label for="fNome">Colaborador</label>
         <input id="fNome" type="text" placeholder="parte do nome" autocomplete="off" /></div>
-      <div class="cpo"><label for="fChapa">Chapa</label>
-        <input id="fChapa" type="text" placeholder="matrícula" autocomplete="off" /></div>
-      <div class="cpo"><label for="fRequisitante">Requisitante</label>
-        <select id="fRequisitante"><option value="">todos</option></select></div>
-      <div class="cpo"><label for="fAtividade">Atividade atual</label>
-        <select id="fAtividade"><option value="">todas</option></select></div>
-      <div class="cpo"><label for="fFilial">Filial</label>
-        <select id="fFilial"><option value="">todas</option></select></div>
+      <div class="cpo"><label for="fChapa">Matrícula</label>
+        <input id="fChapa" type="text" placeholder="número da matrícula" autocomplete="off" /></div>
+      <div class="cpo so-medico"><label for="fEmpresa">Empresa</label>
+        <select id="fEmpresa"><option value="">Todas</option></select></div>
+      <div class="cpo so-medico"><label for="fParecerF">Parecer</label>
+        <select id="fParecerF"><option value="">Todos</option><option>Aprovado</option>
+          <option>Reprovado</option><option>Pendente</option></select></div>
+      <div class="cpo so-rh"><label for="fRequisitante">Requisitante</label>
+        <select id="fRequisitante"><option value="">Todos</option></select></div>
+      <div class="cpo so-rh"><label for="fAtividade">Atividade atual</label>
+        <select id="fAtividade"><option value="">Todas</option></select></div>
+      <div class="cpo so-rh"><label for="fFilial">Filial</label>
+        <select id="fFilial"><option value="">Todas</option></select></div>
       <div class="cpo"><label for="fDe">Início a partir de</label>
         <input id="fDe" type="date" /></div>
       <div class="cpo"><label for="fAte">Início até</label>
@@ -317,21 +353,11 @@
     </div>
   </section>
 
-  <!-- ---------------- gaveta: densidade ---------------- -->
-  <section class="gaveta" id="gavetaDensidade">
-    <h3>Altura das linhas</h3>
-    <div class="densidades">
-      <button class="dens" data-dens="compacta" type="button">Compacta</button>
-      <button class="dens on" data-dens="media" type="button">Padrão</button>
-      <button class="dens" data-dens="larga" type="button">Confortável</button>
-    </div>
-  </section>
-
   <!-- ---------------- gaveta: exportar ---------------- -->
   <section class="gaveta" id="gavetaExportar">
     <h3>Levar esta lista embora</h3>
     <p style="margin:-.4rem 0 .9rem;color:var(--muted);font-size:.88rem">
-      Sai <b id="quantasExportar">0</b> linha(s) — exatamente o que está na
+      Sai <b id="quantasExportar">0</b> linha(s): exatamente o que está na
       tela agora, com os filtros e a ordem escolhidos, e não só a página
       aberta.</p>
     <div class="gaveta__pe">
@@ -377,7 +403,10 @@
     </div>
   </main>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
 <script src="dados.js"></script>
+<script src="casca.js"></script>
 <script>
 (function () {
   "use strict";
@@ -396,12 +425,25 @@
   if (!SESSAO) { window.location.replace("index.html"); return; }
   var MEDICO = SESSAO.tipo === "medico";
 
-  var COLUNAS = [
+  /* O MÉDICO VÊ MENOS COLUNAS, de propósito: para decidir um atestado
+     ele precisa de quem, de onde, quando, quantos dias e o arquivo.
+     Requisitante, filial, chapa e "atividade" são assunto do RH. */
+  var COLUNAS = MEDICO ? [
     {chave:"processo",     titulo:"Processo",       tipo:"texto",  largura:12},
-    {chave:"empresa",      titulo:"Empresa",        tipo:"texto",  largura:32, soMedico:true},
+    {chave:"abertura",     titulo:"Enviado em",     tipo:"data",   largura:16},
+    {chave:"empresa",      titulo:"Empresa",        tipo:"texto",  largura:32},
+    {chave:"nome",         titulo:"Colaborador",    tipo:"texto",  largura:34},
+    {chave:"inicio",       titulo:"Início",         tipo:"data",   largura:13},
+    {chave:"dias",         titulo:"Dias",           tipo:"numero", largura:8},
+    {chave:"cid",          titulo:"CID",            tipo:"texto",  largura:10},
+    {chave:"parecer",      titulo:"Parecer",        tipo:"texto",  largura:12},
+    {chave:"pdf",          titulo:"Atestado",       tipo:"acao",   largura:11}
+  ] : [
+    {chave:"processo",     titulo:"Processo",       tipo:"texto",  largura:12},
+    {chave:"abertura",     titulo:"Enviado em",     tipo:"data",   largura:16},
     {chave:"requisitante", titulo:"Requisitante",   tipo:"texto",  largura:30},
     {chave:"atividade",    titulo:"Atividade atual",tipo:"texto",  largura:28},
-    {chave:"chapa",        titulo:"Chapa",          tipo:"texto",  largura:14},
+    {chave:"chapa",        titulo:"Matrícula",          tipo:"texto",  largura:14},
     {chave:"nome",         titulo:"Nome",           tipo:"texto",  largura:34},
     {chave:"filial",       titulo:"Filial",         tipo:"texto",  largura:20},
     {chave:"inicio",       titulo:"Data início",    tipo:"data",   largura:13},
@@ -410,7 +452,18 @@
     {chave:"parecer",      titulo:"Parecer",        tipo:"texto",  largura:12},
     {chave:"situacao",     titulo:"Situação",       tipo:"texto",  largura:14},
     {chave:"pdf",          titulo:"Atestado",       tipo:"acao",   largura:11}
-  ].filter(function (c) { return !c.soMedico || MEDICO; });
+  ];
+  if (MEDICO) document.body.classList.add("eh-medico");
+
+  /* EM QUE ABA CADA PROCESSO CAI.
+     Para o RH: aberto x finalizado, como sempre.
+     Para o médico, "Para aprovar" é a FILA DELE — só o que espera por
+     ele. O que ele devolveu como Pendente está esperando a EMPRESA, e
+     fica em "Já avaliados" até ela reenviar. */
+  function naAba(l) {
+    if (!MEDICO) return l.situacao;
+    return l.atividade === "Clínica avalia atestado" ? "aberto" : "finalizado";
+  }
 
   /* ===================================================================
      2. OS DADOS — vêm de dados.js, o único arquivo que muda quando o
@@ -426,10 +479,12 @@
      =================================================================== */
   var TUDO = [];                  // o que veio do servidor
   var estado = {
-    situacao: "aberto",           // a aba
+    situacao: /[?&]aba=finalizado/.test(location.search) ? "finalizado" : "aberto",   // a aba
     busca: "",
     filtros: {},
-    ordem: {chave: "inicio", desc: true},
+    // ORDEM DE LANÇAMENTO, para o RH e para o médico: o mais antigo
+    // primeiro, para nenhum prazo se perder no fim da lista
+    ordem: {chave: "abertura", desc: false},
     pagina: 0,
     porPagina: 100,
     escondidas: {}                // colunas desmarcadas
@@ -450,6 +505,11 @@
 
   function celula(linha, chave) {
     if (chave === "inicio" || chave === "fim") return dm(linha[chave]);
+    if (chave === "abertura") {
+      var d = new Date(linha.abertura);
+      return dm(linha.abertura) + " " + dois(d.getHours()) + ":" + dois(d.getMinutes());
+    }
+    if (chave === "cid") return linha.cid ? linha.cid.codigo : "";
     if (chave === "situacao") return linha.situacao === "aberto" ? "Em aberto" : "Finalizado";
     if (chave === "pdf") return "PDF";
     return linha[chave] == null ? "" : String(linha[chave]);
@@ -466,7 +526,9 @@
     var f = estado.filtros;
     var busca = crua(estado.busca);
     var saida = TUDO.filter(function (l) {
-      if (l.situacao !== estado.situacao) return false;
+      if (naAba(l) !== estado.situacao) return false;
+      if (f.empresa && l.empresa !== f.empresa) return false;
+      if (f.parecer && l.parecer !== f.parecer) return false;
       if (f.nome && crua(l.nome).indexOf(crua(f.nome)) < 0) return false;
       if (f.chapa && crua(l.chapa).indexOf(crua(f.chapa)) < 0) return false;
       if (f.requisitante && l.requisitante !== f.requisitante) return false;
@@ -476,7 +538,7 @@
       if (f.ate && l.inicio > f.ate) return false;
       if (f.dias && Number(l.dias) < Number(f.dias)) return false;
       if (busca) {
-        var tudo = crua([l.processo, l.empresa, l.requisitante, l.atividade, l.chapa, l.nome,
+        var tudo = crua([l.processo, l.empresa, l.cid && l.cid.codigo, l.cid && l.cid.nome, l.requisitante, l.atividade, l.chapa, l.nome,
                          l.filial, dm(l.inicio), dm(l.fim), l.dias, l.parecer].join(" "));
         if (tudo.indexOf(busca) < 0) return false;
       }
@@ -487,6 +549,7 @@
     var sinal = estado.ordem.desc ? -1 : 1;
     saida.sort(function (a, b) {
       var x = a[estado.ordem.chave], y = b[estado.ordem.chave];
+      if (estado.ordem.chave === "cid") { x = a.cid ? a.cid.codigo : ""; y = b.cid ? b.cid.codigo : ""; }
       if (col && col.tipo === "numero") { x = Number(x) || 0; y = Number(y) || 0; }
       else { x = crua(x); y = crua(y); }
       return x < y ? -1 * sinal : x > y ? 1 * sinal : 0;
@@ -499,7 +562,13 @@
     }
     return null;
   }
-  function naTela() { return COLUNAS.filter(function (c) { return !estado.escondidas[c.chave]; }); }
+  function naTela() {
+    return COLUNAS.filter(function (c) {
+      // na fila do médico tudo é "Pendente": a coluna não diria nada
+      if (MEDICO && c.chave === "parecer" && estado.situacao === "aberto") return false;
+      return !estado.escondidas[c.chave];
+    });
+  }
 
   /* ===================================================================
      5. Desenhar
@@ -600,8 +669,8 @@
     $("btProxima").disabled = estado.pagina >= maxPagina;
     $("quantasExportar").textContent = total;
 
-    $("contaAberto").textContent = TUDO.filter(function (l) { return l.situacao === "aberto"; }).length;
-    $("contaFim").textContent = TUDO.filter(function (l) { return l.situacao === "finalizado"; }).length;
+    $("contaAberto").textContent = TUDO.filter(function (l) { return naAba(l) === "aberto"; }).length;
+    $("contaFim").textContent = TUDO.filter(function (l) { return naAba(l) === "finalizado"; }).length;
 
     var quantos = Object.keys(estado.filtros).filter(function (k) { return estado.filtros[k]; }).length;
     $("pinoFiltros").style.display = quantos ? "inline-block" : "none";
@@ -616,7 +685,7 @@
      =================================================================== */
   var GAVETAS = {
     ferrColunas: "gavetaColunas", ferrFiltros: "gavetaFiltros",
-    ferrDensidade: "gavetaDensidade", ferrExportar: "gavetaExportar"
+    ferrExportar: "gavetaExportar"
   };
   Object.keys(GAVETAS).forEach(function (bt) {
     $(bt).addEventListener("click", function () {
@@ -677,7 +746,9 @@
       filial: $("fFilial").value,
       de: $("fDe").value,
       ate: $("fAte").value,
-      dias: $("fDias").value
+      dias: $("fDias").value,
+      empresa: $("fEmpresa").value,
+      parecer: $("fParecerF").value
     };
     // "de" depois de "até" não acha nada e ninguém entende por quê
     if (estado.filtros.de && estado.filtros.ate && estado.filtros.de > estado.filtros.ate) {
@@ -695,7 +766,7 @@
   }
   $("btAplicar").addEventListener("click", lerFiltros);
   $("btLimpar").addEventListener("click", function () {
-    ["fNome","fChapa","fRequisitante","fAtividade","fFilial","fDe","fAte","fDias"]
+    ["fNome","fChapa","fRequisitante","fAtividade","fFilial","fDe","fAte","fDias","fEmpresa","fParecerF"]
       .forEach(function (id) { $(id).value = ""; });
     $("busca").value = "";
     estado.busca = "";
@@ -717,17 +788,6 @@
     }, 180);
   });
 
-  /* ---------- densidade ---------- */
-  Array.prototype.forEach.call(document.querySelectorAll(".dens"), function (bt) {
-    bt.addEventListener("click", function () {
-      Array.prototype.forEach.call(document.querySelectorAll(".dens"), function (o) {
-        o.classList.remove("on");
-      });
-      bt.classList.add("on");
-      document.body.className = "dens-" + bt.getAttribute("data-dens");
-    });
-  });
-
   /* ---------- abas ---------- */
   Array.prototype.forEach.call(document.querySelectorAll(".aba"), function (aba) {
     aba.addEventListener("click", function () {
@@ -737,6 +797,9 @@
       aba.classList.add("on");
       estado.situacao = aba.getAttribute("data-situacao");
       estado.pagina = 0;
+      history.replaceState(null, "", "painel.html?aba=" + estado.situacao);
+      if (window.Casca) window.Casca.marcar(estado.situacao);
+      titulos();
       desenhar();
     });
   });
@@ -876,7 +939,7 @@
 
   function saidaPDF() {
     var d = paraExportar();
-    folha("Gestão de atestados — " +
+    folha("Gestão de atestados: " +
           (estado.situacao === "aberto" ? "processos em aberto" : "processos finalizados"),
           d.cols.map(function (c) { return c.titulo; }), d.linhas,
           d.linhas.length + " processo(s) · a mesma lista, os mesmos filtros e a mesma ordem da tela");
@@ -893,25 +956,24 @@
   });
 
   /* ---------- o atestado de uma linha ----------
-     Quando o servidor existir, este botão abre o arquivo que a empresa
-     enviou. Até lá, ele abre a ficha do processo em folha — que também
-     é o que se imprime quando o atestado veio em papel. */
+     Abre o primeiro arquivo que a empresa enviou. O balde é privado: a
+     janela abre JÁ (senão o navegador a bloqueia, por não ter vindo
+     direto do clique) e recebe o endereço quando o link temporário
+     chega. Sem arquivo, abre a ficha do processo em folha — que também é
+     o que se imprime quando o atestado veio em papel. */
   function verAtestado(l) {
     if (l.anexos && l.anexos.length) {
       var jan = window.open("", "_blank");
-      if (jan) {
-        var ax = l.anexos[0];
-        jan.document.write(ax.tipo === "application/pdf"
-          ? '<iframe src="' + ax.dados + '" style="border:0;position:fixed;inset:0;width:100%;height:100%"></iframe>'
-          : '<img src="' + ax.dados + '" style="max-width:100%" alt="Atestado" />');
-        jan.document.close();
-      }
+      if (!jan) { alert("O navegador bloqueou a janela. Libere as janelas para este site."); return; }
+      jan.document.write("<p style='font-family:Arial;color:#56718b'>Abrindo o atestado…</p>");
+      H.urlAnexo(l.anexos[0]).then(function (url) { jan.location.href = url; },
+        function (e) { jan.document.body.innerHTML = "<p style='font-family:Arial'>" + e.message + "</p>"; });
       return;
     }
-    folha("Processo " + l.processo + " — " + l.nome,
+    folha("Processo " + l.processo + ": " + l.nome,
       ["Campo", "Conteúdo"],
       [["Processo", l.processo], ["Requisitante", l.requisitante],
-       ["Atividade atual", l.atividade], ["Chapa", l.chapa], ["Nome", l.nome],
+       ["Atividade atual", l.atividade], ["Matrícula", l.chapa], ["Nome", l.nome],
        ["Filial", l.filial], ["Início do afastamento", dm(l.inicio)],
        ["Fim do afastamento", dm(l.fim)], ["Dias", String(l.dias)],
        ["Situação", l.situacao === "aberto" ? "Em aberto" : "Finalizado"]],
@@ -919,33 +981,48 @@
       "envio pelas empresas estiver ligado");
   }
 
-  /* ---------- topo ---------- */
-  $("btSair").addEventListener("click", function () { H.sair(); window.location.href = "index.html"; });
-  $("quem").textContent = SESSAO.nome;
-  if (MEDICO) {
-    // para o médico, as abas dizem o que ELE tem a fazer
-    document.querySelector('[data-situacao="aberto"]').firstChild.nodeValue = "Aguardando parecer ";
-    document.querySelector('[data-situacao="finalizado"]').firstChild.nodeValue = "Com parecer ";
-    $("btNovo").style.display = "none";
-    $("tituloTela").firstChild.nodeValue = "Homologação — parecer médico ";
+  /* ---------- atualizar ----------
+     Busca de novo sem recarregar a página: filtros, busca, aba e ordem
+     ficam como estavam. É o botão do médico entre um parecer e outro, e
+     do RH esperando a resposta. */
+  $("btAtualizar").addEventListener("click", function () {
+    var bt = $("btAtualizar");
+    bt.disabled = true;
+    $("btAtualizarTxt").textContent = "Atualizando…";
+    carregar().then(function (lista) {
+      TUDO = lista;
+      desenhar();
+      var d = new Date();
+      $("btAtualizarTxt").textContent = "Atualizado às " + dois(d.getHours()) + ":" + dois(d.getMinutes());
+    }, function (e) {
+      $("btAtualizarTxt").textContent = "Atualizar";
+      $("avisoCarga").textContent = e.message;
+      $("avisoCarga").style.display = "block";
+    }).then(function () { bt.disabled = false; });
+  });
+
+  /* ---------- títulos, por papel ---------- */
+  function titulos() {
+    var ab = estado.situacao === "aberto";
+    $("tituloTela").textContent = MEDICO ? (ab ? "Para aprovar" : "Já avaliados")
+                                         : (ab ? "Processos em aberto" : "Processos finalizados");
+    $("subTela").textContent = MEDICO
+      ? (ab ? "Atestados enviados pelas empresas esperando o seu parecer, do mais antigo para o mais novo."
+            : "Tudo o que já passou por você. Procure por nome, empresa, CID ou número do processo.")
+      : (ab ? "Atestados enviados à clínica que ainda não foram finalizados, do mais antigo para o mais novo."
+            : "Atestados com parecer final da clínica.");
+    document.title = $("tituloTela").textContent + " | Homologação de atestados";
   }
+  if (MEDICO) {
+    document.querySelector('[data-situacao="aberto"]').firstChild.nodeValue = "Para aprovar ";
+    document.querySelector('[data-situacao="finalizado"]').firstChild.nodeValue = "Já avaliados ";
+    $("busca").placeholder = "Procurar por nome, empresa, CID, processo…";
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".aba"), function (o) {
+    o.classList.toggle("on", o.getAttribute("data-situacao") === estado.situacao);
+  });
+  titulos();
   $("btNovo").addEventListener("click", function () { window.location.href = "processo.html?novo=1"; });
-  $("btZerar").addEventListener("click", function () {
-    if (confirm("Voltar a demonstração ao começo? Tudo o que foi lançado nela some.")) {
-      H.zerarDemonstracao(); window.location.reload();
-    }
-  });
-  $("btAjuda").addEventListener("click", function () {
-    alert("Gestão de atestados\n\n" +
-      "• As duas abas separam o que ainda anda do que já acabou.\n" +
-      "• COLUNAS esconde o que você não usa; DENSIDADE aperta ou folga as linhas.\n" +
-      "• FILTROS combina colaborador, chapa, requisitante, atividade, filial, " +
-      "período e dias mínimos. O número ao lado do botão diz quantos estão ligados.\n" +
-      "• PROCURAR varre todas as colunas de uma vez, sem ligar para acento.\n" +
-      "• EXPORTAR leva a lista inteira filtrada — não só a página aberta — " +
-      "para Excel, CSV, XML ou papel.\n" +
-      "• O botão PDF de cada linha abre o atestado daquele processo.");
-  });
 
   /* ---------- começa ---------- */
   carregar().then(function (lista) {
@@ -953,6 +1030,7 @@
     encherSeletor("fRequisitante", "requisitante");
     encherSeletor("fAtividade", "atividade");
     encherSeletor("fFilial", "filial");
+    encherSeletor("fEmpresa", "empresa");
     montarColunas();
     // vindo de um alerta do relatório: painel.html#chapa já abre procurando a pessoa,
     // na aba em que ela tiver processo
@@ -961,6 +1039,10 @@
       $("busca").value = procurado; estado.busca = procurado;
       if (!visiveis().length) document.querySelector('[data-situacao="finalizado"]').click();
     }
+    desenhar();
+  }, function (e) {
+    $("avisoCarga").textContent = e.message + " Recarregue a página para tentar de novo.";
+    $("avisoCarga").style.display = "block";
     desenhar();
   });
 })();

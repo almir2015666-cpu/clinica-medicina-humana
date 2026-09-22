@@ -1,22 +1,42 @@
 /* =====================================================================
-   HOMOLOGAÇÃO DE ATESTADOS — os dados
+   HOMOLOGAÇÃO DE ATESTADOS — os dados (Supabase)
 
-   Um arquivo só, usado pelas três telas (porta, lista e ficha do
-   processo). HOJE É DEMONSTRAÇÃO: tudo mora no navegador de quem está
-   testando (localStorage). Isso já deixa o caminho inteiro funcionar —
-   a empresa lança, o Dr. Everaldo dá o parecer, a empresa vê o
-   resultado — desde que as duas pessoas usem o MESMO navegador.
+   Um arquivo só, usado pelas quatro telas (porta, lista, ficha e
+   relatórios). As telas não sabem de onde os dados vêm: pedem aqui, e
+   aqui se fala com o Supabase.
 
-   QUANDO O SERVIDOR EXISTIR, SÓ ESTE ARQUIVO MUDA. Cada função daqui
-   vira uma chamada ao Supabase (tabelas + login de verdade); as telas
-   não sabem, nem precisam saber, de onde os dados vêm. Por isso todas
-   as funções já devolvem Promise, mesmo sem precisar hoje.
+   QUEM DECIDE É O BANCO. Nada do que está aqui é "segurança": a tela
+   pode ser adulterada por qualquer um. Quem vê o quê, quem pode dar o
+   parecer e o que o parecer faz com o processo são regras do banco
+   (servidor-sql/01-esquema.sql). Este arquivo só pede e traduz.
+
+   QUEM ENTRA
+     RH da empresa -> e-mail + senha que a clínica enviou (conta criada
+                      pelo SistemaCMH a partir do contrato assinado)
+     Dr. Everaldo  -> o MESMO usuário e senha do SistemaCMH; o que dá a
+                      ele o papel de médico é a categoria "Diretor médico"
    ===================================================================== */
 (function () {
   "use strict";
 
-  var CHAVE = "cmh_homologacao_demo_v2";
-  var CHAVE_SESSAO = "cmh_homologacao_sessao_v1";
+  /* PRÉVIA LOCAL. Aberto pelo servidor local (127.0.0.1), o site usa os
+     dados de exemplo do dados-demo.js, para dar para ver as telas do RH
+     e do médico sem mexer no banco de verdade. Para testar contra o
+     Supabase no próprio computador, acrescente ?real=1 ao endereço.
+     No site publicado, esta linha nunca é verdadeira. */
+  if (/^(127\.0\.0\.1|localhost)$/.test(location.hostname) && !/[?&]real=1/.test(location.search)) {
+    document.write('<script src="dados-demo.js"><\/script>');
+    return;
+  }
+
+  var CHAVE_SESSAO = "cmh_homologacao_sessao_v2";
+  var BALDE = "homologacao";
+  // o mesmo domínio que o SistemaCMH usa para transformar "usuário" em
+  // e-mail de login (app.py, DOMINIO_LOGIN)
+  var DOMINIO_SISTEMA = "orcamentos.clinicamedicinahumana.com.br";
+  var TETO_ANEXO = 10 * 1048576;   // o mesmo limite do balde, no banco
+
+  var sb = window.supabase.createClient(window.SUPA.url, window.SUPA.key);
 
   /* ---------- as tabelas fixas ---------- */
 
@@ -35,335 +55,375 @@
     ["10", "ATESTADO ACIDENTE DE TRABALHO"]
   ].map(function (t) { return {codigo: t[0], nome: t[1]}; });
 
-  // Quem homologa. O CRM é o que a clínica já usa para assinar ASO
-  // (Orcamentos/pcmso_textos.py, lista EXAMINADORES).
+  // Quem homologa. O CRM é o que a clínica já usa para assinar ASO.
   var RESPONSAVEIS = [
     {codigo: "6276", nome: "DR. EVERALDO BARBOSA RIBEIRO FILHO",
-     registro: "CRM-BA 6276", funcao: "Médico do trabalho — homologação"}
+     registro: "CRM-BA 6276", funcao: "Diretor médico, homologação"}
   ];
+
+  // o médico do atestado, para a clínica, é sempre o Dr. Everaldo
+  var MEDICO_FIXO = {codigo: "6276", nome: "DR. EVERALDO BARBOSA RIBEIRO FILHO", registro: "CRM-BA 6276",
+                     orgao: "CRM", uf: "BA"};
 
   var ORGAOS = ["CRM", "CRO", "CRP", "COREN", "CREFITO", "CRFa", "CRN", "CRF", "CRBM"];
   var UFS = ["AC","AL","AM","AP","BA","CE","DF","ES","GO","MA","MG","MS","MT","PA","PB",
              "PE","PI","PR","RJ","RN","RO","RR","RS","SC","SE","SP","TO"];
 
-  /* ---------- as contas de demonstração ----------
-     A senha NÃO fica conferida aqui quando o servidor existir: quem
-     confere é o Supabase Auth. Estas duas contas só existem para a
-     demonstração poder ser vista pelos dois lados. */
-  var CONTAS_DEMO = {
-    "empresa":  {tipo: "empresa", nome: "RH — Empresa de exemplo", empresa: "EMPRESA DE EXEMPLO LTDA"},
-    "everaldo": {tipo: "medico",  nome: "Dr. Everaldo Barbosa Ribeiro Filho", registro: "CRM-BA 6276"}
-  };
+  /* ---------- utilidades ---------- */
+  function soDigitos(t) { return String(t || "").replace(/\D/g, ""); }
+  function semAcento(t) { return String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, ""); }
 
-  /* ---------- guardar e ler ---------- */
-  var memoria = null;            // se o navegador não deixar guardar nada
-  function ler() {
-    if (memoria) return memoria;
-    try {
-      var t = localStorage.getItem(CHAVE);
-      if (t) { memoria = JSON.parse(t); return memoria; }
-    } catch (e) { /* segue com a semente */ }
-    memoria = semente();
-    gravar();
-    return memoria;
-  }
-  function gravar() {
-    try { localStorage.setItem(CHAVE, JSON.stringify(memoria)); return true; }
-    catch (e) { return false; }   // cheio (anexo grande) ou bloqueado
-  }
-  function copia(o) { return JSON.parse(JSON.stringify(o)); }
-  function agora() { return new Date().toISOString(); }
-  function dois(n) { return (n < 10 ? "0" : "") + n; }
-  function iso(d) { return d.getFullYear() + "-" + dois(d.getMonth() + 1) + "-" + dois(d.getDate()); }
-
-  /* ---------- a semente: exemplo, repetível ---------- */
-  function semente() {
-    var s = 20260101;
-    function sorte(teto) {
-      s = (s * 9301 + 49297) % 233280;
-      return Math.floor(s / 233280 * teto);
+  /* O banco devolve os erros das regras como "CODIGO: frase". A frase é
+     para gente; o código fica para quem for investigar. */
+  function traduzirErro(e, padrao) {
+    var m = String((e && (e.message || e.error_description || e.error)) || "");
+    if (/JWT|expired|not authenticated|permission denied/i.test(m)) {
+      return "Sua sessão acabou. Entre de novo.";
     }
-    var primeiros = ["Ana Carolina","Jefferson","Fernanda","Daniela","Laíza","Marcelo",
-      "Vagner","Tatiane","Ednaldo","Kemelly","Terezinha","Antônio Carlos","Djanir",
-      "Joanderson","Erick","Simone","Rafael","Patrícia","Gilberto","Luciana","Everton",
-      "Márcia","Wesley","Juliana","Rodrigo","Adriana","Fábio","Camila"];
-    var sobrenomes = ["dos Santos","de Souza","Oliveira","da Silva","Pereira","Bispo",
-      "Conceição","Nascimento","Ferreira","Almeida","Rodrigues","Carvalho","Barbosa",
-      "Lima","Araújo","Machado","Teixeira","Moreira"];
-    var requisitantes = ["Ana Carolina Bispo","Jefferson Rodrigues","Fernanda Lescaut",
-      "Daniela Nascimento","Laíza Roberto","Marcos Vinícius Lima"];
-    var abertas = ["Clínica avalia atestado","Clínica avalia atestado","Aguardando documento"];
-    var filiais = ["Matriz — Camaçari","Filial Polo","Filial Candeias","Filial Salvador"];
-    var empresas = ["EMPRESA DE EXEMPLO LTDA","EMPRESA DE EXEMPLO LTDA",
-                    "INDÚSTRIA MODELO S.A.","CONSTRUTORA EXEMPLAR LTDA"];
-
-    var entidades = [
-      {codigo: "00001", nome: "HOSPITAL DE EXEMPLO", cnpj: "", fantasia: "HOSPITAL DE EXEMPLO"},
-      {codigo: "00002", nome: "CLÍNICA MODELO DE SAÚDE", cnpj: "", fantasia: "CLÍNICA MODELO"},
-      {codigo: "00003", nome: "UPA DE EXEMPLO", cnpj: "", fantasia: "UPA DE EXEMPLO"},
-      {codigo: "00004", nome: "CENTRO ODONTOLÓGICO EXEMPLO", cnpj: "", fantasia: "ODONTO EXEMPLO"}
-    ];
-    var profissionais = [
-      {codigo: "1", nome: "MÉDICO DE EXEMPLO UM", registro: "CRM 10001", orgao: "CRM", uf: "BA"},
-      {codigo: "2", nome: "MÉDICA DE EXEMPLO DOIS", registro: "CRM 10002", orgao: "CRM", uf: "BA"},
-      {codigo: "3", nome: "DENTISTA DE EXEMPLO", registro: "CRO 20003", orgao: "CRO", uf: "BA"},
-      {codigo: "4", nome: "MÉDICO DE EXEMPLO QUATRO", registro: "CRM 10004", orgao: "CRM", uf: "RJ"}
-    ];
-    var cids = [["J11","Influenza [gripe] devida a vírus não identificado"],
-      ["M54.5","Dor lombar baixa"],["A09","Diarréia e gastroenterite de origem infecciosa presumível"],
-      ["K08.8","Outros transtornos especificados dos dentes e das estruturas de sustentação"],
-      ["S93.4","Entorse e distensão do tornozelo"],["J03.9","Amigdalite aguda não especificada"]];
-
-    var processos = [];
-    for (var i = 0; i < 186; i++) {
-      var dias = [1,2,3,3,5,7,10,14,15,20,30][sorte(11)];
-      var d = new Date(2025, 7 + sorte(14), 1 + sorte(28));
-      var fim = new Date(d.getTime() + (dias - 1) * 86400000);
-      var finalizado = sorte(10) < 6;
-      var aprovado = sorte(10) < 8;
-      var tipo = TIPOS[dias > 15 ? 7 : 3];
-      var completo = finalizado || sorte(3) > 0;
-      var numero = String(720000 + sorte(160000));
-      var abertura = new Date(d.getTime() + (1 + sorte(3)) * 86400000 + 8 * 3600000);
-      var p = {
-        id: numero, processo: numero,
-        empresa: empresas[sorte(empresas.length)],
-        requisitante: requisitantes[sorte(requisitantes.length)],
-        chapa: "00010" + String(10000 + sorte(9000)),
-        nome: (primeiros[sorte(primeiros.length)] + " " + sobrenomes[sorte(sobrenomes.length)] +
-               " " + sobrenomes[sorte(sobrenomes.length)]).toUpperCase(),
-        filial: filiais[sorte(filiais.length)],
-        inicio: iso(d), horaInicio: "08:00", fim: iso(fim), dias: dias,
-        tipo: tipo,
-        medico: completo ? profissionais[sorte(profissionais.length)] : null,
-        entidade: completo ? entidades[sorte(entidades.length)] : null,
-        cid: null,
-        responsavel: RESPONSAVEIS[0],
-        observacoes: "",
-        parecer: finalizado ? (aprovado ? "Aprovado" : "Reprovado") : "Pendente",
-        parecerObs: finalizado && !aprovado ? "Atestado sem assinatura legível do profissional." : "",
-        situacao: finalizado ? "finalizado" : "aberto",
-        atividade: finalizado ? (aprovado ? "Homologado" : "Não homologado") : abertas[sorte(abertas.length)],
-        abertura: abertura.toISOString(),
-        criadoPor: requisitantes[sorte(requisitantes.length)],
-        anexos: [],
-        historico: []
-      };
-      p.cid = completo ? (function () { var c = cids[sorte(cids.length)]; return {codigo: c[0], nome: c[1]}; })() : null;
-      p.historico.push({quando: p.abertura, quem: p.criadoPor, oque: "Processo aberto e enviado à clínica"});
-      if (finalizado) {
-        p.historico.push({quando: new Date(abertura.getTime() + 26 * 3600000).toISOString(),
-          quem: "Dr. Everaldo Barbosa Ribeiro Filho",
-          oque: "Parecer: " + p.parecer + (p.parecerObs ? " — " + p.parecerObs : "")});
-      }
-      processos.push(p);
+    var regra = m.match(/^[A-Z_]+:\s*(.+)$/);
+    if (regra) return regra[1].charAt(0).toUpperCase() + regra[1].slice(1) + ".";
+    if (/Failed to fetch|NetworkError|network/i.test(m)) {
+      return "Sem conexão com o servidor. Confira a internet e tente de novo. Nada foi perdido.";
     }
-    /* Dois casos montados de propósito, para os alertas do relatório
-       aparecerem na demonstração: a mesma dor lombar três vezes em 50
-       dias (regra dos 60 dias do INSS) e alguém com atestados curtos
-       repetidos (recorrência). */
-    var hoje = new Date(); hoje.setHours(0, 0, 0, 0);
-    function antes(dias) { return iso(new Date(hoje.getTime() - dias * 86400000)); }
-    [["0001019001", "JOSÉ CARLOS DE JESUS SANTOS", "Filial Polo", [[70, 6, "M54.5"], [45, 5, "M54.2"], [22, 7, "M54.5"]]],
-     ["0001019002", "PRISCILA ALVES NUNES", "Matriz — Camaçari", [[80, 1, "J11"], [52, 2, "A09"], [31, 1, "J03.9"], [10, 1, "J11"]]]
-    ].forEach(function (c, ci) {
-      c[3].forEach(function (a, ai) {
-        var ini = antes(a[0]), fim = iso(new Date(new Date(ini + "T00:00:00").getTime() + (a[1] - 1) * 86400000));
-        var n = String(900100 + ci * 10 + ai);
-        var cidNome = {"M54.5": "Dor lombar baixa", "M54.2": "Cervicalgia", "J11": cids[0][1],
-                       "A09": cids[2][1], "J03.9": cids[5][1]}[a[2]];
-        var ab = new Date(new Date(ini + "T08:00:00").getTime() + 86400000).toISOString();
-        processos.push({id: n, processo: n, empresa: "EMPRESA DE EXEMPLO LTDA", requisitante: "Ana Carolina Bispo",
-          chapa: c[0], nome: c[1], filial: c[2], inicio: ini, horaInicio: "08:00", fim: fim, dias: a[1],
-          tipo: TIPOS[3], medico: profissionais[ai % 2], entidade: entidades[ai % 3], cid: {codigo: a[2], nome: cidNome},
-          responsavel: RESPONSAVEIS[0], observacoes: "", parecer: "Aprovado", parecerObs: "",
-          situacao: "finalizado", atividade: "Homologado", abertura: ab, criadoPor: "Ana Carolina Bispo", anexos: [],
-          historico: [{quando: ab, quem: "Ana Carolina Bispo", oque: "Processo aberto e enviado à clínica"},
-                      {quando: ab, quem: "Dr. Everaldo Barbosa Ribeiro Filho", oque: "Parecer: Aprovado"}]});
-      });
-    });
-    return {processos: processos, entidades: entidades, profissionais: profissionais};
+    return padrao || ("Não deu certo: " + m);
   }
 
-  /* ---------- sessão ---------- */
+  /* ---------- sessão ----------
+     O login de verdade quem guarda é o próprio Supabase. Aqui fica só uma
+     cópia de QUEM é a pessoa (papel, nome, empresa), para as telas
+     saberem na hora o que mostrar, sem esperar a rede. */
   function sessao() {
-    try { var t = sessionStorage.getItem(CHAVE_SESSAO); return t ? JSON.parse(t) : null; }
+    try { var t = localStorage.getItem(CHAVE_SESSAO); return t ? JSON.parse(t) : null; }
     catch (e) { return null; }
   }
+  function guardarSessao(s) {
+    try {
+      if (s) localStorage.setItem(CHAVE_SESSAO, JSON.stringify(s));
+      else localStorage.removeItem(CHAVE_SESSAO);
+    } catch (e) { /* segue */ }
+  }
+
+  function paraEmail(usuario) {
+    var u = String(usuario || "").trim();
+    if (u.indexOf("@") >= 0) return u.toLowerCase();
+    // usuário do SistemaCMH: a mesma conversão do programa
+    return semAcento(u).toLowerCase().replace(/\s+/g, "") + "@" + DOMINIO_SISTEMA;
+  }
+
   function entrar(usuario, senha) {
-    var u = String(usuario || "").trim().toLowerCase();
-    var conta = CONTAS_DEMO[u];
-    if (!conta || senha !== "demo") {
-      return Promise.resolve({ok: false});
-    }
-    try { sessionStorage.setItem(CHAVE_SESSAO, JSON.stringify(conta)); } catch (e) { /* segue */ }
-    return Promise.resolve({ok: true, sessao: conta});
+    return sb.auth.signInWithPassword({email: paraEmail(usuario), password: senha})
+      .then(function (r) {
+        if (r.error) {
+          if (/invalid|credentials/i.test(r.error.message)) {
+            return {ok: false, recado: "Usuário ou senha não conferem."};
+          }
+          return {ok: false, recado: traduzirErro(r.error)};
+        }
+        return sb.rpc("homol_quem_sou").then(function (q) {
+          var eu = q.data && q.data[0];
+          if (q.error || !eu) {
+            // entrou no Supabase, mas não é da homologação (aluno, equipe
+            // sem a categoria, conta desligada): sai de novo
+            return sb.auth.signOut().then(function () {
+              return {ok: false, recado: q.error
+                ? traduzirErro(q.error, "Não consegui conferir o seu acesso. Tente de novo.")
+                : "Este acesso não está liberado para a homologação, ou foi desligado. " +
+                  "Fale com a clínica pelo (71) 3493-7220."};
+            });
+          }
+          var s = {
+            id: r.data.user.id,
+            tipo: eu.papel === "medico" ? "medico" : "empresa",
+            nome: eu.nome, empresa: eu.empresa_nome || "", cnpj: eu.empresa_cnpj || "",
+            registro: eu.registro || ""
+          };
+          guardarSessao(s);
+          sb.rpc("homol_entrou").then(function () {}, function () {});
+          return {ok: true, sessao: s};
+        });
+      }, function (e) { return {ok: false, recado: traduzirErro(e)}; });
   }
   function sair() {
-    try { sessionStorage.removeItem(CHAVE_SESSAO); } catch (e) { /* segue */ }
+    guardarSessao(null);
+    return sb.auth.signOut().then(function () {}, function () {});
   }
-  function nomeDeQuem() { var s = sessao(); return s ? s.nome : "—"; }
+  function nomeDeQuem() { var s = sessao(); return s ? s.nome : ""; }
 
-  /* ---------- processos ----------
-     A EMPRESA SÓ VÊ OS DELA; o médico vê todos. No servidor, essa regra
-     mora no banco (RLS), e não aqui — aqui é só para a demonstração se
-     comportar igual. */
-  function podeVer(p) {
+  /* Fora da porta, sem login de verdade não há tela: se a sessão do
+     Supabase acabou (ou nunca existiu neste navegador), volta para a
+     porta em vez de mostrar uma lista vazia com cara de "nada lançado". */
+  if (!/\/homologacao\/(index\.html)?$/.test(location.pathname)) {
+    sb.auth.getSession().then(function (r) {
+      if (!r.data || !r.data.session) {
+        guardarSessao(null);
+        location.replace("index.html");
+      }
+    });
+  }
+
+  /* ---------- tradução banco <-> tela ---------- */
+  function daLinha(r) {
+    return {
+      id: String(r.id), processo: String(r.id),
+      empresa: r.empresa_nome, empresaCnpj: r.empresa_cnpj,
+      requisitante: r.requisitante || "", chapa: r.chapa, nome: r.nome, filial: r.filial || "",
+      inicio: r.inicio, horaInicio: String(r.hora_inicio || "08:00").slice(0, 5),
+      fim: r.fim, dias: r.dias,
+      tipo: r.tipo, medico: r.medico, entidade: r.entidade, cid: r.cid, responsavel: r.responsavel,
+      observacoes: r.observacoes || "",
+      parecer: r.parecer, parecerObs: r.parecer_obs || "", parecerPor: r.parecer_por || "", parecerEm: r.parecer_em || "",
+      situacao: r.situacao, atividade: r.atividade,
+      abertura: r.abertura, criadoPor: r.criado_por_nome || "",
+      anexos: (r.homol_anexo || []).map(anexoDaLinha),
+      historico: []
+    };
+  }
+  function anexoDaLinha(a) {
     var s = sessao();
-    if (!s) return false;
-    return s.tipo === "medico" || p.empresa === s.empresa;
+    return {codigo: String(a.id), nome: a.nome, tipo: a.tipo, tamanho: a.tamanho,
+      versao: a.versao || 1000, quem: a.quem_nome || "", quando: a.quando,
+      atividade: a.atividade || "", caminho: a.caminho,
+      meu: !!(s && a.quem_id && a.quem_id === s.id)};
   }
+  function paraLinha(p, medico) {
+    var l = {
+      chapa: String(p.chapa || "").trim(), nome: String(p.nome || "").trim().toUpperCase(),
+      filial: p.filial || null, inicio: p.inicio, hora_inicio: p.horaInicio || "08:00",
+      dias: Number(p.dias) || 1, fim: p.fim || p.inicio,
+      tipo: p.tipo || null, medico: p.medico || null, entidade: p.entidade || null,
+      cid: p.cid || null, responsavel: p.responsavel || null,
+      observacoes: p.observacoes || null
+    };
+    if (medico) { l.parecer = p.parecer; l.parecer_obs = p.parecerObs || null; }
+    return l;
+  }
+
+  /* ---------- processos ---------- */
+  var COLUNAS_LISTA = "id,empresa_cnpj,empresa_nome,requisitante,chapa,nome,filial,inicio," +
+    "hora_inicio,dias,fim,tipo,medico,entidade,cid,responsavel,observacoes,parecer,parecer_obs," +
+    "parecer_por,parecer_em,situacao,atividade,abertura,criado_por_nome,homol_anexo(id,nome,tipo,tamanho,caminho)";
+
+  // Tudo, em páginas de mil: o servidor não entrega mais que isso de uma
+  // vez, e a lista pararia calada no milésimo processo.
   function listarProcessos() {
-    return Promise.resolve(copia(ler().processos.filter(podeVer)));
+    var todos = [], passo = 1000;
+    function pagina(de) {
+      return sb.from("homol_processo").select(COLUNAS_LISTA)
+        .order("id", {ascending: false}).range(de, de + passo - 1)
+        .then(function (r) {
+          if (r.error) throw new Error(traduzirErro(r.error, "Não consegui carregar a lista."));
+          todos = todos.concat(r.data.map(daLinha));
+          return r.data.length === passo ? pagina(de + passo) : todos;
+        });
+    }
+    return pagina(0);
   }
+
   function obterProcesso(id) {
-    var p = ler().processos.filter(function (x) { return x.id === String(id); })[0];
-    return Promise.resolve(p && podeVer(p) ? copia(p) : null);
+    var n = Number(id);
+    if (!n) return Promise.resolve(null);
+    return Promise.all([
+      sb.from("homol_processo").select(COLUNAS_LISTA.replace(",homol_anexo(id,nome,tipo,tamanho,caminho)", ""))
+        .eq("id", n).maybeSingle(),
+      sb.from("homol_evento").select("quando,quem_nome,oque,comentario")
+        .eq("processo_id", n).order("quando", {ascending: true}).order("id", {ascending: true}),
+      sb.from("homol_anexo").select("id,nome,tipo,tamanho,caminho,versao,quem_id,quem_nome,quando,atividade")
+        .eq("processo_id", n).order("id", {ascending: true})
+    ]).then(function (rs) {
+      if (rs[0].error) throw new Error(traduzirErro(rs[0].error));
+      if (!rs[0].data) return null;       // não existe, ou não é da empresa dele
+      var p = daLinha(rs[0].data);
+      p.historico = (rs[1].data || []).map(function (e) {
+        return {quando: e.quando, quem: e.quem_nome || "", oque: e.oque, comentario: e.comentario};
+      });
+      p.anexos = (rs[2].data || []).map(anexoDaLinha);
+      return p;
+    });
   }
-  function novoNumero() {
-    var maior = 0;
-    ler().processos.forEach(function (p) { maior = Math.max(maior, Number(p.processo) || 0); });
-    return String(maior + 1);
+
+  /* As filiais que a clínica cadastrou para a empresa de quem entrou (o
+     banco só devolve as dela). Lista vazia = empresa sem filial
+     cadastrada, e o campo fica livre. */
+  function listarFiliais() {
+    return sb.from("homol_filial").select("nome").eq("ativo", true).order("nome").then(function (r) {
+      if (r.error) throw new Error(traduzirErro(r.error, "Não consegui ler as filiais."));
+      return r.data.map(function (f) { return f.nome; });
+    });
   }
+
+  /* O histórico do paciente: os outros atestados da MESMA pessoa na
+     MESMA empresa (a chapa só é única dentro da empresa). É o que o
+     médico precisa para ver recorrência e a regra dos 60 dias. */
+  function historicoDoColaborador(p) {
+    if (!p || !p.chapa || !p.empresaCnpj) return Promise.resolve([]);
+    return sb.from("homol_processo")
+      .select(COLUNAS_LISTA.replace(",homol_anexo(id,nome,tipo,tamanho,caminho)", ""))
+      .eq("empresa_cnpj", p.empresaCnpj).eq("chapa", p.chapa).neq("id", Number(p.id) || 0)
+      .order("inicio", {ascending: false}).limit(200)
+      .then(function (r) {
+        if (r.error) throw new Error(traduzirErro(r.error, "Não consegui ler o histórico do colaborador."));
+        return r.data.map(daLinha);
+      });
+  }
+
   function processoEmBranco() {
     var s = sessao();
-    var n = novoNumero();
     return {
-      id: "", processo: n, empresa: s ? s.empresa : "", requisitante: s ? s.nome : "",
+      id: "", processo: "", empresa: s ? s.empresa : "", requisitante: s ? s.nome : "",
       chapa: "", nome: "", filial: "", inicio: "", horaInicio: "08:00", fim: "", dias: 1,
       tipo: null, medico: null, entidade: null, cid: null, responsavel: RESPONSAVEIS[0],
       observacoes: "", parecer: "Pendente", parecerObs: "", situacao: "aberto",
-      atividade: "Rascunho", abertura: agora(), criadoPor: s ? s.nome : "", anexos: [], historico: []
+      atividade: "Rascunho", abertura: new Date().toISOString(), criadoPor: s ? s.nome : "",
+      anexos: [], historico: []
     };
   }
 
-  /* Gravar: a empresa envia; o médico dá o parecer.
-     O QUE O PARECER FAZ, AUTOMATICAMENTE:
-       Aprovado  -> finalizado, "Homologado"
-       Reprovado -> finalizado, "Não homologado"
-       Pendente  -> continua aberto, "Aguardando documento" (a empresa
-                    vê o recado do médico e completa) */
+  /* Gravar. O que o parecer faz com o processo (finalizar, devolver à
+     empresa) é o banco que decide — ver o gatilho homol_processo_regras. */
   function salvarProcesso(p) {
     var s = sessao();
     if (!s) return Promise.resolve({ok: false, recado: "Sua sessão acabou. Entre de novo."});
-    var banco = ler();
-    var antes = banco.processos.filter(function (x) { return x.id === p.id; })[0];
-    var novo = copia(p);
-    var quem = s.nome;
-    // anexos que esperavam o envio ganham data agora
-    (novo.anexos || []).forEach(function (a) { if (!a.quando) { a.quando = agora(); a.quem = quem; } });
+    var medico = s.tipo === "medico";
+    var linha = paraLinha(p, medico);
 
-    if (s.tipo === "medico") {
-      if (novo.parecer === "Aprovado") { novo.situacao = "finalizado"; novo.atividade = "Homologado"; }
-      else if (novo.parecer === "Reprovado") { novo.situacao = "finalizado"; novo.atividade = "Não homologado"; }
-      else { novo.situacao = "aberto"; novo.atividade = "Aguardando documento"; }
-      novo.historico.push({quando: agora(), quem: quem,
-        oque: "Parecer: " + novo.parecer + (novo.parecerObs ? " — " + novo.parecerObs : "")});
-    } else {
-      // a empresa não mexe no parecer, nem por engano
-      if (antes) { novo.parecer = antes.parecer; novo.parecerObs = antes.parecerObs; }
-      novo.situacao = "aberto";
-      novo.atividade = "Clínica avalia atestado";
-      novo.historico.push({quando: agora(), quem: quem,
-        oque: antes ? "Processo corrigido e reenviado à clínica" : "Processo aberto e enviado à clínica"});
+    if (p.id) {
+      return sb.from("homol_processo").update(linha).eq("id", Number(p.id)).select("id").maybeSingle()
+        .then(function (r) {
+          if (r.error) return {ok: false, recado: traduzirErro(r.error)};
+          if (!r.data) return {ok: false, recado: "Este processo não pode mais ser alterado por você " +
+            "(ele já foi finalizado, ou não é da sua empresa)."};
+          return obterProcesso(p.id).then(function (np) { return {ok: true, processo: np}; });
+        });
     }
 
-    if (antes) {
-      banco.processos[banco.processos.indexOf(antes)] = novo;
-    } else {
-      novo.id = novo.processo;
-      banco.processos.unshift(novo);
-    }
-    if (!gravar()) {
-      return Promise.resolve({ok: false, recado: "O navegador não deixou guardar — " +
-        "provavelmente o anexo é grande demais para a demonstração. Tente um arquivo menor."});
-    }
-    return Promise.resolve({ok: true, processo: copia(novo)});
+    // novo: grava o processo, depois sobe os arquivos que esperavam
+    return sb.from("homol_processo").insert(linha).select("id").single().then(function (r) {
+      if (r.error) return {ok: false, recado: traduzirErro(r.error)};
+      var id = r.data.id;
+      var pendentes = (p.anexos || []).filter(function (a) { return a._arquivo; });
+      return pendentes.reduce(function (cadeia, a) {
+        return cadeia.then(function (falhas) {
+          return subir(id, a._arquivo).then(function (e) { return e ? falhas.concat(a.nome) : falhas; });
+        });
+      }, Promise.resolve([])).then(function (falhas) {
+        return obterProcesso(id).then(function (np) {
+          return {ok: true, processo: np, aviso: falhas.length
+            ? "O processo foi enviado, mas não consegui anexar: " + falhas.join(", ") +
+              ". Abra a aba Anexos e tente de novo." : ""};
+        });
+      });
+    });
   }
 
-  /* ---------- comentários e anexos: gravam NA HORA ----------
-     Não esperam o "Enviar" nem mudam a situação do processo — como no
-     sistema de origem. Cada um deixa uma linha no histórico. */
-  function acharParaMexer(id) {
-    var p = ler().processos.filter(function (x) { return x.id === String(id); })[0];
-    return p && podeVer(p) ? p : null;
+  /* ---------- anexos ---------- */
+  function nomeSeguro(n) {
+    return semAcento(n).replace(/[^\w.\-]+/g, "_").replace(/_+/g, "_").slice(-80) || "arquivo";
   }
-  function comentar(id, texto) {
-    var p = acharParaMexer(id), s = sessao();
-    if (!p || !s) return Promise.resolve({ok: false, recado: "Não foi possível comentar."});
-    p.historico.push({quando: agora(), quem: s.nome, oque: String(texto).trim(), comentario: true});
-    if (!gravar()) return Promise.resolve({ok: false, recado: "O navegador não deixou guardar."});
-    return Promise.resolve({ok: true, processo: copia(p)});
+  // Sobe um arquivo e grava a ficha dele. Devolve null (deu certo) ou o erro.
+  function subir(processoId, arquivo) {
+    if (arquivo.size > TETO_ANEXO) return Promise.resolve("maior que 10 MB");
+    var caminho = processoId + "/" + Date.now() + "-" + nomeSeguro(arquivo.name);
+    return sb.storage.from(BALDE).upload(caminho, arquivo, {contentType: arquivo.type, upsert: false})
+      .then(function (u) {
+        if (u.error) return traduzirErro(u.error);
+        return sb.from("homol_anexo").insert({
+          processo_id: Number(processoId), nome: arquivo.name, tipo: arquivo.type,
+          tamanho: arquivo.size, caminho: caminho
+        }).then(function (r) {
+          if (!r.error) return null;
+          // a ficha não entrou: o arquivo solto no balde não serve a ninguém
+          sb.storage.from(BALDE).remove([caminho]);
+          return traduzirErro(r.error);
+        });
+      });
   }
+  // `arquivo` é o File que a pessoa escolheu
   function anexar(id, arquivo) {
-    var p = acharParaMexer(id), s = sessao();
-    if (!p || !s) return Promise.resolve({ok: false, recado: "Não foi possível anexar."});
-    var a = novoAnexo(arquivo, p.atividade);
-    p.anexos.push(a);
-    p.historico.push({quando: a.quando, quem: s.nome, oque: "Anexou o arquivo " + a.nome});
-    if (!gravar()) {
-      p.anexos.pop(); p.historico.pop();
-      return Promise.resolve({ok: false, recado: "Não coube — na demonstração o navegador guarda pouco. Tente um arquivo menor."});
-    }
-    return Promise.resolve({ok: true, processo: copia(p)});
+    return subir(id, arquivo).then(function (erro) {
+      if (erro) return {ok: false, recado: "Não consegui anexar " + arquivo.name + ": " + erro};
+      return obterProcesso(id).then(function (p) { return {ok: true, processo: p}; });
+    });
   }
   function tirarAnexo(id, codigo) {
-    var p = acharParaMexer(id), s = sessao();
-    if (!p || !s) return Promise.resolve({ok: false});
-    var a = p.anexos.filter(function (x) { return x.codigo === codigo; })[0];
-    if (!a) return Promise.resolve({ok: false});
-    p.anexos.splice(p.anexos.indexOf(a), 1);
-    p.historico.push({quando: agora(), quem: s.nome, oque: "Tirou o arquivo " + a.nome});
-    gravar();
-    return Promise.resolve({ok: true, processo: copia(p)});
+    return sb.from("homol_anexo").delete().eq("id", Number(codigo)).select("caminho").maybeSingle()
+      .then(function (r) {
+        if (r.error || !r.data) return {ok: false, recado: r.error ? traduzirErro(r.error)
+          : "Só quem anexou pode tirar, e só enquanto o processo está aberto."};
+        return sb.storage.from(BALDE).remove([r.data.caminho]).then(function () {
+          return obterProcesso(id).then(function (p) { return {ok: true, processo: p}; });
+        });
+      });
   }
-  var seqAnexo = 0;
-  function novoAnexo(arquivo, atividade) {
-    var s = sessao();
-    return {codigo: String(Date.now()).slice(-7) + (seqAnexo++ % 10), versao: 1000,
-      nome: arquivo.nome, tipo: arquivo.tipo, tamanho: arquivo.tamanho, dados: arquivo.dados,
-      quem: s ? s.nome : "", quando: agora(), atividade: atividade || "Início"};
+  // Ficha de um arquivo escolhido que ainda não subiu (atestado novo)
+  function novoAnexo(arquivo) {
+    return {codigo: "", versao: 1000, nome: arquivo.name, tipo: arquivo.type, tamanho: arquivo.size,
+      quem: nomeDeQuem(), quando: "", atividade: "Início", _arquivo: arquivo, meu: true};
+  }
+  /* O endereço para abrir ou baixar. O balde é PRIVADO: o link vale 5
+     minutos, e só é dado a quem pode ver o processo. */
+  function urlAnexo(a, baixar) {
+    if (a._arquivo) return Promise.resolve(URL.createObjectURL(a._arquivo));
+    return sb.storage.from(BALDE).createSignedUrl(a.caminho, 300, baixar ? {download: a.nome} : undefined)
+      .then(function (r) {
+        if (r.error) throw new Error(traduzirErro(r.error, "Não consegui abrir o arquivo."));
+        return r.data.signedUrl;
+      });
+  }
+
+  /* ---------- comentários ---------- */
+  function comentar(id, texto) {
+    return sb.from("homol_evento").insert({processo_id: Number(id), oque: String(texto).trim(), comentario: true})
+      .then(function (r) {
+        if (r.error) return {ok: false, recado: traduzirErro(r.error, "Não consegui gravar o comentário.")};
+        return obterProcesso(id).then(function (p) { return {ok: true, processo: p}; });
+      });
   }
 
   /* ---------- entidades e profissionais ---------- */
-  function listarEntidades() { return Promise.resolve(copia(ler().entidades)); }
-  function listarProfissionais() { return Promise.resolve(copia(ler().profissionais)); }
-  function proximoCodigo(lista, largura) {
-    var maior = 0;
-    lista.forEach(function (x) { maior = Math.max(maior, Number(x.codigo) || 0); });
-    var c = String(maior + 1);
-    while (c.length < largura) c = "0" + c;
-    return c;
+  function listarTudo(tabela, colunas, ordem) {
+    return sb.from(tabela).select(colunas).order(ordem).limit(5000).then(function (r) {
+      if (r.error) throw new Error(traduzirErro(r.error));
+      return r.data.map(function (x) { x.codigo = String(x.codigo); return x; });
+    });
   }
-  function soDigitos(t) { return String(t || "").replace(/\D/g, ""); }
+  function listarEntidades() { return listarTudo("homol_entidade", "codigo,nome,fantasia,cnpj,cidade,uf", "nome"); }
+  function listarProfissionais() { return listarTudo("homol_profissional", "codigo,nome,registro,orgao,uf,numero", "nome"); }
 
   function criarEntidade(e) {
-    var banco = ler();
-    var cnpj = soDigitos(e.cnpj);
-    if (cnpj) {
-      var ja = banco.entidades.filter(function (x) { return soDigitos(x.cnpj) === cnpj; })[0];
-      if (ja) return Promise.resolve({ok: false, recado: "Esta entidade já está cadastrada: " + ja.nome, entidade: copia(ja)});
-    }
-    var nova = {codigo: proximoCodigo(banco.entidades, 5), nome: String(e.nome).toUpperCase(),
-      fantasia: String(e.fantasia || "").toUpperCase(), cnpj: cnpj,
-      cidade: e.cidade || "", uf: e.uf || ""};
-    banco.entidades.push(nova);
-    gravar();
-    return Promise.resolve({ok: true, entidade: copia(nova)});
+    var cnpj = soDigitos(e.cnpj) || null;
+    return sb.from("homol_entidade").insert({nome: e.nome, fantasia: e.fantasia || null, cnpj: cnpj,
+      cidade: e.cidade || null, uf: e.uf || null}).select("codigo,nome,fantasia,cnpj,cidade,uf").single()
+      .then(function (r) {
+        if (!r.error) { r.data.codigo = String(r.data.codigo); return {ok: true, entidade: r.data}; }
+        if (r.error.code === "23505" && cnpj) {        // já existe: devolve a que existe
+          return sb.from("homol_entidade").select("codigo,nome,fantasia,cnpj,cidade,uf").eq("cnpj", cnpj).single()
+            .then(function (j) {
+              if (j.data) j.data.codigo = String(j.data.codigo);
+              return {ok: false, recado: "Esta entidade já está cadastrada: " + (j.data ? j.data.nome : ""),
+                      entidade: j.data || null};
+            });
+        }
+        return {ok: false, recado: traduzirErro(r.error)};
+      });
   }
   function criarProfissional(pr) {
-    var banco = ler();
     var numero = String(pr.numero || "").trim();
-    var registro = pr.orgao + " " + pr.uf + " " + numero;
-    var ja = banco.profissionais.filter(function (x) {
-      return x.orgao === pr.orgao && x.uf === pr.uf && soDigitos(x.registro) === soDigitos(numero);
-    })[0];
-    if (ja) return Promise.resolve({ok: false, recado: "Este profissional já está cadastrado: " + ja.nome, profissional: copia(ja)});
-    var novo = {codigo: proximoCodigo(banco.profissionais, 1), nome: String(pr.nome).toUpperCase(),
-      registro: registro, orgao: pr.orgao, uf: pr.uf};
-    banco.profissionais.push(novo);
-    gravar();
-    return Promise.resolve({ok: true, profissional: copia(novo)});
+    var campos = {nome: pr.nome, orgao: pr.orgao, uf: pr.uf, numero: numero,
+                  registro: pr.orgao + " " + pr.uf + " " + numero};
+    return sb.from("homol_profissional").insert(campos).select("codigo,nome,registro,orgao,uf,numero").single()
+      .then(function (r) {
+        if (!r.error) { r.data.codigo = String(r.data.codigo); return {ok: true, profissional: r.data}; }
+        if (r.error.code === "23505") {
+          return sb.from("homol_profissional").select("codigo,nome,registro,orgao,uf,numero")
+            .eq("orgao", pr.orgao).eq("uf", pr.uf).eq("numero", numero).single()
+            .then(function (j) {
+              if (j.data) j.data.codigo = String(j.data.codigo);
+              return {ok: false, recado: "Este profissional já está cadastrado: " + (j.data ? j.data.nome : ""),
+                      profissional: j.data || null};
+            });
+        }
+        return {ok: false, recado: traduzirErro(r.error)};
+      });
   }
 
   /* ---------- CNPJ na Receita ----------
@@ -412,20 +472,15 @@
     return cidPromessa;
   }
 
-  function zerarDemonstracao() {
-    try { localStorage.removeItem(CHAVE); } catch (e) { /* segue */ }
-    memoria = null;
-  }
-
   window.Homologacao = {
-    TIPOS: TIPOS, RESPONSAVEIS: RESPONSAVEIS, ORGAOS: ORGAOS, UFS: UFS,
+    TIPOS: TIPOS, RESPONSAVEIS: RESPONSAVEIS, MEDICO_FIXO: MEDICO_FIXO, ORGAOS: ORGAOS, UFS: UFS, TETO_ANEXO: TETO_ANEXO,
     sessao: sessao, entrar: entrar, sair: sair, nomeDeQuem: nomeDeQuem,
     listarProcessos: listarProcessos, obterProcesso: obterProcesso,
+    historicoDoColaborador: historicoDoColaborador, listarFiliais: listarFiliais,
     processoEmBranco: processoEmBranco, salvarProcesso: salvarProcesso,
-    comentar: comentar, anexar: anexar, tirarAnexo: tirarAnexo, novoAnexo: novoAnexo,
+    comentar: comentar, anexar: anexar, tirarAnexo: tirarAnexo, novoAnexo: novoAnexo, urlAnexo: urlAnexo,
     listarEntidades: listarEntidades, criarEntidade: criarEntidade,
     listarProfissionais: listarProfissionais, criarProfissional: criarProfissional,
-    buscarCNPJ: buscarCNPJ, listarCID: listarCID, soDigitos: soDigitos,
-    zerarDemonstracao: zerarDemonstracao
+    buscarCNPJ: buscarCNPJ, listarCID: listarCID, soDigitos: soDigitos
   };
 })();

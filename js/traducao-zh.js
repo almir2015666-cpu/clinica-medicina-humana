@@ -544,6 +544,7 @@ window.CMH_ZH = { "Medicina Ocupacional em Camaçari para Empresas": "面向企
  "Outro (descrever nas observações)": "其他（请在备注中说明）",
  "Ouvidoria": "意见受理中心",
  "Homologação de atestados": "病假证明审核",
+ "Empresas enviam os atestados da equipe e acompanham o parecer da clínica online.": "企业在线提交员工的病假证明，并跟踪诊所的审核意见。",
  "Ouvidoria da Clínica Medicina Humana — registre reclamações, sugestões e elogios.": "Clínica Medicina Humana意见受理中心 — 提交投诉、建议和表扬。",
  "Ouvidoria — Clínica Medicina Humana": "意见与投诉 — Medicina Humana诊所",
  "PCMSO (Programa de Controle Médico de Saúde Ocupacional)": "PCMSO（职业健康医学监护计划）",

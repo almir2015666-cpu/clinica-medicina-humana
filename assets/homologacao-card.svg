@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Atestado médico com selo de aprovado">
+  <defs>
+    <linearGradient id="fundo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a2256"/>
+      <stop offset="1" stop-color="#123a86"/>
+    </linearGradient>
+    <linearGradient id="papel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#dfe8f3"/>
+    </linearGradient>
+    <linearGradient id="prancheta" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d4f9c"/>
+      <stop offset="1" stop-color="#143e82"/>
+    </linearGradient>
+    <linearGradient id="selo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f86e8"/>
+      <stop offset="1" stop-color="#1759c4"/>
+    </linearGradient>
+    <radialGradient id="brilho" cx=".7" cy=".3" r=".6">
+      <stop offset="0" stop-color="#2a63c4" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#2a63c4" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="sombra" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#030d26" flood-opacity=".55"/>
+    </filter>
+  </defs>
+
+  <rect width="600" height="600" fill="url(#fundo)"/>
+  <rect width="600" height="600" fill="url(#brilho)"/>
+  <!-- as ondas do fundo -->
+  <path d="M0 120 C140 60 240 150 330 95 S520 20 600 60" fill="none" stroke="#2f6fd6" stroke-opacity=".55" stroke-width="2"/>
+  <path d="M260 600 C300 470 420 420 600 300 L600 600 Z" fill="#0f3275" fill-opacity=".6"/>
+  <!-- pontinhos -->
+  <g fill="#6d8fc9" fill-opacity=".45">
+    <circle cx="40" cy="170" r="3"/><circle cx="62" cy="170" r="3"/><circle cx="84" cy="170" r="3"/>
+    <circle cx="40" cy="192" r="3"/><circle cx="62" cy="192" r="3"/><circle cx="84" cy="192" r="3"/>
+    <circle cx="40" cy="214" r="3"/><circle cx="62" cy="214" r="3"/><circle cx="84" cy="214" r="3"/>
+    <circle cx="520" cy="300" r="3"/><circle cx="542" cy="300" r="3"/><circle cx="564" cy="300" r="3"/>
+    <circle cx="520" cy="322" r="3"/><circle cx="542" cy="322" r="3"/><circle cx="564" cy="322" r="3"/>
+  </g>
+
+  <!-- tudo o que é desenho sobe e encolhe um pouco: a metade de baixo do
+       card é do título e do texto, que cobriam o selo -->
+  <g transform="translate(45 -60) scale(.85)">
+  <!-- ícones em círculo: calendário, empresa, lupa -->
+  <g fill="none" stroke="#8fb0e6" stroke-opacity=".7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="118" cy="300" r="46"/>
+    <rect x="96" y="282" width="44" height="40" rx="5"/><path d="M96 294h44M108 276v12M128 276v12"/>
+    <path d="M108 308l6 6 12-12"/>
+    <circle cx="498" cy="140" r="46"/>
+    <path d="M476 166v-40l16 10v-10l16 10v-14h12v44z"/><path d="M470 166h56"/>
+    <circle cx="505" cy="232" r="34"/>
+    <circle cx="500" cy="228" r="13"/><path d="M510 238l11 11"/>
+  </g>
+
+  <!-- a prancheta com o atestado -->
+  <g filter="url(#sombra)">
+    <rect x="178" y="110" width="244" height="330" rx="18" fill="url(#prancheta)"/>
+    <rect x="196" y="132" width="208" height="292" rx="8" fill="url(#papel)"/>
+    <rect x="252" y="96" width="96" height="36" rx="10" fill="#b9c6d8"/>
+    <rect x="266" y="104" width="68" height="18" rx="6" fill="#8fa0b8"/>
+  </g>
+  <text x="300" y="176" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-size="17" font-weight="700"
+        fill="#143e82" letter-spacing="1.5">ATESTADO MÉDICO</text>
+  <g stroke="#6f8fbf" stroke-width="5" stroke-linecap="round" opacity=".75">
+    <path d="M222 206h156"/><path d="M222 228h120"/><path d="M222 250h140"/><path d="M222 272h96"/>
+    <path d="M222 306h70"/><path d="M222 328h86"/>
+  </g>
+  <!-- cruz da saúde no papel -->
+  <g transform="translate(222 360)">
+    <rect x="12" y="0" width="16" height="40" rx="3" fill="#2a6fd8"/>
+    <rect x="0" y="12" width="40" height="16" rx="3" fill="#2a6fd8"/>
+  </g>
+  <!-- assinatura -->
+  <path d="M276 392c10-14 18 10 28-4s16 8 26-2" fill="none" stroke="#143e82" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- o selo de aprovado -->
+  <g filter="url(#sombra)">
+    <circle cx="386" cy="386" r="58" fill="#0f3a8a"/>
+    <circle cx="386" cy="386" r="48" fill="url(#selo)"/>
+    <circle cx="386" cy="386" r="48" fill="none" stroke="#9cc6ff" stroke-width="3" stroke-opacity=".6"/>
+    <path d="M364 386l15 15 29-31" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- estetoscópio, discreto, embaixo -->
+  <g fill="none" stroke="#9fb4d6" stroke-width="7" stroke-linecap="round" opacity=".9">
+    <path d="M120 520c40 30 120 30 170-6"/>
+    <path d="M290 514c30-22 60-20 80 6"/>
+  </g>
+  <circle cx="386" cy="532" r="20" fill="#c9d5e6"/>
+  <circle cx="386" cy="532" r="11" fill="#7f93b3"/>
+  </g>
+</svg>
