@@ -663,12 +663,12 @@ grant select, insert, update, delete on public.homol_conta to authenticated;
 select 'tabelas homol_' as o_que,
        (select count(*) from information_schema.tables
          where table_schema = 'public' and table_name like 'homol\_%')::text as achei,
-       '6' as esperado
+       '7' as esperado
 union all
 select 'tabelas com RLS ligada',
        (select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace
          where n.nspname = 'public' and c.relname like 'homol\_%' and c.relkind = 'r'
-           and c.relrowsecurity)::text, '6'
+           and c.relrowsecurity)::text, '7'
 union all
 select 'gatilhos',
        (select count(*) from pg_trigger t join pg_class c on c.oid = t.tgrelid

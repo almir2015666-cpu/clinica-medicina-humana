@@ -16,8 +16,8 @@ Faça os passos **nesta ordem**. Até o passo 1 terminar, o site mostra erro ao 
 
 | o_que | esperado |
 |---|---|
-| tabelas homol_ | 6 |
-| tabelas com RLS ligada | 6 |
+| tabelas homol_ | 7 |
+| tabelas com RLS ligada | 7 |
 | gatilhos | 7 |
 | balde de anexos privado | true |
 | politicas do storage | 3 |
