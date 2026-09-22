@@ -359,11 +359,27 @@ img{max-width:100%;display:block}
 .topbar-tab{position:absolute;top:0;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);color:var(--navy);font-size:.94rem;padding:.55rem 1.6rem;border-radius:0 0 14px 14px;box-shadow:0 3px 12px rgba(10,46,92,.14);white-space:nowrap}
 .topbar-tab--center{left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:.4rem}
 .topbar-tab--center strong{font-weight:700}
-.topbar-tab--right{left:50%;transform:translateX(-50%);display:flex;gap:1.2rem}
+.topbar-tab--right{left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:1.2rem;max-width:min(96vw,1120px)}
 .topbar-tab--right a{color:var(--navy);opacity:.9;font-weight:500;display:inline-flex;align-items:center;gap:.35rem;transition:color .2s,opacity .2s,background .2s}
 .topbar-tab--right a:hover{opacity:1;color:var(--brand)}
 .topbar-tab--right a.topbar-cta{background:var(--brand);color:#fff;opacity:1;font-weight:600;padding:.16rem .85rem;border-radius:20px}
 .topbar-tab--right a.topbar-cta:hover{background:var(--navy);color:#fff;opacity:1}
+/* A ABA DO TOPO COM QUATRO ITENS.
+   Ela ganhou "Homologação de atestados", que é o item mais comprido de
+   todos. Como a aba é uma só peça centralizada e não quebra linha
+   (white-space:nowrap), numa tela de 1024px as palavras chegavam a
+   encostar umas nas outras e a aba passava das bordas. A saída é a aba
+   encolher junto com a tela — fonte, respiro entre os itens e o estofo
+   das laterais —, mantendo tudo numa linha e no centro. */
+@media(max-width:1180px){
+  .topbar-tab{font-size:.88rem;padding:.5rem 1.15rem}
+  .topbar-tab--right{gap:.9rem}
+  .topbar-tab--right a.topbar-cta{padding:.14rem .75rem}
+}
+@media(max-width:980px){
+  .topbar-tab{font-size:.82rem;padding:.45rem .9rem}
+  .topbar-tab--right{gap:.7rem}
+}
 .chev--sm{width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-1px);display:inline-block}
 .header .header__inner{height:100px}
 .header.scrolled .header__inner{height:80px}

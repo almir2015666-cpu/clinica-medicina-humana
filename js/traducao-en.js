@@ -542,6 +542,7 @@ window.CMH_EN = { "Medicina Ocupacional em Camaçari para Empresas": "Occupatio
  "Outra": "Other",
  "Outro (descrever nas observações)": "Other (describe in the notes)",
  "Ouvidoria": "Ombudsman",
+ "Homologação de atestados": "Medical certificate review",
  "Ouvidoria da Clínica Medicina Humana — registre reclamações, sugestões e elogios.": "Clínica Medicina Humana Ombudsman Office — file complaints, suggestions and compliments.",
  "Ouvidoria — Clínica Medicina Humana": "Ombudsman — Clínica Medicina Humana",
  "PCMSO (Programa de Controle Médico de Saúde Ocupacional)": "PCMSO (Occupational Health Medical Control Program)",

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- TELA DE ACESSO: fora do Google, de proposito. Nao ha nada aqui para
+       quem nao tem conta, e uma tela de login indexada so atrai tentativa
+       de entrada. -->
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Homologação de atestados | Clínica Medicina Humana</title>
+  <link rel="icon" type="image/png" href="../assets/favicon.png?v=2" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* =================================================================
+       HOMOLOGAÇÃO DE ATESTADOS — a porta
+
+       As cores são as do site (css/style.css), repetidas aqui de
+       propósito: esta tela precisa abrir sozinha, rápido e igual, mesmo
+       que o estilo do site mude de lugar um dia.
+
+       A tela é partida em duas: à esquerda o que é este lugar, à direita
+       o formulário. Quem chega aqui pela primeira vez — o RH de uma
+       empresa — precisa das duas coisas na mesma olhada: saber que veio
+       ao lugar certo, e onde digitar.
+       ================================================================= */
+    :root{
+      --navy:#0a2e5c; --blue-700:#0b5aa5; --blue-500:#1290e0;
+      --blue-400:#3bb3ef; --blue-300:#6fcdf5;
+      --pale:#eaf6fd; --ink:#12283f; --muted:#56718b; --line:#e2edf6;
+      --erro:#b3261e; --ok:#1c7d43;
+      --sombra:0 24px 60px rgba(10,46,92,.22);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      font-family:'Inter',system-ui,Arial,sans-serif;color:var(--ink);
+      background:var(--pale);
+      display:grid;grid-template-columns:1.05fr 1fr;min-height:100vh;
+    }
+
+    /* ---------------- o lado azul ---------------- */
+    .marca{
+      position:relative;overflow:hidden;color:#fff;
+      background:linear-gradient(135deg,var(--navy) 0%,var(--blue-700) 58%,var(--blue-500) 100%);
+      display:flex;flex-direction:column;justify-content:center;
+      padding:3.4rem clamp(2rem,5vw,5rem);
+    }
+    /* as ondas da marca, o mesmo desenho do site */
+    .marca__ondas{position:absolute;right:-60px;top:50%;transform:translateY(-50%);
+      width:420px;opacity:.5;pointer-events:none}
+    .marca__topo{display:flex;align-items:center;gap:.9rem;margin-bottom:auto}
+    .marca__logo{height:54px;width:auto;filter:brightness(0) invert(1)}
+    .marca__nome{font:600 1rem/1.2 'Poppins',sans-serif}
+    .marca__nome span{display:block;font-weight:400;font-size:.78rem;opacity:.8}
+    .marca__corpo{position:relative;z-index:2;margin:2.6rem 0}
+    .marca h1{
+      font:700 clamp(1.9rem,3.2vw,2.7rem)/1.15 'Poppins',sans-serif;
+      margin:0 0 1rem;letter-spacing:-.01em;
+    }
+    .marca h1 span{display:block;color:var(--blue-300)}
+    .marca p{font-size:1.02rem;line-height:1.6;max-width:46ch;margin:0;color:rgba(255,255,255,.88)}
+    .marca__lista{list-style:none;padding:0;margin:2.2rem 0 0;display:grid;gap:1rem;max-width:46ch}
+    .marca__lista li{display:flex;gap:.75rem;align-items:flex-start;font-size:.93rem;
+      color:rgba(255,255,255,.88);line-height:1.5}
+    .marca__lista svg{flex:0 0 auto;margin-top:3px}
+    .marca__lista b{color:#fff;font-weight:600}
+    .marca__lista a{color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.35)}
+    .marca__lista a:hover{border-color:#fff}
+    .marca__pe{margin-top:auto;font-size:.82rem;color:rgba(255,255,255,.7)}
+    .marca__pe a{color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.4)}
+    .marca__pe a:hover{border-color:#fff}
+
+    /* ---------------- o lado do formulário ---------------- */
+    .acesso{display:flex;align-items:center;justify-content:center;padding:2.5rem 1.5rem;
+      background:
+        radial-gradient(1100px 380px at 100% -10%, #ffffff 0%, rgba(255,255,255,0) 70%),
+        var(--pale);
+    }
+    .cartao{
+      width:100%;max-width:430px;background:#fff;border-radius:22px;
+      padding:2.6rem 2.3rem 2.2rem;box-shadow:var(--sombra);border:1px solid var(--line);
+    }
+    .cartao h2{font:600 1.5rem/1.2 'Poppins',sans-serif;margin:0 0 .45rem;color:var(--navy)}
+    .cartao__sub{margin:0 0 1.9rem;color:var(--muted);font-size:.93rem;line-height:1.5}
+
+    .campo{margin-bottom:1.15rem}
+    .campo label{display:block;font:500 .84rem/1 'Poppins',sans-serif;
+      color:var(--navy);margin-bottom:.45rem}
+    .caixa{position:relative;display:flex;align-items:center}
+    .caixa svg.icone{position:absolute;left:14px;color:var(--muted);pointer-events:none}
+    .campo input{
+      width:100%;font:400 .97rem/1 'Inter',sans-serif;color:var(--ink);
+      padding:.92rem 1rem .92rem 2.75rem;border:1.5px solid var(--line);
+      border-radius:12px;background:#fbfdff;transition:border-color .15s,box-shadow .15s,background .15s;
+    }
+    .campo input::placeholder{color:#9ab0c4}
+    .campo input:hover{border-color:#cfe3f3}
+    .campo input:focus{outline:none;border-color:var(--blue-500);background:#fff;
+      box-shadow:0 0 0 4px rgba(18,144,224,.14)}
+    /* o olho da senha: botão de verdade, alcançável pelo teclado */
+    .olho{position:absolute;right:8px;background:none;border:none;cursor:pointer;
+      padding:8px;border-radius:8px;color:var(--muted);line-height:0}
+    .olho:hover{color:var(--blue-700);background:var(--pale)}
+    .olho:focus-visible{outline:2px solid var(--blue-500);outline-offset:2px}
+
+    .linha{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+      margin:-.2rem 0 1.5rem;flex-wrap:wrap}
+    .lembrar{display:flex;align-items:center;gap:.5rem;font-size:.88rem;color:var(--muted);cursor:pointer}
+    .lembrar input{width:16px;height:16px;accent-color:var(--blue-500);cursor:pointer}
+    .ajuda-link{font-size:.88rem;color:var(--blue-700);text-decoration:none;font-weight:500}
+    .ajuda-link:hover{text-decoration:underline}
+
+    .entrar{
+      width:100%;border:none;cursor:pointer;color:#fff;
+      font:600 1rem/1 'Poppins',sans-serif;padding:1.02rem 1rem;border-radius:12px;
+      background:linear-gradient(135deg,var(--blue-700),var(--blue-500));
+      box-shadow:0 10px 26px rgba(11,90,165,.28);
+      transition:transform .15s,box-shadow .15s,filter .15s;
+      display:flex;align-items:center;justify-content:center;gap:.6rem;
+    }
+    .entrar:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(11,90,165,.34)}
+    .entrar:active{transform:translateY(0)}
+    .entrar:disabled{cursor:progress;filter:saturate(.6) brightness(1.05);transform:none}
+    .entrar .girando{width:17px;height:17px;border:2.5px solid rgba(255,255,255,.35);
+      border-top-color:#fff;border-radius:50%;animation:gira .7s linear infinite;display:none}
+    .entrar.ocupado .girando{display:block}
+    @keyframes gira{to{transform:rotate(360deg)}}
+
+    /* O RECADO NÃO É UM ALERTA DO NAVEGADOR: ele nasce aqui dentro, perto
+       do botão, e é lido em voz alta por quem usa leitor de tela. */
+    .recado{margin:1.1rem 0 0;padding:.85rem 1rem;border-radius:12px;font-size:.89rem;
+      line-height:1.5;display:none}
+    .recado.mostra{display:block}
+    .recado--erro{background:#fdecea;color:var(--erro);border:1px solid #f6cdc8}
+    .recado--aviso{background:#fff8e8;color:#6b5200;border:1px solid #f3dca6}
+    .recado a{color:inherit;font-weight:600}
+
+    .demo-caixa{margin:1.3rem 0 0;padding:.85rem 1rem;border-radius:12px;background:#fff8e8;
+      border:1px dashed #f3dca6;font-size:.85rem;color:#6b5200;line-height:1.45}
+    .demo-botoes{display:flex;gap:.5rem;margin-top:.6rem;flex-wrap:wrap}
+    .demo-bt{flex:1 1 150px;border:1.5px solid #f3dca6;background:#fff;color:var(--navy);
+      border-radius:10px;padding:.55rem .6rem;font:600 .82rem 'Poppins',sans-serif;cursor:pointer}
+    .demo-bt:hover{border-color:var(--blue-500);color:var(--blue-700)}
+    .cartao__pe{margin:1.7rem 0 0;padding-top:1.3rem;border-top:1px solid var(--line);
+      font-size:.85rem;color:var(--muted);line-height:1.55;text-align:center}
+    .cartao__pe a{color:var(--blue-700);text-decoration:none;font-weight:500}
+    .cartao__pe a:hover{text-decoration:underline}
+
+    /* ---------------- no celular ---------------- */
+    @media(max-width:900px){
+      body{grid-template-columns:1fr}
+      .marca{padding:1.6rem 1.4rem 2.2rem;min-height:auto}
+      .marca__ondas{display:none}
+      .marca__topo{margin-bottom:1.6rem}
+      .marca__logo{height:44px}
+      .marca__corpo{margin:0}
+      .marca h1{font-size:1.6rem;margin-bottom:.6rem}
+      .marca p{font-size:.94rem}
+      /* OS CONTATOS FICAM, mesmo no celular — é a informação que faz
+         falta quando a senha não entra. Só encolhem, para o formulário
+         não ser empurrado para longe demais. */
+      .marca__lista{margin-top:1.3rem;gap:.7rem;font-size:.86rem;max-width:none}
+      .marca__lista li{font-size:.86rem}
+      .marca__pe{display:none}
+      .acesso{padding:1.6rem 1.1rem 2.6rem}
+      .cartao{padding:2rem 1.4rem 1.7rem;border-radius:18px;
+        box-shadow:0 14px 36px rgba(10,46,92,.14)}
+    }
+    @media(prefers-reduced-motion:reduce){
+      *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===================== o lado azul ===================== -->
+  <section class="marca">
+    <svg class="marca__ondas" viewBox="0 0 260 460" fill="none" stroke="#fff"
+         stroke-linecap="round" aria-hidden="true">
+      <path d="M18 120 C68 80 118 160 168 120 S238 80 250 110" stroke-width="6" opacity=".9"/>
+      <path d="M18 172 C68 132 118 212 168 172 S238 132 250 162" stroke-width="6" opacity=".72"/>
+      <path d="M18 224 C68 184 118 264 168 224 S238 184 250 214" stroke-width="6" opacity=".54"/>
+      <path d="M18 276 C68 236 118 316 168 276 S238 236 250 266" stroke-width="6" opacity=".36"/>
+      <path d="M18 328 C68 288 118 368 168 328 S238 288 250 318" stroke-width="6" opacity=".2"/>
+    </svg>
+
+    <a class="marca__topo" href="../index.html" style="text-decoration:none;color:inherit">
+      <img src="../assets/logo.png" alt="Clínica Medicina Humana" class="marca__logo"
+           onerror="this.style.display='none'" />
+      <span class="marca__nome">Medicina Humana
+        <span>Cuidando de você em cada detalhe</span></span>
+    </a>
+
+    <div class="marca__corpo">
+      <h1>Homologação <span>de atestados</span></h1>
+      <p>O canal da empresa para enviar os atestados dos seus colaboradores
+         e acompanhar cada processo até a conclusão, sem telefonema e sem
+         planilha paralela.</p>
+
+      <!-- OS CONTATOS FICAM AQUI, e não escondidos numa página de ajuda:
+           quem não consegue entrar precisa falar com a clínica na mesma
+           tela em que travou, e não sair procurando o telefone. -->
+      <ul class="marca__lista">
+        <li>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6fcdf5"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+          </svg>
+          <span><b>Rua do Alecrim, 76</b> — Centro, Camaçari — BA<br />
+            <span style="white-space:nowrap">CEP 42800-025</span> ·
+            <a href="../como-chegar.html">Ver como chegar</a></span>
+        </li>
+        <li>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6fcdf5"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>
+          </svg>
+          <span>Telefone <a href="tel:+557134937220"><b>(71) 3493-7220</b></a><br />
+            Segunda a sexta, 7h às 18h · sábado, 7h às 12h</span>
+        </li>
+        <li>
+          <!-- o mesmo desenho do WhatsApp que o site usa no rodapé -->
+          <svg width="20" height="20" viewBox="0 0 32 32" fill="#6fcdf5" aria-hidden="true">
+            <path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.2 1.6 6L4 27l6.2-1.6c1.7.9 3.7 1.4 5.8 1.4 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 21.8c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.7 1 1-3.6-.2-.4c-1-1.6-1.5-3.4-1.5-5.2 0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 9.8-10 9.8zm5.5-7.3c-.3-.2-1.8-.9-2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.4.5-.6.1-.2.2-.3.3-.5.1-.2 0-.4 0-.6-.1-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.2-.5-.4z"/>
+          </svg>
+          <span>WhatsApp do comercial
+            <a href="https://wa.me/5571993010103?text=Ol%C3%A1%21%20Gostaria%20de%20falar%20sobre%20a%20homologa%C3%A7%C3%A3o%20de%20atestados."
+               target="_blank" rel="noopener"><b>(71) 99301-0103</b></a></span>
+        </li>
+        <li>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6fcdf5"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>
+          </svg>
+          <span>E-mail
+            <a href="mailto:comercial@medicinahumana.com.br"><b>comercial@medicinahumana.com.br</b></a></span>
+        </li>
+      </ul>
+    </div>
+
+    <p class="marca__pe">
+      <a href="../contatos.html">Página de contatos</a> ·
+      <a href="../index.html">Site da clínica</a>
+    </p>
+  </section>
+
+  <!-- ===================== o formulário ===================== -->
+  <main class="acesso">
+    <div class="cartao">
+      <h2>Entrar</h2>
+      <p class="cartao__sub">Use o usuário e a senha que a clínica enviou
+         para o RH da sua empresa.</p>
+
+      <form id="form" autocomplete="on" novalidate>
+        <div class="campo">
+          <label for="usuario">Usuário ou CNPJ da empresa</label>
+          <div class="caixa">
+            <svg class="icone" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 9h.01M15 9h.01M9 13h.01M15 13h.01M9 17h.01M15 17h.01"/>
+            </svg>
+            <input id="usuario" name="usuario" type="text" autocomplete="username"
+                   placeholder="e-mail ou CNPJ da empresa"
+                   spellcheck="false" autocapitalize="off" required />
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="senha">Senha</label>
+          <div class="caixa">
+            <svg class="icone" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <input id="senha" name="senha" type="password" autocomplete="current-password"
+                   placeholder="Sua senha" required />
+            <button class="olho" id="olho" type="button" aria-label="Mostrar a senha"
+                    aria-pressed="false">
+              <svg id="olhoIcone" width="19" height="19" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                   stroke-linejoin="round" aria-hidden="true">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="linha">
+          <label class="lembrar">
+            <input type="checkbox" id="lembrar" /> Lembrar meu usuário
+          </label>
+          <a class="ajuda-link" href="#" id="esqueci">Esqueci minha senha</a>
+        </div>
+
+        <button class="entrar" id="botao" type="submit">
+          <span class="girando" aria-hidden="true"></span>
+          <span id="botaoTexto">Entrar</span>
+        </button>
+
+        <!-- role="alert" faz o leitor de tela anunciar o recado assim que
+             ele aparece; sem isso, quem não enxerga a tela fica clicando
+             em Entrar sem saber por que nada acontece. -->
+        <p class="recado" id="recado" role="alert"></p>
+      </form>
+
+      <div class="demo-caixa">
+        <b>Demonstração</b> — dados de exemplo, nada é real.
+        <div class="demo-botoes">
+          <button type="button" class="demo-bt" data-demo="empresa">Entrar como empresa</button>
+          <button type="button" class="demo-bt" data-demo="everaldo">Entrar como Dr. Everaldo</button>
+        </div>
+      </div>
+
+      <p class="cartao__pe">
+        Ainda não tem acesso? Fale com o comercial pelo
+        <a href="https://wa.me/5571993010103?text=Ol%C3%A1%21%20Gostaria%20de%20acesso%20%C3%A0%20homologa%C3%A7%C3%A3o%20de%20atestados."
+           target="_blank" rel="noopener">WhatsApp (71) 99301-0103</a>.<br />
+        <a href="../index.html">← Voltar ao site da clínica</a>
+      </p>
+    </div>
+  </main>
+
+<script src="dados.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var form    = document.getElementById("form");
+  var usuario = document.getElementById("usuario");
+  var senha   = document.getElementById("senha");
+  var lembrar = document.getElementById("lembrar");
+  var botao   = document.getElementById("botao");
+  var recado  = document.getElementById("recado");
+  var CHAVE   = "cmh_homologacao_usuario";
+
+  /* LEMBRAR SÓ O USUÁRIO, NUNCA A SENHA. Senha guardada no navegador é
+     senha vazada no primeiro computador compartilhado — e o RH costuma
+     usar a máquina da recepção. */
+  try {
+    var guardado = localStorage.getItem(CHAVE);
+    if (guardado) { usuario.value = guardado; lembrar.checked = true; senha.focus(); }
+    else { usuario.focus(); }
+  } catch (e) { usuario.focus(); }
+
+  /* ---- o olho da senha ---- */
+  var olho = document.getElementById("olho");
+  olho.addEventListener("click", function () {
+    var mostrando = senha.type === "text";
+    senha.type = mostrando ? "password" : "text";
+    olho.setAttribute("aria-pressed", String(!mostrando));
+    olho.setAttribute("aria-label", mostrando ? "Mostrar a senha" : "Ocultar a senha");
+    senha.focus();
+  });
+
+  function dizer(texto, tipo) {
+    recado.className = "recado mostra recado--" + (tipo || "erro");
+    recado.innerHTML = texto;
+  }
+  function calar() { recado.className = "recado"; recado.textContent = ""; }
+
+  document.getElementById("esqueci").addEventListener("click", function (ev) {
+    ev.preventDefault();
+    dizer("A senha é criada pela clínica. Fale com a gente pelo " +
+          "<a href=\"https://wa.me/5571993010103?text=Ol%C3%A1%21%20Preciso%20recuperar%20a%20senha%20da%20homologa%C3%A7%C3%A3o%20de%20atestados.\" " +
+          "target=\"_blank\" rel=\"noopener\">WhatsApp (71) 99301-0103</a> " +
+          "ou pelo telefone (71) 3493-7220, e uma senha nova é enviada " +
+          "para o e-mail cadastrado.", "aviso");
+  });
+
+  form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    calar();
+
+    if (!usuario.value.trim()) {
+      dizer("Escreva o usuário ou o CNPJ da empresa."); usuario.focus(); return;
+    }
+    if (!senha.value) {
+      dizer("Escreva a senha."); senha.focus(); return;
+    }
+
+    try {
+      if (lembrar.checked) { localStorage.setItem(CHAVE, usuario.value.trim()); }
+      else { localStorage.removeItem(CHAVE); }
+    } catch (e) { /* navegador sem armazenamento: entrar continua valendo */ }
+
+    botao.disabled = true;
+    botao.classList.add("ocupado");
+    document.getElementById("botaoTexto").textContent = "Entrando…";
+
+    autenticar(usuario.value.trim(), senha.value).then(function (resposta) {
+      if (resposta.ok) {
+        window.location.href = resposta.destino || "painel.html";
+        return;
+      }
+      botao.disabled = false;
+      botao.classList.remove("ocupado");
+      document.getElementById("botaoTexto").textContent = "Entrar";
+      dizer(resposta.recado, resposta.tipo || "erro");
+      senha.select();
+    });
+  });
+
+  /* =================================================================
+     AQUI ENTRA A CONFERÊNCIA DE VERDADE.
+
+     Hoje esta função não confere nada: o cadastro das empresas ainda vai
+     ser feito. Ela devolve sempre a mesma resposta e é O ÚNICO lugar a
+     mexer quando o servidor existir — o resto da tela não muda.
+
+     Quando for ligar: a senha NÃO se confere aqui dentro. Quem confere é
+     o servidor (Supabase Auth, como o resto do sistema da clínica); esta
+     função só manda usuário e senha e espera a resposta. Conferência de
+     senha em JavaScript é conferência que qualquer pessoa lê com o botão
+     direito do mouse.
+     ================================================================= */
+  function autenticar(u, s) {
+    return window.Homologacao.entrar(u, s).then(function (r) {
+      if (r.ok) return {ok: true, destino: "painel.html"};
+      return {
+        ok: false,
+        tipo: "aviso",
+        recado: "Usuário ou senha não conferem. O acesso das empresas ainda " +
+                "está sendo liberado; se a sua empresa já foi avisada de que o " +
+                "canal está no ar, fale com a clínica pelo (71) 3493-7220."
+      };
+    });
+  }
+
+  /* ---- os atalhos da demonstração ----
+     Preenchem e entram, para quem está conhecendo a tela não precisar
+     decorar usuário e senha. Somem junto com a demonstração. */
+  Array.prototype.forEach.call(document.querySelectorAll("[data-demo]"), function (bt) {
+    bt.addEventListener("click", function () {
+      usuario.value = bt.getAttribute("data-demo");
+      senha.value = "demo";
+      lembrar.checked = false;
+      form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event("submit"));
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Gestão de atestados | Clínica Medicina Humana</title>
+  <link rel="icon" type="image/png" href="../assets/favicon.png?v=2" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* =================================================================
+       GESTÃO DE ATESTADOS — a lista que a empresa vê depois de entrar
+
+       Uma tabela só, com o que o RH precisa decidir: em que pé está cada
+       processo, de quem é, quantos dias, e o atestado em PDF na hora.
+
+       AS CORES SÃO AS DA CLÍNICA (azul), e não as do sistema de onde
+       veio a ideia (verde). A tela é nossa; o que copiamos de lá é o
+       ARRANJO — abas, ferramentas em cima, tabela larga, paginação
+       embaixo —, porque é um arranjo que quem trabalha com RH já conhece
+       e não precisa reaprender.
+       ================================================================= */
+    :root{
+      --navy:#0a2e5c; --blue-700:#0b5aa5; --blue-500:#1290e0; --blue-400:#3bb3ef;
+      --pale:#eaf6fd; --mist:#f4fafe;
+      --ink:#12283f; --muted:#56718b; --line:#e2edf6; --linha-forte:#cfe3f3;
+      --ok:#1c7d43; --atencao:#b7791f; --erro:#b3261e;
+      --sombra-sm:0 4px 14px rgba(11,90,165,.08);
+      --sombra-md:0 14px 40px rgba(11,90,165,.16);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%}
+    body{font-family:'Inter',system-ui,Arial,sans-serif;color:var(--ink);
+      background:var(--mist);display:flex;flex-direction:column;min-height:100vh}
+
+    /* ---------- a faixa de demonstração ----------
+       Ela existe para ninguém confundir exemplo com verdade. Sai do ar
+       junto com a ligação ao servidor. */
+    .demo{background:#fff8e8;border-bottom:1px solid #f3dca6;color:#6b5200;
+      font-size:.85rem;padding:.6rem 1.2rem;text-align:center;line-height:1.45}
+    .demo b{color:#5a4500}
+
+    /* ---------- o topo ---------- */
+    .topo{background:linear-gradient(135deg,var(--navy) 0%,var(--blue-700) 100%);
+      color:#fff;padding:.9rem 1.2rem;display:flex;align-items:center;gap:1rem;
+      box-shadow:var(--sombra-sm);position:sticky;top:0;z-index:40}
+    .topo__marca{display:flex;align-items:center;gap:.7rem;min-width:0}
+    .topo__marca img{height:34px;filter:brightness(0) invert(1)}
+    .topo__titulo{font:600 1.08rem/1.2 'Poppins',sans-serif;white-space:nowrap;
+      overflow:hidden;text-overflow:ellipsis}
+    .topo__titulo span{display:block;font:400 .76rem/1.3 'Inter',sans-serif;
+      color:rgba(255,255,255,.78)}
+    .topo__dir{margin-left:auto;display:flex;align-items:center;gap:.5rem}
+    .topo__quem{font-size:.84rem;color:rgba(255,255,255,.85);text-align:right;
+      line-height:1.3;white-space:nowrap}
+    .topo__quem b{display:block;font-weight:600;color:#fff}
+    .bt-topo{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);
+      color:#fff;border-radius:10px;padding:.5rem .8rem;font:500 .85rem 'Inter',sans-serif;
+      cursor:pointer;display:inline-flex;align-items:center;gap:.4rem;transition:background .15s}
+    .bt-topo:hover{background:rgba(255,255,255,.26)}
+
+    /* ---------- abas ---------- */
+    .abas{background:#fff;border-bottom:1px solid var(--line);padding:0 1.2rem;
+      display:flex;gap:.3rem;overflow-x:auto}
+    .aba{background:none;border:none;cursor:pointer;padding:1rem .9rem .85rem;
+      font:600 .9rem 'Poppins',sans-serif;color:var(--muted);white-space:nowrap;
+      border-bottom:3px solid transparent;transition:color .15s,border-color .15s}
+    .aba:hover{color:var(--blue-700)}
+    .aba.on{color:var(--blue-700);border-bottom-color:var(--blue-500)}
+    .aba .conta{display:inline-block;margin-left:.45rem;background:var(--pale);
+      color:var(--blue-700);border-radius:20px;padding:.1rem .5rem;font-size:.76rem;
+      font-weight:600;vertical-align:1px}
+    .aba.on .conta{background:var(--blue-500);color:#fff}
+
+    /* ---------- ferramentas ---------- */
+    .barra{background:#fff;border-bottom:1px solid var(--line);padding:.6rem 1.2rem;
+      display:flex;align-items:center;gap:.25rem;flex-wrap:wrap;position:relative;z-index:30}
+    .ferr{background:none;border:none;cursor:pointer;color:var(--blue-700);
+      font:600 .82rem 'Poppins',sans-serif;letter-spacing:.02em;text-transform:uppercase;
+      padding:.5rem .7rem;border-radius:9px;display:inline-flex;align-items:center;gap:.45rem;
+      transition:background .15s,color .15s}
+    .ferr:hover{background:var(--pale)}
+    .ferr.on{background:var(--pale);color:var(--navy)}
+    .ferr .pino{background:var(--blue-500);color:#fff;border-radius:20px;
+      font-size:.72rem;padding:.05rem .42rem;font-weight:700}
+    .procurar{margin-left:auto;position:relative;display:flex;align-items:center;
+      min-width:min(320px,100%)}
+    .procurar svg{position:absolute;left:11px;color:var(--muted);pointer-events:none}
+    .procurar input{width:100%;padding:.62rem .8rem .62rem 2.35rem;border:1.5px solid var(--line);
+      border-radius:11px;font:400 .92rem 'Inter',sans-serif;color:var(--ink);background:var(--mist)}
+    .procurar input:focus{outline:none;border-color:var(--blue-500);background:#fff;
+      box-shadow:0 0 0 4px rgba(18,144,224,.12)}
+
+    /* ---------- as gavetas das ferramentas ---------- */
+    .gaveta{display:none;background:#fff;border-bottom:1px solid var(--line);
+      padding:1.1rem 1.2rem;box-shadow:var(--sombra-sm);position:relative;z-index:20}
+    .gaveta.abre{display:block}
+    .gaveta h3{font:600 .85rem 'Poppins',sans-serif;color:var(--navy);margin:0 0 .8rem;
+      text-transform:uppercase;letter-spacing:.03em}
+    .grade{display:grid;gap:.85rem;grid-template-columns:repeat(auto-fit,minmax(215px,1fr))}
+    .cpo label{display:block;font:500 .78rem 'Poppins',sans-serif;color:var(--muted);
+      margin-bottom:.35rem}
+    .cpo input,.cpo select{width:100%;padding:.6rem .7rem;border:1.5px solid var(--line);
+      border-radius:10px;font:400 .9rem 'Inter',sans-serif;color:var(--ink);background:#fff}
+    .cpo input:focus,.cpo select:focus{outline:none;border-color:var(--blue-500);
+      box-shadow:0 0 0 3px rgba(18,144,224,.12)}
+    .gaveta__pe{margin-top:1rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+    .bt{border:1.5px solid var(--line);background:#fff;color:var(--navy);cursor:pointer;
+      border-radius:10px;padding:.6rem 1rem;font:600 .86rem 'Poppins',sans-serif;
+      display:inline-flex;align-items:center;gap:.45rem;transition:border-color .15s,background .15s}
+    .bt:hover{border-color:var(--blue-400);background:var(--mist)}
+    .bt--forte{background:linear-gradient(135deg,var(--blue-700),var(--blue-500));
+      color:#fff;border-color:transparent;box-shadow:0 8px 20px rgba(11,90,165,.22)}
+    .bt--forte:hover{filter:brightness(1.06);background:linear-gradient(135deg,var(--blue-700),var(--blue-500))}
+    .marcas{display:grid;gap:.5rem .9rem;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+    .marca-item{display:flex;align-items:center;gap:.55rem;font-size:.9rem;cursor:pointer;
+      padding:.35rem .4rem;border-radius:8px}
+    .marca-item:hover{background:var(--mist)}
+    .marca-item input{width:16px;height:16px;accent-color:var(--blue-500);cursor:pointer}
+    .densidades{display:flex;gap:.5rem;flex-wrap:wrap}
+    .dens{border:1.5px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;
+      padding:.55rem .95rem;font:500 .87rem 'Inter',sans-serif;color:var(--ink)}
+    .dens.on{border-color:var(--blue-500);background:var(--pale);color:var(--navy);font-weight:600}
+
+    /* ---------- a tabela ---------- */
+    .quadro{flex:1;padding:1.1rem 1.2rem 0;display:flex;flex-direction:column;min-height:0}
+    .rolo{background:#fff;border:1px solid var(--line);border-radius:14px 14px 0 0;
+      overflow:auto;flex:1;min-height:260px}
+    table{border-collapse:separate;border-spacing:0;width:100%;font-size:.9rem}
+    thead th{position:sticky;top:0;z-index:2;background:#fff;text-align:left;
+      font:600 .78rem 'Poppins',sans-serif;color:var(--navy);text-transform:uppercase;
+      letter-spacing:.03em;padding:.85rem .9rem;border-bottom:2px solid var(--line);
+      white-space:nowrap;cursor:pointer;user-select:none}
+    thead th:hover{background:var(--mist)}
+    thead th .seta{opacity:0;margin-left:.35rem;font-size:.7rem}
+    thead th.ordena .seta{opacity:1;color:var(--blue-500)}
+    thead th.nao-ordena{cursor:default}
+    thead th.nao-ordena:hover{background:#fff}
+    tbody td{padding:.8rem .9rem;border-bottom:1px solid var(--line);white-space:nowrap;
+      color:var(--ink)}
+    tbody tr:hover td{background:var(--mist)}
+    tbody tr:last-child td{border-bottom:none}
+    /* densidade: só o respiro muda, nunca o conteúdo */
+    body.dens-compacta tbody td{padding:.45rem .9rem}
+    body.dens-compacta thead th{padding:.6rem .9rem}
+    body.dens-larga tbody td{padding:1.15rem .9rem}
+    .num{font-variant-numeric:tabular-nums}
+    .nome{font-weight:600}
+    .dias{text-align:center;font-weight:600}
+    .selo{display:inline-block;padding:.2rem .6rem;border-radius:20px;font-size:.78rem;
+      font-weight:600;white-space:nowrap}
+    .selo--aberto{background:#fff4e2;color:var(--atencao)}
+    .selo--fim{background:#e8f6ee;color:var(--ok)}
+    .selo--nao{background:#fdecea;color:var(--erro)}
+    .selo--pend{background:var(--pale);color:var(--blue-700)}
+    tbody tr.clica{cursor:pointer}
+    a.abre{color:var(--blue-700);text-decoration:none;font-weight:600}
+    a.abre:hover{text-decoration:underline}
+    .nome a.abre{color:var(--navy)}
+    .bt-novo{margin-left:.5rem;border:none;cursor:pointer;color:#fff;border-radius:10px;
+      padding:.55rem .95rem;font:600 .84rem 'Poppins',sans-serif;display:inline-flex;
+      align-items:center;gap:.4rem;background:linear-gradient(135deg,var(--blue-700),var(--blue-500));
+      box-shadow:0 6px 16px rgba(11,90,165,.22)}
+    .bt-novo:hover{filter:brightness(1.06)}
+    .bt-pdf{border:1.5px solid var(--line);background:#fff;border-radius:9px;cursor:pointer;
+      padding:.32rem .55rem;color:var(--erro);display:inline-flex;align-items:center;gap:.3rem;
+      font:700 .72rem 'Poppins',sans-serif}
+    .bt-pdf:hover{border-color:var(--erro);background:#fdecea}
+    .vazio{padding:3.2rem 1.2rem;text-align:center;color:var(--muted)}
+    .vazio b{display:block;color:var(--navy);font:600 1.05rem 'Poppins',sans-serif;margin-bottom:.4rem}
+
+    /* ---------- o rodapé da paginação ---------- */
+    .pe{background:#fff;border:1px solid var(--line);border-top:none;
+      border-radius:0 0 14px 14px;padding:.7rem 1rem;display:flex;align-items:center;
+      gap:1rem;flex-wrap:wrap;justify-content:flex-end;font-size:.86rem;color:var(--muted);
+      margin-bottom:1.1rem}
+    .pe select{border:1.5px solid var(--line);border-radius:9px;padding:.35rem .5rem;
+      font:400 .86rem 'Inter',sans-serif;color:var(--ink);background:#fff}
+    .pe__setas{display:flex;gap:.25rem}
+    .seta-bt{border:1.5px solid var(--line);background:#fff;border-radius:9px;cursor:pointer;
+      width:34px;height:34px;display:grid;place-items:center;color:var(--navy)}
+    .seta-bt:hover:not(:disabled){border-color:var(--blue-400);background:var(--mist)}
+    .seta-bt:disabled{opacity:.4;cursor:not-allowed}
+
+    /* ---------- no celular ---------- */
+    @media(max-width:760px){
+      .topo__quem{display:none}
+      .barra{padding:.5rem .7rem}
+      .ferr{font-size:.76rem;padding:.45rem .5rem}
+      .procurar{margin-left:0;min-width:100%;order:9;margin-top:.4rem}
+      .quadro{padding:.7rem .7rem 0}
+      .gaveta{padding:.9rem .7rem}
+      .pe{justify-content:space-between}
+    }
+    @media print{
+      .topo,.abas,.barra,.gaveta,.pe,.demo{display:none}
+      .rolo{border:none;overflow:visible}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="demo">
+    <b>Tela de demonstração.</b> Os processos são inventados e ficam guardados
+    só neste navegador. Quando o cadastro das empresas estiver pronto, ela
+    passa a mostrar os atestados de verdade.
+    <button type="button" id="btZerar" style="margin-left:.4rem;background:none;border:none;
+      color:#5a4500;text-decoration:underline;cursor:pointer;font:inherit">recomeçar a demonstração</button>
+  </div>
+
+  <header class="topo">
+    <div class="topo__marca">
+      <img src="../assets/logo.png" alt="Clínica Medicina Humana"
+           onerror="this.style.display='none'" />
+      <div class="topo__titulo" id="tituloTela">Gestão de atestados
+        <span>Clínica Medicina Humana</span></div>
+    </div>
+    <div class="topo__dir">
+      <div class="topo__quem">entrou como<b id="quem">Empresa de exemplo</b></div>
+      <a class="bt-topo" href="relatorios.html" style="text-decoration:none">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+        Relatórios</a>
+      <button class="bt-topo" id="btAjuda" type="button" title="Como usar esta tela">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 4.2 2.7c-.8.4-1.3 1-1.3 1.9"/>
+          <path d="M12 17h.01"/></svg>
+        Ajuda
+      </button>
+      <button class="bt-topo" id="btSair" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+        Sair
+      </button>
+    </div>
+  </header>
+
+  <nav class="abas">
+    <button class="aba on" data-situacao="aberto" type="button">Processos em aberto
+      <span class="conta" id="contaAberto">0</span></button>
+    <button class="aba" data-situacao="finalizado" type="button">Processos finalizados
+      <span class="conta" id="contaFim">0</span></button>
+  </nav>
+
+  <div class="barra">
+    <button class="ferr" id="ferrColunas" type="button">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" aria-hidden="true"><path d="M4 4h4v16H4zM10 4h4v16h-4zM16 4h4v16h-4z"/></svg>
+      Colunas</button>
+    <button class="ferr" id="ferrFiltros" type="button">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M3 5h18M6 12h12M10 19h4"/></svg>
+      Filtros <span class="pino" id="pinoFiltros" style="display:none">0</span></button>
+    <button class="ferr" id="ferrDensidade" type="button">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      Densidade</button>
+    <button class="ferr" id="ferrExportar" type="button">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+      Exportar</button>
+    <button class="bt-novo" id="btNovo" type="button">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      Novo atestado</button>
+
+    <div class="procurar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+      <input id="busca" type="search" placeholder="Procurar em tudo — nome, chapa, processo…"
+             autocomplete="off" />
+    </div>
+  </div>
+
+  <!-- ---------------- gaveta: colunas ---------------- -->
+  <section class="gaveta" id="gavetaColunas">
+    <h3>Colunas na tela</h3>
+    <div class="marcas" id="listaColunas"></div>
+    <div class="gaveta__pe">
+      <button class="bt" id="btTodasColunas" type="button">Mostrar todas</button>
+    </div>
+  </section>
+
+  <!-- ---------------- gaveta: filtros ---------------- -->
+  <section class="gaveta" id="gavetaFiltros">
+    <h3>Filtrar a lista</h3>
+    <div class="grade">
+      <div class="cpo"><label for="fNome">Colaborador</label>
+        <input id="fNome" type="text" placeholder="parte do nome" autocomplete="off" /></div>
+      <div class="cpo"><label for="fChapa">Chapa</label>
+        <input id="fChapa" type="text" placeholder="matrícula" autocomplete="off" /></div>
+      <div class="cpo"><label for="fRequisitante">Requisitante</label>
+        <select id="fRequisitante"><option value="">todos</option></select></div>
+      <div class="cpo"><label for="fAtividade">Atividade atual</label>
+        <select id="fAtividade"><option value="">todas</option></select></div>
+      <div class="cpo"><label for="fFilial">Filial</label>
+        <select id="fFilial"><option value="">todas</option></select></div>
+      <div class="cpo"><label for="fDe">Início a partir de</label>
+        <input id="fDe" type="date" /></div>
+      <div class="cpo"><label for="fAte">Início até</label>
+        <input id="fAte" type="date" /></div>
+      <div class="cpo"><label for="fDias">Dias de afastamento (mínimo)</label>
+        <input id="fDias" type="number" min="0" step="1" placeholder="ex.: 15" /></div>
+    </div>
+    <div class="gaveta__pe">
+      <button class="bt bt--forte" id="btAplicar" type="button">Aplicar filtros</button>
+      <button class="bt" id="btLimpar" type="button">Limpar tudo</button>
+      <span id="recadoFiltro" style="font-size:.86rem;color:var(--muted)"></span>
+    </div>
+  </section>
+
+  <!-- ---------------- gaveta: densidade ---------------- -->
+  <section class="gaveta" id="gavetaDensidade">
+    <h3>Altura das linhas</h3>
+    <div class="densidades">
+      <button class="dens" data-dens="compacta" type="button">Compacta</button>
+      <button class="dens on" data-dens="media" type="button">Padrão</button>
+      <button class="dens" data-dens="larga" type="button">Confortável</button>
+    </div>
+  </section>
+
+  <!-- ---------------- gaveta: exportar ---------------- -->
+  <section class="gaveta" id="gavetaExportar">
+    <h3>Levar esta lista embora</h3>
+    <p style="margin:-.4rem 0 .9rem;color:var(--muted);font-size:.88rem">
+      Sai <b id="quantasExportar">0</b> linha(s) — exatamente o que está na
+      tela agora, com os filtros e a ordem escolhidos, e não só a página
+      aberta.</p>
+    <div class="gaveta__pe">
+      <button class="bt bt--forte" data-saida="xlsx" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <path d="M14 2v6h6"/><path d="m9 13 6 6M15 13l-6 6"/></svg>
+        Planilha do Excel</button>
+      <button class="bt" data-saida="csv" type="button">CSV</button>
+      <button class="bt" data-saida="xml" type="button">XML</button>
+      <button class="bt" data-saida="pdf" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <path d="M6 14h12v8H6z"/></svg>
+        Ver em PDF</button>
+    </div>
+  </section>
+
+  <main class="quadro">
+    <div class="rolo">
+      <table>
+        <thead><tr id="cabecalho"></tr></thead>
+        <tbody id="corpo"></tbody>
+      </table>
+      <div class="vazio" id="vazio" style="display:none">
+        <b>Nenhum processo com esses filtros.</b>
+        Tire um filtro, ou limpe todos, para ver a lista inteira.
+      </div>
+    </div>
+
+    <div class="pe">
+      <span>Linhas por página:</span>
+      <select id="porPagina">
+        <option>25</option><option>50</option><option selected>100</option>
+      </select>
+      <span id="faixa" class="num">0–0 de 0</span>
+      <div class="pe__setas">
+        <button class="seta-bt" id="btAnterior" type="button" aria-label="Página anterior">‹</button>
+        <button class="seta-bt" id="btProxima" type="button" aria-label="Próxima página">›</button>
+      </div>
+    </div>
+  </main>
+
+<script src="dados.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  /* ===================================================================
+     1. AS COLUNAS — uma definição só, usada pela tela, pela planilha,
+        pelo CSV, pelo XML e pela folha impressa.
+
+     É de propósito: quando alguém acrescentar uma coluna, ela nasce nos
+     cinco lugares de uma vez. Foi assim que a lista e o Excel pararam
+     de discordar em outros módulos da casa.
+     =================================================================== */
+  var H = window.Homologacao;
+  var SESSAO = H.sessao();
+  // sem sessão não há lista: volta para a porta
+  if (!SESSAO) { window.location.replace("index.html"); return; }
+  var MEDICO = SESSAO.tipo === "medico";
+
+  var COLUNAS = [
+    {chave:"processo",     titulo:"Processo",       tipo:"texto",  largura:12},
+    {chave:"empresa",      titulo:"Empresa",        tipo:"texto",  largura:32, soMedico:true},
+    {chave:"requisitante", titulo:"Requisitante",   tipo:"texto",  largura:30},
+    {chave:"atividade",    titulo:"Atividade atual",tipo:"texto",  largura:28},
+    {chave:"chapa",        titulo:"Chapa",          tipo:"texto",  largura:14},
+    {chave:"nome",         titulo:"Nome",           tipo:"texto",  largura:34},
+    {chave:"filial",       titulo:"Filial",         tipo:"texto",  largura:20},
+    {chave:"inicio",       titulo:"Data início",    tipo:"data",   largura:13},
+    {chave:"fim",          titulo:"Data fim",       tipo:"data",   largura:13},
+    {chave:"dias",         titulo:"Dias",           tipo:"numero", largura:8},
+    {chave:"parecer",      titulo:"Parecer",        tipo:"texto",  largura:12},
+    {chave:"situacao",     titulo:"Situação",       tipo:"texto",  largura:14},
+    {chave:"pdf",          titulo:"Atestado",       tipo:"acao",   largura:11}
+  ].filter(function (c) { return !c.soMedico || MEDICO; });
+
+  /* ===================================================================
+     2. OS DADOS — vêm de dados.js, o único arquivo que muda quando o
+        servidor existir. A empresa recebe só os processos dela; o
+        médico, todos.
+     =================================================================== */
+  function carregar() { return H.listarProcessos(); }
+  function dois(n) { return (n < 10 ? "0" : "") + n; }
+  function abrir(l) { window.location.href = "processo.html?id=" + encodeURIComponent(l.id); }
+
+  /* ===================================================================
+     3. O estado da tela
+     =================================================================== */
+  var TUDO = [];                  // o que veio do servidor
+  var estado = {
+    situacao: "aberto",           // a aba
+    busca: "",
+    filtros: {},
+    ordem: {chave: "inicio", desc: true},
+    pagina: 0,
+    porPagina: 100,
+    escondidas: {}                // colunas desmarcadas
+  };
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- texto de tela ---------- */
+  function dm(iso) {              // 2026-03-05 -> 05/03/2026
+    if (!iso) return "";
+    var p = String(iso).slice(0, 10).split("-");
+    return p.length === 3 ? p[2] + "/" + p[1] + "/" + p[0] : String(iso);
+  }
+  function semAcento(t) {
+    return String(t == null ? "" : t).normalize("NFD").replace(/[̀-ͯ]/g, "");
+  }
+  function crua(t) { return semAcento(t).toLowerCase().trim(); }
+
+  function celula(linha, chave) {
+    if (chave === "inicio" || chave === "fim") return dm(linha[chave]);
+    if (chave === "situacao") return linha.situacao === "aberto" ? "Em aberto" : "Finalizado";
+    if (chave === "pdf") return "PDF";
+    return linha[chave] == null ? "" : String(linha[chave]);
+  }
+
+  /* ===================================================================
+     4. Filtrar, procurar e ordenar
+
+     A BUSCA IGNORA ACENTO E MAIÚSCULA, sempre. "joao", "JOÃO" e "João"
+     têm de achar a mesma pessoa: quem digita o nome de um colega não
+     lembra como ele foi cadastrado.
+     =================================================================== */
+  function visiveis() {
+    var f = estado.filtros;
+    var busca = crua(estado.busca);
+    var saida = TUDO.filter(function (l) {
+      if (l.situacao !== estado.situacao) return false;
+      if (f.nome && crua(l.nome).indexOf(crua(f.nome)) < 0) return false;
+      if (f.chapa && crua(l.chapa).indexOf(crua(f.chapa)) < 0) return false;
+      if (f.requisitante && l.requisitante !== f.requisitante) return false;
+      if (f.atividade && l.atividade !== f.atividade) return false;
+      if (f.filial && l.filial !== f.filial) return false;
+      if (f.de && l.inicio < f.de) return false;
+      if (f.ate && l.inicio > f.ate) return false;
+      if (f.dias && Number(l.dias) < Number(f.dias)) return false;
+      if (busca) {
+        var tudo = crua([l.processo, l.empresa, l.requisitante, l.atividade, l.chapa, l.nome,
+                         l.filial, dm(l.inicio), dm(l.fim), l.dias, l.parecer].join(" "));
+        if (tudo.indexOf(busca) < 0) return false;
+      }
+      return true;
+    });
+
+    var col = acharColuna(estado.ordem.chave);
+    var sinal = estado.ordem.desc ? -1 : 1;
+    saida.sort(function (a, b) {
+      var x = a[estado.ordem.chave], y = b[estado.ordem.chave];
+      if (col && col.tipo === "numero") { x = Number(x) || 0; y = Number(y) || 0; }
+      else { x = crua(x); y = crua(y); }
+      return x < y ? -1 * sinal : x > y ? 1 * sinal : 0;
+    });
+    return saida;
+  }
+  function acharColuna(chave) {
+    for (var i = 0; i < COLUNAS.length; i++) {
+      if (COLUNAS[i].chave === chave) return COLUNAS[i];
+    }
+    return null;
+  }
+  function naTela() { return COLUNAS.filter(function (c) { return !estado.escondidas[c.chave]; }); }
+
+  /* ===================================================================
+     5. Desenhar
+     =================================================================== */
+  function desenhar() {
+    var linhas = visiveis();
+    var total = linhas.length;
+    var porPag = estado.porPagina;
+    var maxPagina = Math.max(0, Math.ceil(total / porPag) - 1);
+    if (estado.pagina > maxPagina) estado.pagina = maxPagina;
+    var de = estado.pagina * porPag;
+    var pedaco = linhas.slice(de, de + porPag);
+
+    // cabeçalho
+    var tr = $("cabecalho");
+    tr.innerHTML = "";
+    naTela().forEach(function (c) {
+      var th = document.createElement("th");
+      th.textContent = c.titulo;
+      if (c.tipo === "acao") {
+        th.className = "nao-ordena";
+      } else {
+        if (estado.ordem.chave === c.chave) {
+          th.className = "ordena";
+        }
+        var seta = document.createElement("span");
+        seta.className = "seta";
+        seta.textContent = estado.ordem.desc ? "▼" : "▲";
+        th.appendChild(seta);
+        th.addEventListener("click", function () {
+          if (estado.ordem.chave === c.chave) { estado.ordem.desc = !estado.ordem.desc; }
+          else { estado.ordem = {chave: c.chave, desc: false}; }
+          estado.pagina = 0;
+          desenhar();
+        });
+      }
+      tr.appendChild(th);
+    });
+
+    // corpo
+    var corpo = $("corpo");
+    corpo.innerHTML = "";
+    pedaco.forEach(function (l) {
+      var linha = document.createElement("tr");
+      /* A LINHA INTEIRA ABRE O PROCESSO — no número, no nome ou em
+         qualquer ponto dela. O número e o nome ainda são links de
+         verdade, para quem usa teclado e para "abrir em nova aba". */
+      linha.className = "clica";
+      linha.addEventListener("click", function (ev) {
+        if (ev.target.closest("a,button")) return;
+        abrir(l);
+      });
+      naTela().forEach(function (c) {
+        var td = document.createElement("td");
+        if (c.chave === "processo" || c.chave === "nome") {
+          var a = document.createElement("a");
+          a.href = "processo.html?id=" + encodeURIComponent(l.id);
+          a.className = "abre";
+          a.textContent = celula(l, c.chave);
+          td.appendChild(a);
+          td.className = c.chave === "nome" ? "nome" : "num";
+        } else if (c.chave === "parecer") {
+          var sp = document.createElement("span");
+          sp.className = "selo selo--" + ({Aprovado: "fim", Reprovado: "nao"}[l.parecer] || "pend");
+          sp.textContent = l.parecer;
+          td.appendChild(sp);
+        } else if (c.chave === "pdf") {
+          var bt = document.createElement("button");
+          bt.className = "bt-pdf";
+          bt.type = "button";
+          bt.textContent = "PDF";
+          bt.title = "Abrir o atestado de " + l.nome;
+          bt.addEventListener("click", function () { verAtestado(l); });
+          td.appendChild(bt);
+        } else if (c.chave === "situacao") {
+          var selo = document.createElement("span");
+          selo.className = "selo " + (l.situacao === "aberto" ? "selo--aberto" : "selo--fim");
+          selo.textContent = celula(l, c.chave);
+          td.appendChild(selo);
+        } else {
+          td.textContent = celula(l, c.chave);
+          if (c.chave === "nome") td.className = "nome";
+          if (c.tipo === "numero") td.className = "dias num";
+          if (c.tipo === "data" || c.chave === "processo" || c.chave === "chapa") {
+            td.className = "num";
+          }
+        }
+        linha.appendChild(td);
+      });
+      corpo.appendChild(linha);
+    });
+
+    $("vazio").style.display = total ? "none" : "block";
+    $("faixa").textContent = total
+      ? (de + 1) + "–" + Math.min(de + porPag, total) + " de " + total
+      : "0–0 de 0";
+    $("btAnterior").disabled = estado.pagina <= 0;
+    $("btProxima").disabled = estado.pagina >= maxPagina;
+    $("quantasExportar").textContent = total;
+
+    $("contaAberto").textContent = TUDO.filter(function (l) { return l.situacao === "aberto"; }).length;
+    $("contaFim").textContent = TUDO.filter(function (l) { return l.situacao === "finalizado"; }).length;
+
+    var quantos = Object.keys(estado.filtros).filter(function (k) { return estado.filtros[k]; }).length;
+    $("pinoFiltros").style.display = quantos ? "inline-block" : "none";
+    $("pinoFiltros").textContent = quantos;
+  }
+
+  /* ===================================================================
+     6. As gavetas das ferramentas
+
+     Uma de cada vez: duas abertas empurram a tabela para fora da tela e
+     a pessoa perde de vista o que estava filtrando.
+     =================================================================== */
+  var GAVETAS = {
+    ferrColunas: "gavetaColunas", ferrFiltros: "gavetaFiltros",
+    ferrDensidade: "gavetaDensidade", ferrExportar: "gavetaExportar"
+  };
+  Object.keys(GAVETAS).forEach(function (bt) {
+    $(bt).addEventListener("click", function () {
+      var alvo = GAVETAS[bt], abrindo = !$(alvo).classList.contains("abre");
+      Object.keys(GAVETAS).forEach(function (outro) {
+        $(GAVETAS[outro]).classList.remove("abre");
+        $(outro).classList.remove("on");
+      });
+      if (abrindo) { $(alvo).classList.add("abre"); $(bt).classList.add("on"); }
+    });
+  });
+
+  /* ---------- colunas ---------- */
+  function montarColunas() {
+    var caixa = $("listaColunas");
+    caixa.innerHTML = "";
+    COLUNAS.forEach(function (c) {
+      var rot = document.createElement("label");
+      rot.className = "marca-item";
+      var cx = document.createElement("input");
+      cx.type = "checkbox";
+      cx.checked = !estado.escondidas[c.chave];
+      cx.addEventListener("change", function () {
+        // uma coluna tem de sobrar: tabela sem coluna nenhuma é uma
+        // faixa cinza, e a pessoa acha que o sistema quebrou
+        if (!cx.checked && naTela().length <= 1) { cx.checked = true; return; }
+        estado.escondidas[c.chave] = !cx.checked;
+        desenhar();
+      });
+      rot.appendChild(cx);
+      rot.appendChild(document.createTextNode(c.titulo));
+      caixa.appendChild(rot);
+    });
+  }
+  $("btTodasColunas").addEventListener("click", function () {
+    estado.escondidas = {};
+    montarColunas();
+    desenhar();
+  });
+
+  /* ---------- filtros ---------- */
+  function encherSeletor(id, chave) {
+    var sel = $(id);
+    var vistos = {};
+    TUDO.forEach(function (l) { if (l[chave]) vistos[l[chave]] = true; });
+    Object.keys(vistos).sort().forEach(function (v) {
+      var op = document.createElement("option");
+      op.value = v; op.textContent = v;
+      sel.appendChild(op);
+    });
+  }
+  function lerFiltros() {
+    estado.filtros = {
+      nome: $("fNome").value.trim(),
+      chapa: $("fChapa").value.trim(),
+      requisitante: $("fRequisitante").value,
+      atividade: $("fAtividade").value,
+      filial: $("fFilial").value,
+      de: $("fDe").value,
+      ate: $("fAte").value,
+      dias: $("fDias").value
+    };
+    // "de" depois de "até" não acha nada e ninguém entende por quê
+    if (estado.filtros.de && estado.filtros.ate && estado.filtros.de > estado.filtros.ate) {
+      var troca = estado.filtros.de;
+      estado.filtros.de = estado.filtros.ate;
+      estado.filtros.ate = troca;
+      $("fDe").value = estado.filtros.de;
+      $("fAte").value = estado.filtros.ate;
+      $("recadoFiltro").textContent = "as datas estavam trocadas; arrumei";
+    } else {
+      $("recadoFiltro").textContent = "";
+    }
+    estado.pagina = 0;
+    desenhar();
+  }
+  $("btAplicar").addEventListener("click", lerFiltros);
+  $("btLimpar").addEventListener("click", function () {
+    ["fNome","fChapa","fRequisitante","fAtividade","fFilial","fDe","fAte","fDias"]
+      .forEach(function (id) { $(id).value = ""; });
+    $("busca").value = "";
+    estado.busca = "";
+    lerFiltros();
+  });
+  // Enter dentro de qualquer campo do filtro aplica, como em toda tela
+  $("gavetaFiltros").addEventListener("keydown", function (ev) {
+    if (ev.key === "Enter") { ev.preventDefault(); lerFiltros(); }
+  });
+
+  /* ---------- busca ---------- */
+  var espera = null;
+  $("busca").addEventListener("input", function () {
+    clearTimeout(espera);
+    espera = setTimeout(function () {
+      estado.busca = $("busca").value;
+      estado.pagina = 0;
+      desenhar();
+    }, 180);
+  });
+
+  /* ---------- densidade ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll(".dens"), function (bt) {
+    bt.addEventListener("click", function () {
+      Array.prototype.forEach.call(document.querySelectorAll(".dens"), function (o) {
+        o.classList.remove("on");
+      });
+      bt.classList.add("on");
+      document.body.className = "dens-" + bt.getAttribute("data-dens");
+    });
+  });
+
+  /* ---------- abas ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll(".aba"), function (aba) {
+    aba.addEventListener("click", function () {
+      Array.prototype.forEach.call(document.querySelectorAll(".aba"), function (o) {
+        o.classList.remove("on");
+      });
+      aba.classList.add("on");
+      estado.situacao = aba.getAttribute("data-situacao");
+      estado.pagina = 0;
+      desenhar();
+    });
+  });
+
+  /* ---------- paginação ---------- */
+  $("porPagina").addEventListener("change", function () {
+    estado.porPagina = Number($("porPagina").value) || 100;
+    estado.pagina = 0;
+    desenhar();
+  });
+  $("btAnterior").addEventListener("click", function () {
+    if (estado.pagina > 0) { estado.pagina--; desenhar(); }
+  });
+  $("btProxima").addEventListener("click", function () { estado.pagina++; desenhar(); });
+
+  /* ===================================================================
+     7. Levar embora: planilha, CSV, XML e papel
+
+     TUDO O QUE ESTÁ FILTRADO, e não só a página aberta. Exportar só as
+     100 linhas da tela é o erro clássico dessas listas: a pessoa manda
+     para a contabilidade um recorte que ela não escolheu.
+     =================================================================== */
+  function paraExportar() {
+    var cols = naTela().filter(function (c) { return c.tipo !== "acao"; });
+    var linhas = visiveis().map(function (l) {
+      return cols.map(function (c) { return celula(l, c.chave); });
+    });
+    return {cols: cols, linhas: linhas};
+  }
+  function baixar(nome, texto, tipo) {
+    var blob = new Blob(["﻿" + texto], {type: tipo + ";charset=utf-8"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = nome;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+  }
+  function xml(t) {
+    return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function carimbo() {
+    var d = new Date();
+    return d.getFullYear() + dois(d.getMonth() + 1) + dois(d.getDate()) + "-" +
+           dois(d.getHours()) + dois(d.getMinutes());
+  }
+
+  function saidaCSV() {
+    var d = paraExportar();
+    // ponto e vírgula: é o que o Excel em português espera; com vírgula,
+    // a planilha abre tudo numa coluna só
+    var texto = d.cols.map(function (c) { return c.titulo; }).join(";") + "\r\n";
+    texto += d.linhas.map(function (l) {
+      return l.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(";");
+    }).join("\r\n");
+    baixar("atestados-" + carimbo() + ".csv", texto, "text/csv");
+  }
+
+  function saidaExcel() {
+    /* SpreadsheetML 2003: um XML que o Excel abre como planilha de
+       verdade (colunas, larguras, cabeçalho em negrito) sem precisar de
+       biblioteca nenhuma nesta página. */
+    var d = paraExportar();
+    var t = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<?mso-application progid="Excel.Sheet"?>\n' +
+      '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"' +
+      ' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">\n' +
+      '<Styles><Style ss:ID="cab"><Font ss:Bold="1" ss:Color="#FFFFFF"/>' +
+      '<Interior ss:Color="#0B5AA5" ss:Pattern="Solid"/></Style></Styles>\n' +
+      '<Worksheet ss:Name="Atestados"><Table>\n';
+    d.cols.forEach(function (c) {
+      t += '<Column ss:Width="' + (c.largura * 7) + '"/>\n';
+    });
+    t += '<Row>' + d.cols.map(function (c) {
+      return '<Cell ss:StyleID="cab"><Data ss:Type="String">' + xml(c.titulo) + '</Data></Cell>';
+    }).join("") + '</Row>\n';
+    d.linhas.forEach(function (l) {
+      t += '<Row>' + l.map(function (v, i) {
+        var numero = d.cols[i].tipo === "numero" && v !== "";
+        return '<Cell><Data ss:Type="' + (numero ? "Number" : "String") + '">' +
+               xml(v) + '</Data></Cell>';
+      }).join("") + '</Row>\n';
+    });
+    t += '</Table></Worksheet></Workbook>';
+    baixar("atestados-" + carimbo() + ".xls", t, "application/vnd.ms-excel");
+  }
+
+  function saidaXML() {
+    /* O XML dos DADOS, para quem vai ler com programa: uma etiqueta por
+       coluna, com o nome da chave (e não o título da tela, que muda). */
+    var cols = naTela().filter(function (c) { return c.tipo !== "acao"; });
+    var t = '<?xml version="1.0" encoding="UTF-8"?>\n<atestados' +
+      ' gerado="' + new Date().toISOString() + '"' +
+      ' situacao="' + estado.situacao + '">\n';
+    visiveis().forEach(function (l) {
+      t += "  <processo>\n";
+      cols.forEach(function (c) {
+        t += "    <" + c.chave + ">" + xml(l[c.chave]) + "</" + c.chave + ">\n";
+      });
+      t += "  </processo>\n";
+    });
+    t += "</atestados>";
+    baixar("atestados-" + carimbo() + ".xml", t, "application/xml");
+  }
+
+  function folha(titulo, cabecalhos, linhas, subtitulo) {
+    var hoje = new Date().toLocaleString("pt-BR");
+    var h = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8" />' +
+      '<title>' + xml(titulo) + '</title><style>' +
+      'body{font-family:Inter,Arial,sans-serif;color:#12283f;margin:26px}' +
+      'h1{font-size:1.2rem;color:#0a2e5c;margin:0 0 .2rem}' +
+      '.sub{color:#56718b;font-size:.82rem;margin:0 0 16px}' +
+      'table{border-collapse:collapse;width:100%;font-size:.76rem}' +
+      'th{background:#0b5aa5;color:#fff;text-align:left;padding:6px 8px}' +
+      'td{padding:5px 8px;border-bottom:1px solid #e2edf6}' +
+      'tr:nth-child(even) td{background:#f4fafe}' +
+      '.pe{margin-top:14px;color:#56718b;font-size:.72rem;border-top:1px solid #e2edf6;padding-top:8px}' +
+      '@page{size:landscape;margin:12mm}' +
+      '</style></head><body>' +
+      '<h1>' + xml(titulo) + '</h1><p class="sub">' + xml(subtitulo) + '</p><table><thead><tr>' +
+      cabecalhos.map(function (c) { return "<th>" + xml(c) + "</th>"; }).join("") +
+      "</tr></thead><tbody>" +
+      linhas.map(function (l) {
+        return "<tr>" + l.map(function (v) { return "<td>" + xml(v) + "</td>"; }).join("") + "</tr>";
+      }).join("") +
+      '</tbody></table><p class="pe">Tirado do site da Clínica Medicina Humana em ' +
+      xml(hoje) + '. Confira sempre contra a tela: a folha é de um instante.</p>' +
+      '<script>window.onload=function(){window.print()}<\/script></body></html>';
+    var jan = window.open("", "_blank");
+    if (!jan) {
+      alert("O navegador bloqueou a janela. Libere as janelas para este site e tente de novo.");
+      return;
+    }
+    jan.document.write(h);
+    jan.document.close();
+  }
+
+  function saidaPDF() {
+    var d = paraExportar();
+    folha("Gestão de atestados — " +
+          (estado.situacao === "aberto" ? "processos em aberto" : "processos finalizados"),
+          d.cols.map(function (c) { return c.titulo; }), d.linhas,
+          d.linhas.length + " processo(s) · a mesma lista, os mesmos filtros e a mesma ordem da tela");
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-saida]"), function (bt) {
+    bt.addEventListener("click", function () {
+      var qual = bt.getAttribute("data-saida");
+      if (qual === "csv")  { saidaCSV();   return; }
+      if (qual === "xlsx") { saidaExcel(); return; }
+      if (qual === "xml")  { saidaXML();   return; }
+      saidaPDF();
+    });
+  });
+
+  /* ---------- o atestado de uma linha ----------
+     Quando o servidor existir, este botão abre o arquivo que a empresa
+     enviou. Até lá, ele abre a ficha do processo em folha — que também
+     é o que se imprime quando o atestado veio em papel. */
+  function verAtestado(l) {
+    if (l.anexos && l.anexos.length) {
+      var jan = window.open("", "_blank");
+      if (jan) {
+        var ax = l.anexos[0];
+        jan.document.write(ax.tipo === "application/pdf"
+          ? '<iframe src="' + ax.dados + '" style="border:0;position:fixed;inset:0;width:100%;height:100%"></iframe>'
+          : '<img src="' + ax.dados + '" style="max-width:100%" alt="Atestado" />');
+        jan.document.close();
+      }
+      return;
+    }
+    folha("Processo " + l.processo + " — " + l.nome,
+      ["Campo", "Conteúdo"],
+      [["Processo", l.processo], ["Requisitante", l.requisitante],
+       ["Atividade atual", l.atividade], ["Chapa", l.chapa], ["Nome", l.nome],
+       ["Filial", l.filial], ["Início do afastamento", dm(l.inicio)],
+       ["Fim do afastamento", dm(l.fim)], ["Dias", String(l.dias)],
+       ["Situação", l.situacao === "aberto" ? "Em aberto" : "Finalizado"]],
+      "Ficha do processo · o arquivo do atestado entra aqui quando o " +
+      "envio pelas empresas estiver ligado");
+  }
+
+  /* ---------- topo ---------- */
+  $("btSair").addEventListener("click", function () { H.sair(); window.location.href = "index.html"; });
+  $("quem").textContent = SESSAO.nome;
+  if (MEDICO) {
+    // para o médico, as abas dizem o que ELE tem a fazer
+    document.querySelector('[data-situacao="aberto"]').firstChild.nodeValue = "Aguardando parecer ";
+    document.querySelector('[data-situacao="finalizado"]').firstChild.nodeValue = "Com parecer ";
+    $("btNovo").style.display = "none";
+    $("tituloTela").firstChild.nodeValue = "Homologação — parecer médico ";
+  }
+  $("btNovo").addEventListener("click", function () { window.location.href = "processo.html?novo=1"; });
+  $("btZerar").addEventListener("click", function () {
+    if (confirm("Voltar a demonstração ao começo? Tudo o que foi lançado nela some.")) {
+      H.zerarDemonstracao(); window.location.reload();
+    }
+  });
+  $("btAjuda").addEventListener("click", function () {
+    alert("Gestão de atestados\n\n" +
+      "• As duas abas separam o que ainda anda do que já acabou.\n" +
+      "• COLUNAS esconde o que você não usa; DENSIDADE aperta ou folga as linhas.\n" +
+      "• FILTROS combina colaborador, chapa, requisitante, atividade, filial, " +
+      "período e dias mínimos. O número ao lado do botão diz quantos estão ligados.\n" +
+      "• PROCURAR varre todas as colunas de uma vez, sem ligar para acento.\n" +
+      "• EXPORTAR leva a lista inteira filtrada — não só a página aberta — " +
+      "para Excel, CSV, XML ou papel.\n" +
+      "• O botão PDF de cada linha abre o atestado daquele processo.");
+  });
+
+  /* ---------- começa ---------- */
+  carregar().then(function (lista) {
+    TUDO = lista;
+    encherSeletor("fRequisitante", "requisitante");
+    encherSeletor("fAtividade", "atividade");
+    encherSeletor("fFilial", "filial");
+    montarColunas();
+    // vindo de um alerta do relatório: painel.html#chapa já abre procurando a pessoa,
+    // na aba em que ela tiver processo
+    var procurado = decodeURIComponent(location.hash.slice(1));
+    if (procurado) {
+      $("busca").value = procurado; estado.busca = procurado;
+      if (!visiveis().length) document.querySelector('[data-situacao="finalizado"]').click();
+    }
+    desenhar();
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Processo | Homologação de atestados</title>
+  <link rel="icon" type="image/png" href="../assets/favicon.png?v=2" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* =================================================================
+       FICHA DO PROCESSO — o atestado de um colaborador
+
+       O ARRANJO é o do sistema que o RH das empresas já usa (faixa com
+       número/abertura/autor, painel de ações, blocos recolhíveis, lupa
+       ao lado de cada campo de cadastro). AS CORES são as da clínica.
+
+       QUEM PREENCHE O QUÊ:
+         empresa -> colaborador, datas, observações e o arquivo do atestado
+         clínica -> tipo, médico, entidade, CID, responsável e o PARECER
+       O parecer do médico muda o processo sozinho (ver dados.js).
+       ================================================================= */
+    :root{
+      --navy:#0a2e5c; --blue-700:#0b5aa5; --blue-500:#1290e0; --blue-400:#3bb3ef;
+      --pale:#eaf6fd; --mist:#f4fafe;
+      --ink:#12283f; --muted:#56718b; --line:#e2edf6; --linha-forte:#cfe3f3;
+      --ok:#1c7d43; --atencao:#b7791f; --erro:#b3261e;
+      --sombra-sm:0 4px 14px rgba(11,90,165,.08);
+      --sombra-lg:0 30px 80px rgba(10,46,92,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0}
+    body{font-family:'Inter',system-ui,Arial,sans-serif;color:var(--ink);background:var(--mist);
+      min-height:100vh}
+    button,input,select,textarea{font-family:inherit}
+
+    .demo{background:#fff8e8;border-bottom:1px solid #f3dca6;color:#6b5200;
+      font-size:.85rem;padding:.6rem 1.2rem;text-align:center;line-height:1.45}
+
+    /* ---------- topo ---------- */
+    .topo{background:linear-gradient(135deg,var(--navy) 0%,var(--blue-700) 100%);
+      color:#fff;padding:.9rem 1.2rem;display:flex;align-items:center;gap:1rem;
+      box-shadow:var(--sombra-sm);position:sticky;top:0;z-index:40}
+    .topo img{height:34px;filter:brightness(0) invert(1)}
+    .topo__voltar{color:#fff;text-decoration:none;font:500 .9rem 'Inter';display:inline-flex;
+      align-items:center;gap:.4rem;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);
+      border-radius:10px;padding:.5rem .8rem}
+    .topo__voltar:hover{background:rgba(255,255,255,.26)}
+    .topo__quem{margin-left:auto;font-size:.84rem;color:rgba(255,255,255,.85);text-align:right;line-height:1.3}
+    .topo__quem b{display:block;color:#fff;font-weight:600}
+
+    /* ---------- cabeçalho: título + abas ---------- */
+    .cab{background:#fff;border-bottom:1px solid var(--line);padding:0 1.4rem;display:flex;
+      align-items:flex-end;gap:1rem;flex-wrap:wrap}
+    .cab h1{font:700 1.45rem/1.2 'Poppins',sans-serif;color:var(--navy);margin:1.1rem 0 1rem;
+      flex:1 1 auto;min-width:260px}
+    .abas{display:flex;gap:.2rem;overflow-x:auto}
+    .aba{background:none;border:none;cursor:pointer;padding:1rem 1rem .85rem;display:flex;
+      align-items:center;gap:.5rem;font:500 .95rem 'Poppins',sans-serif;color:var(--muted);
+      border-bottom:3px solid transparent;white-space:nowrap;position:relative}
+    .aba:hover{color:var(--blue-700)}
+    .aba.on{color:var(--navy);font-weight:600;border-bottom-color:var(--blue-500)}
+    .aba .n{position:absolute;left:1.9rem;bottom:.55rem;background:#f5b400;color:#fff;
+      font:700 .64rem 'Inter';border-radius:4px;padding:0 .28rem;line-height:1.3}
+
+    .conteudo{max-width:1320px;margin:0 auto;padding:1rem 1.2rem 6rem}
+    .obrig{color:var(--erro);font-size:.86rem;margin:.2rem 0 .8rem}
+
+    /* ---------- a faixa do processo ---------- */
+    .faixa{display:grid;grid-template-columns:auto 1.2fr 1fr 1.2fr 1.5fr;align-items:center;
+      gap:1rem;background:linear-gradient(135deg,var(--navy),var(--blue-700));color:#fff;
+      border-radius:12px 12px 0 0;padding:.9rem 1.3rem;text-align:center}
+    .faixa img{height:36px;filter:brightness(0) invert(1)}
+    .faixa__nome{font:600 .9rem 'Poppins',sans-serif;letter-spacing:.03em}
+    .faixa b{display:block;font:600 1rem 'Poppins',sans-serif;margin-bottom:.15rem}
+    .faixa span{font-size:.95rem;color:rgba(255,255,255,.9)}
+
+    /* ---------- blocos recolhíveis ---------- */
+    .bloco{background:#fff;border:1px solid var(--line);border-top:none}
+    .bloco:last-of-type{border-radius:0 0 12px 12px}
+    .bloco__cab{width:100%;display:flex;align-items:center;justify-content:space-between;
+      background:linear-gradient(135deg,#0d3a6f,var(--blue-700));color:#fff;border:none;cursor:pointer;
+      padding:.6rem 1.3rem;font:600 1.08rem 'Poppins',sans-serif;text-align:left}
+    .bloco__cab::after{content:"";width:0;height:0;border-left:7px solid transparent;
+      border-right:7px solid transparent;border-bottom:7px solid rgba(255,255,255,.55);transition:transform .2s}
+    .bloco.fechado .bloco__cab::after{transform:rotate(180deg)}
+    .bloco.fechado .bloco__corpo{display:none}
+    .bloco__corpo{padding:1rem 1.3rem 1.2rem}
+
+    .acoes{display:flex;gap:.5rem;flex-wrap:wrap}
+    .pilula{border:none;cursor:pointer;background:var(--blue-500);color:#fff;border-radius:20px;
+      padding:.4rem .95rem;font:600 .84rem 'Poppins',sans-serif;display:inline-flex;align-items:center;gap:.35rem}
+    .pilula:hover{background:var(--blue-700)}
+    .pilula:disabled{opacity:.45;cursor:not-allowed}
+
+    .grade{display:grid;gap:.9rem 1rem}
+    .g-func{grid-template-columns:1fr 2.2fr 1.3fr}
+    .g-datas{grid-template-columns:repeat(4,1fr);margin-top:.9rem}
+    .g-cad{grid-template-columns:repeat(5,1fr);margin-top:.9rem}
+    .g-par{grid-template-columns:1fr 3fr}
+    .cpo label{display:block;font:600 .84rem 'Poppins',sans-serif;color:var(--navy);margin-bottom:.35rem;
+      text-align:center}
+    .cpo label i{color:var(--erro);font-style:normal}
+    .cpo input,.cpo select,.cpo textarea{width:100%;padding:.62rem .75rem;border:1.5px solid var(--line);
+      border-radius:9px;font-size:.93rem;color:var(--ink);background:#fff;text-align:center}
+    .cpo textarea{text-align:left;min-height:84px;resize:vertical}
+    .cpo input:focus,.cpo select:focus,.cpo textarea:focus{outline:none;border-color:var(--blue-500);
+      box-shadow:0 0 0 3px rgba(18,144,224,.12)}
+    .cpo input[readonly],.cpo select:disabled,.cpo textarea[readonly]{background:#f1f5f9;color:#3b5068}
+    .cpo.erro input,.cpo.erro select,.cpo.erro textarea,.cpo.erro .lupa-caixa{border-color:var(--erro)}
+    /* campo com lupa: o texto não se digita, escolhe-se na lista */
+    .lupa-caixa{display:flex;border:1.5px solid var(--line);border-radius:9px;overflow:hidden;background:#f1f5f9}
+    .lupa-caixa input{border:none;border-radius:0;background:transparent;cursor:pointer;
+      text-overflow:ellipsis;font-size:.88rem}
+    .lupa-caixa input:focus{box-shadow:none}
+    .lupa{flex:0 0 38px;border:none;cursor:pointer;background:var(--blue-700);color:#fff;display:grid;place-items:center}
+    .lupa:hover{background:var(--navy)}
+    .lupa:disabled{background:#9ab0c4;cursor:not-allowed}
+    .limpa{flex:0 0 26px;border:none;cursor:pointer;background:transparent;color:var(--muted);font-size:1rem}
+    .limpa:hover{color:var(--erro)}
+
+    .parecer-sel{font-weight:700}
+    .parecer-sel.Aprovado{color:var(--ok)} .parecer-sel.Reprovado{color:var(--erro)}
+    .nota{font-size:.84rem;color:var(--muted);margin:.7rem 0 0;line-height:1.5}
+
+    /* ---------- a barra de baixo ---------- */
+    .rodape{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);
+      box-shadow:0 -6px 20px rgba(11,90,165,.08);padding:.7rem 1.2rem;display:flex;gap:.6rem;
+      align-items:center;justify-content:flex-end;z-index:30}
+    .rodape__recado{margin-right:auto;font-size:.9rem;line-height:1.4}
+    .rodape__recado.erro{color:var(--erro)} .rodape__recado.ok{color:var(--ok)}
+    .bt{border:1.5px solid var(--line);background:#fff;color:var(--navy);cursor:pointer;border-radius:10px;
+      padding:.65rem 1.1rem;font:600 .9rem 'Poppins',sans-serif}
+    .bt:hover{border-color:var(--blue-400);background:var(--mist)}
+    .bt--forte{background:linear-gradient(135deg,var(--blue-700),var(--blue-500));color:#fff;border-color:transparent;
+      box-shadow:0 8px 20px rgba(11,90,165,.22);padding:.65rem 1.6rem}
+    .bt--forte:hover{filter:brightness(1.06);background:linear-gradient(135deg,var(--blue-700),var(--blue-500))}
+    .bt--forte:disabled{opacity:.6;cursor:progress}
+    .bt--vermelho{background:var(--erro);color:#fff;border-color:transparent}
+    .bt--vermelho:hover{background:#8f1d17}
+
+    /* ---------- outras abas ---------- */
+    .painel{display:none}
+    .painel.on{display:block}
+    .cartao{background:#fff;border:1px solid var(--line);border-radius:12px;padding:1.2rem 1.4rem}
+    .info{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem 1.6rem}
+    .info div{border-bottom:1px solid var(--line);padding-bottom:.6rem}
+    .info small{display:block;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.03em;margin-bottom:.2rem}
+    .tab{width:100%;border-collapse:collapse;font-size:.92rem}
+    .tab th{text-align:left;font:600 .78rem 'Poppins';text-transform:uppercase;color:var(--navy);
+      border-bottom:2px solid var(--line);padding:.6rem .7rem}
+    .tab td{padding:.65rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
+    /* histórico: comentário + linha do tempo */
+    .comenta{display:flex;gap:.9rem;align-items:center;padding:1rem 1.2rem}
+    .avatar{flex:0 0 40px;height:40px;border-radius:50%;background:var(--blue-500);color:#fff;display:grid;
+      place-items:center;font:600 .9rem 'Poppins'}
+    .avatar--clinica{background:var(--navy)}
+    .comenta textarea{flex:1;border:none;resize:none;font-size:.97rem;color:var(--ink);padding:.5rem 0;min-height:2.4rem}
+    .comenta textarea:focus{outline:none}
+    .hist-filtro{display:flex;gap:.4rem;margin:1rem 0 .4rem;flex-wrap:wrap}
+    .chip{border:1.5px solid var(--line);background:#fff;border-radius:20px;padding:.35rem .85rem;cursor:pointer;
+      font:500 .84rem 'Inter';color:var(--muted)}
+    .chip.on{border-color:var(--blue-500);color:var(--blue-700);background:var(--pale);font-weight:600}
+    .linha-tempo{list-style:none;margin:0;padding:0 0 0 1.4rem;border-left:2px solid var(--line);margin-left:1.2rem}
+    .linha-tempo li{position:relative;margin:1rem 0 1rem 1rem}
+    .linha-tempo li::before{content:"";position:absolute;left:-2.05rem;top:.9rem;width:12px;height:12px;border-radius:50%;
+      background:#fff;border:3px solid var(--blue-400)}
+    .linha-tempo li.coment::before{border-color:var(--navy);background:var(--navy)}
+    .linha-tempo li.parecer::before{border-color:var(--ok);background:var(--ok)}
+    .ev{background:#fff;border:1px solid var(--line);border-radius:12px;padding:.8rem 1rem}
+    .coment .ev{background:var(--pale);border-color:var(--linha-forte)}
+    .ev__cab{display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap;font-size:.84rem;color:var(--muted);margin-bottom:.25rem}
+    .ev__cab b{color:var(--navy);font-size:.92rem}
+    .ev__txt{white-space:pre-wrap;line-height:1.5}
+    /* anexos */
+    .anx-barra{display:flex;gap:.8rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
+    .anx-busca{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:9px;background:#fff;
+      overflow:hidden;flex:0 1 560px;min-width:260px}
+    .anx-busca select{border:none;background:var(--navy);color:#fff;font:600 .88rem 'Poppins';padding:.62rem .7rem;cursor:pointer}
+    .anx-busca input{flex:1;border:none;padding:.6rem .8rem;font-size:.92rem;min-width:0}
+    .anx-busca input:focus{outline:none}
+    .anx-busca svg{margin-right:.7rem;color:var(--muted)}
+    .anx-filtro{border:1.5px solid var(--line);border-radius:9px;padding:.58rem .6rem;background:#fff;font-size:.88rem;color:var(--ink)}
+    .anx-dir{margin-left:auto;display:flex;gap:.5rem}
+    .anx-tab th{font:600 .88rem 'Poppins';text-transform:none;letter-spacing:0;padding:.9rem .7rem}
+    .anx-tab td{padding:.85rem .7rem;vertical-align:middle}
+    .anx-nome{display:flex;align-items:center;gap:.55rem;color:var(--ink);text-decoration:none}
+    .anx-nome:hover{color:var(--blue-700);text-decoration:underline}
+    .ico-bt{border:none;background:none;cursor:pointer;color:var(--navy);padding:.35rem;border-radius:8px;line-height:0}
+    .ico-bt:hover{background:var(--pale);color:var(--blue-700)}
+    .ico-bt--apaga:hover{background:#fdecea;color:var(--erro)}
+    .soltar{display:block;border:2px dashed var(--linha-forte);border-radius:12px;padding:1.2rem;text-align:center;
+      color:var(--muted);background:var(--mist);cursor:pointer;margin:1rem}
+    .soltar small{display:block;margin-top:.2rem}
+    .soltar:hover,.soltar.sobre{border-color:var(--blue-500);background:var(--pale)}
+    .soltar b{color:var(--blue-700)}
+
+    /* ---------- janelas (buscas e cadastros) ---------- */
+    .veu{position:fixed;inset:0;background:rgba(10,30,55,.5);display:none;align-items:flex-start;
+      justify-content:center;padding:4vh 1rem;z-index:100}
+    .veu.abre{display:flex}
+    .janela{background:#fff;border-radius:14px;box-shadow:var(--sombra-lg);width:min(1180px,100%);
+      max-height:92vh;display:flex;flex-direction:column}
+    .janela--media{width:min(980px,100%)}
+    .janela__cab{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem .6rem}
+    .janela__cab h2{font:700 1.5rem 'Poppins',sans-serif;margin:0;color:var(--navy)}
+    .fechar-x{border:none;background:none;cursor:pointer;font-size:1.7rem;line-height:1;color:var(--muted);padding:.2rem .5rem}
+    .fechar-x:hover{color:var(--ink)}
+    .janela__busca{display:flex;align-items:center;justify-content:flex-end;gap:.6rem;padding:0 1.4rem .6rem;
+      font:600 .88rem 'Poppins';color:var(--navy);flex-wrap:wrap}
+    .janela__busca input{border:1.5px solid var(--line);border-radius:9px;padding:.55rem .7rem;min-width:260px;font-size:.92rem}
+    .janela__busca input:focus{outline:none;border-color:var(--blue-500)}
+    .janela__corpo{overflow:auto;padding:0 1.4rem;flex:1;min-height:120px}
+    .lista{width:100%;border-collapse:collapse;font-size:.86rem}
+    .lista th{position:sticky;top:0;background:#fff;font:600 .82rem 'Poppins';color:var(--navy);
+      border-bottom:2px solid var(--navy);padding:.4rem .6rem;cursor:pointer;white-space:nowrap}
+    .lista th .s{color:var(--blue-500);font-size:.7rem;margin-left:.3rem}
+    .lista td{padding:.32rem .6rem;text-align:center;border-bottom:1px solid #eef3f8}
+    .lista td:first-child{background:#f6f9fc;font-variant-numeric:tabular-nums}
+    .lista tbody tr{cursor:pointer}
+    .lista tbody tr:hover td{background:var(--pale)}
+    .janela__pe{display:flex;align-items:center;gap:.6rem;padding:.8rem 1.4rem;border-top:1px solid var(--line);
+      font-size:.88rem;color:var(--muted);flex-wrap:wrap}
+    .janela__pe .dir{margin-left:auto;display:flex;gap:.5rem}
+    .carregando{padding:2rem;text-align:center;color:var(--muted)}
+    .form-jan{padding:.4rem 1.4rem 1.2rem}
+    .g-ent{grid-template-columns:1fr 1.4fr 1.4fr}
+    .g-prof{grid-template-columns:1.6fr 1fr 1fr .8fr}
+    .form-jan .cpo label{text-align:left}
+    .form-jan .cpo input,.form-jan .cpo select{text-align:left}
+    .aviso-cnpj{font-size:.86rem;margin-top:.8rem;min-height:1.3em;line-height:1.45}
+    .aviso-cnpj.ok{color:var(--ok)} .aviso-cnpj.erro{color:var(--erro)} .aviso-cnpj.busca{color:var(--blue-700)}
+
+    @media(max-width:1000px){
+      .faixa{grid-template-columns:1fr 1fr;text-align:left}
+      .faixa img,.faixa__nome{display:none}
+      .g-cad{grid-template-columns:1fr 1fr}
+      .g-func,.g-datas,.g-par,.g-ent,.g-prof{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:620px){
+      .topo__quem{display:none}
+      .g-func,.g-datas,.g-cad,.g-par,.g-ent,.g-prof{grid-template-columns:1fr}
+      .cab h1{font-size:1.15rem}
+      .janela__busca input{min-width:0;width:100%}
+    }
+    @media print{
+      .demo,.topo,.abas,.rodape,.acoes-bloco{display:none}
+      .bloco.fechado .bloco__corpo{display:block}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="demo"><b>Demonstração.</b> Dados de exemplo, guardados só neste navegador.</div>
+
+  <header class="topo">
+    <a class="topo__voltar" href="painel.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      Voltar à lista</a>
+    <img src="../assets/logo.png" alt="Clínica Medicina Humana" onerror="this.style.display='none'" />
+    <div class="topo__quem">entrou como<b id="quem">—</b></div>
+  </header>
+
+  <div class="cab">
+    <h1 id="titulo">Carregando…</h1>
+    <nav class="abas" role="tablist">
+      <button class="aba on" data-aba="formulario" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+        Formulário</button>
+      <button class="aba" data-aba="informacoes" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+        Informações</button>
+      <button class="aba" data-aba="historico" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <span class="n" id="nHist">0</span>Histórico</button>
+      <button class="aba" data-aba="anexos" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" aria-hidden="true">
+          <path d="M21 11.5 12.5 20a5 5 0 0 1-7-7L14 4.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15.5 8"/></svg>
+        <span class="n" id="nAnexos">0</span>Anexos</button>
+    </nav>
+  </div>
+
+  <main class="conteudo">
+
+    <!-- ======================= FORMULÁRIO ======================= -->
+    <section class="painel on" id="p-formulario">
+      <p class="obrig">Todos os campos com * são de preenchimento obrigatório e os campos com ** são
+        obrigatórios em etapas específicas.</p>
+
+      <div class="faixa">
+        <img src="../assets/logo.png" alt="" onerror="this.style.display='none'" />
+        <div class="faixa__nome">CADASTRO DE ATESTADO</div>
+        <div><b>Nº Processo</b><span id="fxNumero">—</span></div>
+        <div><b>Data Abertura</b><span id="fxAbertura">—</span></div>
+        <div><b>Usuário Criação</b><span id="fxAutor">—</span></div>
+      </div>
+
+      <div class="bloco acoes-bloco">
+        <button class="bloco__cab" type="button">Painel de Ações</button>
+        <div class="bloco__corpo acoes">
+          <button class="pilula" id="btCadEntidade" type="button">+ Cadastrar Entidade</button>
+          <button class="pilula" id="btCadProf" type="button">+ Cadastrar Profissional Saúde</button>
+        </div>
+      </div>
+
+      <div class="bloco">
+        <button class="bloco__cab" type="button">Contexto</button>
+        <div class="bloco__corpo">
+          <div class="grade g-par">
+            <div class="cpo"><label for="fEmpresa">Empresa (coligada) <i>*</i></label>
+              <input id="fEmpresa" readonly /></div>
+            <div class="cpo"><label for="fRequisitante">Requisitante</label>
+              <input id="fRequisitante" readonly /></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bloco">
+        <button class="bloco__cab" type="button">Funcionário</button>
+        <div class="bloco__corpo">
+          <div class="grade g-func">
+            <div class="cpo" data-campo="chapa"><label for="fChapa">Chapa <i>*</i></label>
+              <input id="fChapa" autocomplete="off" /></div>
+            <div class="cpo" data-campo="nome"><label for="fNome">Nome <i>*</i></label>
+              <input id="fNome" autocomplete="off" /></div>
+            <div class="cpo"><label for="fFilial">Filial</label>
+              <input id="fFilial" autocomplete="off" /></div>
+          </div>
+          <div class="grade g-datas">
+            <div class="cpo" data-campo="inicio"><label for="fInicio">Data Início Atestado <i>*</i></label>
+              <input id="fInicio" type="date" /></div>
+            <div class="cpo" data-campo="hora"><label for="fHora">Hora Início Atestado <i>*</i></label>
+              <input id="fHora" type="time" /></div>
+            <div class="cpo" data-campo="dias"><label for="fDias">Qtd. Dias <i>*</i></label>
+              <input id="fDias" type="number" min="1" max="730" step="1" /></div>
+            <div class="cpo"><label for="fFim">Data Fim Atestado</label>
+              <input id="fFim" readonly tabindex="-1" /></div>
+          </div>
+
+          <!-- os cinco campos de cadastro: escolhe-se na lupa -->
+          <div class="grade g-cad">
+            <div class="cpo" data-campo="tipo"><label>Tipo de Atestado <i>**</i></label>
+              <div class="lupa-caixa"><input id="fTipo" readonly data-busca="tipo" placeholder="—" />
+                <button class="limpa" data-limpa="tipo" type="button" aria-label="Limpar tipo">×</button>
+                <button class="lupa" data-busca="tipo" type="button" aria-label="Escolher o tipo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></div></div>
+            <div class="cpo" data-campo="medico"><label>Médico <i>**</i></label>
+              <div class="lupa-caixa"><input id="fMedico" readonly data-busca="medico" placeholder="—" />
+                <button class="limpa" data-limpa="medico" type="button" aria-label="Limpar médico">×</button>
+                <button class="lupa" data-busca="medico" type="button" aria-label="Escolher o médico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></div></div>
+            <div class="cpo" data-campo="entidade"><label>Entidade <i>**</i></label>
+              <div class="lupa-caixa"><input id="fEntidade" readonly data-busca="entidade" placeholder="—" />
+                <button class="limpa" data-limpa="entidade" type="button" aria-label="Limpar entidade">×</button>
+                <button class="lupa" data-busca="entidade" type="button" aria-label="Escolher a entidade"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></div></div>
+            <div class="cpo" data-campo="cid"><label>CID</label>
+              <div class="lupa-caixa"><input id="fCid" readonly data-busca="cid" placeholder="—" />
+                <button class="limpa" data-limpa="cid" type="button" aria-label="Limpar CID">×</button>
+                <button class="lupa" data-busca="cid" type="button" aria-label="Escolher a CID"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></div></div>
+            <div class="cpo" data-campo="responsavel"><label>Responsável Abono <i>**</i></label>
+              <div class="lupa-caixa"><input id="fResponsavel" readonly data-busca="responsavel" placeholder="—" />
+                <button class="limpa" data-limpa="responsavel" type="button" aria-label="Limpar responsável">×</button>
+                <button class="lupa" data-busca="responsavel" type="button" aria-label="Escolher o responsável"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></div></div>
+          </div>
+
+          <div class="cpo" style="margin-top:.9rem"><label for="fObs">Observações</label>
+            <textarea id="fObs" placeholder="Algo que a clínica precise saber sobre este atestado"></textarea></div>
+        </div>
+      </div>
+
+      <div class="bloco">
+        <button class="bloco__cab" type="button">Parecer da clínica</button>
+        <div class="bloco__corpo">
+          <div class="grade g-par">
+            <div class="cpo" data-campo="parecer"><label for="fParecer">Parecer <i>**</i></label>
+              <select id="fParecer" class="parecer-sel">
+                <option>Pendente</option><option>Aprovado</option><option>Reprovado</option>
+              </select></div>
+            <div class="cpo" data-campo="parecerObs"><label for="fParecerObs">Observação do parecer</label>
+              <textarea id="fParecerObs" placeholder="Obrigatória quando o parecer é Pendente ou Reprovado: diga à empresa o que falta ou por quê"></textarea></div>
+          </div>
+          <p class="nota" id="notaParecer"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= INFORMAÇÕES ======================= -->
+    <section class="painel" id="p-informacoes">
+      <div class="cartao"><div class="info" id="info"></div></div>
+    </section>
+
+    <!-- ======================= HISTÓRICO ======================= -->
+    <section class="painel" id="p-historico">
+      <!-- o comentário é conversa entre a empresa e a clínica, dentro do
+           próprio processo: some o "manda por WhatsApp e ninguém acha
+           depois". Grava na hora e avisa quem está do outro lado. -->
+      <div class="cartao comenta">
+        <div class="avatar" id="avatarEu">?</div>
+        <textarea id="comentario" rows="1" placeholder="Digite um comentário nesta solicitação…"></textarea>
+        <button class="bt" id="btComentar" type="button" disabled>Comentar</button>
+      </div>
+      <div class="hist-filtro">
+        <button class="chip on" data-hf="tudo" type="button">Tudo</button>
+        <button class="chip" data-hf="comentario" type="button">Só comentários</button>
+        <button class="chip" data-hf="evento" type="button">Só movimentações</button>
+      </div>
+      <ol class="linha-tempo" id="histCorpo"></ol>
+    </section>
+
+    <!-- ======================= ANEXOS ======================= -->
+    <section class="painel" id="p-anexos">
+      <div class="anx-barra">
+        <div class="anx-busca">
+          <select id="anxCampo" aria-label="Buscar por">
+            <option value="nome">Pelo título</option><option value="quem">Por quem anexou</option>
+            <option value="atividade">Pela atividade</option>
+          </select>
+          <input id="anxTexto" type="search" placeholder="Digite o título do anexo que deseja buscar" autocomplete="off" />
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+        </div>
+        <select id="anxTipo" class="anx-filtro" aria-label="Filtrar por tipo de arquivo">
+          <option value="">Todos os tipos</option><option value="application/pdf">Só PDF</option>
+          <option value="image">Só imagens</option>
+        </select>
+        <div class="anx-dir">
+          <button class="bt" id="anxBaixarSel" type="button" style="display:none">Baixar marcados</button>
+          <button class="bt bt--forte" id="anxAdicionar" type="button">+ Adicionar</button>
+        </div>
+      </div>
+      <input type="file" id="arquivo" accept="application/pdf,image/jpeg,image/png" multiple hidden />
+      <div class="cartao" style="padding:0;overflow:auto">
+        <table class="tab anx-tab">
+          <thead><tr><th style="width:42px"><input type="checkbox" id="anxTodos" aria-label="Marcar todos" /></th>
+            <th>Título</th><th>Código</th><th>Versão</th><th>Usuário que anexou</th><th>Data de inclusão</th>
+            <th>Incluído em atividade</th><th style="width:120px"></th></tr></thead>
+          <tbody id="anexosCorpo"></tbody></table>
+        <label class="soltar" id="soltar" for="arquivo">
+          <b>Arraste o atestado para cá</b> ou clique para escolher — PDF, JPG ou PNG
+          <small>Na demonstração, até 1,5 MB por arquivo.</small>
+        </label>
+      </div>
+    </section>
+  </main>
+
+  <div class="rodape">
+    <span class="rodape__recado" id="recado" role="status"></span>
+    <button class="bt" id="btImprimir" type="button">Imprimir</button>
+    <button class="bt bt--forte" id="btEnviar" type="button">Enviar</button>
+  </div>
+
+  <!-- ============ janela de busca (uma só, para os cinco campos) ============ -->
+  <div class="veu" id="veuBusca">
+    <div class="janela" role="dialog" aria-modal="true" aria-labelledby="buscaTitulo">
+      <div class="janela__cab"><h2 id="buscaTitulo">Selecione</h2>
+        <button class="fechar-x" data-fecha="veuBusca" type="button" aria-label="Fechar">×</button></div>
+      <div class="janela__busca"><label for="buscaTexto">Busque os 100 primeiros registros. Pesquisar</label>
+        <input id="buscaTexto" type="search" autocomplete="off" /></div>
+      <div class="janela__corpo" id="buscaCorpo"></div>
+      <div class="janela__pe"><span id="buscaConta"></span>
+        <div class="dir"><button class="bt" id="buscaCadastrar" type="button" style="display:none">+ Cadastrar novo</button>
+          <button class="bt" data-fecha="veuBusca" type="button">Fechar</button></div></div>
+    </div>
+  </div>
+
+  <!-- ============ cadastro de entidade ============ -->
+  <div class="veu" id="veuEntidade">
+    <div class="janela janela--media" role="dialog" aria-modal="true" aria-labelledby="entTitulo">
+      <div class="janela__cab"><h2 id="entTitulo">Cadastro de Entidade</h2>
+        <button class="fechar-x" data-fecha="veuEntidade" type="button" aria-label="Fechar">×</button></div>
+      <div class="form-jan">
+        <div class="grade g-ent">
+          <div class="cpo"><label for="eCnpj">CNPJ</label>
+            <input id="eCnpj" inputmode="numeric" autocomplete="off" placeholder="00.000.000/0000-00" /></div>
+          <div class="cpo"><label for="eRazao">Razão Social <i>*</i></label><input id="eRazao" autocomplete="off" /></div>
+          <div class="cpo"><label for="eFantasia">Nome Fantasia</label><input id="eFantasia" autocomplete="off" /></div>
+        </div>
+        <p class="aviso-cnpj" id="eAviso">Digite o CNPJ: a razão social e o nome fantasia vêm sozinhos da Receita.</p>
+      </div>
+      <div class="janela__pe"><div class="dir">
+        <button class="bt bt--forte" id="eSalvar" type="button">CADASTRAR</button>
+        <button class="bt bt--vermelho" data-fecha="veuEntidade" type="button">Fechar</button></div></div>
+    </div>
+  </div>
+
+  <!-- ============ cadastro de profissional ============ -->
+  <div class="veu" id="veuProf">
+    <div class="janela janela--media" role="dialog" aria-modal="true" aria-labelledby="profTitulo">
+      <div class="janela__cab"><h2 id="profTitulo">Cadastro de Profissional de Saúde</h2>
+        <button class="fechar-x" data-fecha="veuProf" type="button" aria-label="Fechar">×</button></div>
+      <div class="form-jan">
+        <div class="grade g-prof">
+          <div class="cpo"><label for="pNome">Nome Profissional <i>*</i></label><input id="pNome" autocomplete="off" /></div>
+          <div class="cpo"><label for="pNumero">Número Registro <i>*</i></label><input id="pNumero" autocomplete="off" inputmode="numeric" /></div>
+          <div class="cpo"><label for="pOrgao">Órgão da Classe <i>*</i></label><select id="pOrgao"></select></div>
+          <div class="cpo"><label for="pUf">UF Registro <i>*</i></label><select id="pUf"></select></div>
+        </div>
+        <p class="aviso-cnpj" id="pAviso"></p>
+      </div>
+      <div class="janela__pe"><div class="dir">
+        <button class="bt bt--forte" id="pSalvar" type="button">OK</button>
+        <button class="bt bt--vermelho" data-fecha="veuProf" type="button">Fechar</button></div></div>
+    </div>
+  </div>
+
+<script src="dados.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var H = window.Homologacao;
+  var $ = function (id) { return document.getElementById(id); };
+  var SESSAO = H.sessao();
+  if (!SESSAO) { window.location.replace("index.html"); return; }
+  var MEDICO = SESSAO.tipo === "medico";
+  $("quem").textContent = SESSAO.nome;
+
+  var P = null;            // o processo aberto
+  var NOVO = false;
+
+  /* ---------------- utilidades ---------------- */
+  function dm(iso) {
+    if (!iso) return "";
+    var p = String(iso).slice(0, 10).split("-");
+    return p.length === 3 ? p[2] + "/" + p[1] + "/" + p[0] : String(iso);
+  }
+  function dataHora(iso) {
+    if (!iso) return "";
+    var d = new Date(iso);
+    return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR");
+  }
+  function crua(t) { return String(t == null ? "" : t).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+  function esc(t) {
+    return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function somaDias(iso, n) {
+    var p = iso.split("-");
+    var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]) + n);
+    return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+  }
+  function recado(texto, tipo) { $("recado").textContent = texto || ""; $("recado").className = "rodape__recado " + (tipo || ""); }
+
+  /* ---------------- quem pode mexer em quê ----------------
+     Processo finalizado não se mexe mais — a não ser pelo médico, que
+     pode rever o próprio parecer. A empresa nunca mexe no parecer. */
+  function podeEditarEmpresa() { return !MEDICO && P.situacao !== "finalizado"; }
+  function podeEditarClinica() { return MEDICO || (!MEDICO && P.situacao !== "finalizado"); }
+
+  /* ---------------- abrir ---------------- */
+  var qs = new URLSearchParams(location.search);
+  var pedido = qs.get("novo") && !MEDICO ? Promise.resolve(H.processoEmBranco()) : H.obterProcesso(qs.get("id"));
+  NOVO = !!(qs.get("novo") && !MEDICO);
+
+  pedido.then(function (p) {
+    if (!p) {
+      $("titulo").textContent = "Processo não encontrado";
+      recado("Este processo não existe ou não é da sua empresa.", "erro");
+      $("btEnviar").disabled = true;
+      return;
+    }
+    P = p;
+    preencher();
+  });
+
+  function preencher() {
+    document.title = (NOVO ? "Novo atestado" : "Processo " + P.processo) + " | Homologação de atestados";
+    $("titulo").textContent = NOVO ? "Novo atestado" : P.processo + " - " + P.atividade;
+    $("fxNumero").textContent = NOVO ? "(novo)" : P.processo;
+    $("fxAbertura").textContent = NOVO ? "—" : dataHora(P.abertura);
+    $("fxAutor").textContent = P.criadoPor || "—";
+    $("fEmpresa").value = P.empresa;
+    $("fRequisitante").value = P.requisitante;
+    $("fChapa").value = P.chapa;
+    $("fNome").value = P.nome;
+    $("fFilial").value = P.filial || "";
+    $("fInicio").value = P.inicio;
+    $("fHora").value = P.horaInicio || "08:00";
+    $("fDias").value = P.dias || 1;
+    $("fObs").value = P.observacoes || "";
+    $("fParecer").value = P.parecer || "Pendente";
+    $("fParecerObs").value = P.parecerObs || "";
+    ["tipo", "medico", "entidade", "cid", "responsavel"].forEach(mostrarEscolha);
+    calcularFim();
+    pintarParecer();
+
+    var emp = podeEditarEmpresa(), cli = podeEditarClinica();
+    ["fChapa", "fNome", "fFilial", "fInicio", "fHora", "fDias", "fObs"].forEach(function (id) {
+      $(id).readOnly = !(emp || (MEDICO && P.situacao !== "finalizado"));
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".lupa,.limpa"), function (b) { b.disabled = !cli; });
+    $("btCadEntidade").disabled = !cli;
+    $("btCadProf").disabled = !cli;
+    $("fParecer").disabled = !MEDICO;
+    $("fParecerObs").readOnly = !MEDICO;
+    $("btEnviar").textContent = MEDICO ? "Salvar parecer" : (NOVO ? "Enviar à clínica" : "Reenviar à clínica");
+    $("btEnviar").style.display = (MEDICO || emp) ? "" : "none";
+
+    $("notaParecer").textContent = MEDICO
+      ? "Aprovado ou Reprovado finaliza o processo na hora, e a empresa já vê o resultado. " +
+        "Pendente devolve à empresa como \"Aguardando documento\", com a sua observação."
+      : (P.situacao === "finalizado"
+          ? "Processo finalizado pela clínica."
+          : "O parecer é dado pelo médico da clínica. Assim que ele decidir, o resultado aparece aqui e na lista.");
+
+    if (P.atividade === "Aguardando documento" && !MEDICO && P.parecerObs) {
+      recado("A clínica pediu: " + P.parecerObs, "erro");
+    }
+    desenharInfo();
+    desenharHistorico();
+    desenharAnexos();
+  }
+
+  function pintarParecer() {
+    $("fParecer").className = "parecer-sel " + $("fParecer").value;
+  }
+  $("fParecer").addEventListener("change", pintarParecer);
+
+  /* Data fim = início + dias − 1, às 23:59 (um dia de atestado termina
+     no mesmo dia em que começa). Não se digita: sai das outras duas. */
+  function calcularFim() {
+    var ini = $("fInicio").value, dias = Math.max(1, parseInt($("fDias").value, 10) || 1);
+    $("fFim").value = ini ? dm(somaDias(ini, dias - 1)) + " 23:59" : "";
+  }
+  $("fInicio").addEventListener("input", calcularFim);
+  $("fDias").addEventListener("input", calcularFim);
+
+  /* ---------------- os campos com lupa ---------------- */
+  var ROTULO = {
+    tipo: function (v) { return v.codigo + " - " + v.nome; },
+    medico: function (v) { return v.nome + " (" + v.registro + ")"; },
+    entidade: function (v) { return v.nome; },
+    cid: function (v) { return v.codigo + " - " + v.nome; },
+    responsavel: function (v) { return v.nome + " (" + v.registro + ")"; }
+  };
+  var CAMPO = {tipo: "fTipo", medico: "fMedico", entidade: "fEntidade", cid: "fCid", responsavel: "fResponsavel"};
+  function mostrarEscolha(qual) {
+    var v = P[qual];
+    $(CAMPO[qual]).value = v ? ROTULO[qual](v) : "";
+    $(CAMPO[qual]).title = v ? ROTULO[qual](v) : "";
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("[data-limpa]"), function (b) {
+    b.addEventListener("click", function () {
+      var q = b.getAttribute("data-limpa");
+      P[q] = null; mostrarEscolha(q);
+    });
+  });
+
+  var BUSCAS = {
+    tipo: {titulo: "Selecione o Tipo de Atestado",
+      colunas: [["codigo", "Código"], ["nome", "Nome"]],
+      carregar: function () { return Promise.resolve(H.TIPOS); }},
+    medico: {titulo: "Selecione o Profissional",
+      colunas: [["codigo", "Código"], ["nome", "Nome"], ["registro", "Registro"], ["uf", "Uf Registro"]],
+      carregar: H.listarProfissionais, cadastrar: abrirCadProf},
+    entidade: {titulo: "Selecione a Entidade",
+      colunas: [["codigo", "Código"], ["nome", "Nome"], ["cnpj", "CNPJ"]],
+      carregar: H.listarEntidades, cadastrar: abrirCadEntidade},
+    cid: {titulo: "Selecione a CID",
+      colunas: [["codigo", "Código"], ["nome", "Nome"]],
+      carregar: H.listarCID},
+    responsavel: {titulo: "Selecione o Responsável",
+      colunas: [["codigo", "CRM"], ["nome", "Nome"], ["registro", "Registro"], ["funcao", "Função"]],
+      carregar: function () { return Promise.resolve(H.RESPONSAVEIS); }}
+  };
+
+  var busca = {qual: null, linhas: [], ordem: null, desc: false};
+  function abrirBusca(qual) {
+    if (!podeEditarClinica()) return;
+    var cfg = BUSCAS[qual];
+    busca = {qual: qual, linhas: [], ordem: cfg.colunas[0][0], desc: false};
+    $("buscaTitulo").textContent = cfg.titulo;
+    $("buscaTexto").value = "";
+    $("buscaCadastrar").style.display = cfg.cadastrar ? "" : "none";
+    $("buscaCorpo").innerHTML = '<div class="carregando">Carregando…</div>';
+    $("buscaConta").textContent = "";
+    abrirVeu("veuBusca");
+    $("buscaTexto").focus();
+    cfg.carregar().then(function (linhas) {
+      if (busca.qual !== qual) return;
+      busca.linhas = linhas;
+      desenharBusca();
+    }).catch(function () {
+      $("buscaCorpo").innerHTML = '<div class="carregando">Não foi possível carregar a lista. Confira a internet e tente de novo.</div>';
+    });
+  }
+  /* "Busque os 100 primeiros registros": como no sistema de origem, a
+     tela mostra no máximo 100 linhas, e a pesquisa vasculha a lista
+     INTEIRA — as 14 mil CIDs, inclusive — sem ligar para acento. */
+  function desenharBusca() {
+    var cfg = BUSCAS[busca.qual];
+    var termos = crua($("buscaTexto").value).split(/\s+/).filter(Boolean);
+    var achadas = busca.linhas.filter(function (l) {
+      if (!termos.length) return true;
+      var tudo = crua(cfg.colunas.map(function (c) { return l[c[0]]; }).join(" "));
+      return termos.every(function (t) { return tudo.indexOf(t) >= 0; });
+    });
+    var k = busca.ordem, s = busca.desc ? -1 : 1;
+    if (!(busca.qual === "cid" && k === "codigo" && !busca.desc)) {   // a CID já vem na ordem certa
+      achadas = achadas.slice().sort(function (a, b) {
+        var x = a[k], y = b[k];
+        if (/^\d+$/.test(x) && /^\d+$/.test(y)) { x = Number(x); y = Number(y); }
+        else { x = crua(x); y = crua(y); }
+        return x < y ? -s : x > y ? s : 0;
+      });
+    } else if (busca.desc) { achadas = achadas.slice().reverse(); }
+    var mostra = achadas.slice(0, 100);
+    var h = '<table class="lista"><thead><tr>' + cfg.colunas.map(function (c) {
+      return '<th data-ordem="' + c[0] + '">' + esc(c[1]) +
+        (busca.ordem === c[0] ? '<span class="s">' + (busca.desc ? "▼" : "▲") + "</span>" : "") + "</th>";
+    }).join("") + "</tr></thead><tbody>" + mostra.map(function (l, i) {
+      return '<tr data-i="' + i + '">' + cfg.colunas.map(function (c) { return "<td>" + esc(l[c[0]]) + "</td>"; }).join("") + "</tr>";
+    }).join("") + "</tbody></table>";
+    if (!mostra.length) h = '<div class="carregando">Nada encontrado com essa pesquisa.' +
+      (cfg.cadastrar ? " Use <b>+ Cadastrar novo</b> abaixo." : "") + "</div>";
+    $("buscaCorpo").innerHTML = h;
+    $("buscaConta").textContent = achadas.length
+      ? "1 até " + mostra.length + " de " + achadas.length + " registros" +
+        (achadas.length > 100 ? " — refine a pesquisa para ver os outros" : "")
+      : "0 registros";
+    Array.prototype.forEach.call($("buscaCorpo").querySelectorAll("th"), function (th) {
+      th.addEventListener("click", function () {
+        var k2 = th.getAttribute("data-ordem");
+        if (busca.ordem === k2) busca.desc = !busca.desc; else { busca.ordem = k2; busca.desc = false; }
+        desenharBusca();
+      });
+    });
+    Array.prototype.forEach.call($("buscaCorpo").querySelectorAll("tbody tr"), function (tr) {
+      tr.addEventListener("click", function () { escolher(busca.qual, mostra[Number(tr.getAttribute("data-i"))]); });
+    });
+  }
+  var esperaBusca = null;
+  $("buscaTexto").addEventListener("input", function () {
+    clearTimeout(esperaBusca);
+    esperaBusca = setTimeout(desenharBusca, busca.qual === "cid" ? 160 : 60);
+  });
+  $("buscaTexto").addEventListener("keydown", function (ev) {
+    // Enter com uma linha só na tela: escolhe ela
+    if (ev.key === "Enter") {
+      var trs = $("buscaCorpo").querySelectorAll("tbody tr");
+      if (trs.length === 1) trs[0].click();
+    }
+  });
+  $("buscaCadastrar").addEventListener("click", function () {
+    var cfg = BUSCAS[busca.qual];
+    fecharVeu("veuBusca");
+    if (cfg.cadastrar) cfg.cadastrar();
+  });
+  function escolher(qual, v) {
+    P[qual] = v;
+    mostrarEscolha(qual);
+    var cpo = document.querySelector('[data-campo="' + qual + '"]');
+    if (cpo) cpo.classList.remove("erro");
+    fecharVeu("veuBusca");
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("[data-busca]"), function (el) {
+    el.addEventListener("click", function () { abrirBusca(el.getAttribute("data-busca")); });
+  });
+
+  /* ---------------- janelas ---------------- */
+  var aberta = null;
+  function abrirVeu(id) { aberta = id; $(id).classList.add("abre"); }
+  function fecharVeu(id) { $(id).classList.remove("abre"); if (aberta === id) aberta = null; }
+  Array.prototype.forEach.call(document.querySelectorAll("[data-fecha]"), function (b) {
+    b.addEventListener("click", function () { fecharVeu(b.getAttribute("data-fecha")); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".veu"), function (v) {
+    v.addEventListener("mousedown", function (ev) { if (ev.target === v) fecharVeu(v.id); });
+  });
+  document.addEventListener("keydown", function (ev) { if (ev.key === "Escape" && aberta) fecharVeu(aberta); });
+
+  /* ---------------- cadastro de entidade ----------------
+     DIGITOU O CNPJ, VEM O RESTO. Ao completar os 14 números a tela
+     pergunta à Receita (BrasilAPI, com a CNPJ.ws de reserva) e preenche
+     razão social e nome fantasia. Continua dando para digitar à mão —
+     entidade sem CNPJ (médico autônomo com CPF, por exemplo) existe. */
+  function mascaraCNPJ(v) {
+    var d = H.soDigitos(v).slice(0, 14);
+    return d.replace(/^(\d{2})(\d)/, "$1.$2").replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/\.(\d{3})(\d)/, ".$1/$2").replace(/(\d{4})(\d)/, "$1-$2");
+  }
+  function cnpjValido(c) {
+    c = H.soDigitos(c);
+    if (c.length !== 14 || /^(\d)\1+$/.test(c)) return false;
+    function dv(n) {
+      var soma = 0, peso = n - 7;
+      for (var i = 0; i < n; i++) { soma += Number(c.charAt(i)) * peso--; if (peso < 2) peso = 9; }
+      var r = soma % 11; return r < 2 ? 0 : 11 - r;
+    }
+    return dv(12) === Number(c.charAt(12)) && dv(13) === Number(c.charAt(13));
+  }
+  function avisoEnt(t, tipo) { $("eAviso").textContent = t; $("eAviso").className = "aviso-cnpj " + (tipo || ""); }
+  var dadosCNPJ = {};
+  function abrirCadEntidade() {
+    $("eCnpj").value = ""; $("eRazao").value = ""; $("eFantasia").value = "";
+    dadosCNPJ = {};
+    avisoEnt("Digite o CNPJ: a razão social e o nome fantasia vêm sozinhos da Receita.");
+    abrirVeu("veuEntidade");
+    $("eCnpj").focus();
+  }
+  var ultimoCNPJ = "";
+  $("eCnpj").addEventListener("input", function () {
+    $("eCnpj").value = mascaraCNPJ($("eCnpj").value);
+    var n = H.soDigitos($("eCnpj").value);
+    if (n.length < 14) { ultimoCNPJ = ""; if (n.length) avisoEnt("Faltam " + (14 - n.length) + " número(s)."); return; }
+    if (n === ultimoCNPJ) return;
+    ultimoCNPJ = n;
+    if (!cnpjValido(n)) { avisoEnt("Este CNPJ não existe — confira os números.", "erro"); return; }
+    avisoEnt("Buscando na Receita…", "busca");
+    H.buscarCNPJ(n).then(function (r) {
+      if (ultimoCNPJ !== n) return;
+      dadosCNPJ = r;
+      $("eRazao").value = r.nome || "";
+      $("eFantasia").value = r.fantasia || "";
+      avisoEnt("Encontrado na Receita" + (r.cidade ? " — " + r.cidade + "/" + r.uf : "") +
+        (r.situacao ? " · situação: " + r.situacao : "") + ". Confira e clique em CADASTRAR.", "ok");
+    }).catch(function (e) {
+      if (ultimoCNPJ !== n) return;
+      avisoEnt(e && e.naoExiste
+        ? "A Receita não achou este CNPJ. Confira os números, ou preencha à mão."
+        : "Não consegui falar com a Receita agora. Preencha à mão, ou tente de novo daqui a pouco.", "erro");
+    });
+  });
+  $("btCadEntidade").addEventListener("click", abrirCadEntidade);
+  $("eSalvar").addEventListener("click", function () {
+    var razao = $("eRazao").value.trim();
+    if (!razao) { avisoEnt("Escreva a razão social (ou digite o CNPJ para ela vir sozinha).", "erro"); $("eRazao").focus(); return; }
+    var n = H.soDigitos($("eCnpj").value);
+    if (n && !cnpjValido(n)) { avisoEnt("Este CNPJ não existe — confira os números ou apague o campo.", "erro"); return; }
+    H.criarEntidade({nome: razao, fantasia: $("eFantasia").value.trim(), cnpj: n,
+                     cidade: dadosCNPJ.cidade, uf: dadosCNPJ.uf}).then(function (r) {
+      if (!r.ok && !r.entidade) { avisoEnt(r.recado, "erro"); return; }
+      // cadastrou (ou já existia): já fica escolhida no processo
+      P.entidade = r.entidade; mostrarEscolha("entidade");
+      fecharVeu("veuEntidade");
+      recado(r.ok ? "Entidade cadastrada e escolhida neste processo." : r.recado + " — escolhida neste processo.", "ok");
+    });
+  });
+
+  /* ---------------- cadastro de profissional ---------------- */
+  H.ORGAOS.forEach(function (o) { var op = document.createElement("option"); op.textContent = o; $("pOrgao").appendChild(op); });
+  H.UFS.forEach(function (u) { var op = document.createElement("option"); op.textContent = u; $("pUf").appendChild(op); });
+  function abrirCadProf() {
+    $("pNome").value = ""; $("pNumero").value = ""; $("pOrgao").value = "CRM"; $("pUf").value = "BA";
+    $("pAviso").textContent = ""; $("pAviso").className = "aviso-cnpj";
+    abrirVeu("veuProf");
+    $("pNome").focus();
+  }
+  $("btCadProf").addEventListener("click", abrirCadProf);
+  $("pSalvar").addEventListener("click", function () {
+    var nome = $("pNome").value.trim(), num = $("pNumero").value.trim();
+    function erro(t, el) { $("pAviso").textContent = t; $("pAviso").className = "aviso-cnpj erro"; if (el) el.focus(); }
+    if (nome.split(/\s+/).length < 2) return erro("Escreva o nome completo do profissional.", $("pNome"));
+    if (!/\d/.test(num)) return erro("Escreva o número do registro no conselho.", $("pNumero"));
+    H.criarProfissional({nome: nome, numero: num, orgao: $("pOrgao").value, uf: $("pUf").value}).then(function (r) {
+      if (!r.ok && !r.profissional) return erro(r.recado);
+      P.medico = r.profissional; mostrarEscolha("medico");
+      fecharVeu("veuProf");
+      recado(r.ok ? "Profissional cadastrado e escolhido neste processo." : r.recado + " — escolhido neste processo.", "ok");
+    });
+  });
+
+  /* ---------------- abas ---------------- */
+  Array.prototype.forEach.call(document.querySelectorAll(".aba"), function (a) {
+    a.addEventListener("click", function () {
+      Array.prototype.forEach.call(document.querySelectorAll(".aba"), function (o) { o.classList.remove("on"); });
+      Array.prototype.forEach.call(document.querySelectorAll(".painel"), function (o) { o.classList.remove("on"); });
+      a.classList.add("on");
+      $("p-" + a.getAttribute("data-aba")).classList.add("on");
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".bloco__cab"), function (c) {
+    c.addEventListener("click", function () { c.parentNode.classList.toggle("fechado"); });
+  });
+
+  function desenharInfo() {
+    var itens = [
+      ["Processo", NOVO ? "(novo)" : P.processo], ["Empresa", P.empresa], ["Situação", P.situacao === "aberto" ? "Em aberto" : "Finalizado"],
+      ["Atividade atual", P.atividade], ["Parecer", P.parecer], ["Responsável pelo abono", P.responsavel ? ROTULO.responsavel(P.responsavel) : "—"],
+      ["Aberto em", NOVO ? "—" : dataHora(P.abertura)], ["Aberto por", P.criadoPor], ["Colaborador", (P.nome || "—") + (P.chapa ? " · chapa " + P.chapa : "")],
+      ["Afastamento", P.inicio ? dm(P.inicio) + " a " + dm(P.fim) + " (" + P.dias + " dia" + (P.dias > 1 ? "s" : "") + ")" : "—"],
+      ["Entidade", P.entidade ? P.entidade.nome : "—"], ["CID", P.cid ? ROTULO.cid(P.cid) : "—"]
+    ];
+    $("info").innerHTML = itens.map(function (i) { return "<div><small>" + esc(i[0]) + "</small>" + esc(i[1]) + "</div>"; }).join("");
+  }
+  /* ---------------- histórico ---------------- */
+  function iniciais(nome) {
+    var p = String(nome || "?").replace(/^(dr|dra|rh)\.?\s+[—-]?\s*/i, "").split(/\s+/).filter(Boolean);
+    return ((p[0] || "?").charAt(0) + (p.length > 1 ? p[p.length - 1].charAt(0) : "")).toUpperCase();
+  }
+  $("avatarEu").textContent = iniciais(SESSAO.nome);
+  if (MEDICO) $("avatarEu").classList.add("avatar--clinica");
+  var filtroHist = "tudo";
+  function desenharHistorico() {
+    var todos = (P.historico || []).slice().reverse();
+    $("nHist").textContent = todos.length;
+    $("nHist").style.display = todos.length ? "" : "none";
+    var h = todos.filter(function (e) {
+      return filtroHist === "tudo" || (filtroHist === "comentario" ? e.comentario : !e.comentario);
+    });
+    $("histCorpo").innerHTML = h.length ? h.map(function (e) {
+      var cls = e.comentario ? "coment" : (/^Parecer/.test(e.oque) ? "parecer" : "");
+      return '<li class="' + cls + '"><div class="ev"><div class="ev__cab"><b>' + esc(e.quem) + "</b>" +
+        (e.comentario ? "comentou" : "") + "<span>" + esc(dataHora(e.quando)) + "</span></div>" +
+        '<div class="ev__txt">' + esc(e.oque) + "</div></div></li>";
+    }).join("") : '<li><div class="ev" style="color:var(--muted)">' +
+      (NOVO ? "O histórico começa quando o atestado é enviado à clínica." : "Nada aqui com este filtro.") + "</div></li>";
+    $("comentario").disabled = NOVO;
+    $("comentario").placeholder = NOVO ? "Envie o atestado primeiro — depois dá para comentar aqui."
+                                       : "Digite um comentário nesta solicitação…";
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("[data-hf]"), function (c) {
+    c.addEventListener("click", function () {
+      Array.prototype.forEach.call(document.querySelectorAll("[data-hf]"), function (o) { o.classList.remove("on"); });
+      c.classList.add("on"); filtroHist = c.getAttribute("data-hf"); desenharHistorico();
+    });
+  });
+  $("comentario").addEventListener("input", function () {
+    $("btComentar").disabled = !$("comentario").value.trim();
+    $("comentario").style.height = "auto";
+    $("comentario").style.height = Math.min(200, $("comentario").scrollHeight) + "px";
+  });
+  $("comentario").addEventListener("keydown", function (ev) {
+    if (ev.key === "Enter" && (ev.ctrlKey || ev.metaKey)) $("btComentar").click();
+  });
+  $("btComentar").addEventListener("click", function () {
+    var t = $("comentario").value.trim();
+    if (!t || NOVO) return;
+    $("btComentar").disabled = true;
+    H.comentar(P.id, t).then(function (r) {
+      if (!r.ok) { recado(r.recado, "erro"); $("btComentar").disabled = false; return; }
+      P.historico = r.processo.historico;
+      $("comentario").value = ""; $("comentario").style.height = "";
+      desenharHistorico();
+    });
+  });
+
+  /* ---------------- anexos ----------------
+     No processo que já existe, anexar e tirar gravam NA HORA. No
+     atestado novo, os arquivos esperam o "Enviar à clínica" — não há
+     processo ainda onde pendurá-los. */
+  function tamanho(b) { return b > 1048576 ? (b / 1048576).toFixed(1).replace(".", ",") + " MB" : Math.ceil(b / 1024) + " KB"; }
+  function podeAnexar() { return podeEditarEmpresa() || MEDICO; }
+  var ICO_PDF = '<svg width="24" height="26" viewBox="0 0 24 26" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' +
+    '<path d="M14 1H5a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8z"/><path d="M14 1v7h7"/>' +
+    '<rect x="5.5" y="15" width="13" height="7" rx="1" fill="#fff"/><text x="12" y="20.6" font-size="5.4" text-anchor="middle" ' +
+    'fill="currentColor" stroke="none" font-family="Arial" font-weight="700">PDF</text></svg>';
+  var ICO_IMG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' +
+    '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>';
+  var ICO_BAIXA = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>';
+  var ICO_VER = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var ICO_LIXO = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15M10 11v6M14 11v6"/></svg>';
+
+  function anexosFiltrados() {
+    var campo = $("anxCampo").value, t = crua($("anxTexto").value), tipo = $("anxTipo").value;
+    return (P.anexos || []).filter(function (x) {
+      if (tipo === "image" ? x.tipo.indexOf("image") !== 0 : (tipo && x.tipo !== tipo)) return false;
+      return !t || crua(x[campo]).indexOf(t) >= 0;
+    });
+  }
+  function desenharAnexos() {
+    var todos = P.anexos || [];
+    $("nAnexos").textContent = todos.length;
+    $("nAnexos").style.display = todos.length ? "" : "none";
+    $("soltar").style.display = podeAnexar() ? "" : "none";
+    $("anxAdicionar").style.display = podeAnexar() ? "" : "none";
+    var a = anexosFiltrados();
+    $("anexosCorpo").innerHTML = a.length ? a.map(function (x) {
+      var i = todos.indexOf(x);
+      var podeTirar = !NOVO ? (podeAnexar() && x.quem === SESSAO.nome) : true;
+      return '<tr><td><input type="checkbox" class="anx-marca" data-i="' + i + '" aria-label="Marcar ' + esc(x.nome) + '" /></td>' +
+        '<td><a href="#" class="anx-nome" data-ver="' + i + '">' + (x.tipo === "application/pdf" ? ICO_PDF : ICO_IMG) +
+        esc(x.nome) + '</a><small style="color:var(--muted);display:block;margin-left:2.1rem">' + tamanho(x.tamanho) + "</small></td>" +
+        "<td>" + esc(x.codigo || "—") + "</td><td>" + esc(x.versao || 1000) + "</td><td>" + esc(x.quem || "—") + "</td>" +
+        "<td>" + esc(x.quando ? dataHora(x.quando) : "ainda não enviado") + "</td><td>" + esc(x.atividade || "Início") + "</td>" +
+        '<td style="white-space:nowrap"><button class="ico-bt" data-ver="' + i + '" type="button" title="Abrir">' + ICO_VER + "</button>" +
+        '<button class="ico-bt" data-baixa="' + i + '" type="button" title="Baixar">' + ICO_BAIXA + "</button>" +
+        (podeTirar ? '<button class="ico-bt ico-bt--apaga" data-tira="' + i + '" type="button" title="Tirar">' + ICO_LIXO + "</button>" : "") +
+        "</td></tr>";
+    }).join("") : '<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:1.6rem">' +
+      (todos.length ? "Nenhum anexo com essa busca." : "Nenhum arquivo anexado ainda.") + "</td></tr>";
+    $("anxTodos").checked = false;
+    $("anxBaixarSel").style.display = "none";
+  }
+  function verAnexo(x) {
+    var jan = window.open("", "_blank");
+    if (!jan) { recado("O navegador bloqueou a janela. Libere as janelas para este site.", "erro"); return; }
+    jan.document.write("<title>" + esc(x.nome) + "</title>" + (x.tipo === "application/pdf"
+      ? '<iframe src="' + x.dados + '" style="border:0;position:fixed;inset:0;width:100%;height:100%"></iframe>'
+      : '<img src="' + x.dados + '" style="max-width:100%" alt="" />'));
+    jan.document.close();
+  }
+  function baixarAnexo(x) {
+    var a = document.createElement("a");
+    a.href = x.dados; a.download = x.nome;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+  $("anexosCorpo").addEventListener("click", function (ev) {
+    var el = ev.target.closest("[data-ver],[data-baixa],[data-tira]");
+    if (!el) return;
+    ev.preventDefault();
+    if (el.hasAttribute("data-ver")) return verAnexo(P.anexos[Number(el.getAttribute("data-ver"))]);
+    if (el.hasAttribute("data-baixa")) return baixarAnexo(P.anexos[Number(el.getAttribute("data-baixa"))]);
+    var x = P.anexos[Number(el.getAttribute("data-tira"))];
+    if (!confirm("Tirar o arquivo \"" + x.nome + "\" deste processo?")) return;
+    if (NOVO) { P.anexos.splice(P.anexos.indexOf(x), 1); desenharAnexos(); return; }
+    H.tirarAnexo(P.id, x.codigo).then(function (r) {
+      if (!r.ok) return;
+      P.anexos = r.processo.anexos; P.historico = r.processo.historico;
+      desenharAnexos(); desenharHistorico(); recado("Arquivo tirado.", "ok");
+    });
+  });
+  $("anexosCorpo").addEventListener("change", function () {
+    var n = $("anexosCorpo").querySelectorAll(".anx-marca:checked").length;
+    $("anxBaixarSel").style.display = n ? "" : "none";
+    $("anxBaixarSel").textContent = "Baixar marcados (" + n + ")";
+  });
+  $("anxTodos").addEventListener("change", function () {
+    Array.prototype.forEach.call($("anexosCorpo").querySelectorAll(".anx-marca"), function (c) { c.checked = $("anxTodos").checked; });
+    $("anexosCorpo").dispatchEvent(new Event("change"));
+  });
+  $("anxBaixarSel").addEventListener("click", function () {
+    Array.prototype.forEach.call($("anexosCorpo").querySelectorAll(".anx-marca:checked"), function (c, k) {
+      var x = P.anexos[Number(c.getAttribute("data-i"))];
+      setTimeout(function () { baixarAnexo(x); }, k * 350);   // um de cada vez, senão o navegador barra
+    });
+  });
+  ["anxTexto", "anxTipo", "anxCampo"].forEach(function (id) {
+    $(id).addEventListener("input", desenharAnexos);
+  });
+  $("anxCampo").addEventListener("change", function () {
+    $("anxTexto").placeholder = {nome: "Digite o título do anexo que deseja buscar",
+      quem: "Digite o nome de quem anexou", atividade: "Digite a atividade"}[$("anxCampo").value];
+  });
+  $("anxAdicionar").addEventListener("click", function () { $("arquivo").click(); });
+
+  function receber(arquivos) {
+    if (!podeAnexar()) return;
+    Array.prototype.forEach.call(arquivos, function (f) {
+      if (!/^(application\/pdf|image\/(jpeg|png))$/.test(f.type)) { recado(f.name + ": só PDF, JPG ou PNG.", "erro"); return; }
+      if (f.size > 1.5 * 1048576) { recado(f.name + ": maior que 1,5 MB — na demonstração não cabe.", "erro"); return; }
+      var r = new FileReader();
+      r.onload = function () {
+        var arq = {nome: f.name, tipo: f.type, tamanho: f.size, dados: r.result};
+        if (NOVO) {
+          var a = H.novoAnexo(arq, "Início"); a.quando = "";
+          P.anexos.push(a); desenharAnexos();
+          recado("Arquivo pronto. Ele vai junto quando você clicar em Enviar à clínica.", "ok");
+          return;
+        }
+        H.anexar(P.id, arq).then(function (res) {
+          if (!res.ok) { recado(res.recado, "erro"); return; }
+          P.anexos = res.processo.anexos; P.historico = res.processo.historico;
+          desenharAnexos(); desenharHistorico();
+          recado("Arquivo anexado ao processo " + P.processo + ".", "ok");
+        });
+      };
+      r.readAsDataURL(f);
+    });
+  }
+  $("arquivo").addEventListener("change", function () { receber($("arquivo").files); $("arquivo").value = ""; });
+  ["dragover", "dragenter"].forEach(function (t) {
+    $("soltar").addEventListener(t, function (ev) { ev.preventDefault(); $("soltar").classList.add("sobre"); });
+  });
+  ["dragleave", "drop"].forEach(function (t) {
+    $("soltar").addEventListener(t, function () { $("soltar").classList.remove("sobre"); });
+  });
+  $("soltar").addEventListener("drop", function (ev) { ev.preventDefault(); receber(ev.dataTransfer.files); });
+
+  /* ---------------- enviar ----------------
+     A conferência mostra TODOS os campos que faltam de uma vez, pintados
+     de vermelho — e não um por vez, que faz a pessoa clicar cinco vezes. */
+  function conferir() {
+    Array.prototype.forEach.call(document.querySelectorAll(".cpo.erro"), function (c) { c.classList.remove("erro"); });
+    var falta = [];
+    function exige(campo, ok, nome) { if (!ok) { falta.push(nome); var c = document.querySelector('[data-campo="' + campo + '"]'); if (c) c.classList.add("erro"); } }
+    exige("chapa", $("fChapa").value.trim(), "chapa");
+    exige("nome", $("fNome").value.trim(), "nome");
+    exige("inicio", $("fInicio").value, "data de início");
+    exige("hora", $("fHora").value, "hora de início");
+    exige("dias", parseInt($("fDias").value, 10) >= 1, "quantidade de dias");
+    if (!MEDICO && !(P.anexos && P.anexos.length)) falta.push("o arquivo do atestado (aba Anexos)");
+    if (MEDICO) {
+      var par = $("fParecer").value;
+      if (par === "Aprovado") {
+        exige("tipo", P.tipo, "tipo de atestado"); exige("medico", P.medico, "médico");
+        exige("entidade", P.entidade, "entidade"); exige("responsavel", P.responsavel, "responsável pelo abono");
+      }
+      if (par !== "Aprovado") exige("parecerObs", $("fParecerObs").value.trim(), "a observação do parecer (diga à empresa o porquê)");
+    }
+    return falta;
+  }
+
+  $("btEnviar").addEventListener("click", function () {
+    var falta = conferir();
+    if (falta.length) { recado("Falta preencher: " + falta.join(", ") + ".", "erro"); return; }
+    var dias = parseInt($("fDias").value, 10);
+    P.chapa = $("fChapa").value.trim();
+    P.nome = $("fNome").value.trim().toUpperCase();
+    P.filial = $("fFilial").value.trim();
+    P.inicio = $("fInicio").value;
+    P.horaInicio = $("fHora").value;
+    P.dias = dias;
+    P.fim = somaDias(P.inicio, dias - 1);
+    P.observacoes = $("fObs").value.trim();
+    if (MEDICO) { P.parecer = $("fParecer").value; P.parecerObs = $("fParecerObs").value.trim(); }
+    $("btEnviar").disabled = true;
+    H.salvarProcesso(P).then(function (r) {
+      $("btEnviar").disabled = false;
+      if (!r.ok) { recado(r.recado, "erro"); return; }
+      var eraNovo = NOVO;
+      P = r.processo; NOVO = false;
+      if (eraNovo) history.replaceState(null, "", "processo.html?id=" + encodeURIComponent(P.id));
+      preencher();
+      recado(MEDICO
+        ? "Parecer salvo: " + P.parecer + ". O processo agora está \"" + P.atividade + "\" — a empresa já vê."
+        : "Enviado à clínica. Processo " + P.processo + " aguardando o parecer do médico.", "ok");
+    });
+  });
+
+  $("btImprimir").addEventListener("click", function () {
+    Array.prototype.forEach.call(document.querySelectorAll(".aba"), function (o) { o.classList.remove("on"); });
+    document.querySelector('[data-aba="formulario"]').click();
+    window.print();
+  });
+})();
+</script>
+</body>
+</html>
