@@ -87,6 +87,9 @@
       border-radius:999px;padding:.12rem .45rem;font:700 .82rem 'Inter',sans-serif;
       background:var(--atencao);color:#fff}
     .emp__conta.zero{background:var(--line);color:var(--muted)}
+    /* o "mais N empresas" não é uma empresa: sem contagem, tracejado */
+    .emp--mais{justify-content:center;background:#fff;border-style:dashed;
+      color:var(--blue-700);font-weight:600}
 
     /* ---------- título ---------- */
     .cab-lista{background:#fff;padding:1.1rem 1.2rem .2rem}
@@ -536,6 +539,7 @@
      =================================================================== */
   var TUDO = [];                  // o que veio do servidor
   var estado = {
+    todasEmpresas: false,   // o lobby comeca enxuto (ver desenharEmpresas)
     situacao: /[?&]aba=finalizado/.test(location.search) ? "finalizado" : "aberto",   // a aba
     busca: "",
     filtros: {},
@@ -645,6 +649,9 @@
      quantos esperam naquela empresa mesmo depois de a pessoa escolher
      uma. Contar pelo que está filtrado faria todas as outras caírem a
      zero no instante do clique, que é o contrário de ajudar a achar. */
+  // quantas empresas cabem na faixa antes de ela virar uma parede: duas
+  // fileiras na tela larga, e o resto atrás do "mais N"
+  var TETO_EMPRESAS = 11;
   function desenharEmpresas() {
     var caixa = $("empresas");
     if (!MEDICO || estado.situacao !== "aberto") { caixa.hidden = true; return; }
@@ -661,20 +668,51 @@
     });
     if (!nomes.length) { caixa.hidden = true; return; }
     var escolhida = estado.filtros.empresa || "";
+
+    /* O LOBBY MOSTRA AS QUE TÊM MAIS GENTE ESPERANDO, e não todas.
+       Com as 70 empresas que a clínica atende, "todas" viravam doze
+       linhas de botões com o nome cortado no meio — a lista de atestados
+       ficava embaixo de uma parede, e achar uma empresa ali era pior do
+       que usar o filtro. As primeiras são as que têm mais atestados
+       parados, que é por onde o trabalho começa; o resto abre num
+       clique. A empresa escolhida entra sempre, mesmo fora das
+       primeiras, senão a tela diz que nenhuma está marcada. */
+    var mostradas = nomes;
+    var escondidas = 0;
+    if (!estado.todasEmpresas && nomes.length > TETO_EMPRESAS) {
+      mostradas = nomes.slice(0, TETO_EMPRESAS);
+      if (escolhida && mostradas.indexOf(escolhida) < 0) mostradas.push(escolhida);
+      escondidas = nomes.length - mostradas.length;
+    }
+
     var html = '<button type="button" class="emp' + (escolhida ? "" : " on") +
       '" data-emp=""><span class="emp__nome">Todas as empresas</span>' +
       '<span class="emp__conta' + (total ? "" : " zero") + '">' + total +
       "</span></button>";
-    nomes.forEach(function (n) {
+    mostradas.forEach(function (n) {
       html += '<button type="button" class="emp' +
         (escolhida === n ? " on" : "") + '" data-emp="' + xml(n) + '">' +
         '<span class="emp__nome" title="' + xml(n) + '">' + xml(n) + "</span>" +
         '<span class="emp__conta">' + porEmpresa[n] + "</span></button>";
     });
+    if (escondidas > 0) {
+      html += '<button type="button" class="emp emp--mais" data-mais="1">' +
+        '<span class="emp__nome">mais ' + escondidas + " empresa" +
+        (escondidas > 1 ? "s" : "") + "…</span></button>";
+    } else if (estado.todasEmpresas && nomes.length > TETO_EMPRESAS) {
+      html += '<button type="button" class="emp emp--mais" data-mais="0">' +
+        '<span class="emp__nome">mostrar menos</span></button>';
+    }
     caixa.innerHTML = html;
     caixa.hidden = false;
   }
   $("empresas").addEventListener("click", function (ev) {
+    var mais = ev.target.closest("[data-mais]");
+    if (mais) {
+      estado.todasEmpresas = mais.getAttribute("data-mais") === "1";
+      desenhar();
+      return;
+    }
     var b = ev.target.closest("[data-emp]");
     if (!b) return;
     estado.filtros.empresa = b.getAttribute("data-emp");

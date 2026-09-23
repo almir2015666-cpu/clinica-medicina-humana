@@ -125,7 +125,19 @@
     .par-caixa.Aprovado{color:var(--ok)} .par-caixa.Reprovado{color:var(--erro)} .par-caixa.Pendente{color:var(--muted)}
     .nota-par{margin:.5rem 0 0;font-size:.8rem;color:var(--muted)}
     .nota-par b{color:var(--ink)}
-    .nota-par.pede{color:#7a4a00;background:#fff4e2;border-radius:6px;padding:.4rem .6rem}
+    /* "A CLÍNICA PEDIU: ..." É A ÚNICA COISA QUE O RH TEM DE FAZER quando
+       o processo volta pendente — e era uma tarja creme com letra de
+       0.8rem, do tamanho de um rodapé. Passava batido, e o processo
+       ficava parado esperando um documento que ninguém viu ser pedido.
+
+       Agora: barra âmbar de 5px na lateral, fundo mais forte, texto
+       maior e o rótulo em caixa alta. É o aviso mais visível da ficha,
+       que é o que ele é. */
+    .nota-par.pede{color:#6b3f00;background:#fff3d8;border:1px solid #f0c987;
+      border-left:5px solid #e8a33d;border-radius:8px;padding:.7rem .9rem;
+      font-size:.95rem;line-height:1.45;margin-top:.7rem}
+    .nota-par.pede b{color:#6b3f00;text-transform:uppercase;letter-spacing:.03em;
+      font-size:.82rem;display:block;margin-bottom:.15rem}
 
     /* ---------- histórico ---------- */
     .comenta{display:flex;gap:.7rem;align-items:center;border:1px solid var(--line);border-radius:8px;padding:.55rem .8rem}

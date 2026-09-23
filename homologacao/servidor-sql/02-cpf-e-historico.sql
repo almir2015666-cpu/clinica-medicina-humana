@@ -235,9 +235,137 @@ begin
 end;
 $$;
 
--- O gatilho em si não muda: continua `after insert or update`, apontando
--- para esta função. Recriado só para o caso de o 01 e o 02 não terem
--- sido rodados nesta ordem.
+-- ---------------------------------------------------------------------
+--  O PARECER SÓ SE CARIMBA QUANDO A DECISÃO MUDA
+--
+--  O DEFEITO QUE ISTO FECHA, visto na tela: clicar duas, cinco, onze
+--  vezes em "Salvar parecer" enchia o histórico de "Parecer: Aprovado"
+--  iguais, todos no mesmo minuto. Quem abrisse o processo depois não
+--  sabia se o médico mudara de ideia onze vezes ou se era a tela a
+--  duplicar.
+--
+--  A causa NÃO estava no gatilho do histórico — ele já só escreve
+--  quando `parecer_em` muda. Estava aqui: este gatilho carimbava
+--  `parecer_em := now()` em TODO update do médico, mesmo quando ele
+--  salvava exatamente o mesmo parecer. O carimbo mudava sozinho, e o
+--  histórico, obediente, registrava.
+--
+--  Agora o carimbo só é refeito quando o parecer OU o motivo mudam. Um
+--  segundo clique no mesmo parecer passa a não mexer em nada — e nada
+--  mexido é nada escrito.
+--
+--  A função vem inteira, como manda a casa; em relação ao 01 muda só o
+--  bloco do carimbo, marcado abaixo.
+-- ---------------------------------------------------------------------
+create or replace function public.homol_processo_regras()
+returns trigger
+language plpgsql security definer set search_path = public as $$
+declare
+  eu       public.homol_conta;
+  medico   boolean := public.homol_eh_medico();
+  meu_nome text    := public.homol_meu_nome();
+begin
+  select * into eu from public.homol_eu();
+  if eu.id is null and not medico then
+    raise exception 'SEM_ACESSO: esta conta não tem acesso à homologação';
+  end if;
+
+  -- a data fim sai das outras duas, sempre — nunca do que a tela manda
+  new.fim := new.inicio + (new.dias - 1);
+  new.atualizado_em := now();
+
+  -- A FILIAL TEM DE SER UMA DAS CADASTRADAS, quando a empresa tem filiais
+  -- cadastradas (quem lança é o RH; o CNPJ vem da conta dele). Empresa
+  -- sem filial nenhuma cadastrada continua livre.
+  if not medico and exists (select 1 from public.homol_filial f
+                             where f.empresa_cnpj = eu.empresa_cnpj and f.ativo) then
+    if not exists (select 1 from public.homol_filial f
+                    where f.empresa_cnpj = eu.empresa_cnpj and f.ativo
+                      and f.nome = coalesce(new.filial, '')) then
+      raise exception 'FILIAL_INVALIDA: escolha uma das filiais cadastradas pela clínica';
+    end if;
+  end if;
+
+  if tg_op = 'INSERT' then
+    if eu.id is null then
+      raise exception 'SO_RH_LANCA: quem lança atestado é o RH da empresa';
+    end if;
+    new.empresa_cnpj    := eu.empresa_cnpj;
+    new.empresa_nome    := eu.empresa_nome;
+    new.requisitante    := eu.nome;
+    new.criado_por      := eu.id;
+    new.criado_por_nome := eu.nome;
+    new.abertura        := now();
+    new.parecer         := 'Pendente';
+    new.parecer_obs     := null;
+    new.parecer_por     := null;
+    new.parecer_em      := null;
+    new.situacao        := 'aberto';
+    new.atividade       := 'Clínica avalia atestado';
+    return new;
+  end if;
+
+  -- UPDATE: o que ninguém muda
+  new.id              := old.id;
+  new.empresa_cnpj    := old.empresa_cnpj;
+  new.empresa_nome    := old.empresa_nome;
+  new.requisitante    := old.requisitante;
+  new.abertura        := old.abertura;
+  new.criado_por      := old.criado_por;
+  new.criado_por_nome := old.criado_por_nome;
+
+  if medico then
+    -- O PARECER DECIDE O PROCESSO, sozinho:
+    --   Aprovado  -> finalizado, "Homologado"
+    --   Reprovado -> finalizado, "Não homologado"
+    --   Pendente  -> volta à empresa, "Aguardando documento"
+    if new.parecer in ('Pendente', 'Reprovado') and coalesce(btrim(new.parecer_obs), '') = '' then
+      raise exception 'FALTA_MOTIVO: diga à empresa o que falta, ou por que foi reprovado';
+    end if;
+    if new.parecer = 'Aprovado' and (new.tipo is null or new.medico is null
+                                     or new.entidade is null or new.responsavel is null) then
+      raise exception 'FALTA_CAMPO: para aprovar, preencha tipo, médico, entidade e responsável';
+    end if;
+    new.situacao    := case when new.parecer = 'Pendente' then 'aberto' else 'finalizado' end;
+    new.atividade   := case new.parecer when 'Aprovado'  then 'Homologado'
+                                        when 'Reprovado' then 'Não homologado'
+                                        else 'Aguardando documento' end;
+    -- >>> O QUE MUDA EM RELAÇÃO AO 01 <<<
+    -- Só carimba quando a DECISÃO muda. Salvar o mesmo parecer, com o
+    -- mesmo motivo, não é uma decisão nova: é o mesmo clique de novo.
+    if new.parecer is distinct from old.parecer
+       or coalesce(btrim(new.parecer_obs), '')
+          is distinct from coalesce(btrim(old.parecer_obs), '') then
+      new.parecer_por := meu_nome;
+      new.parecer_em  := now();
+    else
+      new.parecer_por := old.parecer_por;
+      new.parecer_em  := old.parecer_em;
+    end if;
+  else
+    -- o RH corrige e reenvia; o parecer não é dele, nem por engano
+    if old.situacao = 'finalizado' then
+      raise exception 'FINALIZADO: processo finalizado não se altera';
+    end if;
+    new.parecer     := old.parecer;
+    new.parecer_obs := old.parecer_obs;
+    new.parecer_por := old.parecer_por;
+    new.parecer_em  := old.parecer_em;
+    new.situacao    := 'aberto';
+    new.atividade   := 'Clínica avalia atestado';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists trg_homol_processo_regras on public.homol_processo;
+create trigger trg_homol_processo_regras
+  before insert or update on public.homol_processo
+  for each row execute function public.homol_processo_regras();
+
+
+-- O gatilho do histórico não muda: continua `after insert or update`,
+-- apontando para a função acima. Recriado só para o caso de o 01 e o 02
+-- não terem sido rodados nesta ordem.
 drop trigger if exists trg_homol_processo_historico on public.homol_processo;
 create trigger trg_homol_processo_historico
   after insert or update on public.homol_processo
@@ -263,7 +391,21 @@ select public.homol_cpf_curto('12345678901') as deve_dar_estrelas,
        public.homol_cpf_curto(null)          as deve_dar_nulo,
        public.homol_cpf_curto('123')         as deve_dar_invalido;
 
---  4. quantos processos já têm CPF, e quantos ainda estão só na matrícula
+--  4. o parecer só se carimba quando a decisão muda
+select proname,
+       (prosrc like '%is distinct from old.parecer%') as nao_repete_parecer
+  from pg_proc where proname = 'homol_processo_regras';
+
+--  5. pareceres repetidos no histórico (o passivo que ficou)
+select processo_id, oque, count(*) as vezes
+  from public.homol_evento
+ where comentario = false and oque like 'Parecer:%'
+ group by processo_id, oque
+having count(*) > 1
+ order by vezes desc
+ limit 10;
+
+--  6. quantos processos já têm CPF, e quantos ainda estão só na matrícula
 select count(*) filter (where cpf is not null)  as com_cpf,
        count(*) filter (where cpf is null)      as so_matricula,
        count(*)                                 as total
