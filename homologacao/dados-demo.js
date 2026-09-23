@@ -59,7 +59,10 @@
      confere é o Supabase Auth. Estas duas contas só existem para a
      demonstração poder ser vista pelos dois lados. */
   var CONTAS_DEMO = {
-    "empresa":  {tipo: "empresa", nome: "RH da Empresa de exemplo", empresa: "EMPRESA DE EXEMPLO LTDA"},
+    // o CNPJ de mentira existe porque no sistema de verdade a conta tem um,
+    // e telas que perguntam pelo CNPJ precisam achar alguma coisa na prévia
+    "empresa":  {tipo: "empresa", nome: "RH da Empresa de exemplo", empresa: "EMPRESA DE EXEMPLO LTDA",
+                 cnpj: "11222333000181"},
     "everaldo": {tipo: "medico",  nome: "Dr. Everaldo Barbosa Ribeiro Filho", registro: "CRM-BA 6276"}
   };
 
@@ -557,9 +560,18 @@
     });
   };
   H.historicoDoColaborador = function (p) {
+    /* NO SERVIDOR A PERGUNTA É PELO CNPJ, e aqui a empresa só tem nome.
+       Quem chama de dentro de um processo manda o processo inteiro (tem
+       nome); quem chama da tela de lançamento manda só o CNPJ da conta.
+       Aceitar os dois é o que faz a prévia responder igual ao sistema:
+       antes, o aviso de "essa pessoa já tem atestado aqui" nunca
+       aparecia na prévia, e parecia que o aviso tinha sumido. */
+    var ses = H.sessao() || {};
+    var empresa = p.empresa ||
+      (p.empresaCnpj && ses.cnpj === p.empresaCnpj ? ses.empresa : "") || ses.empresa || "";
     return velho.listarProcessos().then(function (l) {
       return l.filter(function (x) {
-        if (x.empresa !== p.empresa || x.id === p.id) return false;
+        if ((empresa && x.empresa !== empresa) || x.id === p.id) return false;
         return (p.cpf && x.cpf === p.cpf) || (p.chapa && x.chapa === p.chapa);
       })
         .sort(function (a, b) { return a.inicio < b.inicio ? 1 : -1; });

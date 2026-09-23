@@ -897,7 +897,7 @@
       }
       recado((ultimo.nome || "Este colaborador") + " já tem " + ps.length +
              " atestado" + (ps.length > 1 ? "s" : "") + " aqui" +
-             (trouxe.length ? " — trouxe " + trouxe.join(" e ") + " do último." : "."), "ok");
+             (trouxe.length ? ", trouxe " + trouxe.join(" e ") + " do último." : "."), "ok");
     }, function () { /* sem rede, o RH preenche à mão: não atrapalha */ });
   }
   $("fCpf").addEventListener("blur", puxarColaborador);
@@ -1061,6 +1061,11 @@
         if (cpo) cpo.classList.remove("erro");
       });
       fecharVeu("veuBusca");
+      /* O AVISO DO HISTÓRICO CONTINUA VALENDO. Ele nascia do CPF digitado,
+         e quando o CPF passou a vir do cadastro o aviso sumiu sem ninguém
+         notar: é ele que diz ao RH "essa pessoa já tem três atestados
+         aqui" antes de lançar o quarto. */
+      puxarColaborador();
       return;
     }
     P[qual] = v;

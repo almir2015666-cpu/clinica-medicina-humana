@@ -742,7 +742,7 @@
     var dias = ps.reduce(function (s, p) { return s + (p.parecer === "Reprovado" ? 0 : p.dias); }, 0);
     $("pessoaNome").textContent = ps[0].nome;
     var doc = ps.filter(function (p) { return p.cpf; })[0];
-    $("pessoaSub").textContent = (doc ? "CPF " + H.cpfBonito(doc.cpf) : "Matrícula " + (ps[0].chapa || "—")) +
+    $("pessoaSub").textContent = (doc ? "CPF " + H.cpfBonito(doc.cpf) : "Matrícula " + (ps[0].chapa || "não informada")) +
       (ps[0].filial ? " · " + ps[0].filial : "") + " · " +
       qtd(ps.length, "atestado", "atestados") + " no total, " + qtd(dias, "dia", "dias") + " sem contar reprovados";
     $("pessoaCorpo").innerHTML = ps.map(function (p) {
