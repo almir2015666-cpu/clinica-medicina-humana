@@ -240,12 +240,25 @@
     .cab-lista{padding:1rem 1.2rem .1rem}
     .cab-lista h1{font:600 1.08rem/1.3 'Poppins',sans-serif}
     .cab-lista p{font-size:.8rem;margin-top:.1rem}
-    .abas{padding:0 .8rem;gap:0}
-    .aba{font:500 .8rem 'Inter',sans-serif;text-transform:uppercase;letter-spacing:.02em;
-      padding:.85rem .9rem .7rem;border-bottom-width:2px;color:#5b6b7b}
-    .aba.on{color:var(--blue-700)}
-    .aba .conta,.aba.on .conta{background:none;color:inherit;padding:0;margin-left:.3rem;
-      font-size:.78rem;font-weight:500;opacity:.75}
+    /* AS ABAS SÃO A DIVISÃO PRINCIPAL DA TELA, e estavam quase apagadas:
+       0.8rem, peso 500, cinza-azulado, com um risco de 2px na escolhida
+       e a contagem em cinza translúcido. De relance não dava para ver em
+       qual delas se estava, nem que a outra existia.
+
+       Agora: texto maior e em negrito, a escolhida sobre uma pastilha
+       clara com risco de 3px, e a CONTAGEM volta a ser uma bolinha —
+       azul cheia na aba escolhida. É o número que diz se há trabalho
+       esperando, e ele não pode ser o que menos se vê. */
+    .abas{padding:0 .8rem;gap:.25rem}
+    .aba{font:700 .88rem 'Inter',sans-serif;text-transform:uppercase;letter-spacing:.03em;
+      padding:.85rem 1.05rem .7rem;border-bottom-width:3px;color:var(--navy);
+      border-radius:8px 8px 0 0;transition:background .15s,color .15s}
+    .aba:hover{background:var(--pale)}
+    .aba.on{color:var(--navy);background:var(--pale)}
+    .aba .conta{display:inline-block;background:var(--pale);color:var(--blue-700);
+      border-radius:20px;padding:.1rem .5rem;margin-left:.4rem;
+      font-size:.78rem;font-weight:700;opacity:1;vertical-align:1px}
+    .aba.on .conta{background:var(--blue-500);color:#fff}
     .barra{padding:.3rem .8rem;border-bottom:none;gap:.1rem}
     .ferr{font:500 .76rem 'Inter',sans-serif;letter-spacing:.02em;padding:.4rem .5rem;gap:.35rem}
     .ferr svg{width:14px;height:14px}
