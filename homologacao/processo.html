@@ -47,12 +47,19 @@
     .chip-sit{font:500 .72rem 'Inter';padding:.12rem .5rem;border-radius:999px;background:var(--pale);color:var(--blue-700)}
     .chip-sit.fim{background:#e8f6ee;color:var(--ok)} .chip-sit.nao{background:#fdecea;color:var(--erro)}
     .chip-sit.esp{background:#fff4e2;color:var(--atencao)}
-    .abas{display:flex;gap:0}
-    .aba{background:none;border:none;cursor:pointer;padding:.7rem .9rem .6rem;display:flex;align-items:center;gap:.4rem;
-      font:500 .8rem 'Inter';text-transform:uppercase;letter-spacing:.02em;color:var(--muted);
-      border-bottom:2px solid transparent;white-space:nowrap}
-    .aba:hover{color:var(--blue-700)}
-    .aba.on{color:var(--blue-700);border-bottom-color:var(--blue-500)}
+    /* AS ABAS PRECISAM SER VISTAS. Elas eram texto cinza de 0.8rem com
+       um risco de 2px embaixo da escolhida: quem abria a ficha não
+       percebia que Histórico e Anexos existiam, e o anexo do atestado
+       está atrás de uma delas. Agora a escolhida é uma pastilha azul
+       clara com o texto marinho, o risco tem 3px, e as outras já nascem
+       escuras o bastante para se ler de relance. */
+    .abas{display:flex;gap:.25rem;padding:0 .15rem}
+    .aba{background:none;border:none;cursor:pointer;padding:.7rem 1.05rem .55rem;display:flex;align-items:center;gap:.4rem;
+      font:700 .86rem 'Inter';text-transform:uppercase;letter-spacing:.03em;color:var(--navy);
+      border-bottom:3px solid transparent;white-space:nowrap;border-radius:8px 8px 0 0;
+      transition:background .15s,color .15s}
+    .aba:hover{color:var(--blue-700);background:var(--blue-50,#eaf4fd)}
+    .aba.on{color:var(--navy);border-bottom-color:var(--blue-500);background:var(--blue-50,#eaf4fd)}
     .aba .n{font-size:.74rem;opacity:.75}
     .bt-mini{border:1px solid var(--line);background:#fff;border-radius:7px;padding:.3rem .6rem;cursor:pointer;
       font:500 .76rem 'Inter';color:var(--navy);margin-left:auto}
@@ -377,7 +384,14 @@
                     <div class="lupa-caixa"><input id="fTipo" readonly data-busca="tipo" placeholder="Selecionar" />
                       <button class="limpa" data-limpa="tipo" type="button" aria-label="Limpar tipo">×</button>
                       <button class="lupa" data-busca="tipo" type="button" aria-label="Escolher o tipo"></button></div></div>
-                  <div class="cpo fixo" data-campo="medico"><label>Médico</label>
+                  <!-- O MÉDICO ESCOLHE-SE NA LUPA, como a entidade. Este
+                       campo era "fixo" (a classe esconde a lupa e o × e
+                       faz o clique ser ignorado) porque o médico vinha
+                       carimbado como o Dr. Everaldo. Agora ele é quem
+                       ASSINOU o atestado que o colaborador trouxe, e sai
+                       da lista de profissionais cadastrados — quem não
+                       estiver lá entra pelo "Cadastrar Médico". -->
+                  <div class="cpo" data-campo="medico"><label>Médico <i>*</i></label>
                     <div class="lupa-caixa"><input id="fMedico" readonly data-busca="medico" placeholder="Selecionar" />
                       <button class="limpa" data-limpa="medico" type="button" aria-label="Limpar médico">×</button>
                       <button class="lupa" data-busca="medico" type="button" aria-label="Escolher o médico"></button></div></div>
@@ -1394,6 +1408,10 @@
       exige("hora", $("fHora").value, "hora de início");
       exige("dias", parseInt($("fDias").value, 10) >= 1, "quantidade de dias");
       exige("tipo", P.tipo, "tipo de atestado");
+      // o médico que ASSINOU o atestado: sem ele, o processo chega à
+      // clínica sem ter como ser aprovado (o banco cobra tipo, médico,
+      // entidade e responsável para o parecer "Aprovado")
+      exige("medico", P.medico, "médico que assinou o atestado");
       exige("entidade", P.entidade, "entidade");
       if (!(P.anexos && P.anexos.length)) falta.push("o arquivo do atestado (aba Anexos)");
       return falta;
