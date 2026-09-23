@@ -329,6 +329,13 @@
           <button class="sec__cab" type="button">Painel de Ações</button>
           <div class="sec__corpo acoes">
             <button class="pilula" id="btCadEntidade" type="button">Cadastrar Entidade</button>
+            <!-- O ATALHO DO MÉDICO, ao lado do da entidade. O cadastro em
+                 si sempre existiu, só que escondido dentro da lupa do
+                 campo Médico: quem não abrisse a busca não descobria que
+                 dava para cadastrar, e o atestado de um profissional que
+                 ainda não está na lista travava aí. São os dois campos
+                 que o RH mais precisa criar na hora de lançar. -->
+            <button class="pilula" id="btCadMedico" type="button">Cadastrar Médico</button>
           </div>
         </section>
 
@@ -357,7 +364,6 @@
                        matrícula continua na tela nos processos antigos
                        que a têm — só que somente lá. -->
                   <div class="cpo" data-campo="cpf"><label for="fCpf">CPF <i>*</i></label><input id="fCpf" autocomplete="off" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" /></div>
-                  <div class="cpo" data-campo="chapa" id="cpoChapa"><label for="fChapa">Matrícula <small id="chapaNota">(opcional)</small></label><input id="fChapa" autocomplete="off" /></div>
                   <div class="cpo" data-campo="nome"><label for="fNome">Nome <i>*</i></label><input id="fNome" autocomplete="off" /></div>
                   <div class="cpo" data-campo="inicio"><label for="fInicio">Data Início Atestado <i>*</i></label><input id="fInicio" type="date" /></div>
                   <div class="cpo" data-campo="hora"><label for="fHora">Hora Início <i>*</i></label><input id="fHora" type="time" /></div>
@@ -688,21 +694,10 @@
     $("fEmpresa").value = P.empresa;
     $("fRequisitante").value = P.requisitante;
     $("fCpf").value = P.cpf ? H.cpfBonito(P.cpf) : "";
-    $("fChapa").value = P.chapa || "";
-    // A MATRÍCULA FICA, OPCIONAL, E É A PONTE PARA O QUE JÁ EXISTE.
-    //
-    // Quem já lançava atestado aqui tem anos de processos gravados só
-    // com a matrícula. Se o processo novo levasse apenas o CPF, o
-    // histórico daquele colaborador recomeçaria do zero — e é o
-    // histórico que sustenta a regra dos 60 dias e a conversa sobre
-    // recorrência.
-    //
-    // Preenchida UMA VEZ junto com o CPF, ela liga os dois lados: o
-    // relatório passa a juntar os processos antigos (matrícula) e os
-    // novos (CPF) da mesma pessoa. Depois disso pode ser esquecida.
-    $("chapaNota").textContent = P.chapa
-      ? "(registro antigo)"
-      : "(opcional — só se esta pessoa já teve atestado aqui)";
+    // A MATRÍCULA NÃO ESTÁ MAIS NA TELA. O que já está gravado nela
+    // continua gravado (o P.chapa veio do banco e volta para lá no
+    // salvar): tirar o campo é tirar da vista, e não apagar o número de
+    // um processo antigo.
     $("fNome").value = P.nome;
     $("fFilial").value = P.filial || "";
     $("fFilial").hidden = false;
@@ -712,16 +707,24 @@
     $("fDias").value = P.dias || 1;
     $("fObs").value = P.observacoes || "";
     $("fParecer").value = P.parecer || "Pendente";
-    // médico e responsável pelo abono são o Dr. Everaldo, sempre
+    // O RESPONSÁVEL PELO ABONO é o Dr. Everaldo, sempre — é ele quem
+    // responde pela homologação na clínica.
+    //
+    // O MÉDICO, NÃO. Médico é quem ASSINOU o atestado que o colaborador
+    // trouxe: sai da lista de profissionais cadastrados, e quem não
+    // estiver lá se cadastra no botão "Cadastrar Médico". Carimbar o Dr.
+    // Everaldo aqui punha o nome dele como emissor de um atestado que
+    // ele não emitiu — e era o mesmo nome nos dois campos, em todo
+    // processo.
     if (!P.responsavel) P.responsavel = H.RESPONSAVEIS[0];
-    P.medico = H.MEDICO_FIXO;
     ["tipo", "medico", "entidade", "cid", "responsavel"].forEach(mostrarEscolha);
     calcularFim();
 
     var emp = podeEditarEmpresa(), cli = podeEditarClinica();
-    ["fChapa", "fNome", "fFilial", "fInicio", "fHora", "fDias", "fObs"].forEach(function (id) { $(id).readOnly = !emp; });
+    ["fCpf", "fNome", "fFilial", "fInicio", "fHora", "fDias", "fObs"].forEach(function (id) { $(id).readOnly = !emp; });
     Array.prototype.forEach.call(document.querySelectorAll(".lupa,.limpa"), function (b) { b.disabled = !cli; });
     $("btCadEntidade").disabled = !cli;
+    $("btCadMedico").disabled = !cli;
     $("btEnviar").textContent = NOVO ? "Enviar à clínica" : "Reenviar à clínica";
     $("btEnviar").hidden = MEDICO || !emp;
 
@@ -979,6 +982,7 @@
     });
   });
   $("btCadEntidade").addEventListener("click", abrirCadEntidade);
+  $("btCadMedico").addEventListener("click", abrirCadProf);
   $("eSalvar").addEventListener("click", function () {
     var razao = $("eRazao").value.trim();
     if (!razao) { avisoEnt("Escreva a razão social (ou digite o CNPJ para ela vir sozinha).", "erro"); $("eRazao").focus(); return; }
@@ -1411,10 +1415,6 @@
     if (!MEDICO) {
       var dias = parseInt($("fDias").value, 10);
       P.cpf = H.soDigitos($("fCpf").value);
-      // A matrícula não é mais pedida, mas o que já estava gravado
-      // continua indo: apagá-la tiraria do registro antigo o único
-      // número que aquela empresa usava quando ele foi aberto.
-      P.chapa = $("fChapa").value.trim();
       P.nome = $("fNome").value.trim().toUpperCase();
       P.filial = filialEscolhida();
       P.inicio = $("fInicio").value;

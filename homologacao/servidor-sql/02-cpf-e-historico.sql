@@ -1,8 +1,17 @@
 -- =====================================================================
---  HOMOLOGAÇÃO — o colaborador passa a ser identificado pelo CPF
+--  HOMOLOGAÇÃO — o CPF no lugar da matrícula, e o histórico que explica
 --
---  Rode UMA VEZ no SQL Editor do Supabase, DEPOIS do 01 e do 02.
---  Pode rodar de novo: tudo aqui é "if not exists" ou "create or replace".
+--  ESTE É O ÚNICO ARQUIVO A RODAR depois do 01-esquema.sql. Ele traz
+--  duas coisas que antes estavam separadas:
+--
+--    1. o colaborador passa a ser identificado pelo CPF;
+--    2. o histórico do processo para de repetir e passa a dizer O QUÊ
+--       mudou, campo a campo, avisando quando alguém altera um processo
+--       que JÁ tinha parecer.
+--
+--  Cole INTEIRO no SQL Editor do Supabase e clique em Run. Pode rodar de
+--  novo: tudo aqui é "if not exists" ou "create or replace", e nada é
+--  apagado.
 --
 --  POR QUE TROCAR A MATRÍCULA PELO CPF
 --  -----------------------------------

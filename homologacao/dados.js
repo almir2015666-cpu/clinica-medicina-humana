@@ -61,10 +61,6 @@
      registro: "CRM-BA 6276", funcao: "Diretor médico, homologação"}
   ];
 
-  // o médico do atestado, para a clínica, é sempre o Dr. Everaldo
-  var MEDICO_FIXO = {codigo: "6276", nome: "DR. EVERALDO BARBOSA RIBEIRO FILHO", registro: "CRM-BA 6276",
-                     orgao: "CRM", uf: "BA"};
-
   var ORGAOS = ["CRM", "CRO", "CRP", "COREN", "CREFITO", "CRFa", "CRN", "CRF", "CRBM"];
   var UFS = ["AC","AL","AM","AP","BA","CE","DF","ES","GO","MA","MG","MS","MT","PA","PB",
              "PE","PI","PR","RJ","RN","RO","RR","RS","SC","SE","SP","TO"];
@@ -527,7 +523,7 @@
   }
 
   window.Homologacao = {
-    TIPOS: TIPOS, RESPONSAVEIS: RESPONSAVEIS, MEDICO_FIXO: MEDICO_FIXO, ORGAOS: ORGAOS, UFS: UFS, TETO_ANEXO: TETO_ANEXO,
+    TIPOS: TIPOS, RESPONSAVEIS: RESPONSAVEIS, ORGAOS: ORGAOS, UFS: UFS, TETO_ANEXO: TETO_ANEXO,
     sessao: sessao, entrar: entrar, sair: sair, nomeDeQuem: nomeDeQuem,
     listarProcessos: listarProcessos, obterProcesso: obterProcesso,
     historicoDoColaborador: historicoDoColaborador, listarFiliais: listarFiliais,

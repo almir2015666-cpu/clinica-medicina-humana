@@ -25,21 +25,21 @@ Faça os passos **nesta ordem**. Até o passo 1 terminar, o site mostra erro ao 
 
 Pode rodar o arquivo de novo sempre que ele mudar. Ele não apaga nada.
 
-### 1.1. Os arquivos que vieram depois
+### 1.1. O arquivo que veio depois
 
-Rode **na ordem**, no mesmo SQL Editor, e só uma vez cada um (podem ser
-repetidos sem estrago). Cada um termina com uma conferência própria:
+Cole o **`homologacao/servidor-sql/02-cpf-e-historico.sql` inteiro** no
+mesmo SQL Editor e clique em **Run**. Ele faz duas coisas:
 
-| arquivo | o que muda |
-|---|---|
-| `02-historico-diz-o-que-mudou.sql` | O histórico do processo para de repetir eventos iguais e passa a dizer **o quê** mudou, campo a campo. Alteração feita **depois** do parecer sai marcada com "ALTERADO DEPOIS DO PARECER". |
-| `03-cpf-no-lugar-da-matricula.sql` | O colaborador passa a ser identificado pelo **CPF**, e não pela matrícula. A matrícula continua onde está, deixa de ser obrigatória e vira a ponte para os processos antigos. |
-| `04-cadastrar-medico.sql` | Quem avalia atestado passa a ser uma **lista** (`homol_medico`), cadastrada pela clínica no SistemaCMH. A categoria "Diretor médico" continua valendo em paralelo, para ninguém perder acesso. |
+- o colaborador passa a ser identificado pelo **CPF**, e não pela
+  matrícula (a matrícula é o número que a *empresa* dá ao empregado:
+  repete entre empresas, não tem dígito para conferir contra erro de
+  digitação, e some quando a pessoa troca de emprego — justamente quando
+  o histórico de atestados dela mais importa);
+- o **histórico do processo** para de repetir o mesmo evento e passa a
+  dizer *o quê* mudou, campo a campo. Alteração feita **depois** do
+  parecer sai marcada com "ALTERADO DEPOIS DO PARECER".
 
-**Por que o CPF.** A matrícula é o número que a *empresa* dá ao empregado:
-ela repete entre empresas, não tem dígito para conferir, e some quando a
-pessoa troca de emprego — justamente quando o histórico de atestados dela
-mais importa. O CPF é da pessoa.
+Pode rodar de novo. No fim, quatro conferências mostram se pegou.
 
 O histórico do colaborador **continua preso à empresa**, de propósito: o
 RH da empresa B não vê o que a pessoa apresentou na empresa A, mesmo
