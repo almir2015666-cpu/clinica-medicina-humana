@@ -463,6 +463,31 @@
 
   /* ---------------- estado ---------------- */
   var TUDO = [];
+
+  /* QUEM É A MESMA PESSOA — a chave que TODA contagem daqui usa.
+     O CPF é da pessoa e a matrícula é do emprego, e durante a transição
+     existem processos com um, com o outro e com os dois. Quem tem os
+     DOIS é a ponte: por ele se sabe que a matrícula 00010023 daquela
+     empresa e o CPF tal são o mesmo colaborador, e os atestados antigos
+     entram na mesma linha dos novos em vez de virar uma segunda pessoa
+     com o mesmo nome.
+
+     UMA FUNÇÃO SÓ PARA O ARQUIVO INTEIRO, e não uma chave montada à mão
+     em cada contagem: "empresa|chapa" escrito em cinco lugares vira
+     "empresa|null" nos processos novos, que não têm matrícula — e aí
+     todos os colaboradores novos da empresa contam como UMA pessoa. Foi
+     o que aconteceria em "pessoas afastadas" no mês. */
+  function juntarPessoas(lista) {
+    var ponte = {};
+    (lista || []).forEach(function (p) {
+      if (p.cpf && p.chapa) ponte[p.empresa + "|" + p.chapa] = p.cpf;
+    });
+    return function (p) {
+      var cpf = p.cpf || ponte[p.empresa + "|" + p.chapa] || "";
+      return p.empresa + "|" + (cpf ? "cpf:" + cpf : "mat:" + (p.chapa || "?"));
+    };
+  }
+  var CHAVE = juntarPessoas([]);   // refeita quando a lista chega
   var ULTIMO = null;                 // o que o último desenho calculou (resumo, exportação)
   var estado = {preset: "12m", medida: "dias", ordem: {k: "dias", desc: true}, procura: ""};
 
@@ -523,7 +548,7 @@
     lista.forEach(function (p) {
       var k = chave(p);
       if (!g[k]) g[k] = {nome: k, atestados: 0, dias: 0, pessoas: {}};
-      g[k].atestados++; g[k].dias += sobrepoe(p, de, ate); g[k].pessoas[p.empresa + "|" + p.chapa] = 1;
+      g[k].atestados++; g[k].dias += sobrepoe(p, de, ate); g[k].pessoas[CHAVE(p)] = 1;
     });
     return Object.keys(g).map(function (k) { g[k].nPessoas = Object.keys(g[k].pessoas).length; return g[k]; });
   }
@@ -545,7 +570,7 @@
     /* ----- números ----- */
     function resumo(l, a, b) {
       var pessoas = {}, dias = 0;
-      l.forEach(function (p) { pessoas[p.empresa + "|" + p.chapa] = 1; dias += sobrepoe(p, a, b); });
+      l.forEach(function (p) { pessoas[CHAVE(p)] = 1; dias += sobrepoe(p, a, b); });
       return {atestados: l.length, pessoas: Object.keys(pessoas).length, dias: dias};
     }
     var r = resumo(lista, de, ate), ra = resumo(anterior, antDe, antAte);
@@ -574,7 +599,7 @@
       var a = mDe < de ? de : mDe, b = mFim > ate ? ate : mFim;
       var noMes = lista.filter(function (p) { return sobrepoe(p, a, b) > 0; });
       var pes = {}, dias = 0;
-      noMes.forEach(function (p) { pes[p.empresa + "|" + p.chapa] = 1; dias += sobrepoe(p, a, b); });
+      noMes.forEach(function (p) { pes[CHAVE(p)] = 1; dias += sobrepoe(p, a, b); });
       meses.push({rot: MESES[cur.getMonth()] + (cur.getMonth() === 0 || !meses.length ? "/" + String(cur.getFullYear()).slice(2) : ""),
         nome: MESES[cur.getMonth()] + "/" + cur.getFullYear(), dias: dias, atestados: noMes.length, pessoas: Object.keys(pes).length});
       cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1);
@@ -666,14 +691,20 @@
   }
 
   /* ---------------- tabela de colaboradores ---------------- */
-  var COLS = [["nome", "Colaborador"], ["chapa", "Matrícula"], ["filial", "Filial"], ["atestados", "Atestados"],
+  var COLS = [["nome", "Colaborador"], ["doc", "CPF / Matrícula"], ["filial", "Filial"], ["atestados", "Atestados"],
               ["dias", "Dias perdidos"], ["cids", "CIDs"], ["ultimo", "Último atestado"]];
   var LINHAS = [];
+
+  function documento(p) {
+    return p.cpf ? H.cpfBonito(p.cpf) : (p.chapa || "");
+  }
   function colaboradores(lista, de, ate) {
     var g = {};
     lista.forEach(function (p) {
-      var k = p.empresa + "|" + p.chapa;
-      if (!g[k]) g[k] = {nome: p.nome, chapa: p.chapa, filial: p.filial, empresa: p.empresa, atestados: 0, dias: 0, cids: {}, ultimo: ""};
+      var k = CHAVE(p);
+      if (!g[k]) g[k] = {nome: p.nome, doc: documento(p), chave: k, filial: p.filial, empresa: p.empresa, atestados: 0, dias: 0, cids: {}, ultimo: ""};
+      // o CPF ganha da matrícula quando os dois aparecem na mesma pessoa
+      if (p.cpf) g[k].doc = H.cpfBonito(p.cpf);
       g[k].atestados++; g[k].dias += sobrepoe(p, de, ate);
       if (p.cid) g[k].cids[p.cid.codigo] = 1;
       if (p.inicio > g[k].ultimo) g[k].ultimo = p.inicio;
@@ -685,7 +716,7 @@
   function tabela() {
     var cols = MEDICO ? [["empresa", "Empresa"]].concat(COLS) : COLS;
     var t = crua(estado.procura);
-    var ls = LINHAS.filter(function (l) { return !t || crua([l.nome, l.chapa, l.filial, l.cids, l.empresa].join(" ")).indexOf(t) >= 0; });
+    var ls = LINHAS.filter(function (l) { return !t || crua([l.nome, l.doc, H.soDigitos(l.doc), l.filial, l.cids, l.empresa].join(" ")).indexOf(t) >= 0; });
     var k = estado.ordem.k, s = estado.ordem.desc ? -1 : 1;
     ls.sort(function (a, b) {
       var x = a[k], y = b[k];
@@ -696,7 +727,7 @@
       return '<th data-k="' + c[0] + '">' + c[1] + (k === c[0] ? '<span class="s">' + (estado.ordem.desc ? "▼" : "▲") + "</span>" : "") + "</th>";
     }).join("");
     $("colabCorpo").innerHTML = ls.length ? ls.map(function (l) {
-      return '<tr class="clica" data-pessoa="' + esc(l.empresa + "|" + l.chapa) + '">' + cols.map(function (c) {
+      return '<tr class="clica" data-pessoa="' + esc(l.chave) + '">' + cols.map(function (c) {
         var v = l[c[0]];
         if (c[0] === "ultimo") v = dm(v);
         var num = c[0] === "atestados" || c[0] === "dias";
@@ -723,12 +754,14 @@
      Todos os atestados da pessoa, e não só os do período: recorrência
      se enxerga na linha do tempo inteira. */
   function abrirPessoa(chave) {
-    var ps = TUDO.filter(function (p) { return p.empresa + "|" + p.chapa === chave; })
+    var ps = TUDO.filter(function (p) { return CHAVE(p) === chave; })
       .sort(function (a, b) { return a.inicio < b.inicio ? 1 : -1; });
     if (!ps.length) return;
     var dias = ps.reduce(function (s, p) { return s + (p.parecer === "Reprovado" ? 0 : p.dias); }, 0);
     $("pessoaNome").textContent = ps[0].nome;
-    $("pessoaSub").textContent = "Matrícula " + ps[0].chapa + (ps[0].filial ? " · " + ps[0].filial : "") + " · " +
+    var doc = ps.filter(function (p) { return p.cpf; })[0];
+    $("pessoaSub").textContent = (doc ? "CPF " + H.cpfBonito(doc.cpf) : "Matrícula " + (ps[0].chapa || "—")) +
+      (ps[0].filial ? " · " + ps[0].filial : "") + " · " +
       ps.length + " atestado(s) no total, " + fmt(dias) + " dia(s) sem contar reprovados";
     $("pessoaCorpo").innerHTML = ps.map(function (p) {
       var cor = {Aprovado: "var(--ok)", Reprovado: "var(--erro)"}[p.parecer] || "var(--muted)";
@@ -747,7 +780,7 @@
   function topPessoas(lista, de, ate) {
     var g = {};
     lista.forEach(function (p) {
-      var k = p.empresa + "|" + p.chapa;
+      var k = CHAVE(p);
       if (!g[k]) g[k] = {k: k, nome: p.nome, dias: 0, n: 0};
       g[k].dias += sobrepoe(p, de, ate); g[k].n++;
     });
@@ -772,7 +805,7 @@
       var cod = p.cid ? p.cid.codigo : "";
       if (!g[cod]) g[cod] = {codigo: cod, nome: p.cid ? p.cid.nome : "Sem CID informada",
         capitulo: p.cid && capitulo(cod) ? capitulo(cod)[3] : "", atestados: 0, dias: 0, pessoas: {}};
-      g[cod].atestados++; g[cod].dias += sobrepoe(p, de, ate); g[cod].pessoas[p.empresa + "|" + p.chapa] = 1;
+      g[cod].atestados++; g[cod].dias += sobrepoe(p, de, ate); g[cod].pessoas[CHAVE(p)] = 1;
     });
     LINHAS_CID = Object.keys(g).map(function (k) { g[k].npessoas = Object.keys(g[k].pessoas).length; return g[k]; });
     desenharCids();
@@ -899,10 +932,13 @@
   $("btExcelTudo").addEventListener("click", function () {
     if (!ULTIMO) return;
     function x(t) { return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
-    var cols = ["Processo", "Colaborador", "Matrícula", "Filial", "Início", "Fim", "Dias", "Dias no período", "CID",
+    // AS DUAS COLUNAS, e não uma: a planilha vai para o RH cruzar com a
+    // folha dele, que ainda é por matrícula, enquanto o que identifica a
+    // pessoa aqui já é o CPF.
+    var cols = ["Processo", "Colaborador", "CPF", "Matrícula", "Filial", "Início", "Fim", "Dias", "Dias no período", "CID",
                 "Descrição da CID", "Tipo", "Entidade", "Parecer", "Motivo", "Enviado em"];
     var linhas = ULTIMO.lista.slice().sort(function (a, b) { return a.inicio < b.inicio ? -1 : 1; }).map(function (p) {
-      return [p.processo, p.nome, p.chapa, p.filial, dm(p.inicio), dm(p.fim), p.dias, sobrepoe(p, ULTIMO.de, ULTIMO.ate),
+      return [p.processo, p.nome, p.cpf ? H.cpfBonito(p.cpf) : "", p.chapa || "", p.filial, dm(p.inicio), dm(p.fim), p.dias, sobrepoe(p, ULTIMO.de, ULTIMO.ate),
         p.cid ? p.cid.codigo : "", p.cid ? p.cid.nome : "", p.tipo ? p.tipo.nome : "", p.entidade ? p.entidade.nome : "",
         p.parecer, p.parecerObs || "",
         p.abertura ? new Date(p.abertura).toLocaleString("pt-BR") : ""];
@@ -940,6 +976,7 @@
 
   H.listarProcessos().then(function (lista) {
     TUDO = lista;
+    CHAVE = juntarPessoas(TUDO);
     aplicarPreset("12m");
     desenhar();
   }, function (e) {

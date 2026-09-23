@@ -144,6 +144,7 @@
         empresa: empresas[sorte(empresas.length)],
         requisitante: requisitantes[sorte(requisitantes.length)],
         chapa: "00010" + String(10000 + sorte(9000)),
+        cpf: cpfDeMentira(Number(numero) * 7919),
         nome: (primeiros[sorte(primeiros.length)] + " " + sobrenomes[sorte(sobrenomes.length)] +
                " " + sobrenomes[sorte(sobrenomes.length)]).toUpperCase(),
         filial: filiais[sorte(filiais.length)],
@@ -188,7 +189,7 @@
                        "A09": cids[2][1], "J03.9": cids[5][1]}[a[2]];
         var ab = new Date(new Date(ini + "T08:00:00").getTime() + 86400000).toISOString();
         processos.push({id: n, processo: n, empresa: "EMPRESA DE EXEMPLO LTDA", requisitante: "Ana Carolina Bispo",
-          chapa: c[0], nome: c[1], filial: c[2], inicio: ini, horaInicio: "08:00", fim: fim, dias: a[1],
+          chapa: c[0], cpf: cpfDeMentira(Number(String(c[0]).replace(/\D/g, "") || 1) * 31), nome: c[1], filial: c[2], inicio: ini, horaInicio: "08:00", fim: fim, dias: a[1],
           tipo: a[3] ? null : TIPOS[3], medico: a[3] ? null : profissionais[ai % 2], entidade: a[3] ? null : entidades[ai % 3], cid: a[3] ? null : {codigo: a[2], nome: cidNome},
           responsavel: RESPONSAVEIS[0], observacoes: a[3] ? "Colaborador relata que a dor voltou." : "", parecer: a[3] ? "Pendente" : "Aprovado", parecerObs: "",
           situacao: a[3] ? "aberto" : "finalizado", atividade: a[3] ? "Clínica avalia atestado" : "Homologado", abertura: ab, criadoPor: "Ana Carolina Bispo", anexos: [],
@@ -244,7 +245,7 @@
     var n = novoNumero();
     return {
       id: "", processo: n, empresa: s ? s.empresa : "", requisitante: s ? s.nome : "",
-      chapa: "", nome: "", filial: "", inicio: "", horaInicio: "08:00", fim: "", dias: 1,
+      cpf: "", chapa: "", nome: "", filial: "", inicio: "", horaInicio: "08:00", fim: "", dias: 1,
       tipo: null, medico: null, entidade: null, cid: null, responsavel: RESPONSAVEIS[0],
       observacoes: "", parecer: "Pendente", parecerObs: "", situacao: "aberto",
       atividade: "Rascunho", abertura: agora(), criadoPor: s ? s.nome : "", anexos: [], historico: []
@@ -351,6 +352,38 @@
   }
   function soDigitos(t) { return String(t || "").replace(/\D/g, ""); }
 
+  /* CPF DE MENTIRA, MAS QUE PASSA NA CONTA DOS DÍGITOS. A demonstração
+     usa as mesmas telas do sistema de verdade, e lá o CPF é conferido:
+     um número inventado sem os verificadores seria recusado dentro da
+     própria demonstração, e quem estivesse vendo acharia que é defeito. */
+  function cpfValido(t) {
+    var c = soDigitos(t), i, soma, resto;
+    if (c.length !== 11 || /^(\d){10}$/.test(c)) return false;
+    for (var passo = 0; passo < 2; passo++) {
+      soma = 0;
+      for (i = 0; i < 9 + passo; i++) soma += Number(c[i]) * (10 + passo - i);
+      resto = (soma * 10) % 11;
+      if (resto === 10) resto = 0;
+      if (resto !== Number(c[9 + passo])) return false;
+    }
+    return true;
+  }
+  function cpfBonito(t) {
+    var c = soDigitos(t);
+    if (c.length !== 11) return String(t || "");
+    return c.slice(0, 3) + "." + c.slice(3, 6) + "." + c.slice(6, 9) + "-" + c.slice(9);
+  }
+  function cpfDeMentira(semente) {
+    var base = String(100000000 + (Math.abs(semente) % 800000000)), i, soma, resto, c = base;
+    for (var passo = 0; passo < 2; passo++) {
+      soma = 0;
+      for (i = 0; i < 9 + passo; i++) soma += Number(c[i]) * (10 + passo - i);
+      resto = (soma * 10) % 11;
+      c += String(resto === 10 ? 0 : resto);
+    }
+    return c;
+  }
+
   function criarEntidade(e) {
     var banco = ler();
     var cnpj = soDigitos(e.cnpj);
@@ -440,6 +473,7 @@
     listarEntidades: listarEntidades, criarEntidade: criarEntidade,
     listarProfissionais: listarProfissionais, criarProfissional: criarProfissional,
     buscarCNPJ: buscarCNPJ, listarCID: listarCID, soDigitos: soDigitos,
+    cpfValido: cpfValido, cpfBonito: cpfBonito,
     zerarDemonstracao: zerarDemonstracao
   };
 })();
@@ -511,7 +545,10 @@
   };
   H.historicoDoColaborador = function (p) {
     return velho.listarProcessos().then(function (l) {
-      return l.filter(function (x) { return x.empresa === p.empresa && x.chapa === p.chapa && x.id !== p.id; })
+      return l.filter(function (x) {
+        if (x.empresa !== p.empresa || x.id === p.id) return false;
+        return (p.cpf && x.cpf === p.cpf) || (p.chapa && x.chapa === p.chapa);
+      })
         .sort(function (a, b) { return a.inicio < b.inicio ? 1 : -1; });
     });
   };

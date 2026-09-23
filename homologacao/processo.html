@@ -352,7 +352,12 @@
               <div class="cpo"><label>Parecer</label><div class="par-caixa" id="parCaixa"></div></div>
               <div>
                 <div class="grade g-l1">
-                  <div class="cpo" data-campo="chapa"><label for="fChapa">Matrícula <i>*</i></label><input id="fChapa" autocomplete="off" /></div>
+                  <!-- O CPF NO LUGAR DA MATRÍCULA: ele é da pessoa, e a
+                       matrícula é do emprego (ver o 03-cpf-...sql). A
+                       matrícula continua na tela nos processos antigos
+                       que a têm — só que somente lá. -->
+                  <div class="cpo" data-campo="cpf"><label for="fCpf">CPF <i>*</i></label><input id="fCpf" autocomplete="off" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" /></div>
+                  <div class="cpo" data-campo="chapa" id="cpoChapa"><label for="fChapa">Matrícula <small id="chapaNota">(opcional)</small></label><input id="fChapa" autocomplete="off" /></div>
                   <div class="cpo" data-campo="nome"><label for="fNome">Nome <i>*</i></label><input id="fNome" autocomplete="off" /></div>
                   <div class="cpo" data-campo="inicio"><label for="fInicio">Data Início Atestado <i>*</i></label><input id="fInicio" type="date" /></div>
                   <div class="cpo" data-campo="hora"><label for="fHora">Hora Início <i>*</i></label><input id="fHora" type="time" /></div>
@@ -682,7 +687,22 @@
     $("fxAutor").textContent = P.criadoPor || "";
     $("fEmpresa").value = P.empresa;
     $("fRequisitante").value = P.requisitante;
-    $("fChapa").value = P.chapa;
+    $("fCpf").value = P.cpf ? H.cpfBonito(P.cpf) : "";
+    $("fChapa").value = P.chapa || "";
+    // A MATRÍCULA FICA, OPCIONAL, E É A PONTE PARA O QUE JÁ EXISTE.
+    //
+    // Quem já lançava atestado aqui tem anos de processos gravados só
+    // com a matrícula. Se o processo novo levasse apenas o CPF, o
+    // histórico daquele colaborador recomeçaria do zero — e é o
+    // histórico que sustenta a regra dos 60 dias e a conversa sobre
+    // recorrência.
+    //
+    // Preenchida UMA VEZ junto com o CPF, ela liga os dois lados: o
+    // relatório passa a juntar os processos antigos (matrícula) e os
+    // novos (CPF) da mesma pessoa. Depois disso pode ser esquecida.
+    $("chapaNota").textContent = P.chapa
+      ? "(registro antigo)"
+      : "(opcional — só se esta pessoa já teve atestado aqui)";
     $("fNome").value = P.nome;
     $("fFilial").value = P.filial || "";
     $("fFilial").hidden = false;
@@ -748,6 +768,18 @@
   }
   $("fInicio").addEventListener("input", calcularFim);
   $("fDias").addEventListener("input", calcularFim);
+
+  /* O CPF SE PONTUA SOZINHO enquanto se digita. Não é enfeite: com os
+     pontos, o olho confere o número em três blocos, e é assim que a
+     pessoa percebe que trocou um dígito antes de salvar. O cursor volta
+     para o fim porque a pontuação é reescrita a cada tecla. */
+  $("fCpf").addEventListener("input", function () {
+    var c = H.soDigitos(this.value).slice(0, 11), fim = c;
+    if (c.length > 9) fim = c.slice(0, 3) + "." + c.slice(3, 6) + "." + c.slice(6, 9) + "-" + c.slice(9);
+    else if (c.length > 6) fim = c.slice(0, 3) + "." + c.slice(3, 6) + "." + c.slice(6);
+    else if (c.length > 3) fim = c.slice(0, 3) + "." + c.slice(3);
+    if (this.value !== fim) { this.value = fim; }
+  });
 
   /* ---------------- os campos com lupa ---------------- */
   var ROTULO = {
@@ -1193,7 +1225,11 @@
     $("avNome").textContent = P.nome;
     var linhas = [
       ["Empresa", P.empresa],
-      ["Matrícula", P.chapa + (P.filial ? " · " + P.filial : "")],
+      // O CPF NA FICHA DO MÉDICO: é por ele que se sabe que o
+      // colaborador de hoje é o mesmo do atestado anterior. Processo
+      // antigo, que só tem matrícula, continua mostrando a matrícula.
+      [P.cpf ? "CPF" : "Matrícula",
+       (P.cpf ? H.cpfBonito(P.cpf) : P.chapa) + (P.filial ? " · " + P.filial : "")],
       ["Afastamento", dm(P.inicio) + " às " + (P.horaInicio || "08:00") + " até " + dm(P.fim)],
       ["Dias", P.dias + (P.dias > 1 ? " dias" : " dia")],
       ["Enviado em", dataHora(P.abertura) + (P.requisitante ? ", por " + P.requisitante : "")]
@@ -1341,7 +1377,13 @@
     var falta = [];
     function exige(campo, ok, nome) { if (!ok) { falta.push(nome); var c = document.querySelector('[data-campo="' + campo + '"]'); if (c) c.classList.add("erro"); } }
     if (!MEDICO) {
-      exige("chapa", $("fChapa").value.trim(), "matrícula");
+      // O CPF TEM DE SER UM CPF, e não onze algarismos quaisquer: é ele
+      // que junta o atestado de hoje com o de oito meses atrás, e um
+      // dígito trocado cria uma segunda pessoa com o mesmo nome. A
+      // matrícula não tinha como conferir isso — era o buraco antigo.
+      var cpf = $("fCpf").value.trim();
+      if (!cpf) exige("cpf", false, "CPF");
+      else exige("cpf", H.cpfValido(cpf), "um CPF válido (confira os números)");
       exige("nome", $("fNome").value.trim(), "nome");
       if (!$("fFilialSel").hidden) exige("filial", $("fFilialSel").value, "filial");
       exige("inicio", $("fInicio").value, "data de início");
@@ -1368,6 +1410,10 @@
     if (falta.length) { recado("Falta: " + falta.join(", ") + ".", "erro"); return Promise.resolve(false); }
     if (!MEDICO) {
       var dias = parseInt($("fDias").value, 10);
+      P.cpf = H.soDigitos($("fCpf").value);
+      // A matrícula não é mais pedida, mas o que já estava gravado
+      // continua indo: apagá-la tiraria do registro antigo o único
+      // número que aquela empresa usava quando ele foi aberto.
       P.chapa = $("fChapa").value.trim();
       P.nome = $("fNome").value.trim().toUpperCase();
       P.filial = filialEscolhida();

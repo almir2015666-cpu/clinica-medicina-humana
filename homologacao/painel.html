@@ -65,6 +65,29 @@
        colunas, densidade nem exportação — e o RH não filtra por empresa */
     body.eh-medico .so-rh, body:not(.eh-medico) .so-medico{display:none!important}
 
+    /* ---------- o lobby de empresas (só o médico) ----------
+       Caixas em grade, cada uma com o nome da empresa e quantos
+       atestados esperam. A caixa escolhida fica marcada, e há sempre uma
+       de "Todas" para voltar — sem ela a pessoa clica numa empresa e
+       fica presa nela sem perceber como sair. */
+    .empresas{background:#fff;padding:.2rem 1.2rem 1rem;display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.6rem}
+    .emp{display:flex;align-items:center;justify-content:space-between;
+      gap:.6rem;background:var(--mist);border:1px solid var(--line);
+      border-radius:12px;padding:.7rem .85rem;cursor:pointer;text-align:left;
+      font:500 .88rem 'Inter',sans-serif;color:var(--ink);
+      transition:border-color .15s,background .15s}
+    .emp:hover{border-color:var(--blue-400);background:var(--pale)}
+    .emp.on{border-color:var(--blue-700);background:var(--pale);
+      box-shadow:inset 0 0 0 1px var(--blue-700)}
+    .emp__nome{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    /* O NÚMERO É O PONTO DA TELA: âmbar quando há alguém esperando,
+       apagado quando não há. Cor de alerta num zero ensina a ignorá-la. */
+    .emp__conta{flex:none;min-width:1.9rem;text-align:center;
+      border-radius:999px;padding:.12rem .45rem;font:700 .82rem 'Inter',sans-serif;
+      background:var(--atencao);color:#fff}
+    .emp__conta.zero{background:var(--line);color:var(--muted)}
+
     /* ---------- título ---------- */
     .cab-lista{background:#fff;padding:1.1rem 1.2rem .2rem}
     .cab-lista h1{font:700 1.35rem/1.2 'Poppins',sans-serif;color:var(--navy);margin:0}
@@ -250,8 +273,17 @@
     .nome,.dias{font-weight:400}
     a.abre,.nome a.abre{font-weight:400;color:var(--ink)}
     tbody tr:hover a.abre{color:var(--blue-700)}
-    .selo{background:none!important;padding:0;font-size:.84rem;font-weight:500}
-    .selo--pend{color:#5b6b7b}
+    /* O PARECER MANTÉM A COR, e é a única exceção do enxuto.
+       O enxuto tirou a caixa de todos os selos, e com ela foi a cor: a
+       coluna Parecer virava três palavras cinzentas iguais, e saber se o
+       atestado foi aprovado ou reprovado exigia LER cada linha. Numa
+       lista de cem, é a única coluna em que a resposta tem de saltar.
+       A caixa continua fora — o que volta é só a tinta, que não pesa. */
+    .selo{background:none!important;padding:0;font-size:.84rem;font-weight:600}
+    .selo--pend{color:var(--atencao)}   /* espera alguém */
+    .selo--aberto{color:var(--atencao)}
+    .selo--fim{color:var(--ok)}         /* aprovado / finalizado */
+    .selo--nao{color:var(--erro)}       /* reprovado */
     .bt-pdf{padding:.18rem .45rem;border-width:1px;border-radius:6px;font-size:.66rem}
     .pe{border-radius:0 0 6px 6px;padding:.4rem .9rem;font-size:.8rem;margin-bottom:.8rem}
     .pe select{padding:.2rem .4rem;font-size:.8rem;border-width:1px}
@@ -269,6 +301,16 @@
     <h1 id="tituloTela">Processos</h1>
     <p id="subTela"></p>
   </div>
+
+  <!-- O LOBBY DO MÉDICO: uma caixa por empresa, com quantos esperam.
+       Só aparece para ele, e só na aba "Para aprovar".
+
+       POR QUE EXISTE: a fila dele era uma tabela corrida, com todas as
+       empresas misturadas. Para saber se a Termite Prax tinha atestado
+       esperando era preciso procurar na lista — e com quinze empresas a
+       pergunta "de quem é a fila hoje?" não tinha resposta na tela.
+       Aqui ela é a primeira coisa que se vê, com o número ao lado. -->
+  <div class="empresas" id="empresas" hidden></div>
 
   <nav class="abas">
     <button class="aba on" data-situacao="aberto" type="button">Processos em aberto
@@ -326,8 +368,8 @@
     <div class="grade">
       <div class="cpo"><label for="fNome">Colaborador</label>
         <input id="fNome" type="text" placeholder="parte do nome" autocomplete="off" /></div>
-      <div class="cpo"><label for="fChapa">Matrícula</label>
-        <input id="fChapa" type="text" placeholder="número da matrícula" autocomplete="off" /></div>
+      <div class="cpo"><label for="fDoc">CPF ou matrícula</label>
+        <input id="fDoc" type="text" placeholder="CPF (ou a matrícula antiga)" autocomplete="off" /></div>
       <div class="cpo so-medico"><label for="fEmpresa">Empresa</label>
         <select id="fEmpresa"><option value="">Todas</option></select></div>
       <div class="cpo so-medico"><label for="fParecerF">Parecer</label>
@@ -443,7 +485,9 @@
     {chave:"abertura",     titulo:"Enviado em",     tipo:"data",   largura:16},
     {chave:"requisitante", titulo:"Requisitante",   tipo:"texto",  largura:30},
     {chave:"atividade",    titulo:"Atividade atual",tipo:"texto",  largura:28},
-    {chave:"chapa",        titulo:"Matrícula",          tipo:"texto",  largura:14},
+    /* O documento da pessoa. Mostra o CPF; processo antigo, que só
+       tem matrícula, mostra a matrícula (ver o 03-cpf-...sql). */
+    {chave:"doc",          titulo:"CPF / Matrícula", tipo:"texto",  largura:16},
     {chave:"nome",         titulo:"Nome",           tipo:"texto",  largura:34},
     {chave:"filial",       titulo:"Filial",         tipo:"texto",  largura:20},
     {chave:"inicio",       titulo:"Data início",    tipo:"data",   largura:13},
@@ -511,6 +555,9 @@
     }
     if (chave === "cid") return linha.cid ? linha.cid.codigo : "";
     if (chave === "situacao") return linha.situacao === "aberto" ? "Em aberto" : "Finalizado";
+    if (chave === "doc") {
+      return linha.cpf ? H.cpfBonito(linha.cpf) : (linha.chapa || "");
+    }
     if (chave === "pdf") return "PDF";
     return linha[chave] == null ? "" : String(linha[chave]);
   }
@@ -530,7 +577,14 @@
       if (f.empresa && l.empresa !== f.empresa) return false;
       if (f.parecer && l.parecer !== f.parecer) return false;
       if (f.nome && crua(l.nome).indexOf(crua(f.nome)) < 0) return false;
-      if (f.chapa && crua(l.chapa).indexOf(crua(f.chapa)) < 0) return false;
+      /* Procura no CPF E na matrícula, e o CPF casa com ou sem
+         pontuação: quem cola de uma planilha traz os pontos, e quem
+         digita, não. */
+      if (f.doc) {
+        var so = H.soDigitos(f.doc);
+        var alvo = crua((l.cpf || "") + " " + H.cpfBonito(l.cpf || "") + " " + (l.chapa || ""));
+        if (alvo.indexOf(crua(so || f.doc)) < 0) return false;
+      }
       if (f.requisitante && l.requisitante !== f.requisitante) return false;
       if (f.atividade && l.atividade !== f.atividade) return false;
       if (f.filial && l.filial !== f.filial) return false;
@@ -538,7 +592,7 @@
       if (f.ate && l.inicio > f.ate) return false;
       if (f.dias && Number(l.dias) < Number(f.dias)) return false;
       if (busca) {
-        var tudo = crua([l.processo, l.empresa, l.cid && l.cid.codigo, l.cid && l.cid.nome, l.requisitante, l.atividade, l.chapa, l.nome,
+        var tudo = crua([l.processo, l.empresa, l.cid && l.cid.codigo, l.cid && l.cid.nome, l.requisitante, l.atividade, l.cpf, H.cpfBonito(l.cpf || ""), l.chapa, l.nome,
                          l.filial, dm(l.inicio), dm(l.fim), l.dias, l.parecer].join(" "));
         if (tudo.indexOf(busca) < 0) return false;
       }
@@ -573,7 +627,52 @@
   /* ===================================================================
      5. Desenhar
      =================================================================== */
+  /* O LOBBY DE EMPRESAS — só para o médico, e só na fila dele.
+     Conta pela ABA, e não pelo filtro: o número tem de continuar dizendo
+     quantos esperam naquela empresa mesmo depois de a pessoa escolher
+     uma. Contar pelo que está filtrado faria todas as outras caírem a
+     zero no instante do clique, que é o contrário de ajudar a achar. */
+  function desenharEmpresas() {
+    var caixa = $("empresas");
+    if (!MEDICO || estado.situacao !== "aberto") { caixa.hidden = true; return; }
+    var porEmpresa = {}, total = 0;
+    TUDO.forEach(function (l) {
+      if (naAba(l) !== "aberto") return;
+      var nome = l.empresa || "(sem empresa)";
+      porEmpresa[nome] = (porEmpresa[nome] || 0) + 1;
+      total += 1;
+    });
+    var nomes = Object.keys(porEmpresa).sort(function (a, b) {
+      // quem tem mais esperando vem primeiro; empatou, ordem alfabética
+      return porEmpresa[b] - porEmpresa[a] || a.localeCompare(b, "pt-BR");
+    });
+    if (!nomes.length) { caixa.hidden = true; return; }
+    var escolhida = estado.filtros.empresa || "";
+    var html = '<button type="button" class="emp' + (escolhida ? "" : " on") +
+      '" data-emp=""><span class="emp__nome">Todas as empresas</span>' +
+      '<span class="emp__conta' + (total ? "" : " zero") + '">' + total +
+      "</span></button>";
+    nomes.forEach(function (n) {
+      html += '<button type="button" class="emp' +
+        (escolhida === n ? " on" : "") + '" data-emp="' + xml(n) + '">' +
+        '<span class="emp__nome" title="' + xml(n) + '">' + xml(n) + "</span>" +
+        '<span class="emp__conta">' + porEmpresa[n] + "</span></button>";
+    });
+    caixa.innerHTML = html;
+    caixa.hidden = false;
+  }
+  $("empresas").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-emp]");
+    if (!b) return;
+    estado.filtros.empresa = b.getAttribute("data-emp");
+    // o seletor de Filtros acompanha, senão a tela diz duas coisas
+    if ($("fEmpresa")) $("fEmpresa").value = estado.filtros.empresa;
+    estado.pagina = 0;
+    desenhar();
+  });
+
   function desenhar() {
+    desenharEmpresas();
     var linhas = visiveis();
     var total = linhas.length;
     var porPag = estado.porPagina;
@@ -652,7 +751,7 @@
           td.textContent = celula(l, c.chave);
           if (c.chave === "nome") td.className = "nome";
           if (c.tipo === "numero") td.className = "dias num";
-          if (c.tipo === "data" || c.chave === "processo" || c.chave === "chapa") {
+          if (c.tipo === "data" || c.chave === "processo" || c.chave === "doc") {
             td.className = "num";
           }
         }
@@ -740,7 +839,7 @@
   function lerFiltros() {
     estado.filtros = {
       nome: $("fNome").value.trim(),
-      chapa: $("fChapa").value.trim(),
+      doc: $("fDoc").value.trim(),
       requisitante: $("fRequisitante").value,
       atividade: $("fAtividade").value,
       filial: $("fFilial").value,
@@ -766,7 +865,7 @@
   }
   $("btAplicar").addEventListener("click", lerFiltros);
   $("btLimpar").addEventListener("click", function () {
-    ["fNome","fChapa","fRequisitante","fAtividade","fFilial","fDe","fAte","fDias","fEmpresa","fParecerF"]
+    ["fNome","fDoc","fRequisitante","fAtividade","fFilial","fDe","fAte","fDias","fEmpresa","fParecerF"]
       .forEach(function (id) { $(id).value = ""; });
     $("busca").value = "";
     estado.busca = "";
@@ -973,7 +1072,9 @@
     folha("Processo " + l.processo + ": " + l.nome,
       ["Campo", "Conteúdo"],
       [["Processo", l.processo], ["Requisitante", l.requisitante],
-       ["Atividade atual", l.atividade], ["Matrícula", l.chapa], ["Nome", l.nome],
+       ["Atividade atual", l.atividade],
+       [l.cpf ? "CPF" : "Matrícula", l.cpf ? H.cpfBonito(l.cpf) : (l.chapa || "")],
+       ["Nome", l.nome],
        ["Filial", l.filial], ["Início do afastamento", dm(l.inicio)],
        ["Fim do afastamento", dm(l.fim)], ["Dias", String(l.dias)],
        ["Situação", l.situacao === "aberto" ? "Em aberto" : "Finalizado"]],
@@ -1032,8 +1133,9 @@
     encherSeletor("fFilial", "filial");
     encherSeletor("fEmpresa", "empresa");
     montarColunas();
-    // vindo de um alerta do relatório: painel.html#chapa já abre procurando a pessoa,
-    // na aba em que ela tiver processo
+    // vindo de um alerta do relatório: painel.html#CPF (ou #matrícula, nos
+    // registros antigos) já abre procurando a pessoa, na aba em que ela
+    // tiver processo
     var procurado = decodeURIComponent(location.hash.slice(1));
     if (procurado) {
       $("busca").value = procurado; estado.busca = procurado;

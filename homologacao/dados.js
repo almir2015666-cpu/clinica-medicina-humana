@@ -71,6 +71,32 @@
 
   /* ---------- utilidades ---------- */
   function soDigitos(t) { return String(t || "").replace(/\D/g, ""); }
+
+  /* O CPF é quem identifica o colaborador (ver o 03-cpf-...sql). Aqui a
+     conta dos dois dígitos verificadores: é ela que separa um CPF de um
+     número de onze algarismos digitado errado, e é por isso que a
+     matrícula não servia — matrícula não tem como conferir.
+
+     Os repetidos ("111.111.111-11") passam na conta dos dígitos e são
+     recusados à parte: são os que a pessoa escreve quando não tem o
+     documento à mão e quer seguir assim mesmo. */
+  function cpfValido(t) {
+    var c = soDigitos(t), i, soma, resto;
+    if (c.length !== 11 || /^(\d)\1{10}$/.test(c)) return false;
+    for (var passo = 0; passo < 2; passo++) {
+      soma = 0;
+      for (i = 0; i < 9 + passo; i++) soma += Number(c[i]) * (10 + passo - i);
+      resto = (soma * 10) % 11;
+      if (resto === 10) resto = 0;
+      if (resto !== Number(c[9 + passo])) return false;
+    }
+    return true;
+  }
+  function cpfBonito(t) {
+    var c = soDigitos(t);
+    if (c.length !== 11) return String(t || "");
+    return c.slice(0, 3) + "." + c.slice(3, 6) + "." + c.slice(6, 9) + "-" + c.slice(9);
+  }
   function semAcento(t) { return String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, ""); }
 
   /* O banco devolve os erros das regras como "CODIGO: frase". A frase é
@@ -166,7 +192,8 @@
     return {
       id: String(r.id), processo: String(r.id),
       empresa: r.empresa_nome, empresaCnpj: r.empresa_cnpj,
-      requisitante: r.requisitante || "", chapa: r.chapa, nome: r.nome, filial: r.filial || "",
+      requisitante: r.requisitante || "", cpf: r.cpf || "",
+      chapa: r.chapa || "", nome: r.nome, filial: r.filial || "",
       inicio: r.inicio, horaInicio: String(r.hora_inicio || "08:00").slice(0, 5),
       fim: r.fim, dias: r.dias,
       tipo: r.tipo, medico: r.medico, entidade: r.entidade, cid: r.cid, responsavel: r.responsavel,
@@ -187,7 +214,15 @@
   }
   function paraLinha(p, medico) {
     var l = {
-      chapa: String(p.chapa || "").trim(), nome: String(p.nome || "").trim().toUpperCase(),
+      /* O CPF vai SÓ COM OS DÍGITOS. A máscara é da tela; no banco ele é
+         chave de busca, e "123.456.789-01" e "12345678901" seriam duas
+         pessoas diferentes na hora de juntar o histórico. */
+      cpf: soDigitos(p.cpf) || null,
+      /* A MATRÍCULA CONTINUA INDO, mesmo não sendo mais pedida: processo
+         antigo tem matrícula, e gravar null aqui apagaria do registro o
+         único número que aquela empresa usava quando ele foi aberto. */
+      chapa: String(p.chapa || "").trim() || null,
+      nome: String(p.nome || "").trim().toUpperCase(),
       filial: p.filial || null, inicio: p.inicio, hora_inicio: p.horaInicio || "08:00",
       dias: Number(p.dias) || 1, fim: p.fim || p.inicio,
       tipo: p.tipo || null, medico: p.medico || null, entidade: p.entidade || null,
@@ -199,7 +234,7 @@
   }
 
   /* ---------- processos ---------- */
-  var COLUNAS_LISTA = "id,empresa_cnpj,empresa_nome,requisitante,chapa,nome,filial,inicio," +
+  var COLUNAS_LISTA = "id,empresa_cnpj,empresa_nome,requisitante,cpf,chapa,nome,filial,inicio," +
     "hora_inicio,dias,fim,tipo,medico,entidade,cid,responsavel,observacoes,parecer,parecer_obs," +
     "parecer_por,parecer_em,situacao,atividade,abertura,criado_por_nome,homol_anexo(id,nome,tipo,tamanho,caminho)";
 
@@ -252,13 +287,32 @@
   }
 
   /* O histórico do paciente: os outros atestados da MESMA pessoa na
-     MESMA empresa (a chapa só é única dentro da empresa). É o que o
-     médico precisa para ver recorrência e a regra dos 60 dias. */
+     MESMA empresa. É o que o médico precisa para ver recorrência e a
+     regra dos 60 dias.
+
+     CASA PELO CPF, e cai na matrícula quando não há CPF. O CPF é da
+     pessoa e a matrícula é do emprego: enquanto os processos antigos
+     não forem corrigidos, os dois caminhos convivem, e um processo com
+     CPF encontra tanto os outros com o MESMO CPF quanto os antigos que
+     têm a mesma matrícula — senão o histórico de quem já estava no
+     sistema recomeçaria do zero no dia em que o CPF entrou.
+
+     SEMPRE PRESO À EMPRESA. Atestado é dado de saúde, e o RH da empresa
+     B não vê o que a pessoa apresentou na empresa A — nem sendo a mesma
+     pessoa, nem sendo as duas clientes da clínica. Quem vê tudo é o
+     médico, e é a política do banco que decide isso; este `.eq` está
+     aqui para a busca não depender só dela. */
   function historicoDoColaborador(p) {
-    if (!p || !p.chapa || !p.empresaCnpj) return Promise.resolve([]);
+    if (!p || !p.empresaCnpj) return Promise.resolve([]);
+    var cpf = soDigitos(p.cpf), chapa = String(p.chapa || "").trim();
+    if (!cpf && !chapa) return Promise.resolve([]);
+    var quem = [];
+    if (cpf) quem.push("cpf.eq." + cpf);
+    if (chapa) quem.push("chapa.eq." + chapa);
     return sb.from("homol_processo")
       .select(COLUNAS_LISTA.replace(",homol_anexo(id,nome,tipo,tamanho,caminho)", ""))
-      .eq("empresa_cnpj", p.empresaCnpj).eq("chapa", p.chapa).neq("id", Number(p.id) || 0)
+      .eq("empresa_cnpj", p.empresaCnpj).or(quem.join(","))
+      .neq("id", Number(p.id) || 0)
       .order("inicio", {ascending: false}).limit(200)
       .then(function (r) {
         if (r.error) throw new Error(traduzirErro(r.error, "Não consegui ler o histórico do colaborador."));
@@ -270,7 +324,7 @@
     var s = sessao();
     return {
       id: "", processo: "", empresa: s ? s.empresa : "", requisitante: s ? s.nome : "",
-      chapa: "", nome: "", filial: "", inicio: "", horaInicio: "08:00", fim: "", dias: 1,
+      cpf: "", chapa: "", nome: "", filial: "", inicio: "", horaInicio: "08:00", fim: "", dias: 1,
       tipo: null, medico: null, entidade: null, cid: null, responsavel: RESPONSAVEIS[0],
       observacoes: "", parecer: "Pendente", parecerObs: "", situacao: "aberto",
       atividade: "Rascunho", abertura: new Date().toISOString(), criadoPor: s ? s.nome : "",
@@ -481,6 +535,7 @@
     comentar: comentar, anexar: anexar, tirarAnexo: tirarAnexo, novoAnexo: novoAnexo, urlAnexo: urlAnexo,
     listarEntidades: listarEntidades, criarEntidade: criarEntidade,
     listarProfissionais: listarProfissionais, criarProfissional: criarProfissional,
-    buscarCNPJ: buscarCNPJ, listarCID: listarCID, soDigitos: soDigitos
+    buscarCNPJ: buscarCNPJ, listarCID: listarCID, soDigitos: soDigitos,
+    cpfValido: cpfValido, cpfBonito: cpfBonito
   };
 })();
