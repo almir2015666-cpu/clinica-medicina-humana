@@ -351,7 +351,7 @@
       </section>
       <section class="cartao c4" data-sec="geral">
         <div class="cartao__cab"><div><h2>Dia da semana em que começa</h2>
-          <p>Muito atestado na segunda ou na sexta costuma merecer uma conversa.</p></div></div>
+          <p>Em que dia cada atestado começou, no período escolhido.</p></div></div>
         <div id="gSemana"></div>
       </section>
       <section class="cartao c4" data-sec="geral">
@@ -848,21 +848,85 @@
     function comparar(a, b, oque) {
       if (!b) return "";
       var v = (a - b) / b * 100;
-      if (Math.abs(v) < 0.5) return ", o mesmo de " + oque + " no período anterior";
+      // "o mesmo de dias no período anterior" era o que saía aqui
+      if (Math.abs(v) < 0.5) return ", o mesmo do período anterior";
       return " (" + (v > 0 ? "alta" : "queda") + " de " + fmt(Math.abs(v)) + "% em relação ao período anterior)";
     }
     var capTop = u.caps.filter(function (c) { return c.nome.indexOf("|") !== 0; })[0];
     var cidTop = u.cids[0];
+
+    /* CONCORDÂNCIA DE VERDADE, e não "1 colaborador(es) apresentaram".
+       Este texto vai colado num e-mail para a diretoria — os parênteses
+       denunciam que saiu de um sistema, e "(es)" com o número 1 na
+       frente é erro de português num documento que fala de gente. */
+    function plural(n, um, muitos) { return fmt(n) + " " + (n === 1 ? um : muitos); }
+    function comoNome(t) {
+      return String(t || "").toLowerCase().replace(/(^|[\s'-])([a-zà-ú])/g,
+        function (_t, antes, letra) { return antes + letra.toUpperCase(); })
+        .replace(/(Da|De|Do|Das|Dos|E)/g, function (x) { return x.toLowerCase(); });
+    }
     var partes = [
-      "De " + dm(u.de) + " a " + dm(u.ate) + ", " + fmt(r.pessoas) + " colaborador(es) apresentaram " + fmt(r.atestados) +
-        " atestado(s), somando " + fmt(r.dias) + " dia(s) de afastamento" + comparar(r.dias, ra.dias, "dias") + "."
+      "De " + dm(u.de) + " a " + dm(u.ate) + ", " +
+        plural(r.pessoas, "colaborador apresentou", "colaboradores apresentaram") + " " +
+        plural(r.atestados, "atestado", "atestados") + ", somando " +
+        plural(r.dias, "dia de afastamento", "dias de afastamento") +
+        comparar(r.dias, ra.dias, "dias") + "."
     ];
-    if (capTop) partes.push("O grupo de doenças com mais dias perdidos foi " + capTop.nome.split("|")[2].toLowerCase() +
-      " (" + fmt(capTop.dias) + " dias).");
-    if (cidTop) partes.push("A CID mais frequente foi " + cidTop.nome + ": " + (function () {
-      var n = u.lista.filter(function (p) { return p.cid && p.cid.codigo === cidTop.nome; })[0];
-      return n ? n.cid.nome.toLowerCase() : "";
-    })() + " (" + fmt(cidTop.atestados) + " atestado(s)).");
+
+    /* A MÉDIA É O QUE A DIRETORIA PERGUNTA DEPOIS. "13 dias" não diz se
+       foram treze atestados de um dia ou um de treze — e a conversa
+       sobre absenteísmo é outra em cada caso. */
+    if (r.atestados > 1) {
+      partes.push("A média foi de " + fmt(r.dias / r.atestados, 1) +
+                  " dias por atestado.");
+    }
+
+    /* QUANTOS NÃO FORAM HOMOLOGADOS. É o número que justifica a
+       homologação existir, e não estava no resumo. */
+    var reprovados = u.lista.filter(function (x) { return x.parecer === "Reprovado"; }).length;
+    var pendentes = u.lista.filter(function (x) { return x.parecer === "Pendente"; }).length;
+    if (reprovados) {
+      partes.push(plural(reprovados, "atestado não foi homologado",
+                         "atestados não foram homologados") + " pela clínica.");
+    }
+    if (pendentes) {
+      partes.push(plural(pendentes, "atestado ainda aguarda",
+                         "atestados ainda aguardam") + " documento ou correção.");
+    }
+
+    if (capTop) {
+      partes.push("O grupo de doenças com mais dias perdidos foi " +
+                  capTop.nome.split("|")[2].toLowerCase() + ", com " +
+                  plural(capTop.dias, "dia", "dias") + ".");
+    }
+    if (cidTop) {
+      var comNome = u.lista.filter(function (x) { return x.cid && x.cid.codigo === cidTop.nome; })[0];
+      partes.push("A CID mais frequente foi a " + cidTop.nome +
+                  (comNome ? " (" + comNome.cid.nome.toLowerCase() + ")" : "") +
+                  ", em " + plural(cidTop.atestados, "atestado", "atestados") + ".");
+    }
+
+    /* QUEM MAIS FALTOU, quando há mais de uma pessoa: é por onde a
+       diretoria começa a olhar, e estava só na tabela lá embaixo. A
+       conta sai da própria lista, pela MESMA chave de pessoa que o resto
+       do relatório usa (CPF, ou matrícula nos registros antigos) — senão
+       o mesmo colaborador contaria duas vezes. */
+    if (r.pessoas > 1) {
+      var porPessoa = {};
+      u.lista.forEach(function (x) {
+        var k = CHAVE(x);
+        if (!porPessoa[k]) porPessoa[k] = {nome: x.nome, dias: 0};
+        porPessoa[k].dias += sobrepoe(x, u.de, u.ate);
+      });
+      var top = Object.keys(porPessoa).map(function (k) { return porPessoa[k]; })
+        .sort(function (a, b) { return b.dias - a.dias; })[0];
+      if (top && top.dias) {
+        // o nome é gravado em CAIXA ALTA; no meio de uma frase de e-mail
+        // ele grita, e "MARIA SOUZA" vira "Maria Souza"
+        partes.push("O afastamento mais longo foi de " + comoNome(top.nome) + ", com " +
+                    plural(top.dias, "dia", "dias") + ".");
+      }
+    }
     $("resumo").textContent = partes.join(" ");
   }
   $("btCopiarResumo").addEventListener("click", function () {
