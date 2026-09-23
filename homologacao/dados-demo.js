@@ -539,6 +539,23 @@
     return Promise.resolve(s && s.tipo === "empresa"
       ? ["Filial Candeias", "Filial Polo", "Filial Salvador", "Matriz Camaçari"] : []);
   };
+  /* O cadastro de colaboradores, na prévia: sai dos próprios processos de
+     exemplo, que é o que a clínica teria subido da folha da empresa. */
+  H.listarColaboradores = function () {
+    var s = H.sessao();
+    if (!s || s.tipo !== "empresa") return Promise.resolve([]);
+    return velho.listarProcessos().then(function (l) {
+      var vistos = {};
+      l.forEach(function (p) {
+        if (p.empresa === s.empresa && p.cpf && !vistos[p.cpf]) {
+          vistos[p.cpf] = {cpf: p.cpf, cpf_bonito: H.cpfBonito(p.cpf), nome: p.nome,
+                           matricula: p.chapa || "", filial: p.filial || "", cargo: ""};
+        }
+      });
+      return Object.keys(vistos).map(function (k) { return vistos[k]; })
+        .sort(function (a, b) { return a.nome < b.nome ? -1 : 1; });
+    });
+  };
   H.historicoDoColaborador = function (p) {
     return velho.listarProcessos().then(function (l) {
       return l.filter(function (x) {

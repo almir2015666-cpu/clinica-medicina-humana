@@ -282,6 +282,20 @@
     });
   }
 
+  /* Os colaboradores que a clínica cadastrou para a empresa (o banco só
+     devolve os dela, pela RLS). Lista vazia = empresa ainda sem cadastro,
+     e aí o RH digita o CPF e o nome, como antes. */
+  function listarColaboradores() {
+    return sb.from("homol_colaborador").select("cpf,nome,matricula,filial,cargo")
+      .eq("ativo", true).order("nome").limit(5000).then(function (r) {
+        if (r.error) throw new Error(traduzirErro(r.error, "Não consegui ler os colaboradores."));
+        return r.data.map(function (c) {
+          c.cpf_bonito = cpfBonito(c.cpf);
+          return c;
+        });
+      });
+  }
+
   /* O histórico do paciente: os outros atestados da MESMA pessoa na
      MESMA empresa. É o que o médico precisa para ver recorrência e a
      regra dos 60 dias.
@@ -527,6 +541,7 @@
     sessao: sessao, entrar: entrar, sair: sair, nomeDeQuem: nomeDeQuem,
     listarProcessos: listarProcessos, obterProcesso: obterProcesso,
     historicoDoColaborador: historicoDoColaborador, listarFiliais: listarFiliais,
+    listarColaboradores: listarColaboradores,
     processoEmBranco: processoEmBranco, salvarProcesso: salvarProcesso,
     comentar: comentar, anexar: anexar, tirarAnexo: tirarAnexo, novoAnexo: novoAnexo, urlAnexo: urlAnexo,
     listarEntidades: listarEntidades, criarEntidade: criarEntidade,

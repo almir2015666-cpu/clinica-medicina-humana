@@ -388,7 +388,13 @@
                        matrícula é do emprego (ver o 03-cpf-...sql). A
                        matrícula continua na tela nos processos antigos
                        que a têm — só que somente lá. -->
-                  <div class="cpo" data-campo="cpf"><label for="fCpf">CPF <i>*</i></label><input id="fCpf" autocomplete="off" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" /></div>
+                  <div class="cpo" data-campo="cpf"><label for="fCpf">CPF <i>*</i></label>
+                    <div class="lupa-caixa" id="caixaCpf" hidden>
+                      <input id="fCpfBusca" readonly data-busca="colaborador" placeholder="Procurar colaborador" />
+                      <button class="limpa" data-limpa="colaborador" type="button" aria-label="Limpar colaborador">×</button>
+                      <button class="lupa" data-busca="colaborador" type="button" aria-label="Procurar colaborador"></button>
+                    </div>
+                    <input id="fCpf" autocomplete="off" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" /></div>
                   <div class="cpo" data-campo="nome"><label for="fNome">Nome <i>*</i></label><input id="fNome" autocomplete="off" /></div>
                   <div class="cpo" data-campo="inicio"><label for="fInicio">Data Início Atestado <i>*</i></label><input id="fInicio" type="date" /></div>
                   <div class="cpo" data-campo="hora"><label for="fHora">Hora Início <i>*</i></label><input id="fHora" type="time" /></div>
@@ -789,7 +795,23 @@
     desenharHistorico();
     desenharAnexos();
     if (MEDICO) montarAvaliacao();
-    if (emp) montarFiliais();
+    if (emp) { montarFiliais(); montarColaboradores(); }
+  }
+
+  /* O COLABORADOR VEM DO CADASTRO que a clínica fez para a empresa. Com
+     cadastro, o RH procura a pessoa e não digita nada: some o nome em
+     duas grafias e o CPF de quem não tinha o documento à mão. Sem
+     cadastro, a tela segue como antes, para nenhuma empresa ficar parada
+     esperando a clínica subir a folha inteira. */
+  function montarColaboradores() {
+    H.listarColaboradores().then(function (lista) {
+      if (!lista.length) return;
+      $("caixaCpf").hidden = false;
+      $("fCpf").hidden = true;
+      $("fNome").readOnly = true;
+      $("fNome").title = "O nome vem do cadastro do colaborador";
+      if (P.cpf) $("fCpfBusca").value = (P.nome || "") + " (" + H.cpfBonito(P.cpf) + ")";
+    }, function () { /* sem a lista, o RH digita, como antes */ });
   }
 
   /* A FILIAL VEM DA LISTA QUE A CLÍNICA CADASTROU para a empresa (no
@@ -900,12 +922,21 @@
   Array.prototype.forEach.call(document.querySelectorAll("[data-limpa]"), function (b) {
     b.addEventListener("click", function () {
       var q = b.getAttribute("data-limpa");
+      if (q === "colaborador") {
+        P.cpf = ""; P.nome = "";
+        $("fCpf").value = ""; $("fNome").value = ""; $("fCpfBusca").value = "";
+        return;
+      }
       P[q] = null; mostrarEscolha(q);
       if (q === "cid" && MEDICO) desenharHistPaciente();
     });
   });
 
   var BUSCAS = {
+    colaborador: {titulo: "Selecione o Colaborador",
+      colunas: [["nome", "Nome"], ["cpf_bonito", "CPF"], ["matricula", "Matrícula"],
+                ["filial", "Filial"], ["cargo", "Cargo"]],
+      carregar: H.listarColaboradores},
     tipo: {titulo: "Selecione o Tipo de Atestado", colunas: [["codigo", "Código"], ["nome", "Nome"]],
       carregar: function () { return Promise.resolve(H.TIPOS); }},
     medico: {titulo: "Selecione o Profissional",
@@ -1002,6 +1033,26 @@
     if (cfg.cadastrar) cfg.cadastrar();
   });
   function escolher(qual, v) {
+    if (qual === "colaborador") {
+      /* O CADASTRO MANDA: CPF, nome e filial saem dele, e não do teclado.
+         É o que faz o relatório e o histórico do paciente enxergarem a
+         mesma pessoa em todos os atestados dela. */
+      P.cpf = v.cpf; P.nome = v.nome;
+      if (v.matricula) P.chapa = v.matricula;
+      if (v.filial) P.filial = v.filial;
+      $("fCpf").value = H.cpfBonito(v.cpf);
+      $("fNome").value = v.nome;
+      $("fCpfBusca").value = v.nome + " (" + H.cpfBonito(v.cpf) + ")";
+      $("fCpfBusca").title = $("fCpfBusca").value;
+      if (v.filial && !$("fFilialSel").hidden) $("fFilialSel").value = v.filial;
+      else if (v.filial) $("fFilial").value = v.filial;
+      ["cpf", "nome", "filial"].forEach(function (campo) {
+        var cpo = document.querySelector('[data-campo="' + campo + '"]');
+        if (cpo) cpo.classList.remove("erro");
+      });
+      fecharVeu("veuBusca");
+      return;
+    }
     P[qual] = v;
     mostrarEscolha(qual);
     var cpo = document.querySelector('[data-campo="' + qual + '"]');
@@ -1511,7 +1562,7 @@
       // dígito trocado cria uma segunda pessoa com o mesmo nome. A
       // matrícula não tinha como conferir isso — era o buraco antigo.
       var cpf = $("fCpf").value.trim();
-      if (!cpf) exige("cpf", false, "CPF");
+      if (!cpf) exige("cpf", false, $("caixaCpf").hidden ? "CPF" : "o colaborador");
       else exige("cpf", H.cpfValido(cpf), "um CPF válido (confira os números)");
       exige("nome", $("fNome").value.trim(), "nome");
       if (!$("fFilialSel").hidden) exige("filial", $("fFilialSel").value, "filial");
