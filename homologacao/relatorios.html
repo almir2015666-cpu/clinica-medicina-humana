@@ -941,10 +941,7 @@
        terceira. A primeira linha diz o período; o resto vira tópico, um
        por assunto. Copia com as quebras, que é como vai para o e-mail. */
     var cabeca = partes.shift();
-    $("resumo").textContent = cabeca + (partes.length ? "
-
-• " + partes.join("
-• ") : "");
+    $("resumo").textContent = cabeca + (partes.length ? "\n\n• " + partes.join("\n• ") : "");
   }
   $("btCopiarResumo").addEventListener("click", function () {
     var txt = $("resumo").textContent;
