@@ -123,6 +123,12 @@
     .par-caixa{height:30px;display:grid;place-items:center;border:1px solid var(--linha-forte);border-radius:5px;
       font:600 .8rem 'Inter';background:#f3f5f7}
     .par-caixa.Aprovado{color:var(--ok)} .par-caixa.Reprovado{color:var(--erro)} .par-caixa.Pendente{color:var(--muted)}
+    .av-anexar{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
+    .av-meus{margin-top:.5rem;display:flex;flex-direction:column;gap:.3rem}
+    .av-meus a{font-size:.85rem;color:var(--blue-700);text-decoration:none;
+      display:inline-flex;align-items:center;gap:.4rem}
+    .av-meus a:hover{text-decoration:underline}
+    .av-meus small{color:var(--muted)}
     .nota-par{margin:.5rem 0 0;font-size:.8rem;color:var(--muted)}
     .nota-par b{color:var(--ink)}
     /* "A CLÍNICA PEDIU: ..." É A ÚNICA COISA QUE O RH TEM DE FAZER quando
@@ -505,6 +511,22 @@
         <section class="av-bloco">
           <h3>Dados do atestado <span style="text-transform:none;letter-spacing:0;font-weight:400">(informados pela empresa; corrija se precisar)</span></h3>
           <div id="avCad"></div>
+        </section>
+
+        <!-- O MÉDICO TAMBÉM ANEXA, e a empresa vê.
+             Ele só recebia arquivo: para mandar um documento de volta —
+             o laudo que justifica a recusa, o modelo do que está
+             faltando, o atestado carimbado — tinha de sair do sistema e
+             escrever um e-mail, e aí o processo ficava com metade da
+             história. O banco já permitia (homol_pode_anexar diz "o
+             médico, sempre"); o que faltava era o botão. -->
+        <section class="av-bloco">
+          <h3>Anexar para a empresa</h3>
+          <div class="av-anexar">
+            <button class="bt" id="avAnexar" type="button">Escolher arquivo…</button>
+            <span class="av-dica">PDF, JPG ou PNG, até 10 MB. A empresa vê na aba Anexos do processo, e o histórico registra que foi você.</span>
+          </div>
+          <div id="avMeusAnexos" class="av-meus"></div>
         </section>
 
         <section class="av-bloco">
@@ -1170,6 +1192,27 @@
      processo ainda onde pendurá-los. */
   function tamanho(b) { return b > 1048576 ? (b / 1048576).toFixed(1).replace(".", ",") + " MB" : Math.ceil(b / 1024) + " KB"; }
   function podeAnexar() { return podeEditarEmpresa() || MEDICO; }
+
+  /* O QUE O MÉDICO MANDOU, listado embaixo do botão dele.
+     Sem isto, ele clica, o arquivo sobe e a tela não muda — e a dúvida
+     "foi?" termina em três cópias do mesmo laudo no processo. A lista é
+     só dos anexos DELE: os da empresa ele já vê no visor ao lado. */
+  function desenharMeusAnexos(todos) {
+    var caixa = $("avMeusAnexos");
+    if (!caixa) return;
+    var meus = (todos || []).filter(function (x) { return x.meu; });
+    caixa.innerHTML = meus.map(function (x) {
+      return '<a href="#" data-meu="' + esc(x.codigo) + '">' + esc(x.nome) +
+        " <small>(" + dataHora(x.quando) + ")</small></a>";
+    }).join("");
+  }
+  $("avMeusAnexos").addEventListener("click", function (ev) {
+    var a = ev.target.closest("[data-meu]");
+    if (!a) return;
+    ev.preventDefault();
+    var x = (P.anexos || []).filter(function (y) { return String(y.codigo) === a.getAttribute("data-meu"); })[0];
+    if (x) verAnexo(x);
+  });
   var ICO_PDF = '<svg width="20" height="22" viewBox="0 0 24 26" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' +
     '<path d="M14 1H5a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8z"/><path d="M14 1v7h7"/>' +
     '<rect x="5.5" y="15" width="13" height="7" rx="1" fill="#fff"/><text x="12" y="20.6" font-size="5.4" text-anchor="middle" ' +
@@ -1190,6 +1233,7 @@
   function desenharAnexos() {
     var todos = P.anexos || [];
     $("nAnexos").textContent = todos.length || "";
+    desenharMeusAnexos(todos);
     $("soltar").hidden = !podeAnexar();
     $("anxAdicionar").hidden = !podeAnexar();
     var a = anexosFiltrados();
@@ -1284,6 +1328,9 @@
     });
   }
   $("arquivo").addEventListener("change", function () { receber($("arquivo").files); $("arquivo").value = ""; });
+  // o médico usa o MESMO caminho do RH: mesma conferência de tipo e
+  // tamanho, mesmo envio, mesmo registro no histórico
+  $("avAnexar").addEventListener("click", function () { $("arquivo").click(); });
   ["dragover", "dragenter"].forEach(function (t) {
     $("soltar").addEventListener(t, function (ev) { ev.preventDefault(); $("soltar").classList.add("sobre"); });
   });
@@ -1412,7 +1459,8 @@
     }
     $("avHist").innerHTML =
       '<div class="av-hist-resumo">' + (HIST.length
-        ? HIST.length + " atestado(s) anterior(es) nesta empresa · " + diasAno + " dia(s) nos 12 meses antes deste"
+        ? HIST.length + (HIST.length === 1 ? " atestado anterior" : " atestados anteriores") +
+          " nesta empresa · " + diasAno + (diasAno === 1 ? " dia" : " dias") + " nos 12 meses antes deste"
         : "Primeiro atestado deste colaborador nesta empresa.") + "</div>" + alerta +
       (HIST.length ? '<ul class="av-hist">' + HIST.map(function (h) {
         return '<li><a href="processo.html?id=' + encodeURIComponent(h.id) + '">' + dm(h.inicio) + " a " + dm(h.fim) +

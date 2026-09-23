@@ -192,7 +192,7 @@
     .secoes .conta{margin-left:.3rem;opacity:.75}
     .grade > [data-sec]{display:none}
     .grade > [data-sec].sec-on{display:block}
-    .resumo{margin:0;font-size:.9rem;line-height:1.65;color:var(--ink)}
+    .resumo{margin:0;font-size:.9rem;line-height:1.65;color:var(--ink);white-space:pre-line}
     .kpi--clica{cursor:pointer}
     .tab tbody tr.clica{cursor:pointer}
     .tab tbody tr.clica:hover td{background:var(--pale)}
@@ -517,8 +517,17 @@
     });
   }
 
+  /* Concordância nas dicas e nos textos da tela: "2 atestado(s) · 1
+     pessoa(s)" é como um sistema escreve, não como gente lê. */
+  function qtd(n, um, muitos) { return fmt(n) + " " + (n === 1 ? um : muitos); }
+
   /* ---------------- dica ao passar o mouse ---------------- */
   var dica = $("dica");
+  function esconderDica() { dica.style.display = "none"; }
+  // o mouse que sai da janela, a rolagem e a troca de aba tambem apagam
+  document.addEventListener("mouseleave", esconderDica);
+  window.addEventListener("blur", esconderDica);
+  window.addEventListener("scroll", esconderDica, true);
   document.addEventListener("mousemove", function (ev) {
     var alvo = ev.target.closest("[data-dica]");
     if (!alvo) { dica.style.display = "none"; return; }
@@ -610,7 +619,7 @@
     var poucas = meses.length <= 14;
     $("gMes").innerHTML = '<div class="colunas">' + meses.map(function (m) {
       return '<div class="col" data-dica="<b>' + esc(m.nome) + "</b><br>" + fmt(m.dias) + " dias perdidos<br>" + fmt(m.atestados) +
-        " atestado(s)<br>" + fmt(m.pessoas) + ' colaborador(es)">' +
+        " " + (m.atestados === 1 ? "atestado" : "atestados") + "<br>" + qtd(m.pessoas, "colaborador", "colaboradores") + '">' +
         (poucas ? '<span class="col__val">' + fmt(m[med]) + "</span>" : "") +
         '<div class="col__barra" style="height:' + (m[med] / maxM * 100) + '%"></div></div>';
     }).join("") + '</div><div class="rotulos">' + meses.map(function (m) { return "<span>" + esc(m.rot) + "</span>"; }).join("") + "</div>";
@@ -622,7 +631,7 @@
     barras("gCap", caps.map(function (g) {
       var p = g.nome.split("|");
       return {pre: p[0], nome: p[1], valor: g.dias,
-        dica: "<b>" + esc(p[2]) + "</b><br>" + fmt(g.dias) + " dias · " + fmt(g.atestados) + " atestado(s) · " + fmt(g.nPessoas) + " pessoa(s)"};
+        dica: "<b>" + esc(p[2]) + "</b><br>" + qtd(g.dias, "dia", "dias") + " · " + qtd(g.atestados, "atestado", "atestados") + " · " + qtd(g.nPessoas, "pessoa", "pessoas")};
     }), "dias");
 
     /* ----- CIDs ----- */
@@ -632,30 +641,30 @@
       .sort(function (x, y) { return y.atestados - x.atestados || y.dias - x.dias; }).slice(0, 10);
     barras("gCid", cids.map(function (g) {
       return {pre: g.nome, nome: nomesCid[g.nome], valor: g.atestados,
-        dica: "<b>" + esc(g.nome) + ": " + esc(nomesCid[g.nome]) + "</b><br>" + fmt(g.atestados) + " atestado(s) · " +
-          fmt(g.dias) + " dias · " + fmt(g.nPessoas) + " pessoa(s)"};
+        dica: "<b>" + esc(g.nome) + ": " + esc(nomesCid[g.nome]) + "</b><br>" + qtd(g.atestados, "atestado", "atestados") + " · " +
+          qtd(g.dias, "dia", "dias") + " · " + qtd(g.nPessoas, "pessoa", "pessoas")};
     }));
 
     /* ----- tipo, filial, entidade ----- */
     barras("gTipo", agrupar(lista, function (p) { return p.tipo ? p.tipo.nome : "Tipo não informado"; }, de, ate)
       .sort(function (x, y) { return y.atestados - x.atestados; }).map(function (g) {
-        return {nome: g.nome, valor: g.atestados, dica: "<b>" + esc(g.nome) + "</b><br>" + fmt(g.atestados) + " atestado(s) · " + fmt(g.dias) + " dias"};
+        return {nome: g.nome, valor: g.atestados, dica: "<b>" + esc(g.nome) + "</b><br>" + qtd(g.atestados, "atestado", "atestados") + " · " + qtd(g.dias, "dia", "dias")};
       }));
     barras("gFilial", agrupar(lista, function (p) { return p.filial || "Sem filial"; }, de, ate)
       .sort(function (x, y) { return y.dias - x.dias; }).map(function (g) {
         return {nome: g.nome, valor: g.dias, dica: "<b>" + esc(g.nome) + "</b><br>" + fmt(g.dias) + " dias · " + fmt(g.atestados) +
-          " atestado(s) · " + fmt(g.nPessoas) + " pessoa(s)"};
+          " " + (g.atestados === 1 ? "atestado" : "atestados") + " · " + qtd(g.nPessoas, "pessoa", "pessoas")};
       }), "dias");
     barras("gEntidade", agrupar(lista, function (p) { return p.entidade ? p.entidade.nome : "Não informada"; }, de, ate)
       .sort(function (x, y) { return y.atestados - x.atestados; }).slice(0, 6).map(function (g) {
-        return {nome: g.nome, valor: g.atestados, dica: "<b>" + esc(g.nome) + "</b><br>" + fmt(g.atestados) + " atestado(s)"};
+        return {nome: g.nome, valor: g.atestados, dica: "<b>" + esc(g.nome) + "</b><br>" + qtd(g.atestados, "atestado", "atestados")};
       }));
 
     /* ----- duração ----- */
     var faixas = [["1 dia", 1, 1], ["2 a 3 dias", 2, 3], ["4 a 7 dias", 4, 7], ["8 a 15 dias", 8, 15], ["mais de 15 dias", 16, 9999]];
     barras("gDur", faixas.map(function (f) {
       var n = lista.filter(function (p) { return p.dias >= f[1] && p.dias <= f[2]; }).length;
-      return {nome: f[0], valor: n, dica: "<b>" + f[0] + "</b><br>" + fmt(n) + " atestado(s)" +
+      return {nome: f[0], valor: n, dica: "<b>" + f[0] + "</b><br>" + qtd(n, "atestado", "atestados") +
         (f[1] > 15 ? "<br>a partir do 16º dia, o afastamento é do INSS" : "")};
     }));
 
@@ -663,7 +672,7 @@
     var sem = [0, 0, 0, 0, 0, 0, 0];
     lista.forEach(function (p) { sem[d0(p.inicio).getDay()]++; });
     barras("gSemana", [1, 2, 3, 4, 5, 6, 0].map(function (d) {
-      return {nome: SEMANA[d], valor: sem[d], dica: "<b>" + SEMANA[d] + "</b><br>" + fmt(sem[d]) + " atestado(s) começaram neste dia" +
+      return {nome: SEMANA[d], valor: sem[d], dica: "<b>" + SEMANA[d] + "</b><br>" + qtd(sem[d], "atestado começou", "atestados começaram") + " neste dia" +
         (lista.length ? " (" + fmt(sem[d] / lista.length * 100) + "%)" : "")};
     }));
 
@@ -710,7 +719,7 @@
       if (p.inicio > g[k].ultimo) g[k].ultimo = p.inicio;
     });
     LINHAS = Object.keys(g).map(function (k) { var x = g[k]; x.cids = Object.keys(x.cids).sort().join(", "); return x; });
-    $("colabSub").textContent = fmt(LINHAS.length) + " pessoa(s). Clique no título da coluna para ordenar.";
+    $("colabSub").textContent = qtd(LINHAS.length, "pessoa", "pessoas") + ". Clique no título da coluna para ordenar.";
     tabela();
   }
   function tabela() {
@@ -762,7 +771,7 @@
     var doc = ps.filter(function (p) { return p.cpf; })[0];
     $("pessoaSub").textContent = (doc ? "CPF " + H.cpfBonito(doc.cpf) : "Matrícula " + (ps[0].chapa || "—")) +
       (ps[0].filial ? " · " + ps[0].filial : "") + " · " +
-      ps.length + " atestado(s) no total, " + fmt(dias) + " dia(s) sem contar reprovados";
+      qtd(ps.length, "atestado", "atestados") + " no total, " + qtd(dias, "dia", "dias") + " sem contar reprovados";
     $("pessoaCorpo").innerHTML = ps.map(function (p) {
       var cor = {Aprovado: "var(--ok)", Reprovado: "var(--erro)"}[p.parecer] || "var(--muted)";
       return "<tr><td><a href=\"processo.html?id=" + encodeURIComponent(p.id) + "\">" + esc(p.processo) + "</a></td><td>" +
@@ -788,7 +797,7 @@
       .sort(function (a, b) { return b.dias - a.dias || b.n - a.n; }).slice(0, 10);
     barras("gTop", top.map(function (x) {
       return {nome: x.nome, valor: x.dias, dica: "<b>" + esc(x.nome) + "</b><br>" + fmt(x.dias) + " dias · " + fmt(x.n) +
-        " atestado(s)<br>clique para ver os atestados", pessoa: x.k};
+        " " + (x.v === 1 ? "atestado" : "atestados") + "<br>clique para ver os atestados", pessoa: x.k};
     }), "dias");
     Array.prototype.forEach.call($("gTop").querySelectorAll(".barra"), function (el, i) {
       el.style.cursor = "pointer";
@@ -866,7 +875,7 @@
         .replace(/(Da|De|Do|Das|Dos|E)/g, function (x) { return x.toLowerCase(); });
     }
     var partes = [
-      "De " + dm(u.de) + " a " + dm(u.ate) + ", " +
+      "De " + dm(u.de) + " a " + dm(u.ate) + ": " +
         plural(r.pessoas, "colaborador apresentou", "colaboradores apresentaram") + " " +
         plural(r.atestados, "atestado", "atestados") + ", somando " +
         plural(r.dias, "dia de afastamento", "dias de afastamento") +
@@ -927,7 +936,15 @@
                     plural(top.dias, "dia", "dias") + ".");
       }
     }
-    $("resumo").textContent = partes.join(" ");
+    /* EM LINHAS, E NÃO NUM PARÁGRAFO CORRIDO. São cinco frases com
+       números no meio: emendadas, quem lê o e-mail perde a conta na
+       terceira. A primeira linha diz o período; o resto vira tópico, um
+       por assunto. Copia com as quebras, que é como vai para o e-mail. */
+    var cabeca = partes.shift();
+    $("resumo").textContent = cabeca + (partes.length ? "
+
+• " + partes.join("
+• ") : "");
   }
   $("btCopiarResumo").addEventListener("click", function () {
     var txt = $("resumo").textContent;
