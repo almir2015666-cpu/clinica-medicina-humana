@@ -354,13 +354,6 @@
           <p>Em que dia cada atestado começou, no período escolhido.</p></div></div>
         <div id="gSemana"></div>
       </section>
-      <section class="cartao c4" data-sec="geral">
-        <div class="cartao__cab"><div><h2>Parecer da clínica</h2><p>Todos os atestados do período, inclusive reprovados.</p></div></div>
-        <div id="gParecer"></div>
-        <div style="margin-top:1.2rem"><h2 style="font:600 .92rem 'Poppins';color:var(--navy);margin:0 0 .6rem">Onde o atestado foi emitido</h2>
-          <div id="gEntidade"></div></div>
-      </section>
-
       <section class="cartao c12" data-sec="pessoas">
         <div class="cartao__cab"><div><h2>Quem mais se afastou</h2><p>Os 10 colaboradores com mais dias perdidos no período.</p></div></div>
         <div id="gTop"></div>
@@ -655,11 +648,6 @@
         return {nome: g.nome, valor: g.dias, dica: "<b>" + esc(g.nome) + "</b><br>" + fmt(g.dias) + " dias · " + fmt(g.atestados) +
           " " + (g.atestados === 1 ? "atestado" : "atestados") + " · " + qtd(g.nPessoas, "pessoa", "pessoas")};
       }), "dias");
-    barras("gEntidade", agrupar(lista, function (p) { return p.entidade ? p.entidade.nome : "Não informada"; }, de, ate)
-      .sort(function (x, y) { return y.atestados - x.atestados; }).slice(0, 6).map(function (g) {
-        return {nome: g.nome, valor: g.atestados, dica: "<b>" + esc(g.nome) + "</b><br>" + qtd(g.atestados, "atestado", "atestados")};
-      }));
-
     /* ----- duração ----- */
     var faixas = [["1 dia", 1, 1], ["2 a 3 dias", 2, 3], ["4 a 7 dias", 4, 7], ["8 a 15 dias", 8, 15], ["mais de 15 dias", 16, 9999]];
     barras("gDur", faixas.map(function (f) {
@@ -675,21 +663,6 @@
       return {nome: SEMANA[d], valor: sem[d], dica: "<b>" + SEMANA[d] + "</b><br>" + qtd(sem[d], "atestado começou", "atestados começaram") + " neste dia" +
         (lista.length ? " (" + fmt(sem[d] / lista.length * 100) + "%)" : "")};
     }));
-
-    /* ----- parecer (conta TODOS, inclusive reprovados) ----- */
-    var todosPer = TUDO.filter(function (p) {
-      return p.inicio && p.fim && !(p.fim < de || p.inicio > ate);
-    });
-    var cont = {Aprovado: 0, Reprovado: 0, Pendente: 0};
-    todosPer.forEach(function (p) { cont[p.parecer] = (cont[p.parecer] || 0) + 1; });
-    var tot = todosPer.length || 1;
-    var cores = {Aprovado: "var(--ok)", Reprovado: "var(--erro)", Pendente: "#9ab0c4"};
-    $("gParecer").innerHTML = todosPer.length ? '<div class="empilha">' + ["Aprovado", "Pendente", "Reprovado"].map(function (k) {
-      return cont[k] ? '<div style="width:' + (cont[k] / tot * 100) + "%;background:" + cores[k] + '" data-dica="<b>' + k + "</b><br>" +
-        fmt(cont[k]) + " (" + fmt(cont[k] / tot * 100) + '%)"></div>' : "";
-    }).join("") + '</div><div class="legenda">' + ["Aprovado", "Pendente", "Reprovado"].map(function (k) {
-      return '<span><i style="background:' + cores[k] + '"></i>' + k + ": <b>" + fmt(cont[k]) + "</b> (" + fmt(cont[k] / tot * 100) + "%)</span>";
-    }).join("") + "</div>" : '<div class="vazio-g">Nenhum atestado no período.</div>';
 
     colaboradores(lista, de, ate);
     tabelaCids(lista, de, ate);

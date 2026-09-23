@@ -803,15 +803,25 @@
      duas grafias e o CPF de quem não tinha o documento à mão. Sem
      cadastro, a tela segue como antes, para nenhuma empresa ficar parada
      esperando a clínica subir a folha inteira. */
+  var SEM_CADASTRO = false;
   function montarColaboradores() {
+    /* O RH NÃO DIGITA COLABORADOR, nem quando a lista está vazia: ele
+       escolhe. Quem cadastra, corrige e desliga é a clínica, no
+       SistemaCMH. Deixar digitar "só desta vez" é o que fazia a mesma
+       pessoa virar duas, com o nome em duas grafias e um CPF trocado. */
+    $("caixaCpf").hidden = false;
+    $("fCpf").hidden = true;
+    $("fNome").readOnly = true;
+    $("fNome").title = "O nome vem do cadastro do colaborador";
+    if (P.cpf) $("fCpfBusca").value = (P.nome || "") + " (" + H.cpfBonito(P.cpf) + ")";
     H.listarColaboradores().then(function (lista) {
-      if (!lista.length) return;
-      $("caixaCpf").hidden = false;
-      $("fCpf").hidden = true;
-      $("fNome").readOnly = true;
-      $("fNome").title = "O nome vem do cadastro do colaborador";
-      if (P.cpf) $("fCpfBusca").value = (P.nome || "") + " (" + H.cpfBonito(P.cpf) + ")";
-    }, function () { /* sem a lista, o RH digita, como antes */ });
+      SEM_CADASTRO = !lista.length;
+      if (SEM_CADASTRO) {
+        $("fCpfBusca").placeholder = "Nenhum colaborador cadastrado";
+        recado("A clínica ainda não cadastrou os colaboradores desta empresa. " +
+               "Peça o cadastro pelo (71) 3493-7220 e depois lance o atestado.", "erro");
+      }
+    }, function (e) { recado(e.message, "erro"); });
   }
 
   /* A FILIAL VEM DA LISTA QUE A CLÍNICA CADASTROU para a empresa (no
@@ -1562,7 +1572,10 @@
       // dígito trocado cria uma segunda pessoa com o mesmo nome. A
       // matrícula não tinha como conferir isso — era o buraco antigo.
       var cpf = $("fCpf").value.trim();
-      if (!cpf) exige("cpf", false, $("caixaCpf").hidden ? "CPF" : "o colaborador");
+      if (SEM_CADASTRO) {
+        falta.push("o cadastro dos colaboradores desta empresa (fale com a clínica)");
+      }
+      if (!cpf) exige("cpf", false, "o colaborador");
       else exige("cpf", H.cpfValido(cpf), "um CPF válido (confira os números)");
       exige("nome", $("fNome").value.trim(), "nome");
       if (!$("fFilialSel").hidden) exige("filial", $("fFilialSel").value, "filial");
