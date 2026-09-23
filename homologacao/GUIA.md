@@ -46,6 +46,34 @@ RH da empresa B não vê o que a pessoa apresentou na empresa A, mesmo
 sendo a mesma pessoa. Atestado é dado de saúde. Quem vê tudo é o médico,
 que já via.
 
+### 1.2. O cadastro de colaboradores
+
+Cole o **`homologacao/servidor-sql/03-colaboradores.sql` inteiro** e
+clique em **Run**. Ele cria a tabela em que a clínica registra os
+empregados de cada empresa cliente, que é preenchida pela aba
+**Colaboradores** do módulo Homologação, no SistemaCMH.
+
+Com ela, no site o RH **escolhe a pessoa numa lista** e não digita mais
+CPF nem nome: some o mesmo colaborador virando duas pessoas, com o nome
+em duas grafias e um CPF trocado. Enquanto a empresa não tiver ninguém
+cadastrado, o site não deixa lançar e manda o RH falar com a clínica.
+
+### 1.3. O que a empresa pode alterar depois de enviar
+
+Cole o **`homologacao/servidor-sql/04-o-que-a-empresa-altera.sql`
+inteiro** e clique em **Run**.
+
+Depois dele, o RH só altera quatro coisas num atestado já enviado: o
+**tipo**, o **médico** que assinou, a **entidade** e a **CID**, mais a
+observação e os anexos. A pessoa, a filial, a data, a hora e a
+quantidade de dias ficam congeladas no lançamento, e o servidor devolve
+o valor antigo sem reclamar.
+
+O motivo: a clínica dá o parecer sobre o que leu. Se o período pudesse
+mudar depois, o "Aprovado" de ontem passaria a valer para um atestado
+diferente do que foi aprovado. Errou a data ou a pessoa? A clínica
+devolve o processo, e ele volta a ser lançado direito.
+
 ## 2. A função que cria o login do RH (uma vez)
 
 1. Abra **Edge Functions**, clique em **Deploy a new function** e depois em **Via Editor**.

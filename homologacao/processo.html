@@ -91,7 +91,9 @@
 
     .grade{display:grid;gap:.45rem .55rem}
     .g-ctx{grid-template-columns:1.4fr 1fr 1.2fr}
-    .g-l1{grid-template-columns:1fr 2.2fr 1.1fr .8fr 1.1fr .6fr}
+    /* o CPF ganha um fio a mais que o nome: com 14 caracteres e pontuação,
+       ele é o único campo desta linha que cortava o próprio texto */
+    .g-l1{grid-template-columns:1.15fr 2.05fr 1.1fr .8fr 1.1fr .6fr}
     .g-cad{grid-template-columns:repeat(5,1fr);margin-top:.45rem}
     .func{display:grid;grid-template-columns:118px 1fr;gap:.7rem;align-items:start}
     .cpo label{display:block;font:600 .72rem 'Inter';color:var(--navy);margin-bottom:.2rem;text-align:center;white-space:nowrap;
@@ -103,6 +105,9 @@
     .cpo textarea{height:auto;min-height:48px;text-align:left;resize:vertical;padding:.35rem .5rem}
     .cpo input:focus,.cpo select:focus,.cpo textarea:focus{outline:none;border-color:var(--blue-500);box-shadow:0 0 0 2px rgba(18,144,224,.12)}
     .cpo input[readonly],.cpo textarea[readonly]{background:#f3f5f7;color:#3b4a5a}
+    /* campo fechado tem de PARECER fechado, e o seletor de filial fecha
+       sozinho quando a filial vem do cadastro do colaborador */
+    .cpo select:disabled{background:#f3f5f7;color:#3b4a5a;opacity:1;cursor:not-allowed}
     .cpo.erro input,.cpo.erro textarea,.cpo.erro .lupa-caixa{border-color:var(--erro)}
     .cpo-obs{margin-top:.45rem}
     .lupa-caixa{display:flex;height:30px;border:1px solid var(--linha-forte);border-radius:5px;overflow:hidden;background:#f3f5f7}
@@ -705,6 +710,16 @@
   function podeEditarEmpresa() { return !MEDICO && (NOVO || P.atividade === "Aguardando documento"); }
   function podeEditarClinica() { return MEDICO || P.situacao !== "finalizado"; }
 
+  /* O QUE A EMPRESA PODE ALTERAR DEPOIS DE ENVIADO: o tipo de atestado, o
+     médico que assinou, a entidade e a CID. Só isso, e é por um motivo:
+     esses quatro são leitura do papel, e é neles que a clínica pede
+     correção quando devolve o processo. Quem é a pessoa, de qual filial
+     ela é, quando o atestado começou e quantos dias ele tem são o fato
+     lançado: mudar isso depois é reescrever o que a clínica já leu, e
+     ninguém enxergaria a troca. Errou o dia ou a quantidade? O caminho é
+     a clínica devolver, e não a empresa corrigir por cima. */
+  function podeEditarDados() { return !MEDICO && NOVO; }
+
   /* ---------------- o modo da tela ---------------- */
   if (MEDICO) {
     $("abas").hidden = true;
@@ -774,11 +789,21 @@
     ["tipo", "medico", "entidade", "cid", "responsavel"].forEach(mostrarEscolha);
     calcularFim();
 
-    var emp = podeEditarEmpresa(), cli = podeEditarClinica();
-    ["fCpf", "fNome", "fFilial", "fInicio", "fHora", "fDias", "fObs"].forEach(function (id) { $(id).readOnly = !emp; });
-    Array.prototype.forEach.call(document.querySelectorAll(".lupa,.limpa"), function (b) { b.disabled = !cli; });
-    $("btCadEntidade").disabled = !cli;
-    $("btCadMedico").disabled = !cli;
+    var emp = podeEditarEmpresa(), cli = podeEditarClinica(), dad = podeEditarDados();
+    // o fato lançado (pessoa, filial, data, hora, dias) só se escreve no
+    // lançamento; a observação é recado do RH para a clínica, e segue livre
+    ["fCpf", "fNome", "fFilial", "fInicio", "fHora", "fDias"].forEach(function (id) { $(id).readOnly = !dad; });
+    $("fObs").readOnly = !emp;
+    Array.prototype.forEach.call(document.querySelectorAll(".lupa,.limpa"), function (b) {
+      // a lupa do colaborador é do fato; as outras quatro (tipo, médico,
+      // entidade e CID) são a leitura do papel, e essas a empresa refaz
+      // enquanto puder reenviar
+      var doFato = b.getAttribute("data-busca") === "colaborador" ||
+                   b.getAttribute("data-limpa") === "colaborador";
+      b.disabled = MEDICO ? !cli : (doFato ? !dad : !emp);
+    });
+    $("btCadEntidade").disabled = MEDICO ? !cli : !emp;
+    $("btCadMedico").disabled = MEDICO ? !cli : !emp;
     $("btEnviar").textContent = NOVO ? "Enviar à clínica" : "Reenviar à clínica";
     $("btEnviar").hidden = MEDICO || !emp;
 
@@ -789,7 +814,10 @@
     nota.hidden = !(P.parecerObs || P.atividade === "Aguardando documento");
     nota.className = "nota-par" + (P.atividade === "Aguardando documento" ? " pede" : "");
     nota.innerHTML = P.atividade === "Aguardando documento"
-      ? "<b>A clínica pediu:</b> " + esc(P.parecerObs) + ". Corrija ou anexe o que falta e clique em Reenviar à clínica."
+      ? "<b>A clínica pediu:</b> " + esc(P.parecerObs) +
+        ". Anexe o que falta ou corrija o tipo, o médico, a entidade e a CID, " +
+        "e clique em Reenviar à clínica. Para mudar a data, os dias ou a pessoa, " +
+        "fale com a clínica pelo (71) 3493-7220."
       : "<b>Motivo do parecer:</b> " + esc(P.parecerObs);
 
     desenharHistorico();
@@ -805,6 +833,18 @@
      esperando a clínica subir a folha inteira. */
   var SEM_CADASTRO = false;
   function montarColaboradores() {
+    /* PROCESSO JÁ LANÇADO NÃO TROCA DE PESSOA. Então some a caixa de
+       procurar, e o CPF volta a ser o que ele é aqui: um número para
+       ler. Carregar a lista neste caso seria pior do que inútil: a
+       empresa que ainda não tem cadastro ficaria sem conseguir reenviar
+       um atestado que já está lá dentro, por causa de um cadastro que
+       não tem nada a ver com ele. */
+    if (!podeEditarDados()) {
+      $("caixaCpf").hidden = true;
+      $("fCpf").hidden = false;
+      $("fNome").title = "O nome vem do cadastro do colaborador";
+      return;
+    }
     /* O RH NÃO DIGITA COLABORADOR, nem quando a lista está vazia: ele
        escolhe. Quem cadastra, corrige e desliga é a clínica, no
        SistemaCMH. Deixar digitar "só desta vez" é o que fazia a mesma
@@ -837,10 +877,28 @@
       sel.value = atual;
       sel.hidden = false;
       $("fFilial").hidden = true;
+      travarFilial();
     }, function () { /* sem a lista, o campo continua livre */ });
   }
   function filialEscolhida() {
     return $("fFilialSel").hidden ? $("fFilial").value.trim() : $("fFilialSel").value;
+  }
+
+  /* A FILIAL É CONSEQUÊNCIA DA PESSOA, e não uma escolha do RH: ela vem do
+     cadastro que a clínica fez. Por isso o campo fecha assim que a pessoa
+     entra na tela trazendo a dela. Continua à mão em um caso só: quando o
+     cadastro não disse filial nenhuma. Sem essa saída, uma empresa com
+     filiais cadastradas e um colaborador cadastrado sem filial ficaria
+     sem poder lançar o atestado, e a culpa cairia no site. */
+  function travarFilial() {
+    var sel = $("fFilialSel"), livre = $("fFilial");
+    var mostrado = sel.hidden ? livre.value.trim() : sel.value;
+    var doCadastro = !!(P.filial || "").trim() && mostrado === (P.filial || "").trim();
+    var fechado = doCadastro || !podeEditarDados();
+    sel.disabled = fechado;
+    livre.readOnly = fechado;
+    var recadinho = doCadastro ? "A filial vem do cadastro do colaborador" : "";
+    sel.title = livre.title = recadinho;
   }
 
   /* Data fim = início + dias - 1, às 23:59 (um dia de atestado termina
@@ -935,6 +993,15 @@
       if (q === "colaborador") {
         P.cpf = ""; P.nome = "";
         $("fCpf").value = ""; $("fNome").value = ""; $("fCpfBusca").value = "";
+        /* A FILIAL SAI JUNTO: ela era da pessoa. Deixá-la ali seria lançar
+           o próximo colaborador na filial do anterior sem ninguém reparar.
+           A empresa de uma filial só continua com ela marcada, que é o que
+           o cadastro diz de qualquer forma. */
+        P.filial = "";
+        var sel = $("fFilialSel");
+        if (sel.hidden) $("fFilial").value = "";
+        else if (sel.options.length > 1) sel.value = "";
+        travarFilial();
         return;
       }
       P[q] = null; mostrarEscolha(q);
@@ -1056,6 +1123,7 @@
       $("fCpfBusca").title = $("fCpfBusca").value;
       if (v.filial && !$("fFilialSel").hidden) $("fFilialSel").value = v.filial;
       else if (v.filial) $("fFilial").value = v.filial;
+      travarFilial();
       ["cpf", "nome", "filial"].forEach(function (campo) {
         var cpo = document.querySelector('[data-campo="' + campo + '"]');
         if (cpo) cpo.classList.remove("erro");
