@@ -798,6 +798,56 @@
   $("fInicio").addEventListener("input", calcularFim);
   $("fDias").addEventListener("input", calcularFim);
 
+  /* O CPF PUXA O COLABORADOR QUE JÁ VEIO ANTES.
+     É para isto que serve o CPF: quem já mandou atestado desta empresa
+     está no sistema, e digitar o nome de novo é onde nasce o "JOSE
+     CARLOS" e o "JOSÉ CARLOS" como duas pessoas. Completou onze dígitos
+     válidos, procura; achou, traz o nome e a filial do último atestado.
+
+     SÓ PREENCHE O QUE ESTÁ VAZIO. Se o RH já escreveu o nome, o que ele
+     escreveu fica — pode ser justamente uma correção de grafia, e uma
+     tela que desfaz o que a pessoa acabou de digitar é pior do que uma
+     tela que não ajuda.
+
+     NÃO ATRAPALHA QUEM É NOVO: sem processo anterior, nada acontece e
+     nenhum recado aparece. */
+  var cpfProcurado = "";
+  function puxarColaborador() {
+    if (MEDICO || !podeEditarEmpresa()) return;
+    var cpf = H.soDigitos($("fCpf").value);
+    if (cpf.length !== 11 || !H.cpfValido(cpf) || cpf === cpfProcurado) return;
+    cpfProcurado = cpf;
+    var ses = H.sessao();
+    H.historicoDoColaborador({
+      cpf: cpf, chapa: "", id: P.id || 0,
+      empresaCnpj: P.empresaCnpj || (ses && ses.cnpj) || ""
+    }).then(function (ps) {
+      if (!ps.length || H.soDigitos($("fCpf").value) !== cpf) return;
+      var ultimo = ps[0];
+      var trouxe = [];
+      if (!$("fNome").value.trim() && ultimo.nome) {
+        $("fNome").value = ultimo.nome;
+        trouxe.push("o nome");
+      }
+      if (ultimo.filial) {
+        var sel = $("fFilialSel");
+        if (!sel.hidden && !sel.value) {
+          // só se a filial ainda existe na lista da empresa
+          for (var i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].value === ultimo.filial) { sel.value = ultimo.filial; trouxe.push("a filial"); break; }
+          }
+        } else if (sel.hidden && !$("fFilial").value.trim()) {
+          $("fFilial").value = ultimo.filial;
+          trouxe.push("a filial");
+        }
+      }
+      recado((ultimo.nome || "Este colaborador") + " já tem " + ps.length +
+             " atestado" + (ps.length > 1 ? "s" : "") + " aqui" +
+             (trouxe.length ? " — trouxe " + trouxe.join(" e ") + " do último." : "."), "ok");
+    }, function () { /* sem rede, o RH preenche à mão: não atrapalha */ });
+  }
+  $("fCpf").addEventListener("blur", puxarColaborador);
+
   /* O CPF SE PONTUA SOZINHO enquanto se digita. Não é enfeite: com os
      pontos, o olho confere o número em três blocos, e é assim que a
      pessoa percebe que trocou um dígito antes de salvar. O cursor volta
@@ -808,6 +858,7 @@
     else if (c.length > 6) fim = c.slice(0, 3) + "." + c.slice(3, 6) + "." + c.slice(6);
     else if (c.length > 3) fim = c.slice(0, 3) + "." + c.slice(3);
     if (this.value !== fim) { this.value = fim; }
+    if (c.length === 11) puxarColaborador();
   });
 
   /* ---------------- os campos com lupa ---------------- */
