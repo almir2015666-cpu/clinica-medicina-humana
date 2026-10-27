@@ -103,6 +103,20 @@ Enquanto o deploy não for feito, o formulário novo responde
 *"Formulário desconhecido"* — a versão antiga da função não conhece o
 `agendamento`.
 
+### Pesquisa e Ouvidoria também ficam gravadas no sistema
+
+Cada resposta da **pesquisa de satisfação** e cada mensagem da **ouvidoria**
+é gravada na tabela `orc_retornos_site` (SQL `nuvem/sql/76-retornos-site.sql`
+do SistemaCMH) **antes** de o e-mail sair. A equipe acompanha e trata no
+SistemaCMH, em **☰ Menu → Pesquisa e Ouvidoria**.
+
+- Não tem secret para criar: `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`
+  o Supabase já põe em toda função.
+- Se a gravação falhar (tabela ainda não criada, banco fora do ar), o
+  e-mail sai do mesmo jeito.
+- Se o e-mail falhar mas a gravação deu certo, o visitante vê "enviado" —
+  a resposta não se perdeu, e dizer "erro" faria ele mandar de novo.
+
 ## 4. Apontar o site para a função
 
 > **Cuidado com o slug.** O painel deixa você dar o nome `ouvidoria`, mas o

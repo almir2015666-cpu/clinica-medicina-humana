@@ -27,6 +27,10 @@
 //    MAIL_CC_OUVIDORIA / MAIL_CC_CONTATOS / MAIL_CC_AGENDAMENTO /
 //    MAIL_CC_PESQUISA     -> (opcional) cópia só naquele formulário
 //    SITE_ORIGIN          -> ex.: https://clinicamedicinahumana.com.br
+//
+//  A PESQUISA E A OUVIDORIA TAMBÉM SÃO GRAVADAS no banco do SistemaCMH
+//  (tabela orc_retornos_site, ver gravarRetorno no fim do arquivo), para
+//  a equipe acompanhar e tratar cada uma pelo sistema.
 // =====================================================================
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
@@ -286,6 +290,14 @@ Deno.serve(async (req) => {
     return json({ error: "E-mail inválido." }, 400);
   }
 
+  // A PESQUISA E A OUVIDORIA FICAM GRAVADAS no banco do sistema, antes do
+  // e-mail: é de lá que a equipe acompanha e trata cada uma (SistemaCMH,
+  // ☰ Menu > Pesquisa e Ouvidoria; tabela em nuvem/sql/76-retornos-site.sql).
+  const gravado = FORMS_GRAVADOS.has(limpa(body?.form, 20) || "ouvidoria")
+    ? await gravarRetorno(limpa(body?.form, 20) || "ouvidoria", cfg, body,
+                          { nome, email, assunto, mensagem })
+    : false;
+
   // Montado sem quebras de linha e sem indentação. Não é mais obrigatório
   // desde que o corpo passou a ir em base64, mas manter assim evita
   // surpresas se um dia alguém trocar a codificação de volta.
@@ -359,8 +371,72 @@ Deno.serve(async (req) => {
   } catch (e) {
     console.error("Falha SMTP:", e);
     try { await client.close(); } catch { /* já fechado */ }
+    // JÁ GRAVADA NO SISTEMA, a resposta não se perdeu: dizer "não foi
+    // possível" faria a pessoa mandar de novo, e a equipe veria repetida
+    if (gravado) return json({ ok: true });
     return json({ error: "Não foi possível enviar a mensagem." }, 502);
   }
 
   return json({ ok: true });
 });
+
+// ---------------------------------------------------------------------
+//  Gravação no banco do sistema (só pesquisa e ouvidoria)
+//
+//  SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY o próprio Supabase põe em
+//  toda função — não há secret para criar. A chave de serviço passa por
+//  cima das regras da tabela: é por isso que o site consegue gravar e
+//  ninguém de fora consegue ler.
+//
+//  NUNCA DERRUBA O FORMULÁRIO: tabela que ainda não existe, banco fora do
+//  ar ou demora — devolve false e o e-mail segue como sempre.
+// ---------------------------------------------------------------------
+const FORMS_GRAVADOS = new Set(["pesquisa", "ouvidoria"]);
+
+async function gravarRetorno(
+  form: string,
+  cfg: (typeof FORMULARIOS)[string],
+  body: any,
+  extra: { nome: string; email: string; assunto: string; mensagem: string },
+): Promise<boolean> {
+  const url = Deno.env.get("SUPABASE_URL");
+  const chave = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !chave) return false;
+  const respostas = cfg.campos.map(([campo, rotulo, _o, max]) => ({
+    campo, rotulo,
+    valor: limpa(body?.[campo], max ?? (campo === "email" ? 160 : 120)),
+  }));
+  const linha = {
+    formulario: form,
+    empresa: limpa(body?.empresa, 160) || null,
+    cnpj: limpa(body?.cnpj, 30) || null,
+    nome: extra.nome || null,
+    email: extra.email || null,
+    telefone: limpa(body?.telefone, 40) || null,
+    assunto: extra.assunto || null,
+    mensagem: extra.mensagem || null,
+    respostas,
+  };
+  const prazo = new AbortController();
+  const relogio = setTimeout(() => prazo.abort(), 8_000);
+  try {
+    const r = await fetch(`${url}/rest/v1/orc_retornos_site`, {
+      method: "POST",
+      headers: {
+        apikey: chave,
+        Authorization: `Bearer ${chave}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(linha),
+      signal: prazo.signal,
+    });
+    if (!r.ok) console.error("Gravar retorno:", r.status, await r.text());
+    return r.ok;
+  } catch (e) {
+    console.error("Gravar retorno falhou:", e);
+    return false;
+  } finally {
+    clearTimeout(relogio);
+  }
+}
