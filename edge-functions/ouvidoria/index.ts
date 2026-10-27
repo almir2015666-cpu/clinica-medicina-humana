@@ -4,10 +4,12 @@
 //  A senha do e-mail vive como SECRET aqui no servidor — nunca no site.
 //  Deploy: Supabase > Edge Functions > Deploy new function (cole este código).
 //
-//  Atende TRÊS formulários, cada um com seu destinatário:
+//  Atende QUATRO formulários, cada um com seu destinatário:
 //    ouvidoria.html    -> form: "ouvidoria"   -> secret MAIL_TO_OUVIDORIA
 //    contatos.html     -> form: "contatos"    -> secret MAIL_TO_CONTATOS
 //    agende-exame.html -> form: "agendamento" -> secret MAIL_TO_AGENDAMENTO
+//                                                (cai em MAIL_TO_CONTATOS)
+//    pesquisa-satisfacao.html -> form: "pesquisa" -> secret MAIL_TO_PESQUISA
 //                                                (cai em MAIL_TO_CONTATOS)
 //
 //  Secrets (Supabase > Edge Functions > Secrets):
@@ -20,8 +22,10 @@
 //                            sem ele, os agendamentos vão para o comercial
 //    MAIL_CC              -> (opcional) cópia em TODOS os formulários;
 //                            vários e-mails separados por vírgula
-//    MAIL_CC_OUVIDORIA / MAIL_CC_CONTATOS / MAIL_CC_AGENDAMENTO
-//                         -> (opcional) cópia só naquele formulário
+//    MAIL_TO_PESQUISA     -> (opcional) destino da pesquisa de satisfação;
+//                            sem ele, as respostas vão para o comercial
+//    MAIL_CC_OUVIDORIA / MAIL_CC_CONTATOS / MAIL_CC_AGENDAMENTO /
+//    MAIL_CC_PESQUISA     -> (opcional) cópia só naquele formulário
 //    SITE_ORIGIN          -> ex.: https://clinicamedicinahumana.com.br
 // =====================================================================
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
@@ -48,10 +52,13 @@ const FORMULARIOS: Record<string, {
   titulo: string;
   secretsDestino: string[];
   secretsCopia: string[];
-  campos: Array<[chave: string, rotulo: string, obrigatorio: boolean]>;
+  // O 4º item (opcional) é o tamanho máximo do campo; sem ele vale 120.
+  campos: Array<[chave: string, rotulo: string, obrigatorio: boolean, max?: number]>;
   // Alguns formulários são um pedido estruturado: o texto livre é opcional.
   exigeMensagem: boolean;
   rotuloMensagem: string;
+  // A pesquisa pode ser respondida sem deixar e-mail. Nos outros, é obrigatório.
+  emailOpcional?: boolean;
 }> = {
   ouvidoria: {
     titulo: "Ouvidoria",
@@ -99,6 +106,39 @@ const FORMULARIOS: Record<string, {
     ],
     exigeMensagem: false,
     rotuloMensagem: "Observações",
+  },
+  pesquisa: {
+    titulo: "Pesquisa de satisfação",
+    secretsDestino: ["MAIL_TO_PESQUISA", "MAIL_TO_CONTATOS"],
+    secretsCopia: ["MAIL_CC_PESQUISA", "MAIL_CC_CONTATOS"],
+    campos: [
+      ["empresa", "Empresa", true],
+      ["cnpj", "CNPJ", true],
+      ["responsavel", "Respondido por", false],
+      ["email", "E-mail", false],
+      ["telefone", "Telefone", false],
+      ["experiencia", "Experiência geral", true],
+      ["notaEncaminhar", "Nota: facilidade para encaminhar os colaboradores", true],
+      ["notaEspera", "Nota: agilidade no atendimento e tempo de espera", true],
+      ["notaEmissao", "Nota: agilidade na liberação e emissão do ASO", true],
+      ["notaPrazos", "Nota: cumprimento dos prazos para liberação do ASO", true],
+      ["notaAcesso", "Nota: facilidade para receber e acessar o ASO", true],
+      ["notaEquipe", "Nota: atendimento e comunicação com a equipe", true],
+      ["notaResolucao", "Nota: agilidade na resolução de dúvidas e problemas", true],
+      ["notaPrecos", "Nota: preços e condições comerciais", true],
+      ["dificuldade", "Já enfrentou dificuldades?", true],
+      ["dificuldades", "Principais dificuldades", false, 1500],
+      ["outrasClinicas", "Usa outras clínicas?", true],
+      ["motivos", "Motivos para usar outras clínicas", false, 1500],
+      ["servicoOutra", "Serviço de outra clínica que gostaria aqui", true, 600],
+      ["prioridade", "O que melhorar primeiro", true, 600],
+      ["maisExames", "O que faria encaminhar mais exames", false, 2000],
+      ["condicoes", "Condições comerciais", true],
+      ["interesse", "Interesse em conversar", true],
+    ],
+    exigeMensagem: false,
+    rotuloMensagem: "Sugestões, críticas ou observações",
+    emailOpcional: true,
   },
 };
 
@@ -223,8 +263,8 @@ Deno.serve(async (req) => {
     .filter((e) => e.toLowerCase() !== destino.toLowerCase());
 
   const linhas: Array<[string, string]> = [];
-  for (const [chave, rotulo, obrigatorio] of cfg.campos) {
-    const valor = limpa(body?.[chave], chave === "email" ? 160 : 120);
+  for (const [chave, rotulo, obrigatorio, max] of cfg.campos) {
+    const valor = limpa(body?.[chave], max ?? (chave === "email" ? 160 : 120));
     if (obrigatorio && !valor) {
       return json({ error: "Preencha todos os campos obrigatórios." }, 400);
     }
@@ -242,7 +282,7 @@ Deno.serve(async (req) => {
   if (cfg.exigeMensagem && !mensagem) {
     return json({ error: "Preencha todos os campos obrigatórios." }, 400);
   }
-  if (!EMAIL_OK.test(email)) {
+  if ((email || !cfg.emailOpcional) && !EMAIL_OK.test(email)) {
     return json({ error: "E-mail inválido." }, 400);
   }
 
@@ -276,10 +316,12 @@ Deno.serve(async (req) => {
         `<div style="background:#f6fafd;border:1px solid #e0ebf6;border-left:4px solid #3bb3ef;border-radius:8px;padding:15px 17px;color:#12263a;font-size:14px;line-height:1.65;white-space:pre-wrap">${esc(mensagem)}</div>` +
         `</td></tr>`
       : `<tr><td style="padding:10px 26px 0"></td></tr>`,
-    // Rodapé
+    // Rodapé — sem e-mail (só na pesquisa) não há para quem responder.
     `<tr><td style="padding:20px 26px 24px">`,
-    `<a href="mailto:${esc(email)}" style="display:inline-block;background:#0a2e5c;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:11px 22px;border-radius:8px">Responder para ${esc(nome)}</a>`,
-    `<div style="color:#8fa4b8;font-size:12px;margin-top:14px;line-height:1.6">Basta responder este e-mail — a resposta vai direto para ${esc(email)}.</div>`,
+    email
+      ? `<a href="mailto:${esc(email)}" style="display:inline-block;background:#0a2e5c;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:11px 22px;border-radius:8px">Responder para ${esc(nome)}</a>` +
+        `<div style="color:#8fa4b8;font-size:12px;margin-top:14px;line-height:1.6">Basta responder este e-mail — a resposta vai direto para ${esc(email)}.</div>`
+      : `<div style="color:#8fa4b8;font-size:12px;line-height:1.6">Quem respondeu não deixou e-mail para contato.</div>`,
     `</td></tr>`,
     `</table></div>`,
   ].join("");
@@ -301,7 +343,7 @@ Deno.serve(async (req) => {
       to: destino,
       cc: copia,
       // Assim o "Responder" da caixa vai direto para quem escreveu.
-      replyTo: `${cabecalhoSeguro(nome)} <${email}>`,
+      ...(email ? { replyTo: `${cabecalhoSeguro(nome)} <${email}>` } : {}),
       subject: cabecalhoSeguro(
         assunto ? `[${cfg.titulo}] ${assunto} — ${nome}` : `[${cfg.titulo}] ${nome}`,
       ),

@@ -49,6 +49,7 @@ caem na mesma caixa. Para separar, crie:
 | `MAIL_TO_OUVIDORIA` | mensagens de `ouvidoria.html` |
 | `MAIL_TO_CONTATOS` | mensagens de `contatos.html` (comercial) |
 | `MAIL_TO_AGENDAMENTO` | pedidos de `agende-exame.html` |
+| `MAIL_TO_PESQUISA` | respostas de `pesquisa-satisfacao.html` (sem ele, vão para o `MAIL_TO_CONTATOS`) |
 
 Cada um sobrepõe o `MAIL_TO` no seu formulário. **Trocar destinatário =
 mudar o secret.** Nada no site muda, nenhuma ativação, nada quebra.
